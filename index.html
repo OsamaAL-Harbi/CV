@@ -1,19 +1,18 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="scroll-smooth">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>السيرة الذاتية | Portfolio</title>
+    <title>أسامة الحربي | Portfolio</title>
     
-    <meta name="description" content="الموقع الشخصي والسيرة الذاتية. استعراض الخبرات والمشاريع التقنية.">
-    <meta name="author" content="Osama Al-Harbi">
+    <meta name="description" content="السيرة الذاتية والموقع الشخصي للمطور أسامة الحربي.">
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -22,19 +21,10 @@
                 extend: {
                     fontFamily: { sans: ['Tajawal', 'sans-serif'] },
                     colors: { 
-                        primary: '#6366f1',   /* Indigo 500 */
-                        secondary: '#ec4899', /* Pink 500 */
-                        darkBg: '#0f172a',    
-                        darkCard: '#1e293b'   
-                    },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-20px)' },
-                        }
+                        primary: '#3b82f6', 
+                        secondary: '#8b5cf6', 
+                        darkBg: '#0b1120', 
+                        cardBg: '#1e293b' 
                     }
                 }
             }
@@ -42,183 +32,170 @@
     </script>
     
     <style>
-        /* Glassmorphism */
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .dark .glass {
-            background: rgba(30, 41, 59, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        /* Noise Background Texture (لمسة احترافية) */
-        .bg-noise {
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-        }
-
-        /* Typewriter Cursor */
-        .cursor::after { content: '|'; animation: blink 1s step-start infinite; color: #6366f1; }
-        @keyframes blink { 50% { opacity: 0; } }
+        /* Custom Styles */
+        body { overflow-x: hidden; }
+        #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; pointer-events: none; }
+        
+        .nav-active { color: #3b82f6; position: relative; }
+        .nav-active::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: #3b82f6; border-radius: 2px; }
+        
+        /* Page Transitions */
+        .page-section { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: #0b1120; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
 
-        /* Edit Mode Highlight */
-        .editable-active { border: 2px dashed #f59e0b; background: rgba(253, 230, 138, 0.1); outline: none; padding: 2px; border-radius: 4px; }
+        /* Admin Highlight */
+        .editable-active { border: 2px dashed #f59e0b !important; background: rgba(253, 230, 138, 0.1); outline: none; }
     </style>
 </head>
-<body class="bg-gray-50 text-slate-800 dark:bg-darkBg dark:text-gray-100 font-sans transition-colors duration-300 overflow-x-hidden relative selection:bg-primary selection:text-white">
+<body class="bg-gray-50 text-gray-800 dark:bg-darkBg dark:text-gray-100 font-sans transition-colors duration-300 min-h-screen flex flex-col">
 
-    <div class="fixed inset-0 pointer-events-none bg-noise z-0 opacity-40"></div>
-    
-    <div class="fixed top-0 left-0 w-96 h-96 bg-primary/20 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0"></div>
-    <div class="fixed bottom-0 right-0 w-96 h-96 bg-secondary/20 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2 pointer-events-none z-0"></div>
+    <div id="particles-js" class="opacity-30 dark:opacity-20"></div>
 
-    <div id="loading-screen" class="fixed inset-0 z-[100] bg-white dark:bg-darkBg flex flex-col items-center justify-center transition-opacity duration-500">
-        <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 text-sm font-bold tracking-widest animate-pulse">جاري التحميل...</p>
-    </div>
-
-    <nav class="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl glass rounded-full shadow-lg transition-all duration-300" id="navbar">
-        <div class="px-6 py-3 flex justify-between items-center">
-            <a href="#" class="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">Portfolio.</a>
+    <nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-darkBg/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" onclick="showPage('home')" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary z-50">OSAMA.</a>
             
-            <div class="hidden md:flex gap-6 text-sm font-medium">
-                <a href="#home" class="hover:text-primary transition">الرئيسية</a>
-                <a href="#about" class="hover:text-primary transition">عني</a>
-                <a href="#experience" class="hover:text-primary transition">الخبرات</a>
-                <a href="#projects" class="hover:text-primary transition">المشاريع</a>
+            <div class="hidden md:flex gap-8 font-medium text-sm">
+                <button onclick="showPage('home')" class="nav-link nav-active hover:text-primary transition" id="nav-home">الرئيسية</button>
+                <button onclick="showPage('resume')" class="nav-link hover:text-primary transition" id="nav-resume">السيرة الذاتية</button>
+                <button onclick="showPage('portfolio')" class="nav-link hover:text-primary transition" id="nav-portfolio">الأعمال</button>
+                <button onclick="showPage('contact')" class="nav-link hover:text-primary transition" id="nav-contact">تواصل معي</button>
             </div>
 
-            <div class="flex items-center gap-3">
-                <button id="theme-btn" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">🌓</button>
-                <a href="cv.pdf" download class="text-xs font-bold bg-primary text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition shadow-lg shadow-primary/30">
-                    تحميل CV
-                </a>
+            <div class="flex items-center gap-4 z-50">
+                <button id="theme-btn" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition flex items-center justify-center">🌓</button>
+                <a href="cv.pdf" download class="hidden sm:block px-5 py-2 bg-primary text-white text-xs font-bold rounded-full shadow-lg hover:shadow-primary/50 transition transform hover:-translate-y-1">تحميل CV</a>
             </div>
         </div>
     </nav>
 
-    <main class="relative z-10 pt-32 pb-20 container mx-auto px-4 max-w-5xl">
+    <main class="container mx-auto px-4 pt-32 pb-20 flex-grow relative z-10 max-w-5xl">
 
-        <section id="home" class="min-h-[80vh] flex flex-col justify-center mb-20">
-            <div class="grid md:grid-cols-12 gap-6">
+        <section id="home" class="page-section active min-h-[60vh] flex items-center justify-center">
+            <div class="text-center">
+                <div class="mb-8 relative inline-block group" data-aos="zoom-in">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
+                    <img id="profile-img" src="" class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl" onerror="this.src='https://via.placeholder.com/200'">
+                </div>
                 
-                <div class="md:col-span-8 glass rounded-3xl p-8 md:p-12 flex flex-col justify-center" data-aos="fade-left">
-                    <span class="text-primary font-bold tracking-wider text-sm mb-2">👋 مرحباً، أنا</span>
-                    <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight" data-path="profile.name"></h1>
-                    <div class="text-2xl text-gray-500 dark:text-gray-400 font-bold mb-6">
-                        <span id="typewriter" class="cursor"></span>
-                    </div>
-                    <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-8 max-w-2xl" data-path="profile.summary"></p>
-                    <div class="flex gap-4">
-                        <a href="#contact" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-105 transition shadow-lg shadow-primary/30">تواصل معي</a>
-                        <a id="github-link" href="#" target="_blank" class="px-8 py-3 bg-gray-800 text-white rounded-xl font-bold hover:scale-105 transition flex items-center gap-2"><i class="fab fa-github"></i> GitHub</a>
-                    </div>
+                <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight" data-aos="fade-up" data-path="profile.name"></h1>
+                <div class="text-xl md:text-2xl text-primary font-medium mb-6 h-8" data-aos="fade-up" data-aos-delay="100">
+                    <span id="typewriter"></span><span class="animate-pulse">|</span>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed mb-10" data-aos="fade-up" data-aos-delay="200" data-path="profile.summary"></p>
+                
+                <div class="flex justify-center gap-4" data-aos="fade-up" data-aos-delay="300">
+                    <button onclick="showPage('portfolio')" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-105 transition shadow-lg shadow-primary/30">شاهد أعمالي</button>
+                    <button onclick="showPage('contact')" class="px-8 py-3 bg-white dark:bg-cardBg text-gray-800 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl font-bold hover:scale-105 transition">تواصل معي</button>
                 </div>
 
-                <div class="md:col-span-4 glass rounded-3xl p-4 flex items-center justify-center relative overflow-hidden group" data-aos="fade-right">
-                    <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                    <img id="profile-img" src="" class="w-full h-full object-cover rounded-2xl shadow-inner" onerror="this.src='https://via.placeholder.com/400'">
-                </div>
-
-                <div class="md:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="glass rounded-2xl p-4 text-center" data-aos="zoom-in" data-aos-delay="0">
-                        <h3 class="text-2xl font-bold text-primary">+<span id="exp-years">3</span></h3>
-                        <p class="text-xs text-gray-500">سنوات الخبرة</p>
+                <div class="grid grid-cols-3 gap-6 mt-20 max-w-3xl mx-auto border-t border-gray-200 dark:border-gray-800 pt-10" data-aos="fade-up" data-aos-delay="400">
+                    <div>
+                        <h3 class="text-3xl font-bold text-secondary">+<span id="exp-years">3</span></h3>
+                        <p class="text-xs text-gray-500 mt-1">سنوات خبرة</p>
                     </div>
-                    <div class="glass rounded-2xl p-4 text-center" data-aos="zoom-in" data-aos-delay="100">
-                        <h3 class="text-2xl font-bold text-secondary">+15</h3>
-                        <p class="text-xs text-gray-500">مشاريع منجزة</p>
+                    <div>
+                        <h3 class="text-3xl font-bold text-primary">+<span id="proj-count">15</span></h3>
+                        <p class="text-xs text-gray-500 mt-1">مشروع مكتمل</p>
                     </div>
-                    <div class="glass rounded-2xl p-4 text-center" data-aos="zoom-in" data-aos-delay="200">
-                        <div class="text-2xl">📍</div>
-                        <p class="text-xs text-gray-500 mt-1" data-path="profile.location">السعودية</p>
-                    </div>
-                    <div class="glass rounded-2xl p-4 text-center flex items-center justify-center gap-2" data-aos="zoom-in" data-aos-delay="300">
-                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                        <p class="text-sm font-bold text-green-600 dark:text-green-400">متاح للعمل</p>
+                    <div>
+                        <h3 class="text-3xl font-bold text-green-500">100%</h3>
+                        <p class="text-xs text-gray-500 mt-1">رضا العملاء</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="about" class="mb-24">
-            <h2 class="text-3xl font-bold mb-8 flex items-center gap-2" data-aos="fade-up"><i class="fas fa-code text-primary"></i> المهارات التقنية</h2>
-            <div id="skills-container" class="flex flex-wrap gap-3">
-                </div>
-        </section>
-
-        <section id="experience" class="mb-24">
-            <h2 class="text-3xl font-bold mb-10 flex items-center gap-2" data-aos="fade-up"><i class="fas fa-briefcase text-primary"></i> الخبرات العملية</h2>
-            <div id="experience-container" class="space-y-8 border-r-2 border-gray-200 dark:border-gray-700 mr-3 md:mr-0 md:ml-3">
-                </div>
-        </section>
-
-        <section id="projects" class="mb-24">
-            <h2 class="text-3xl font-bold mb-10 flex items-center gap-2" data-aos="fade-up"><i class="fas fa-laptop-code text-primary"></i> أبرز المشاريع</h2>
-            <div id="projects-container" class="grid md:grid-cols-2 gap-8">
-                </div>
-        </section>
-
-        <section id="certificates" class="mb-24">
-            <h2 class="text-3xl font-bold mb-8 flex items-center gap-2" data-aos="fade-up"><i class="fas fa-certificate text-primary"></i> الشهادات</h2>
-            <div id="certificates-container" class="grid md:grid-cols-2 gap-4">
-                </div>
-        </section>
-
-        <section id="contact" class="glass rounded-3xl p-10 text-center relative overflow-hidden" data-aos="zoom-in">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"></div>
-            <h2 class="text-3xl font-bold mb-4">لنبني شيئاً عظيماً معاً</h2>
-            <p class="text-gray-500 dark:text-gray-400 mb-8">أبحث دائماً عن فرص وتحديات جديدة. راسلني!</p>
-            <a id="email-contact" href="#" class="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-full font-bold hover:scale-105 transition shadow-xl">
-                <i class="fas fa-envelope"></i> <span id="contact-email-text">mail@example.com</span>
-            </a>
+        <section id="resume" class="page-section">
+            <h2 class="text-4xl font-bold mb-12 text-center" data-aos="fade-down">مسار الخبرة والتعليم</h2>
             
-            <div class="flex justify-center gap-6 mt-8">
-                <a id="footer-linkedin" href="#" target="_blank" class="text-2xl text-gray-400 hover:text-blue-600 transition transform hover:-translate-y-1"><i class="fab fa-linkedin"></i></a>
-                <a id="footer-github" href="#" target="_blank" class="text-2xl text-gray-400 hover:text-white transition transform hover:-translate-y-1"><i class="fab fa-github"></i></a>
+            <div class="grid md:grid-cols-2 gap-12">
+                <div>
+                    <h3 class="text-2xl font-bold mb-8 flex items-center gap-2 text-primary"><i class="fas fa-briefcase"></i> الخبرات العملية</h3>
+                    <div id="experience-container" class="space-y-8 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8">
+                        </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-bold mb-8 flex items-center gap-2 text-secondary"><i class="fas fa-graduation-cap"></i> الشهادات</h3>
+                    <div id="certificates-container" class="space-y-4">
+                        </div>
+
+                    <h3 class="text-2xl font-bold mb-6 mt-12 flex items-center gap-2 text-green-500"><i class="fas fa-code"></i> المهارات</h3>
+                    <div id="skills-container" class="flex flex-wrap gap-3">
+                        </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="portfolio" class="page-section">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4" data-aos="fade-down">معرض الأعمال</h2>
+                <p class="text-gray-500">مجموعة مختارة من المشاريع التي قمت بتنفيذها</p>
+            </div>
+
+            <div id="projects-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+        </section>
+
+        <section id="contact" class="page-section">
+            <div class="max-w-2xl mx-auto bg-white dark:bg-cardBg rounded-3xl p-10 shadow-2xl border border-gray-100 dark:border-gray-800 text-center" data-aos="zoom-in">
+                <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-paper-plane text-3xl text-primary"></i>
+                </div>
+                <h2 class="text-3xl font-bold mb-4">لنتحدث عن مشروعك القادم</h2>
+                <p class="text-gray-500 mb-8">أنا متاح حالياً لاستلام مشاريع جديدة. راسلني وسأرد عليك في أقرب وقت.</p>
+                
+                <a id="email-contact" href="#" class="block w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition shadow-lg mb-6">
+                    مراسلة عبر البريد الإلكتروني
+                </a>
+                
+                <div class="flex justify-center gap-8 mt-8 pt-8 border-t border-gray-100 dark:border-gray-700">
+                    <a id="social-linkedin" href="#" target="_blank" class="flex flex-col items-center gap-2 group">
+                        <div class="w-12 h-12 rounded-full bg-gray-50 dark:bg-darkBg flex items-center justify-center group-hover:bg-[#0077b5] group-hover:text-white transition"><i class="fab fa-linkedin-in text-xl"></i></div>
+                        <span class="text-xs font-bold text-gray-500">LinkedIn</span>
+                    </a>
+                    <a id="social-github" href="#" target="_blank" class="flex flex-col items-center gap-2 group">
+                        <div class="w-12 h-12 rounded-full bg-gray-50 dark:bg-darkBg flex items-center justify-center group-hover:bg-black group-hover:text-white transition"><i class="fab fa-github text-xl"></i></div>
+                        <span class="text-xs font-bold text-gray-500">GitHub</span>
+                    </a>
+                </div>
             </div>
         </section>
 
     </main>
 
-    <footer class="text-center py-8 text-sm text-gray-500">
-        <p id="secret-trigger" class="cursor-pointer select-none hover:text-primary transition">
-            &copy; <span id="year"></span> Osama Al-Harbi. All rights reserved.
+    <footer class="text-center py-6 text-xs text-gray-500 border-t border-gray-200 dark:border-gray-800">
+        <p id="secret-trigger" class="cursor-pointer select-none hover:text-primary transition inline-block px-4 py-2">
+            &copy; <span id="year"></span> جميع الحقوق محفوظة
         </p>
     </footer>
 
-    <div id="admin-modal" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="bg-white dark:bg-darkCard w-full max-w-md rounded-2xl shadow-2xl border border-gray-700 p-8 transform transition-all scale-100">
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 bg-primary/20 text-primary rounded-full flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-user-secret"></i></div>
-                <h3 class="text-xl font-bold dark:text-white">وضع المطور (Admin)</h3>
-                <p class="text-xs text-gray-500">أدخل بياناتك للتعديل على الموقع</p>
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-cardBg w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-gray-200 dark:border-gray-700">
+            <h3 class="text-xl font-bold mb-4 text-center">لوحة التحكم</h3>
+            <div class="space-y-3">
+                <input type="text" id="repo-input" class="w-full p-3 bg-gray-50 dark:bg-darkBg border dark:border-gray-600 rounded-lg outline-none text-center text-sm" placeholder="User/Repo">
+                <input type="password" id="token-input" class="w-full p-3 bg-gray-50 dark:bg-darkBg border dark:border-gray-600 rounded-lg outline-none text-center text-sm" placeholder="GitHub Token">
             </div>
-            
-            <div class="space-y-4">
-                <input type="text" id="repo-input" class="w-full p-3 bg-gray-50 dark:bg-gray-800 border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-primary dark:text-white text-center" placeholder="Username/Repo">
-                <input type="password" id="token-input" class="w-full p-3 bg-gray-50 dark:bg-gray-800 border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-primary dark:text-white text-center" placeholder="GitHub Token">
-            </div>
-
-            <div class="flex gap-3 mt-8">
-                <button onclick="document.getElementById('admin-modal').classList.add('hidden')" class="flex-1 py-3 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition">إلغاء</button>
-                <button onclick="authenticateAndEdit()" class="flex-1 py-3 bg-primary text-white rounded-xl hover:bg-indigo-700 shadow-lg transition font-bold">دخول</button>
+            <div class="flex gap-3 mt-6">
+                <button onclick="document.getElementById('admin-modal').classList.add('hidden')" class="flex-1 py-2 text-gray-500 text-sm">إلغاء</button>
+                <button onclick="authenticateAndEdit()" class="flex-1 py-2 bg-primary text-white rounded-lg text-sm font-bold">دخول</button>
             </div>
         </div>
     </div>
 
-    <button id="save-btn" onclick="saveToGitHub()" class="hidden fixed bottom-8 right-8 z-[110] bg-green-600 text-white px-6 py-3 rounded-full shadow-2xl font-bold animate-bounce hover:bg-green-700 transition flex items-center gap-2">
-        حفظ التعديلات <i class="fas fa-save"></i>
+    <button id="save-btn" onclick="saveToGitHub()" class="hidden fixed bottom-6 right-6 z-[100] bg-green-600 text-white px-6 py-3 rounded-full shadow-2xl font-bold animate-bounce flex items-center gap-2">
+        حفظ <i class="fas fa-save"></i>
     </button>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="script.js"></script>
 </body>
 </html>
