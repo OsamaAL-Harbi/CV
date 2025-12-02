@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>السيرة الذاتية الشخصية | Portfolio</title>
+    <title>أسامة الحربي | سيرة ذاتية تفاعلية</title>
     
-    <meta name="description" content="السيرة الذاتية التفاعلية. استعرض خبراتي ومشاريعي التقنية.">
-    <meta name="keywords" content="سيرة ذاتية, مطور ويب, برمجة, Portfolio, CV, Resume">
-    <meta name="author" content="الاسم">
+    <meta name="description" content="السيرة الذاتية الرسمية للمطور أسامة الحربي. خبرة في تطوير البرمجيات، تصميم المواقع، وحلول الويب الحديثة.">
+    <meta name="keywords" content="أسامة الحربي, مبرمج, سيرة ذاتية, CV, Portfolio, Web Developer, JavaScript, Saudi Arabia">
+    <meta name="author" content="Osama Al-Harbi">
     
     <meta property="og:type" content="website">
-    <meta property="og:title" content="سيرتي الذاتية التفاعلية">
-    <meta property="og:description" content="تصفح خبراتي وأعمالي في تطوير البرمجيات.">
-    <meta property="og:image" content="https://via.placeholder.com/1200x630"> <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <meta property="og:url" content="https://osamaal-harbi.github.io/CV/">
+    <meta property="og:title" content="أسامة الحربي | مهندس برمجيات">
+    <meta property="og:description" content="تصفح سيرتي الذاتية التفاعلية وأبرز مشاريعي التقنية.">
+    <meta property="og:image" content="https://osamaal-harbi.github.io/CV/images/preview.jpg"> <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -35,7 +36,7 @@
     </script>
 
     <style>
-        /* إخفاء العناصر غير المهمة عند الطباعة */
+        /* إخفاء العناصر غير المهمة عند الطباعة (Ctrl+P) */
         @media print {
             button, #admin-controls, #theme-btn, .no-print { display: none !important; }
             body { background-color: white !important; color: black !important; }
@@ -52,7 +53,7 @@
             cursor: text;
         }
         
-        /* شريط التمرير (Scrollbar) */
+        /* شريط التمرير الجميل */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         .dark ::-webkit-scrollbar-track { background: #0f172a; }
@@ -62,7 +63,7 @@
 </head>
 <body class="bg-gray-50 text-gray-800 transition-colors duration-300 dark:bg-darkBg dark:text-gray-100 font-sans pb-32 overflow-x-hidden">
 
-    <button id="theme-btn" class="fixed top-6 left-6 z-40 p-3 rounded-full bg-white dark:bg-gray-700 shadow-lg hover:scale-110 transition text-xl">
+    <button id="theme-btn" class="fixed top-6 left-6 z-40 p-3 rounded-full bg-white dark:bg-gray-700 shadow-lg hover:scale-110 transition text-xl border dark:border-gray-600">
         🌓
     </button>
 
@@ -72,38 +73,46 @@
             </header>
 
         <section class="mb-16" data-aos="fade-up">
-            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white">المهارات والتقنيات</h2>
-            <div id="skills-container" class="flex flex-wrap gap-3"></div>
+            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white flex items-center gap-2">
+                المهارات والتقنيات
+            </h2>
+            <div id="skills-container" class="flex flex-wrap gap-3 justify-center md:justify-start"></div>
         </section>
 
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white" data-aos="fade-right">الرحلة المهنية</h2>
+            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white" data-aos="fade-right">
+                الرحلة المهنية
+            </h2>
             <div id="experience-container" class="space-y-0 relative border-r-2 border-gray-200 dark:border-gray-700 mr-3 md:mr-0 md:border-r-0 md:border-l-2">
                 </div>
         </section>
 
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white" data-aos="fade-right">أبرز المشاريع</h2>
+            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white" data-aos="fade-right">
+                أبرز المشاريع
+            </h2>
             <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
 
         <section class="mb-16" data-aos="fade-up">
-            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white">الشهادات</h2>
+            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white">
+                الشهادات والدورات
+            </h2>
             <div id="certificates-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </section>
         
         <footer class="text-center text-gray-500 text-sm mt-20 border-t dark:border-gray-800 pt-8 no-print">
-            <p>&copy; <span id="year"></span> تم التطوير بواسطة <span class="font-bold text-primary">GitHub Pages & JS</span></p>
+            <p>&copy; <span id="year"></span> تم التطوير بواسطة <span class="font-bold text-primary">Osama Al-Harbi</span></p>
         </footer>
 
     </div>
 
     <div id="admin-controls" class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-        <button id="save-btn" onclick="saveToGitHub()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-xl font-bold animate-bounce flex items-center gap-2">
+        <button id="save-btn" onclick="saveToGitHub()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-xl font-bold animate-bounce flex items-center gap-2 border-2 border-white dark:border-gray-800">
             <span>حفظ التعديلات</span> 💾
         </button>
         
-        <button onclick="toggleAdminPanel()" class="bg-gray-900 hover:bg-black text-white p-4 rounded-full shadow-2xl opacity-40 hover:opacity-100 transition-all transform hover:scale-110" title="تعديل المحتوى">
+        <button onclick="toggleAdminPanel()" class="bg-gray-900 hover:bg-black text-white p-4 rounded-full shadow-2xl opacity-50 hover:opacity-100 transition-all transform hover:scale-110 border-2 border-gray-700" title="تعديل المحتوى">
             ✏️
         </button>
     </div>
@@ -115,7 +124,7 @@
             <div class="space-y-4">
                 <div>
                     <label class="text-sm text-gray-500 dark:text-gray-400 block mb-1">اسم المستودع (Username/Repo)</label>
-                    <input type="text" id="repo-input" class="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-primary outline-none" placeholder="مثال: khaled/cv">
+                    <input type="text" id="repo-input" class="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-primary outline-none" placeholder="مثال: OsamaAL-Harbi/CV">
                 </div>
                 <div>
                     <label class="text-sm text-gray-500 dark:text-gray-400 block mb-1">GitHub Token</label>
