@@ -1,43 +1,22 @@
 let appData = {};
 let githubInfo = { token: '', repo: '', sha: '' };
-let clickCount = 0;
+let isAdmin = false;
 
 document.addEventListener('DOMContentLoaded', () => {
-    AOS.init({ duration: 800, once: true });
+    AOS.init();
     document.getElementById('year').textContent = new Date().getFullYear();
-    
     loadContent();
     initTheme();
-    initParticles();
-    setupSecretTrigger();
-
-    if(localStorage.getItem('saved_repo')) document.getElementById('repo-input').value = localStorage.getItem('saved_repo');
-    if(localStorage.getItem('saved_token')) document.getElementById('token-input').value = localStorage.getItem('saved_token');
+    
+    // Auto-login if data exists
+    if(localStorage.getItem('gh_token')) {
+        githubInfo.token = localStorage.getItem('gh_token');
+        githubInfo.repo = localStorage.getItem('gh_repo');
+        enableAdminMode();
+    }
 });
 
-// --- Routing System (نظام التنقل) ---
-function showPage(pageId) {
-    // 1. Hide all pages
-    document.querySelectorAll('.page-section').forEach(sec => {
-        sec.classList.remove('active');
-        sec.style.display = 'none';
-    });
-    
-    // 2. Show selected page with animation
-    const target = document.getElementById(pageId);
-    target.style.display = 'block';
-    setTimeout(() => target.classList.add('active'), 10);
-
-    // 3. Update Navbar
-    document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('nav-active'));
-    const navBtn = document.getElementById(`nav-${pageId}`);
-    if(navBtn) navBtn.classList.add('nav-active');
-
-    // 4. Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// --- Data Loading ---
+// --- 1. Data Loading ---
 async function loadContent() {
     try {
         const res = await fetch(`data.json?t=${Date.now()}`);
@@ -46,178 +25,247 @@ async function loadContent() {
         renderAll();
     } catch (err) {
         console.error(err);
-        alert('خطأ في تحميل البيانات. تأكد من ملف data.json');
     }
 }
 
+// --- 2. Rendering ---
 function renderAll() {
+    // Profile
     const p = appData.profile;
-    
-    // Home
-    document.querySelector('[data-path="profile.name"]').innerText = p.name;
-    document.querySelector('[data-path="profile.summary"]').innerText = p.summary;
+    updateText('profile.name', p.name);
+    updateText('profile.title', p.title);
+    updateText('profile.summary', p.summary);
     document.getElementById('profile-img').src = p.image;
-    typeWriter(p.title, 'typewriter');
-
-    // Contact Links
-    document.getElementById('email-contact').href = `mailto:${p.email}`;
-    document.getElementById('social-linkedin').href = p.linkedin;
-    document.getElementById('social-github').href = p.github;
-
-    // Experience (Resume Page)
-    document.getElementById('experience-container').innerHTML = appData.experience.map((exp, i) => `
-        <div class="relative group" data-aos="fade-up">
-            <div class="absolute -right-[39px] top-1 w-4 h-4 bg-primary rounded-full border-4 border-white dark:border-darkBg z-10 group-hover:scale-125 transition"></div>
-            <div class="mb-1">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white" data-path="experience[${i}].role">${exp.role}</h3>
-                <p class="text-primary font-medium text-sm" data-path="experience[${i}].company">${exp.company}</p>
-            </div>
-            <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs font-bold mb-3" data-path="experience[${i}].period">${exp.period}</span>
-            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed" data-path="experience[${i}].description">${exp.description}</p>
-        </div>
-    `).join('');
-
-    // Certificates
-    if(appData.certificates) {
-        document.getElementById('certificates-container').innerHTML = appData.certificates.map((cert, i) => `
-            <div class="bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:border-secondary transition" data-aos="fade-up">
-                <div class="text-2xl text-secondary"><i class="fas fa-certificate"></i></div>
-                <div>
-                    <h4 class="font-bold text-sm text-gray-800 dark:text-white" data-path="certificates[${i}].name">${cert.name}</h4>
-                    <p class="text-xs text-gray-500 mt-1"><span data-path="certificates[${i}].issuer">${cert.issuer}</span> | <span data-path="certificates[${i}].date">${cert.date}</span></p>
-                </div>
-            </div>
-        `).join('');
-    }
+    document.getElementById('email-btn').href = `mailto:${p.email}`;
 
     // Skills
-    document.getElementById('skills-container').innerHTML = appData.skills.map((s, i) => `
-        <span class="px-3 py-1 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300" data-path="skills[${i}]">${s}</span>
-    `).join('');
-
-    // Projects (Portfolio Page)
-    document.getElementById('projects-container').innerHTML = appData.projects.map((proj, i) => `
-        <div class="group bg-white dark:bg-cardBg rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700 flex flex-col h-full" data-aos="fade-up" data-aos-delay="${i * 100}">
-            <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center relative overflow-hidden">
-                <i class="fas fa-laptop-code text-5xl text-gray-300 dark:text-gray-700 group-hover:scale-110 transition duration-500"></i>
-                <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 backdrop-blur-sm">
-                    <a href="${proj.link}" target="_blank" class="px-6 py-2 bg-white text-gray-900 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300">عرض التفاصيل</a>
-                </div>
-            </div>
-            <div class="p-6 flex-grow flex flex-col">
-                <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white" data-path="projects[${i}].title">${proj.title}</h3>
-                <p class="text-gray-500 dark:text-gray-400 text-sm line-clamp-3 mb-4 flex-grow" data-path="projects[${i}].desc">${proj.desc}</p>
-            </div>
+    const skillsHtml = appData.skills.map((s, i) => `
+        <div class="group relative px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+            <span class="font-bold" onclick="${isAdmin ? `editArrayItem('skills', ${i})` : ''}">${s}</span>
+            ${isAdmin ? `<button onclick="deleteItem('skills', ${i})" class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs hidden group-hover:flex items-center justify-center">×</button>` : ''}
         </div>
     `).join('');
+    document.getElementById('skills-container').innerHTML = skillsHtml;
+
+    // Experience
+    const expHtml = appData.experience.map((exp, i) => `
+        <div class="group relative bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            ${isAdmin ? `<div class="absolute top-4 left-4 flex gap-2 opacity-0 group-hover:opacity-100 transition"><button onclick="editObjectItem('experience', ${i})" class="text-blue-500"><i class="fas fa-pen"></i></button><button onclick="deleteItem('experience', ${i})" class="text-red-500"><i class="fas fa-trash"></i></button></div>` : ''}
+            <h3 class="text-xl font-bold">${exp.role}</h3>
+            <p class="text-primary text-sm mb-2">${exp.company} | ${exp.period}</p>
+            <p class="text-gray-600 dark:text-gray-400">${exp.description}</p>
+        </div>
+    `).join('');
+    document.getElementById('experience-container').innerHTML = expHtml;
+
+    // Projects
+    const projHtml = appData.projects.map((proj, i) => `
+        <div class="group relative bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+             ${isAdmin ? `<div class="absolute top-4 left-4 flex gap-2 opacity-0 group-hover:opacity-100 transition"><button onclick="editObjectItem('projects', ${i})" class="text-blue-500"><i class="fas fa-pen"></i></button><button onclick="deleteItem('projects', ${i})" class="text-red-500"><i class="fas fa-trash"></i></button></div>` : ''}
+            <h3 class="text-lg font-bold mb-2">${proj.title}</h3>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">${proj.desc}</p>
+            <a href="${proj.link}" target="_blank" class="text-primary text-sm font-bold">عرض المشروع &rarr;</a>
+        </div>
+    `).join('');
+    document.getElementById('projects-container').innerHTML = projHtml;
+
+    // Custom Section (NEW)
+    updateText('customSection.title', appData.customSection?.title || 'قسم إضافي');
+    updateText('customSection.subtitle', appData.customSection?.subtitle || 'وصف القسم الإضافي');
+    
+    if(appData.customSection && appData.customSection.items) {
+        const customHtml = appData.customSection.items.map((item, i) => `
+            <div class="group relative bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                ${isAdmin ? `<button onclick="deleteItem('customSection.items', ${i})" class="absolute top-2 left-2 text-red-500 opacity-0 group-hover:opacity-100">×</button>` : ''}
+                <h4 class="font-bold">${item.title}</h4>
+                <p class="text-sm text-gray-500">${item.desc}</p>
+            </div>
+        `).join('');
+        document.getElementById('custom-container').innerHTML = customHtml;
+    }
 }
 
-// --- Utilities ---
-function typeWriter(text, elementId) {
-    const elm = document.getElementById(elementId);
-    elm.innerHTML = "";
-    let i = 0;
-    const interval = setInterval(() => {
-        elm.innerHTML += text.charAt(i);
-        i++;
-        if (i >= text.length) clearInterval(interval);
-    }, 100);
+// --- 3. CRUD Operations (Add, Edit, Delete) ---
+
+// A. Edit Image
+async function editImage(key) {
+    if(!isAdmin) return;
+    const { value: url } = await Swal.fire({
+        input: 'url',
+        inputLabel: 'رابط الصورة الجديد',
+        inputPlaceholder: 'https://...'
+    });
+    if (url) {
+        setDeepValue(appData, key, url);
+        renderAll();
+    }
 }
 
+// B. Edit Simple Text
+function updateText(key, value) {
+    const el = document.querySelector(`[data-key="${key}"]`);
+    if(el) {
+        el.innerText = value;
+        if(isAdmin) {
+            el.contentEditable = "true";
+            el.classList.add('editable-highlight');
+            el.onblur = () => setDeepValue(appData, key, el.innerText);
+        }
+    }
+}
+
+// C. Add New Item (Universal)
+async function addItem(type) {
+    if(type === 'skills') {
+        const { value: skill } = await Swal.fire({ input: 'text', title: 'أضف مهارة جديدة' });
+        if(skill) appData.skills.push(skill);
+    } 
+    else if (type === 'experience') {
+        // Form for Object
+        const { value: formValues } = await Swal.fire({
+            title: 'إضافة خبرة',
+            html: 
+                '<input id="swal-role" class="swal2-input" placeholder="المسمى الوظيفي">' +
+                '<input id="swal-company" class="swal2-input" placeholder="الشركة">' +
+                '<input id="swal-period" class="swal2-input" placeholder="الفترة">' +
+                '<textarea id="swal-desc" class="swal2-textarea" placeholder="الوصف"></textarea>',
+            focusConfirm: false,
+            preConfirm: () => {
+                return {
+                    role: document.getElementById('swal-role').value,
+                    company: document.getElementById('swal-company').value,
+                    period: document.getElementById('swal-period').value,
+                    description: document.getElementById('swal-desc').value
+                }
+            }
+        });
+        if(formValues) appData.experience.push(formValues);
+    }
+    else if (type === 'projects') {
+        const { value: formValues } = await Swal.fire({
+            title: 'إضافة مشروع',
+            html: 
+                '<input id="swal-title" class="swal2-input" placeholder="اسم المشروع">' +
+                '<input id="swal-link" class="swal2-input" placeholder="رابط المشروع">' +
+                '<textarea id="swal-desc" class="swal2-textarea" placeholder="وصف المشروع"></textarea>',
+            preConfirm: () => {
+                return {
+                    title: document.getElementById('swal-title').value,
+                    link: document.getElementById('swal-link').value,
+                    desc: document.getElementById('swal-desc').value
+                }
+            }
+        });
+        if(formValues) appData.projects.push(formValues);
+    }
+    else if (type === 'customSection.items') {
+        const { value: formValues } = await Swal.fire({
+            title: 'عنصر جديد',
+            html: '<input id="swal-title" class="swal2-input" placeholder="العنوان"><input id="swal-desc" class="swal2-input" placeholder="التفاصيل">',
+            preConfirm: () => ({ title: document.getElementById('swal-title').value, desc: document.getElementById('swal-desc').value })
+        });
+        if(formValues) {
+            if(!appData.customSection) appData.customSection = { title: "عنوان", items: [] };
+            appData.customSection.items.push(formValues);
+        }
+    }
+    renderAll();
+}
+
+// D. Delete Item
+function deleteItem(type, index) {
+    Swal.fire({
+        title: 'هل أنت متأكد؟',
+        text: "لن تتمكن من التراجع عن الحذف!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'نعم، احذف!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const arr = getDeepValue(appData, type);
+            if(Array.isArray(arr)) {
+                arr.splice(index, 1);
+                renderAll();
+            }
+        }
+    })
+}
+
+// --- 4. Admin & Auth Logic ---
+async function toggleAdminLogin() {
+    if(isAdmin) return;
+    const { value: formValues } = await Swal.fire({
+        title: 'تسجيل دخول المالك',
+        html: '<input id="swal-repo" class="swal2-input" placeholder="User/Repo"><input id="swal-token" class="swal2-input" type="password" placeholder="Token">',
+        focusConfirm: false,
+        preConfirm: () => [document.getElementById('swal-repo').value, document.getElementById('swal-token').value]
+    });
+
+    if (formValues) {
+        const [repo, token] = formValues;
+        if(repo && token) {
+            localStorage.setItem('gh_repo', repo);
+            localStorage.setItem('gh_token', token);
+            githubInfo.repo = repo; githubInfo.token = token;
+            enableAdminMode();
+            Swal.fire('تم الدخول', 'وضع التعديل مفعل الآن', 'success');
+        }
+    }
+}
+
+function enableAdminMode() {
+    isAdmin = true;
+    document.getElementById('admin-toolbar').classList.remove('hidden');
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+    renderAll(); // Re-render to add edit buttons
+}
+
+function logout() {
+    localStorage.clear();
+    location.reload();
+}
+
+async function saveChanges() {
+    const btn = document.querySelector('#admin-toolbar button');
+    const oldText = btn.innerHTML;
+    btn.innerHTML = 'جاري الرفع...';
+    
+    try {
+        const fileUrl = `https://api.github.com/repos/${githubInfo.repo}/contents/data.json`;
+        const getRes = await fetch(fileUrl, { headers: { 'Authorization': `token ${githubInfo.token}` } });
+        const fileData = await getRes.json();
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(appData, null, 2))));
+        
+        await fetch(fileUrl, {
+            method: 'PUT',
+            headers: { 'Authorization': `token ${githubInfo.token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: "Update Content via Dashboard", content: content, sha: fileData.sha })
+        });
+        
+        Swal.fire('نجاح!', 'تم حفظ جميع التعديلات في GitHub', 'success');
+    } catch(e) {
+        Swal.fire('خطأ', e.message, 'error');
+    } finally {
+        btn.innerHTML = oldText;
+    }
+}
+
+// --- Helpers ---
+function getDeepValue(obj, path) {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+}
+function setDeepValue(obj, path, value) {
+    const keys = path.split('.');
+    let current = obj;
+    for (let i = 0; i < keys.length - 1; i++) current = current[keys[i]];
+    current[keys[keys.length - 1]] = value;
+}
 function initTheme() {
     const btn = document.getElementById('theme-btn');
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
     btn.addEventListener('click', () => {
         document.documentElement.classList.toggle('dark');
         localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-        // تحديث لون الجزيئات
-        initParticles(); 
     });
-}
-
-function initParticles() {
-    const isDark = document.documentElement.classList.contains('dark');
-    particlesJS("particles-js", {
-        "particles": {
-            "number": { "value": 80 },
-            "color": { "value": isDark ? "#ffffff" : "#3b82f6" },
-            "shape": { "type": "circle" },
-            "opacity": { "value": 0.5 },
-            "size": { "value": 3 },
-            "line_linked": { "enable": true, "distance": 150, "color": isDark ? "#ffffff" : "#3b82f6", "opacity": 0.2, "width": 1 },
-            "move": { "enable": true, "speed": 2 }
-        },
-        "interactivity": {
-            "detect_on": "canvas",
-            "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" } },
-            "modes": { "grab": { "distance": 140, "line_linked": { "opacity": 1 } } }
-        },
-        "retina_detect": true
-    });
-}
-
-// --- Admin Logic ---
-function setupSecretTrigger() {
-    const trigger = document.getElementById('secret-trigger');
-    trigger.addEventListener('click', () => {
-        clickCount++;
-        if(clickCount === 3) {
-            document.getElementById('admin-modal').classList.remove('hidden');
-            clickCount = 0;
-        }
-    });
-}
-
-function authenticateAndEdit() {
-    const repo = document.getElementById('repo-input').value.trim();
-    const token = document.getElementById('token-input').value.trim();
-    if(!repo || !token) return alert("البيانات ناقصة");
-    
-    localStorage.setItem('saved_repo', repo);
-    localStorage.setItem('saved_token', token);
-    githubInfo.repo = repo; githubInfo.token = token;
-    
-    document.getElementById('admin-modal').classList.add('hidden');
-    document.getElementById('save-btn').classList.remove('hidden');
-    document.querySelectorAll('[data-path]').forEach(el => {
-        el.contentEditable = "true";
-        el.classList.add('editable-active');
-    });
-    alert("تم تفعيل وضع التعديل ✅");
-}
-
-async function saveToGitHub() {
-    const btn = document.getElementById('save-btn');
-    btn.innerHTML = 'جاري الحفظ...'; btn.disabled = true;
-
-    try {
-        document.querySelectorAll('[data-path]').forEach(el => {
-            setNestedValue(appData, el.getAttribute('data-path'), el.innerText);
-        });
-
-        const fileUrl = `https://api.github.com/repos/${githubInfo.repo}/contents/data.json`;
-        const getRes = await fetch(fileUrl, { headers: { 'Authorization': `token ${githubInfo.token}` } });
-        if(!getRes.ok) throw new Error('فشل الاتصال');
-        const fileData = await getRes.json();
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(appData, null, 2))));
-
-        await fetch(fileUrl, {
-            method: 'PUT',
-            headers: { 'Authorization': `token ${githubInfo.token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: "Update CV Content", content: content, sha: fileData.sha })
-        });
-
-        alert("تم الحفظ بنجاح! 🎉");
-        location.reload();
-    } catch (e) {
-        alert("خطأ: " + e.message);
-        btn.innerHTML = 'حفظ'; btn.disabled = false;
-    }
-}
-
-function setNestedValue(obj, path, value) {
-    const keys = path.replace(/\[(\d+)\]/g, '.$1').split('.');
-    let current = obj;
-    for (let i = 0; i < keys.length - 1; i++) current = current[keys[i]];
-    current[keys[keys.length - 1]] = value;
 }
