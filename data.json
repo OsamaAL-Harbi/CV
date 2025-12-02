@@ -7,7 +7,7 @@
     "email": "contact@example.com",
     "github": "https://github.com",
     "linkedin": "https://linkedin.com",
-    "image": "https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=Black&facialHairType=BeardLight&facialHairColor=Black&clotheType=Hoodie&clotheColor=Blue03&eyeType=Happy&eyebrowType=Default&mouthType=Smile&skinColor=Light"
+    "image": "https://via.placeholder.com/400"
   },
   "skills": [
     "JavaScript",
@@ -59,17 +59,7 @@
     }
   ],
   "customSection": {
-    "title": "اهتمامات أخرى",
-    "subtitle": "جوانب أخرى من مسيرتي",
-    "items": [
-      {
-        "title": "التدوين التقني",
-        "desc": "كتابة مقالات تعليمية عن البرمجة والتقنيات الحديثة."
-      },
-      {
-        "title": "المصادر المفتوحة",
-        "desc": "المساهمة في مشاريع برمجية مفتوحة المصدر على GitHub."
-      }
-    ]
+    "title": "عنوان",
+    "items": []
   }
 }
