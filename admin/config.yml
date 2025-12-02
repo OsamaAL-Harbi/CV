@@ -1,0 +1,59 @@
+backend:
+  name: git-gateway
+  branch: main # تأكد من أن هذا يطابق اسم الفرع الخاص بك (main أو master)
+
+media_folder: "images"
+public_folder: "images"
+
+display_url: "https://yoursite.netlify.app" # يمكنك تغيير هذا لاحقاً برابط موقعك الفعلي
+locale: "ar"
+
+collections:
+  - name: "content"
+    label: "المحتوى"
+    files:
+      - name: "cv_data"
+        label: "بيانات السيرة الذاتية"
+        file: "data.json"
+        fields:
+          - label: "الملف الشخصي"
+            name: "profile"
+            widget: "object"
+            fields:
+              - {label: "الاسم", name: "name", widget: "string"}
+              - {label: "المسمى الوظيفي", name: "title", widget: "string"}
+              - {label: "صورة شخصية", name: "image", widget: "image"}
+              - {label: "نبذة عني", name: "summary", widget: "text"}
+              - {label: "البريد الإلكتروني", name: "email", widget: "string"}
+              - {label: "رابط لينكد إن", name: "linkedin", widget: "string", required: false}
+              - {label: "رابط جيت هب", name: "github", widget: "string", required: false}
+          
+          - label: "المهارات"
+            name: "skills"
+            widget: "list"
+            field: {label: "اسم المهارة", name: "skill", widget: "string"}
+
+          - label: "الخبرات"
+            name: "experience"
+            widget: "list"
+            fields:
+              - {label: "المسمى الوظيفي", name: "role", widget: "string"}
+              - {label: "الشركة", name: "company", widget: "string"}
+              - {label: "الفترة الزمنية", name: "period", widget: "string"}
+              - {label: "الوصف", name: "description", widget: "text"}
+
+          - label: "المشاريع"
+            name: "projects"
+            widget: "list"
+            fields:
+              - {label: "اسم المشروع", name: "title", widget: "string"}
+              - {label: "الوصف", name: "desc", widget: "text"}
+              - {label: "رابط المشروع", name: "link", widget: "string"}
+
+          - label: "الشهادات"
+            name: "certificates"
+            widget: "list"
+            fields:
+              - {label: "اسم الشهادة", name: "name", widget: "string"}
+              - {label: "جهة الإصدار", name: "issuer", widget: "string"}
+              - {label: "التاريخ", name: "date", widget: "string"}
