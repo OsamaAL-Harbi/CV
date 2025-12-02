@@ -10,7 +10,15 @@
     "image": "https://via.placeholder.com/400"
   },
   "skills": [
-    "JavaScript", "React.js", "Node.js", "Python", "Tailwind CSS", "Git", "SQL", "MongoDB", "Figma"
+    "JavaScript",
+    "React.js",
+    "Node.js",
+    "Python",
+    "Tailwind CSS",
+    "Git",
+    "SQL",
+    "MongoDB",
+    "Figma"
   ],
   "experience": [
     {
