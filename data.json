@@ -1,15 +1,19 @@
 {
   "profile": {
-    "name": "الاسم هنا",
-    "title": "المسمى الوظيفي (مثال: مطور برمجيات)",
-    "summary": "اكتب نبذة مختصرة عن نفسك وعن شغفك وأهدافك المهنية هنا...",
+    "name": "Osama AL-Harbi",
+    "title": "IT",
+    "summary": "test the edit mode",
     "email": "email@example.com",
     "image": "https://via.placeholder.com/150",
     "github": "https://github.com",
     "linkedin": "https://linkedin.com"
   },
   "skills": [
-    "HTML & CSS", "JavaScript", "Python", "Git & GitHub", "Problem Solving"
+    "HTML & CSS",
+    "JavaScript",
+    "Python",
+    "Git & GitHub",
+    "Problem Solving"
   ],
   "experience": [
     {
