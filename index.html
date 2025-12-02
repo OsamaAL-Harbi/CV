@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>أسامة الحربي | Portfolio</title>
-    <meta name="description" content="الموقع الشخصي للمطور.">
     
+    <meta name="description" content="السيرة الذاتية والموقع الشخصي للمطور.">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
     <script>
         tailwind.config = {
@@ -18,95 +23,160 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Tajawal', 'sans-serif'] },
-                    colors: { primary: '#3b82f6', secondary: '#8b5cf6', darkBg: '#0f172a' }
+                    colors: { primary: '#3b82f6', secondary: '#8b5cf6', darkBg: '#0b1120', cardBg: '#1e293b' }
                 }
             }
         }
     </script>
+    
     <style>
-        .editable-highlight { border: 2px dashed #f59e0b; background: rgba(253, 230, 138, 0.1); cursor: pointer; }
-        /* Image Overlay for Editing */
-        .img-edit-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; cursor: pointer; }
-        .editable-img-container:hover .img-edit-overlay { opacity: 1; }
+        body { overflow-x: hidden; }
+        #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; pointer-events: none; }
+        
+        .nav-active { color: #3b82f6; position: relative; }
+        .nav-active::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: #3b82f6; border-radius: 2px; }
+        
+        /* Page Transitions */
+        .page-section { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Admin Styles */
+        .editable-active { border: 2px dashed #f59e0b !important; background: rgba(253, 230, 138, 0.1); outline: none; padding: 2px; border-radius: 4px; }
+        .admin-btn { display: none; } /* Hidden by default */
+        .admin-mode .admin-btn { display: inline-flex; } /* Show in admin mode */
+        .delete-btn { opacity: 0; transition: 0.2s; }
+        .group:hover .delete-btn { opacity: 1; }
     </style>
 </head>
-<body class="bg-gray-50 text-slate-800 dark:bg-darkBg dark:text-gray-100 font-sans transition-colors duration-300 min-h-screen pb-32">
+<body class="bg-gray-50 text-gray-800 dark:bg-darkBg dark:text-gray-100 font-sans transition-colors duration-300 min-h-screen flex flex-col">
 
-    <nav class="fixed top-0 w-full z-40 bg-white/80 dark:bg-darkBg/90 backdrop-blur border-b border-gray-200 dark:border-gray-800">
+    <div id="particles-js" class="opacity-40 dark:opacity-20"></div>
+
+    <nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-darkBg/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-all">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">Portfolio.</a>
-            <div class="flex gap-4">
-                <button id="theme-btn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">🌓</button>
+            <a href="#" onclick="showPage('home')" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary z-50">OSAMA.</a>
+            
+            <div class="hidden md:flex gap-8 font-medium text-sm">
+                <button onclick="showPage('home')" class="nav-link nav-active hover:text-primary transition" id="nav-home">الرئيسية</button>
+                <button onclick="showPage('resume')" class="nav-link hover:text-primary transition" id="nav-resume">السيرة الذاتية</button>
+                <button onclick="showPage('portfolio')" class="nav-link hover:text-primary transition" id="nav-portfolio">الأعمال</button>
+                <button onclick="showPage('contact')" class="nav-link hover:text-primary transition" id="nav-contact">تواصل</button>
+            </div>
+
+            <div class="flex items-center gap-4 z-50">
+                <button id="theme-btn" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition">🌓</button>
             </div>
         </div>
     </nav>
 
-    <main class="container mx-auto px-4 pt-32 max-w-5xl">
+    <main class="container mx-auto px-4 pt-32 pb-20 flex-grow relative z-10 max-w-5xl">
 
-        <section id="profile-section" class="text-center mb-20">
-            <div class="relative w-40 h-40 mx-auto mb-6 group editable-img-container">
-                <img id="profile-img" src="" class="w-full h-full rounded-full object-cover border-4 border-white shadow-xl">
-                <div class="img-edit-overlay rounded-full text-white" onclick="editImage('profile.image')"><i class="fas fa-camera"></i></div>
+        <section id="home" class="page-section active min-h-[60vh] flex items-center justify-center text-center">
+            <div>
+                <div class="mb-8 relative inline-block group cursor-pointer" onclick="editImage('profile.image')">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-50 group-hover:opacity-100 transition"></div>
+                    <img id="profile-img" src="" class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl">
+                    <div class="admin-btn absolute inset-0 bg-black/50 rounded-full items-center justify-center text-white"><i class="fas fa-camera"></i></div>
+                </div>
+                
+                <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight" data-path="profile.name"></h1>
+                <div class="text-xl md:text-2xl text-primary font-medium mb-6 h-8 flex justify-center gap-2">
+                    <span id="typewriter"></span><span class="animate-pulse">|</span>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed mb-10" data-path="profile.summary"></p>
+                
+                <div class="flex justify-center gap-4">
+                    <button onclick="showPage('portfolio')" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-105 transition shadow-lg">شاهد أعمالي</button>
+                    <button onclick="showPage('contact')" class="px-8 py-3 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-xl font-bold hover:scale-105 transition">تواصل معي</button>
+                </div>
             </div>
+        </section>
+
+        <section id="resume" class="page-section">
+            <h2 class="text-4xl font-bold mb-12 text-center" data-aos="fade-down">مسار الخبرة والتعليم</h2>
             
-            <h1 class="text-5xl font-extrabold mb-4" data-key="profile.name"></h1>
-            <p class="text-xl text-primary font-medium mb-6" data-key="profile.title"></p>
-            <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8 text-lg" data-key="profile.summary"></p>
-            
-            <div class="flex justify-center gap-4">
-                <a id="email-btn" href="#" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:shadow-lg transition">تواصل معي</a>
+            <div class="grid md:grid-cols-2 gap-12">
+                <div>
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 class="text-2xl font-bold flex items-center gap-2 text-primary"><i class="fas fa-briefcase"></i> الخبرات</h3>
+                        <button onclick="addItem('experience')" class="admin-btn bg-green-100 text-green-700 px-3 py-1 rounded text-xs font-bold hover:bg-green-200">+ إضافة</button>
+                    </div>
+                    <div id="experience-container" class="space-y-8 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8"></div>
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-center mb-6 mt-2">
+                        <h3 class="text-2xl font-bold flex items-center gap-2 text-green-500"><i class="fas fa-code"></i> المهارات</h3>
+                        <button onclick="addItem('skills')" class="admin-btn bg-green-100 text-green-700 px-3 py-1 rounded text-xs font-bold hover:bg-green-200">+ إضافة</button>
+                    </div>
+                    <div id="skills-container" class="flex flex-wrap gap-3 mb-12"></div>
+
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold flex items-center gap-2 text-secondary"><i class="fas fa-graduation-cap"></i> الشهادات</h3>
+                        <button onclick="addItem('certificates')" class="admin-btn bg-green-100 text-green-700 px-3 py-1 rounded text-xs font-bold hover:bg-green-200">+ إضافة</button>
+                    </div>
+                    <div id="certificates-container" class="space-y-4"></div>
+                    
+                    <div id="custom-section-wrapper" class="mt-12 hidden">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-2xl font-bold flex items-center gap-2 text-purple-500" data-path="customSection.title">إضافات</h3>
+                            <button onclick="addItem('customSection.items')" class="admin-btn bg-green-100 text-green-700 px-3 py-1 rounded text-xs font-bold hover:bg-green-200">+ إضافة</button>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-4" data-path="customSection.subtitle"></p>
+                        <div id="custom-container" class="space-y-4"></div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section class="mb-20">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold border-r-4 border-primary pr-3">المهارات</h2>
-                <button onclick="addItem('skills')" class="admin-only hidden bg-green-100 text-green-700 px-3 py-1 rounded-lg text-sm font-bold hover:bg-green-200">+ إضافة مهارة</button>
+        <section id="portfolio" class="page-section">
+            <div class="text-center mb-12 relative">
+                <h2 class="text-4xl font-bold mb-4" data-aos="fade-down">معرض الأعمال</h2>
+                <button onclick="addItem('projects')" class="admin-btn absolute top-0 right-0 bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-200">+ مشروع جديد</button>
             </div>
-            <div id="skills-container" class="flex flex-wrap gap-3"></div>
+            <div id="projects-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </section>
 
-        <section class="mb-20">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold border-r-4 border-primary pr-3">الخبرات</h2>
-                <button onclick="addItem('experience')" class="admin-only hidden bg-green-100 text-green-700 px-3 py-1 rounded-lg text-sm font-bold hover:bg-green-200">+ إضافة خبرة</button>
+        <section id="contact" class="page-section">
+            <div class="max-w-2xl mx-auto bg-white dark:bg-cardBg rounded-3xl p-10 shadow-2xl border border-gray-100 dark:border-gray-800 text-center" data-aos="zoom-in">
+                <h2 class="text-3xl font-bold mb-4">لنتحدث عن مشروعك</h2>
+                <a id="email-contact" href="#" class="block w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition shadow-lg mb-6">مراسلة</a>
+                <div class="flex justify-center gap-8 mt-8 border-t border-gray-100 dark:border-gray-700 pt-8">
+                    <a id="social-linkedin" href="#" target="_blank" class="flex flex-col items-center gap-2"><i class="fab fa-linkedin-in text-2xl text-blue-600"></i><span class="text-xs font-bold">LinkedIn</span></a>
+                    <a id="social-github" href="#" target="_blank" class="flex flex-col items-center gap-2"><i class="fab fa-github text-2xl"></i><span class="text-xs font-bold">GitHub</span></a>
+                </div>
             </div>
-            <div id="experience-container" class="space-y-6"></div>
-        </section>
-
-        <section class="mb-20">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold border-r-4 border-primary pr-3">المشاريع</h2>
-                <button onclick="addItem('projects')" class="admin-only hidden bg-green-100 text-green-700 px-3 py-1 rounded-lg text-sm font-bold hover:bg-green-200">+ إضافة مشروع</button>
-            </div>
-            <div id="projects-container" class="grid md:grid-cols-2 gap-6"></div>
-        </section>
-
-        <section class="mb-20">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold border-r-4 border-secondary pr-3" data-key="customSection.title">إضافات أخرى</h2>
-                <button onclick="addItem('customSection.items')" class="admin-only hidden bg-green-100 text-green-700 px-3 py-1 rounded-lg text-sm font-bold hover:bg-green-200">+ عنصر جديد</button>
-            </div>
-            <p class="text-gray-500 mb-6" data-key="customSection.subtitle"></p>
-            <div id="custom-container" class="grid md:grid-cols-2 gap-4"></div>
         </section>
 
     </main>
 
-    <footer class="text-center py-8 text-gray-500 text-sm border-t border-gray-200 dark:border-gray-800">
-        <p class="cursor-pointer" onclick="toggleAdminLogin()">&copy; <span id="year"></span> Osama Al-Harbi</p>
+    <footer class="text-center py-6 text-xs text-gray-500 border-t border-gray-200 dark:border-gray-800">
+        <p id="secret-trigger" class="cursor-pointer select-none hover:text-primary transition inline-block px-4 py-2">
+            &copy; <span id="year"></span> Osama Al-Harbi
+        </p>
     </footer>
 
-    <div id="admin-toolbar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 shadow-2xl rounded-full px-6 py-3 border border-gray-200 dark:border-gray-700 z-50 flex items-center gap-4">
-        <span class="text-xs font-bold text-gray-400">Admin Mode</span>
-        <div class="h-4 w-px bg-gray-300"></div>
-        <button onclick="saveChanges()" class="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-green-700 transition flex items-center gap-2">
-            حفظ التغييرات <i class="fas fa-save"></i>
-        </button>
-        <button onclick="logout()" class="text-red-500 hover:text-red-700"><i class="fas fa-sign-out-alt"></i></button>
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-cardBg w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-gray-200 dark:border-gray-700">
+            <h3 class="text-xl font-bold mb-4 text-center">دخول المالك</h3>
+            <div class="space-y-3">
+                <input type="text" id="repo-input" class="w-full p-3 bg-gray-50 dark:bg-darkBg border dark:border-gray-600 rounded-lg outline-none text-center text-sm" placeholder="User/Repo">
+                <input type="password" id="token-input" class="w-full p-3 bg-gray-50 dark:bg-darkBg border dark:border-gray-600 rounded-lg outline-none text-center text-sm" placeholder="GitHub Token">
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="document.getElementById('admin-modal').classList.add('hidden')" class="flex-1 py-2 text-gray-500 text-sm">إلغاء</button>
+                <button onclick="authenticateAndEdit()" class="flex-1 py-2 bg-primary text-white rounded-lg text-sm font-bold">دخول</button>
+            </div>
+        </div>
     </div>
 
+    <button id="save-btn" onclick="saveToGitHub()" class="hidden fixed bottom-6 right-6 z-[100] bg-green-600 text-white px-6 py-3 rounded-full shadow-2xl font-bold animate-bounce flex items-center gap-2 hover:bg-green-700 transition">
+        حفظ التعديلات <i class="fas fa-save"></i>
+    </button>
+
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="script.js"></script>
 </body>
 </html>
