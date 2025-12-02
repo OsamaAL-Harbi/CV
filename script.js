@@ -13,15 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     setupSecretTrigger();
 
-    // استعادة الدخول
+    // استعادة بيانات الدخول
     if(localStorage.getItem('saved_repo')) {
         document.getElementById('repo-input').value = localStorage.getItem('saved_repo');
         document.getElementById('token-input').value = localStorage.getItem('saved_token');
-        // إذا البيانات موجودة، لا نفعل الأدمن تلقائياً للأمان، لكن نسهل الدخول
     }
 });
 
-// --- Navigation (SPA Logic) ---
+// --- التنقل بين الصفحات (SPA) ---
 function showPage(pageId) {
     document.querySelectorAll('.page-section').forEach(sec => {
         sec.classList.remove('active');
@@ -38,7 +37,7 @@ function showPage(pageId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// --- Data Loading & Rendering ---
+// --- تحميل البيانات وعرضها ---
 async function loadContent() {
     try {
         const res = await fetch(`data.json?t=${Date.now()}`);
@@ -53,21 +52,21 @@ async function loadContent() {
 function renderAll() {
     const p = appData.profile;
     
-    // 1. Profile
+    // الملف الشخصي
     updateText('profile.name', p.name);
     updateText('profile.summary', p.summary);
     document.getElementById('profile-img').src = p.image;
     typeWriter(p.title, 'typewriter');
 
-    // Contact
+    // الروابط
     document.getElementById('email-contact').href = `mailto:${p.email}`;
     document.getElementById('social-linkedin').href = p.linkedin;
     document.getElementById('social-github').href = p.github;
 
-    // 2. Experience
+    // الخبرات
     document.getElementById('experience-container').innerHTML = appData.experience.map((exp, i) => `
         <div class="relative group mb-8" data-aos="fade-up">
-            ${isAdmin ? `<button onclick="deleteItem('experience', ${i})" class="delete-btn absolute top-0 left-0 text-red-500 bg-red-100 p-1 rounded z-20"><i class="fas fa-trash"></i></button>` : ''}
+            <button onclick="deleteItem('experience', ${i})" class="delete-btn absolute top-0 left-0 text-red-500 bg-red-100 p-1 rounded z-20"><i class="fas fa-trash"></i></button>
             <div class="absolute -right-[39px] top-1 w-4 h-4 bg-primary rounded-full border-4 border-white dark:border-darkBg z-10 group-hover:scale-125 transition"></div>
             <div class="mb-1">
                 <h3 class="text-xl font-bold text-gray-800 dark:text-white" onclick="${isAdmin ? `editArrayItem('experience', ${i}, 'role')` : ''}">${exp.role}</h3>
@@ -78,19 +77,19 @@ function renderAll() {
         </div>
     `).join('');
 
-    // 3. Skills
+    // المهارات
     document.getElementById('skills-container').innerHTML = appData.skills.map((s, i) => `
         <div class="relative group inline-block">
             <span class="px-3 py-1 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300 cursor-default">${s}</span>
-            ${isAdmin ? `<button onclick="deleteItem('skills', ${i})" class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs hidden group-hover:flex items-center justify-center">×</button>` : ''}
+            <button onclick="deleteItem('skills', ${i})" class="delete-btn absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs items-center justify-center">×</button>
         </div>
     `).join('');
 
-    // 4. Certificates
+    // الشهادات
     if(appData.certificates) {
         document.getElementById('certificates-container').innerHTML = appData.certificates.map((cert, i) => `
             <div class="relative group bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:border-secondary transition">
-                ${isAdmin ? `<button onclick="deleteItem('certificates', ${i})" class="delete-btn absolute top-2 left-2 text-red-500 opacity-0 group-hover:opacity-100"><i class="fas fa-trash"></i></button>` : ''}
+                <button onclick="deleteItem('certificates', ${i})" class="delete-btn absolute top-2 left-2 text-red-500"><i class="fas fa-trash"></i></button>
                 <div class="text-2xl text-secondary"><i class="fas fa-certificate"></i></div>
                 <div>
                     <h4 class="font-bold text-sm text-gray-800 dark:text-white">${cert.name}</h4>
@@ -100,10 +99,10 @@ function renderAll() {
         `).join('');
     }
 
-    // 5. Projects
+    // المشاريع
     document.getElementById('projects-container').innerHTML = appData.projects.map((proj, i) => `
         <div class="relative group bg-white dark:bg-cardBg rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100 dark:border-gray-700 flex flex-col h-full">
-            ${isAdmin ? `<button onclick="deleteItem('projects', ${i})" class="absolute top-2 left-2 z-20 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition"><i class="fas fa-trash"></i></button>` : ''}
+            <button onclick="deleteItem('projects', ${i})" class="delete-btn absolute top-2 left-2 z-20 bg-red-500 text-white p-2 rounded-full shadow-lg"><i class="fas fa-trash"></i></button>
             <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center relative overflow-hidden">
                 <i class="fas fa-laptop-code text-5xl text-gray-300 dark:text-gray-700 group-hover:scale-110 transition duration-500"></i>
                 <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm">
@@ -116,24 +115,9 @@ function renderAll() {
             </div>
         </div>
     `).join('');
-
-    // 6. Custom Section
-    if(appData.customSection && appData.customSection.items) {
-        document.getElementById('custom-section-wrapper').classList.remove('hidden');
-        updateText('customSection.title', appData.customSection.title);
-        updateText('customSection.subtitle', appData.customSection.subtitle);
-        
-        document.getElementById('custom-container').innerHTML = appData.customSection.items.map((item, i) => `
-            <div class="relative group bg-gray-50 dark:bg-cardBg p-4 rounded-lg">
-                ${isAdmin ? `<button onclick="deleteItem('customSection.items', ${i})" class="absolute top-2 left-2 text-red-500 opacity-0 group-hover:opacity-100">×</button>` : ''}
-                <h4 class="font-bold text-sm">${item.title}</h4>
-                <p class="text-xs text-gray-500">${item.desc}</p>
-            </div>
-        `).join('');
-    }
 }
 
-// --- CRUD & Editing Logic ---
+// --- عمليات التعديل (CRUD) ---
 function updateText(key, value) {
     const el = document.querySelector(`[data-path="${key}"]`);
     if(el) {
@@ -141,7 +125,6 @@ function updateText(key, value) {
         if(isAdmin) {
             el.contentEditable = "true";
             el.classList.add('editable-active');
-            // Save on blur
             el.onblur = () => setDeepValue(appData, key, el.innerText);
         }
     }
@@ -150,48 +133,36 @@ function updateText(key, value) {
 async function addItem(type) {
     if(!isAdmin) return;
     
-    let newItem = null;
+    let value = null;
     
     if(type === 'skills') {
-        const { value } = await Swal.fire({ input: 'text', title: 'مهارة جديدة' });
-        if(value) appData.skills.push(value);
+        const res = await Swal.fire({ input: 'text', title: 'مهارة جديدة' });
+        if(res.value) appData.skills.push(res.value);
     } 
     else if(type === 'experience') {
-        const { value } = await Swal.fire({
+        const res = await Swal.fire({
             title: 'إضافة خبرة',
             html: '<input id="swal-role" class="swal2-input" placeholder="المسمى"><input id="swal-co" class="swal2-input" placeholder="الشركة"><input id="swal-date" class="swal2-input" placeholder="التاريخ"><textarea id="swal-desc" class="swal2-textarea" placeholder="الوصف"></textarea>',
             preConfirm: () => ({ role: document.getElementById('swal-role').value, company: document.getElementById('swal-co').value, period: document.getElementById('swal-date').value, description: document.getElementById('swal-desc').value })
         });
-        if(value) appData.experience.push(value);
+        if(res.value) appData.experience.push(res.value);
     }
     else if(type === 'projects') {
-        const { value } = await Swal.fire({
+        const res = await Swal.fire({
             title: 'إضافة مشروع',
             html: '<input id="swal-title" class="swal2-input" placeholder="العنوان"><input id="swal-link" class="swal2-input" placeholder="الرابط"><textarea id="swal-desc" class="swal2-textarea" placeholder="الوصف"></textarea>',
             preConfirm: () => ({ title: document.getElementById('swal-title').value, link: document.getElementById('swal-link').value, desc: document.getElementById('swal-desc').value })
         });
-        if(value) appData.projects.push(value);
+        if(res.value) appData.projects.push(res.value);
     }
     else if(type === 'certificates') {
-         const { value } = await Swal.fire({
+         const res = await Swal.fire({
             title: 'إضافة شهادة',
             html: '<input id="swal-name" class="swal2-input" placeholder="الاسم"><input id="swal-iss" class="swal2-input" placeholder="الجهة"><input id="swal-date" class="swal2-input" placeholder="التاريخ">',
             preConfirm: () => ({ name: document.getElementById('swal-name').value, issuer: document.getElementById('swal-iss').value, date: document.getElementById('swal-date').value })
         });
-        if(value) appData.certificates.push(value);
+        if(res.value) appData.certificates.push(res.value);
     }
-    else if(type === 'customSection.items') {
-         const { value } = await Swal.fire({
-            title: 'عنصر جديد',
-            html: '<input id="swal-t" class="swal2-input" placeholder="العنوان"><input id="swal-d" class="swal2-input" placeholder="الوصف">',
-            preConfirm: () => ({ title: document.getElementById('swal-t').value, desc: document.getElementById('swal-d').value })
-        });
-        if(value) {
-            if(!appData.customSection) appData.customSection = { title: "إضافات", items: [] };
-            appData.customSection.items.push(value);
-        }
-    }
-    
     renderAll();
 }
 
@@ -223,7 +194,7 @@ async function editImage(key) {
     }
 }
 
-// --- Admin Auth ---
+// --- نظام الدخول والحفظ ---
 function setupSecretTrigger() {
     document.getElementById('secret-trigger').addEventListener('click', () => {
         clickCount++;
@@ -248,7 +219,7 @@ function authenticateAndEdit() {
     document.body.classList.add('admin-mode');
     isAdmin = true;
     
-    renderAll(); // Re-render to show admin buttons
+    renderAll(); // إعادة الرسم لإظهار أزرار الإضافة والحذف
     showToast('تم تفعيل وضع التعديل', 'success');
 }
 
@@ -276,7 +247,7 @@ async function saveToGitHub() {
     }
 }
 
-// --- Helpers ---
+// --- دوال مساعدة ---
 function typeWriter(text, elementId) {
     const elm = document.getElementById(elementId);
     elm.innerHTML = "";
