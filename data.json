@@ -9,7 +9,15 @@
     "image": "https://via.placeholder.com/400"
   },
   "skills": [
-    "JavaScript (ES6+)", "React.js", "Next.js", "Node.js", "Python", "Tailwind CSS", "Git & GitHub", "RESTful APIs", "MongoDB"
+    "JavaScript (ES6+)",
+    "React.js",
+    "Next.js",
+    "Node.js",
+    "Python",
+    "Tailwind CSS",
+    "Git & GitHub",
+    "RESTful APIs",
+    "MongoDB"
   ],
   "experience": [
     {
