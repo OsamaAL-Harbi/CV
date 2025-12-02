@@ -1,64 +1,52 @@
 {
   "profile": {
     "name": "أسامة الحربي",
-    "title": "Full Stack Developer | مهندس برمجيات",
-    "summary": "مطور برمجيات شغوف، متخصص في بناء حلول الويب المتقدمة وتطبيقات الجوال. أركز على كتابة كود نظيف، قابل للتطوير، ويحقق أهداف العمل بكفاءة عالية.",
+    "title": "Software Engineer | مهندس برمجيات",
+    "summary": "مطور برمجيات شغوف، أسعى لبناء تجارب رقمية استثنائية باستخدام أحدث تقنيات الويب. أركز على الجودة، الأداء، والتصميم الجذاب.",
+    "location": "المدينة المنورة، السعودية",
     "email": "contact@example.com",
-    "github": "https://github.com/OsamaAL-Harbi",
+    "github": "https://github.com",
     "linkedin": "https://linkedin.com",
     "image": "https://via.placeholder.com/400"
   },
   "skills": [
-    "JavaScript (ES6+)",
-    "React.js",
-    "Next.js",
-    "Node.js",
-    "Python",
-    "Tailwind CSS",
-    "Git & GitHub",
-    "RESTful APIs",
-    "MongoDB"
+    "JavaScript", "React.js", "Node.js", "Python", "Tailwind CSS", "Git", "SQL", "MongoDB", "Figma"
   ],
   "experience": [
     {
-      "role": "مطور واجهات أمامية (Frontend)",
-      "company": "شركة الحلول الرقمية",
+      "role": "مطور واجهات (Frontend)",
+      "company": "Tech Solutions",
       "period": "2024 - الآن",
-      "description": "قيادة فريق التطوير لبناء واجهة المستخدم الخاصة بمنصة التجارة الإلكترونية، وتحسين سرعة الموقع بنسبة 40%."
+      "description": "تطوير وصيانة واجهات المستخدم لتطبيقات الويب باستخدام React و Tailwind CSS."
     },
     {
-      "role": "مطور ويب مستقل",
+      "role": "مبرمج مستقل",
       "company": "Freelance",
       "period": "2022 - 2024",
-      "description": "تصميم وتطوير أكثر من 10 مواقع إلكترونية لعملاء محليين، بما في ذلك مواقع تعريفية ومتاجر صغيرة."
+      "description": "العمل مع عملاء متنوعين لبناء مواقع شخصية ومتاجر إلكترونية."
     }
   ],
   "projects": [
     {
-      "title": "منصة المتجر الإلكتروني",
-      "desc": "متجر متكامل متعدد التجار، يدعم الدفع الإلكتروني وتتبع الطلبات. مبني باستخدام MERN Stack.",
+      "title": "نظام إدارة المهام",
+      "desc": "تطبيق ويب متكامل لإدارة المهام والمشاريع مع دعم السحب والإفلات.",
       "link": "#"
     },
     {
-      "title": "تطبيق إدارة المهام",
-      "desc": "أداة لزيادة الإنتاجية تسمح للفرق بتنظيم المهام والمشاريع مع ميزات السحب والإفلات.",
-      "link": "#"
-    },
-    {
-      "title": "لوحة تحكم تحليل البيانات",
-      "desc": "لوحة تحكم تفاعلية تعرض إحصائيات المبيعات والزوار باستخدام الرسوم البيانية.",
+      "title": "متجر إلكتروني",
+      "desc": "منصة تجارة إلكترونية حديثة مع بوابة دفع ولوحة تحكم للإدارة.",
       "link": "#"
     }
   ],
   "certificates": [
     {
-      "name": "Google UX Design Certificate",
-      "issuer": "Coursera",
+      "name": "شهادة تطوير الويب",
+      "issuer": "Udacity",
       "date": "2023"
     },
     {
-      "name": "AWS Certified Cloud Practitioner",
-      "issuer": "Amazon Web Services",
+      "name": "أساسيات الحوسبة السحابية",
+      "issuer": "AWS",
       "date": "2024"
     }
   ]
