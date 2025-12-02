@@ -3,86 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>السيرة الذاتية التفاعلية</title>
+    <title>السيرة الذاتية الشخصية | Portfolio</title>
+    
+    <meta name="description" content="السيرة الذاتية التفاعلية. استعرض خبراتي ومشاريعي التقنية.">
+    <meta name="keywords" content="سيرة ذاتية, مطور ويب, برمجة, Portfolio, CV, Resume">
+    <meta name="author" content="الاسم">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="سيرتي الذاتية التفاعلية">
+    <meta property="og:description" content="تصفح خبراتي وأعمالي في تطوير البرمجيات.">
+    <meta property="og:image" content="https://via.placeholder.com/1200x630"> <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['Cairo', 'sans-serif'] },
-                    colors: { primary: '#3b82f6', darkBg: '#0f172a', darkCard: '#1e293b' }
+                    colors: { 
+                        primary: '#2563eb', 
+                        darkBg: '#0f172a', 
+                        darkCard: '#1e293b' 
+                    }
                 }
             }
         }
     </script>
+
     <style>
-        /* تأثيرات حركية */
-        .editable-active { border: 2px dashed #f59e0b; background: rgba(255,255,200,0.1); cursor: text; }
-        .fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; transform: translateY(10px); }
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        /* إخفاء العناصر غير المهمة عند الطباعة */
+        @media print {
+            button, #admin-controls, #theme-btn, .no-print { display: none !important; }
+            body { background-color: white !important; color: black !important; }
+            a { text-decoration: none; color: black; }
+            .shadow-sm, .shadow-lg, .shadow-xl { box-shadow: none !important; }
+        }
+        
+        /* تنسيق وضع التعديل */
+        .editable-active { 
+            border: 2px dashed #f59e0b; 
+            background: rgba(253, 230, 138, 0.1); 
+            padding: 2px;
+            border-radius: 4px;
+            cursor: text;
+        }
+        
+        /* شريط التمرير (Scrollbar) */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        .dark ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 transition-colors duration-300 dark:bg-darkBg dark:text-gray-100 font-sans pb-24">
+<body class="bg-gray-50 text-gray-800 transition-colors duration-300 dark:bg-darkBg dark:text-gray-100 font-sans pb-32 overflow-x-hidden">
 
-    <button id="theme-btn" class="fixed top-6 left-6 z-50 p-3 rounded-full bg-white dark:bg-gray-700 shadow-lg hover:scale-110 transition">
+    <button id="theme-btn" class="fixed top-6 left-6 z-40 p-3 rounded-full bg-white dark:bg-gray-700 shadow-lg hover:scale-110 transition text-xl">
         🌓
     </button>
 
     <div class="container mx-auto px-4 py-12 max-w-4xl">
         
-        <header id="profile-section" class="text-center mb-16 fade-in" style="animation-delay: 0.1s;"></header>
+        <header id="profile-section" class="text-center mb-16" data-aos="fade-down">
+            </header>
 
-        <section class="mb-14 fade-in" style="animation-delay: 0.2s;">
-            <h2 class="text-2xl font-bold mb-6 border-b-4 border-primary w-fit pb-1 px-2">المهارات</h2>
-            <div id="skills-container" class="flex flex-wrap gap-3 justify-center md:justify-start"></div>
+        <section class="mb-16" data-aos="fade-up">
+            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white">المهارات والتقنيات</h2>
+            <div id="skills-container" class="flex flex-wrap gap-3"></div>
         </section>
 
-        <section class="mb-14 fade-in" style="animation-delay: 0.3s;">
-            <h2 class="text-2xl font-bold mb-6 border-b-4 border-primary w-fit pb-1 px-2">الخبرات العملية</h2>
-            <div id="experience-container" class="space-y-6"></div>
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white" data-aos="fade-right">الرحلة المهنية</h2>
+            <div id="experience-container" class="space-y-0 relative border-r-2 border-gray-200 dark:border-gray-700 mr-3 md:mr-0 md:border-r-0 md:border-l-2">
+                </div>
         </section>
 
-        <section class="mb-14 fade-in" style="animation-delay: 0.4s;">
-            <h2 class="text-2xl font-bold mb-6 border-b-4 border-primary w-fit pb-1 px-2">المشاريع</h2>
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white" data-aos="fade-right">أبرز المشاريع</h2>
             <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
 
+        <section class="mb-16" data-aos="fade-up">
+            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white">الشهادات</h2>
+            <div id="certificates-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </section>
+        
+        <footer class="text-center text-gray-500 text-sm mt-20 border-t dark:border-gray-800 pt-8 no-print">
+            <p>&copy; <span id="year"></span> تم التطوير بواسطة <span class="font-bold text-primary">GitHub Pages & JS</span></p>
+        </footer>
+
     </div>
 
-    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-        <button id="save-changes-btn" onclick="saveToGitHub()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-xl font-bold animate-bounce flex items-center gap-2">
-            <span>حفظ التغييرات</span> 💾
+    <div id="admin-controls" class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        <button id="save-btn" onclick="saveToGitHub()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-xl font-bold animate-bounce flex items-center gap-2">
+            <span>حفظ التعديلات</span> 💾
         </button>
         
-        <button onclick="toggleAdminPanel()" class="bg-gray-900 hover:bg-black text-white p-4 rounded-full shadow-2xl opacity-40 hover:opacity-100 transition-all transform hover:scale-110">
+        <button onclick="toggleAdminPanel()" class="bg-gray-900 hover:bg-black text-white p-4 rounded-full shadow-2xl opacity-40 hover:opacity-100 transition-all transform hover:scale-110" title="تعديل المحتوى">
             ✏️
         </button>
     </div>
 
-    <div id="admin-modal" class="hidden fixed inset-0 bg-black/80 z-[60] flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white dark:bg-darkCard p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-700">
-            <h3 class="text-xl font-bold mb-4 dark:text-white">إعدادات المالك</h3>
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/80 z-[60] flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-darkCard p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 transform transition-all scale-100">
+            <h3 class="text-xl font-bold mb-6 dark:text-white flex items-center gap-2">🔐 تسجيل دخول المالك</h3>
             
             <div class="space-y-4">
                 <div>
-                    <label class="text-sm text-gray-500 block mb-1">اسم المستودع (username/repo)</label>
-                    <input type="text" id="repo-input" class="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="مثال: ahmed/cv">
+                    <label class="text-sm text-gray-500 dark:text-gray-400 block mb-1">اسم المستودع (Username/Repo)</label>
+                    <input type="text" id="repo-input" class="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-primary outline-none" placeholder="مثال: khaled/cv">
                 </div>
                 <div>
-                    <label class="text-sm text-gray-500 block mb-1">GitHub Token</label>
-                    <input type="password" id="token-input" class="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="ghp_xxxxxxxxxxxx">
+                    <label class="text-sm text-gray-500 dark:text-gray-400 block mb-1">GitHub Token</label>
+                    <input type="password" id="token-input" class="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-primary outline-none" placeholder="ghp_xxxxxxxxxxxx">
                 </div>
             </div>
 
             <div class="flex justify-end gap-3 mt-8">
-                <button onclick="toggleAdminPanel()" class="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg">إلغاء</button>
-                <button onclick="authenticateAndEdit()" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 shadow-lg">بدء التعديل</button>
+                <button onclick="toggleAdminPanel()" class="px-4 py-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">إلغاء</button>
+                <button onclick="authenticateAndEdit()" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 shadow-lg transition">دخول وتعديل</button>
             </div>
         </div>
     </div>
 
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

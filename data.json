@@ -1,33 +1,51 @@
 {
   "profile": {
-    "name": "Osama AL-Harbi",
-    "title": "IT",
-    "summary": "test the edit mode",
-    "email": "email@example.com",
-    "image": "https://via.placeholder.com/150",
-    "github": "https://github.com",
-    "linkedin": "https://linkedin.com"
+    "name": "الاسم الكامل",
+    "title": "مطور برمجيات شامل (Full Stack Developer)",
+    "summary": "مطور شغوف بخبرة واسعة في بناء تطبيقات الويب الحديثة. أهدف دائمًا لتقديم حلول برمجية عالية الأداء وقابلة للتطوير.",
+    "email": "contact@example.com",
+    "linkedin": "https://linkedin.com",
+    "image": "https://via.placeholder.com/150"
   },
   "skills": [
-    "HTML & CSS",
-    "JavaScript",
-    "Python",
-    "Git & GitHub",
-    "Problem Solving"
+    "JavaScript", "React.js", "Node.js", "Python", "Tailwind CSS", "Git & GitHub", "SQL", "UI/UX Design"
   ],
   "experience": [
     {
-      "role": "اسم الوظيفة",
-      "company": "اسم الشركة",
-      "period": "2023 - الآن",
-      "description": "وصف موجز للمسؤوليات والإنجازات في هذه الوظيفة."
+      "role": "مطور واجهات أمامية",
+      "company": "شركة الحلول التقنية",
+      "period": "2024 - الآن",
+      "description": "تطوير واجهات مستخدم تفاعلية باستخدام React.js وتحسين أداء الموقع بنسبة 30%."
+    },
+    {
+      "role": "مبرمج مستقل",
+      "company": "Freelance",
+      "period": "2022 - 2024",
+      "description": "العمل على مشاريع متنوعة لعملاء محليين، بما في ذلك متاجر إلكترونية ومواقع تعريفية."
     }
   ],
   "projects": [
     {
-      "title": "اسم المشروع",
-      "desc": "وصف المشروع وماذا يفعل.",
+      "title": "منصة المتجر الذكي",
+      "desc": "تطبيق تجارة إلكترونية متكامل مع لوحة تحكم وبوابة دفع إلكتروني.",
       "link": "#"
+    },
+    {
+      "title": "نظام إدارة المهام",
+      "desc": "تطبيق ويب لتنظيم المهام اليومية مع ميزات السحب والإفلات (Drag & Drop).",
+      "link": "#"
+    }
+  ],
+  "certificates": [
+    {
+      "name": "شهادة محترف بايثون",
+      "issuer": "Misk Academy",
+      "date": "2023"
+    },
+    {
+      "name": "أساسيات الحوسبة السحابية",
+      "issuer": "AWS",
+      "date": "2024"
     }
   ]
 }
