@@ -1,23 +1,27 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أسامة الحربي | سيرة ذاتية تفاعلية</title>
+    <title>أسامة الحربي | Portfolio</title>
     
-    <meta name="description" content="السيرة الذاتية الرسمية للمطور أسامة الحربي. خبرة في تطوير البرمجيات، تصميم المواقع، وحلول الويب الحديثة.">
-    <meta name="keywords" content="أسامة الحربي, مبرمج, سيرة ذاتية, CV, Portfolio, Web Developer, JavaScript, Saudi Arabia">
+    <meta name="description" content="السيرة الذاتية الرسمية للمطور أسامة الحربي. متخصص في تطوير البرمجيات، تطبيقات الويب، والحلول التقنية المبتكرة.">
+    <meta name="keywords" content="أسامة الحربي, مبرمج, سيرة ذاتية, مطور ويب, السعودية, React, Python, JavaScript, CV, Portfolio">
     <meta name="author" content="Osama Al-Harbi">
-    
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#2563eb">
+
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://osamaal-harbi.github.io/CV/">
     <meta property="og:title" content="أسامة الحربي | مهندس برمجيات">
     <meta property="og:description" content="تصفح سيرتي الذاتية التفاعلية وأبرز مشاريعي التقنية.">
-    <meta property="og:image" content="https://osamaal-harbi.github.io/CV/images/preview.jpg"> <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <meta property="og:image" content="https://osamaal-harbi.github.io/CV/images/preview.jpg">
+    <meta property="og:locale" content="ar_SA">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
 
     <script>
         tailwind.config = {
@@ -25,116 +29,79 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Cairo', 'sans-serif'] },
-                    colors: { 
-                        primary: '#2563eb', 
-                        darkBg: '#0f172a', 
-                        darkCard: '#1e293b' 
-                    }
+                    colors: { primary: '#2563eb', darkBg: '#0f172a', darkCard: '#1e293b' }
                 }
             }
         }
     </script>
-
+    
     <style>
-        /* إخفاء العناصر غير المهمة عند الطباعة (Ctrl+P) */
-        @media print {
-            button, #admin-controls, #theme-btn, .no-print { display: none !important; }
-            body { background-color: white !important; color: black !important; }
-            a { text-decoration: none; color: black; }
-            .shadow-sm, .shadow-lg, .shadow-xl { box-shadow: none !important; }
-        }
-        
-        /* تنسيق وضع التعديل */
-        .editable-active { 
-            border: 2px dashed #f59e0b; 
-            background: rgba(253, 230, 138, 0.1); 
-            padding: 2px;
-            border-radius: 4px;
-            cursor: text;
-        }
-        
-        /* شريط التمرير الجميل */
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .editable-active { border: 2px dashed #f59e0b !important; background: rgba(253, 230, 138, 0.1); cursor: text; }
+        /* إخفاء شريط التمرير المزعج */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        .dark ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 transition-colors duration-300 dark:bg-darkBg dark:text-gray-100 font-sans pb-32 overflow-x-hidden">
+<body class="bg-gray-50 text-gray-800 dark:bg-darkBg dark:text-gray-100 font-sans transition-colors duration-300">
 
-    <button id="theme-btn" class="fixed top-6 left-6 z-40 p-3 rounded-full bg-white dark:bg-gray-700 shadow-lg hover:scale-110 transition text-xl border dark:border-gray-600">
-        🌓
-    </button>
+    <div id="loading-screen" class="fixed inset-0 bg-white dark:bg-darkBg z-[100] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="loader mb-4"></div>
+        <p class="text-gray-500 animate-pulse">جاري تحميل السيرة الذاتية...</p>
+    </div>
 
-    <div class="container mx-auto px-4 py-12 max-w-4xl">
+    <div id="error-message" class="hidden fixed inset-0 z-[101] bg-white dark:bg-darkBg flex flex-col items-center justify-center text-center p-5">
+        <div class="text-red-500 text-6xl mb-4">⚠️</div>
+        <h2 class="text-2xl font-bold text-red-600 mb-2">عذراً، حدث خطأ في تحميل البيانات</h2>
+        <p id="error-details" class="text-gray-600 dark:text-gray-300 mb-4 max-w-lg dir-ltr bg-gray-100 p-2 rounded font-mono text-sm"></p>
+        <button onclick="location.reload()" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">تحديث الصفحة</button>
+    </div>
+
+    <div id="main-content" class="opacity-0 transition-opacity duration-700 container mx-auto px-4 py-12 max-w-4xl pb-32">
         
-        <header id="profile-section" class="text-center mb-16" data-aos="fade-down">
-            </header>
+        <button id="theme-btn" class="fixed top-6 left-6 z-40 p-3 rounded-full bg-white dark:bg-gray-700 shadow-lg hover:scale-110 transition border dark:border-gray-600">🌓</button>
+
+        <header id="profile-section" class="text-center mb-16" data-aos="fade-down"></header>
 
         <section class="mb-16" data-aos="fade-up">
-            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white flex items-center gap-2">
-                المهارات والتقنيات
-            </h2>
+            <h2 class="text-2xl font-bold mb-6 border-r-4 border-primary pr-3 flex items-center gap-2">🛠️ المهارات التقنية</h2>
             <div id="skills-container" class="flex flex-wrap gap-3 justify-center md:justify-start"></div>
         </section>
 
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white" data-aos="fade-right">
-                الرحلة المهنية
-            </h2>
-            <div id="experience-container" class="space-y-0 relative border-r-2 border-gray-200 dark:border-gray-700 mr-3 md:mr-0 md:border-r-0 md:border-l-2">
-                </div>
+            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3" data-aos="fade-right">💼 الخبرات العملية</h2>
+            <div id="experience-container" class="space-y-0 relative border-r-2 border-gray-200 dark:border-gray-700 mr-3 md:mr-0 md:border-r-0 md:border-l-2"></div>
         </section>
 
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white" data-aos="fade-right">
-                أبرز المشاريع
-            </h2>
+            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3" data-aos="fade-right">🚀 أبرز المشاريع</h2>
             <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
 
         <section class="mb-16" data-aos="fade-up">
-            <h2 class="text-2xl font-bold mb-8 border-r-4 border-primary pr-3 text-gray-900 dark:text-white">
-                الشهادات والدورات
-            </h2>
+            <h2 class="text-2xl font-bold mb-6 border-r-4 border-primary pr-3">🏅 الشهادات</h2>
             <div id="certificates-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </section>
         
-        <footer class="text-center text-gray-500 text-sm mt-20 border-t dark:border-gray-800 pt-8 no-print">
+        <footer class="text-center text-gray-500 text-sm mt-20 border-t dark:border-gray-800 pt-8">
             <p>&copy; <span id="year"></span> تم التطوير بواسطة <span class="font-bold text-primary">Osama Al-Harbi</span></p>
         </footer>
-
     </div>
 
     <div id="admin-controls" class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-        <button id="save-btn" onclick="saveToGitHub()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-xl font-bold animate-bounce flex items-center gap-2 border-2 border-white dark:border-gray-800">
-            <span>حفظ التعديلات</span> 💾
-        </button>
-        
-        <button onclick="toggleAdminPanel()" class="bg-gray-900 hover:bg-black text-white p-4 rounded-full shadow-2xl opacity-50 hover:opacity-100 transition-all transform hover:scale-110 border-2 border-gray-700" title="تعديل المحتوى">
-            ✏️
-        </button>
+        <button id="save-btn" onclick="saveToGitHub()" class="hidden bg-green-600 text-white px-6 py-3 rounded-xl shadow-xl font-bold animate-bounce flex items-center gap-2"><span>حفظ التعديلات</span> 💾</button>
+        <button onclick="toggleAdminPanel()" class="bg-gray-900 text-white p-4 rounded-full shadow-2xl opacity-50 hover:opacity-100 transition hover:scale-110 border-2 border-gray-700">✏️</button>
     </div>
 
     <div id="admin-modal" class="hidden fixed inset-0 bg-black/80 z-[60] flex items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white dark:bg-darkCard p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 transform transition-all scale-100">
-            <h3 class="text-xl font-bold mb-6 dark:text-white flex items-center gap-2">🔐 تسجيل دخول المالك</h3>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="text-sm text-gray-500 dark:text-gray-400 block mb-1">اسم المستودع (Username/Repo)</label>
-                    <input type="text" id="repo-input" class="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-primary outline-none" placeholder="مثال: OsamaAL-Harbi/CV">
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500 dark:text-gray-400 block mb-1">GitHub Token</label>
-                    <input type="password" id="token-input" class="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-primary outline-none" placeholder="ghp_xxxxxxxxxxxx">
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-3 mt-8">
-                <button onclick="toggleAdminPanel()" class="px-4 py-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">إلغاء</button>
-                <button onclick="authenticateAndEdit()" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 shadow-lg transition">دخول وتعديل</button>
+        <div class="bg-white dark:bg-darkCard p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 class="text-xl font-bold mb-6 dark:text-white">🔐 تسجيل دخول المالك</h3>
+            <input type="text" id="repo-input" class="w-full p-3 rounded-lg border mb-3 dark:bg-gray-800 dark:text-white" placeholder="مثال: OsamaAL-Harbi/CV">
+            <input type="password" id="token-input" class="w-full p-3 rounded-lg border mb-6 dark:bg-gray-800 dark:text-white" placeholder="ghp_xxxxxxxxxxxx">
+            <div class="flex justify-end gap-3">
+                <button onclick="toggleAdminPanel()" class="px-4 py-2 text-gray-500">إلغاء</button>
+                <button onclick="authenticateAndEdit()" class="px-6 py-2 bg-primary text-white rounded-lg">دخول</button>
             </div>
         </div>
     </div>
