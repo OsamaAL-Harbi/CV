@@ -1,57 +1,56 @@
 {
   "profile": {
     "name": "أسامة الحربي",
-    "title": "مطور برمجيات شامل (Full Stack Developer)",
-    "summary": "مطور شغوف بخبرة واسعة في بناء تطبيقات الويب الحديثة. أهدف دائمًا لتقديم حلول برمجية عالية الأداء وقابلة للتطوير.",
-    "email": "email@example.com",
+    "title": "Full Stack Developer | مهندس برمجيات",
+    "summary": "مطور برمجيات شغوف، متخصص في بناء حلول الويب المتقدمة وتطبيقات الجوال. أركز على كتابة كود نظيف، قابل للتطوير، ويحقق أهداف العمل بكفاءة عالية.",
+    "email": "contact@example.com",
+    "github": "https://github.com/OsamaAL-Harbi",
     "linkedin": "https://linkedin.com",
-    "image": "https://via.placeholder.com/150"
+    "image": "https://via.placeholder.com/400"
   },
   "skills": [
-    "JavaScript",
-    "React.js",
-    "Node.js",
-    "Python",
-    "Tailwind CSS",
-    "Git & GitHub",
-    "SQL",
-    "UI/UX Design"
+    "JavaScript (ES6+)", "React.js", "Next.js", "Node.js", "Python", "Tailwind CSS", "Git & GitHub", "RESTful APIs", "MongoDB"
   ],
   "experience": [
     {
-      "role": "مطور واجهات أمامية",
-      "company": "شركة الحلول التقنية",
+      "role": "مطور واجهات أمامية (Frontend)",
+      "company": "شركة الحلول الرقمية",
       "period": "2024 - الآن",
-      "description": "تطوير واجهات مستخدم تفاعلية باستخدام React.js وتحسين أداء الموقع بنسبة 30%."
+      "description": "قيادة فريق التطوير لبناء واجهة المستخدم الخاصة بمنصة التجارة الإلكترونية، وتحسين سرعة الموقع بنسبة 40%."
     },
     {
-      "role": "مبرمج مستقل",
+      "role": "مطور ويب مستقل",
       "company": "Freelance",
       "period": "2022 - 2024",
-      "description": "العمل على مشاريع متنوعة لعملاء محليين، بما في ذلك متاجر إلكترونية ومواقع تعريفية."
+      "description": "تصميم وتطوير أكثر من 10 مواقع إلكترونية لعملاء محليين، بما في ذلك مواقع تعريفية ومتاجر صغيرة."
     }
   ],
   "projects": [
     {
-      "title": "منصة المتجر الذكي",
-      "desc": "تطبيق تجارة إلكترونية متكامل مع لوحة تحكم وبوابة دفع إلكتروني.",
+      "title": "منصة المتجر الإلكتروني",
+      "desc": "متجر متكامل متعدد التجار، يدعم الدفع الإلكتروني وتتبع الطلبات. مبني باستخدام MERN Stack.",
       "link": "#"
     },
     {
-      "title": "نظام إدارة المهام",
-      "desc": "تطبيق ويب لتنظيم المهام اليومية مع ميزات السحب والإفلات (Drag & Drop).",
+      "title": "تطبيق إدارة المهام",
+      "desc": "أداة لزيادة الإنتاجية تسمح للفرق بتنظيم المهام والمشاريع مع ميزات السحب والإفلات.",
+      "link": "#"
+    },
+    {
+      "title": "لوحة تحكم تحليل البيانات",
+      "desc": "لوحة تحكم تفاعلية تعرض إحصائيات المبيعات والزوار باستخدام الرسوم البيانية.",
       "link": "#"
     }
   ],
   "certificates": [
     {
-      "name": "شهادة محترف بايثون",
-      "issuer": "Misk Academy",
+      "name": "Google UX Design Certificate",
+      "issuer": "Coursera",
       "date": "2023"
     },
     {
-      "name": "أساسيات الحوسبة السحابية",
-      "issuer": "AWS",
+      "name": "AWS Certified Cloud Practitioner",
+      "issuer": "Amazon Web Services",
       "date": "2024"
     }
   ]
