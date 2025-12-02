@@ -6,21 +6,17 @@ let isAdmin = false;
 document.addEventListener('DOMContentLoaded', () => {
     AOS.init();
     document.getElementById('year').textContent = new Date().getFullYear();
-    
-    // إعدادات الأساس
     loadContent();
     initTheme();
     initParticles();
     setupSecretTrigger();
 
-    // استعادة بيانات الدخول
     if(localStorage.getItem('saved_repo')) {
         document.getElementById('repo-input').value = localStorage.getItem('saved_repo');
         document.getElementById('token-input').value = localStorage.getItem('saved_token');
     }
 });
 
-// --- التنقل بين الصفحات (SPA) ---
 function showPage(pageId) {
     document.querySelectorAll('.page-section').forEach(sec => {
         sec.classList.remove('active');
@@ -29,15 +25,12 @@ function showPage(pageId) {
     const target = document.getElementById(pageId);
     target.style.display = 'block';
     setTimeout(() => target.classList.add('active'), 10);
-
     document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('nav-active'));
     const navBtn = document.getElementById(`nav-${pageId}`);
     if(navBtn) navBtn.classList.add('nav-active');
-    
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// --- تحميل البيانات وعرضها ---
 async function loadContent() {
     try {
         const res = await fetch(`data.json?t=${Date.now()}`);
@@ -51,25 +44,25 @@ async function loadContent() {
 
 function renderAll() {
     const p = appData.profile;
-    
-    // الملف الشخصي
     updateText('profile.name', p.name);
     updateText('profile.summary', p.summary);
     document.getElementById('profile-img').src = p.image;
     typeWriter(p.title, 'typewriter');
-
-    // الروابط
     document.getElementById('email-contact').href = `mailto:${p.email}`;
     document.getElementById('social-linkedin').href = p.linkedin;
     document.getElementById('social-github').href = p.github;
 
-    // الخبرات
+    // Experience
     document.getElementById('experience-container').innerHTML = appData.experience.map((exp, i) => `
         <div class="relative group mb-8" data-aos="fade-up">
-            <button onclick="deleteItem('experience', ${i})" class="delete-btn absolute top-0 left-0 text-red-500 bg-red-100 p-1 rounded z-20"><i class="fas fa-trash"></i></button>
+            ${isAdmin ? `
+            <div class="action-btns">
+                <button onclick="editItem('experience', ${i})" class="bg-blue-500 text-white p-2 rounded-lg shadow hover:bg-blue-600"><i class="fas fa-pen"></i></button>
+                <button onclick="deleteItem('experience', ${i})" class="bg-red-500 text-white p-2 rounded-lg shadow hover:bg-red-600"><i class="fas fa-trash"></i></button>
+            </div>` : ''}
             <div class="absolute -right-[39px] top-1 w-4 h-4 bg-primary rounded-full border-4 border-white dark:border-darkBg z-10 group-hover:scale-125 transition"></div>
             <div class="mb-1">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white" onclick="${isAdmin ? `editArrayItem('experience', ${i}, 'role')` : ''}">${exp.role}</h3>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">${exp.role}</h3>
                 <p class="text-primary font-medium text-sm">${exp.company}</p>
             </div>
             <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs font-bold mb-3">${exp.period}</span>
@@ -77,19 +70,23 @@ function renderAll() {
         </div>
     `).join('');
 
-    // المهارات
+    // Skills
     document.getElementById('skills-container').innerHTML = appData.skills.map((s, i) => `
         <div class="relative group inline-block">
             <span class="px-3 py-1 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300 cursor-default">${s}</span>
-            <button onclick="deleteItem('skills', ${i})" class="delete-btn absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs items-center justify-center">×</button>
+            ${isAdmin ? `<button onclick="deleteItem('skills', ${i})" class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs hidden group-hover:flex items-center justify-center">×</button>` : ''}
         </div>
     `).join('');
 
-    // الشهادات
+    // Certificates
     if(appData.certificates) {
         document.getElementById('certificates-container').innerHTML = appData.certificates.map((cert, i) => `
             <div class="relative group bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:border-secondary transition">
-                <button onclick="deleteItem('certificates', ${i})" class="delete-btn absolute top-2 left-2 text-red-500"><i class="fas fa-trash"></i></button>
+                ${isAdmin ? `
+                <div class="action-btns">
+                    <button onclick="editItem('certificates', ${i})" class="bg-blue-500 text-white w-8 h-8 rounded-full shadow hover:bg-blue-600 flex items-center justify-center text-xs"><i class="fas fa-pen"></i></button>
+                    <button onclick="deleteItem('certificates', ${i})" class="bg-red-500 text-white w-8 h-8 rounded-full shadow hover:bg-red-600 flex items-center justify-center text-xs"><i class="fas fa-trash"></i></button>
+                </div>` : ''}
                 <div class="text-2xl text-secondary"><i class="fas fa-certificate"></i></div>
                 <div>
                     <h4 class="font-bold text-sm text-gray-800 dark:text-white">${cert.name}</h4>
@@ -99,10 +96,14 @@ function renderAll() {
         `).join('');
     }
 
-    // المشاريع
+    // Projects
     document.getElementById('projects-container').innerHTML = appData.projects.map((proj, i) => `
         <div class="relative group bg-white dark:bg-cardBg rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100 dark:border-gray-700 flex flex-col h-full">
-            <button onclick="deleteItem('projects', ${i})" class="delete-btn absolute top-2 left-2 z-20 bg-red-500 text-white p-2 rounded-full shadow-lg"><i class="fas fa-trash"></i></button>
+            ${isAdmin ? `
+            <div class="action-btns">
+                <button onclick="editItem('projects', ${i})" class="bg-blue-500 text-white p-2 rounded-full shadow hover:bg-blue-600"><i class="fas fa-pen"></i></button>
+                <button onclick="deleteItem('projects', ${i})" class="bg-red-500 text-white p-2 rounded-full shadow hover:bg-red-600"><i class="fas fa-trash"></i></button>
+            </div>` : ''}
             <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center relative overflow-hidden">
                 <i class="fas fa-laptop-code text-5xl text-gray-300 dark:text-gray-700 group-hover:scale-110 transition duration-500"></i>
                 <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm">
@@ -117,7 +118,6 @@ function renderAll() {
     `).join('');
 }
 
-// --- عمليات التعديل (CRUD) ---
 function updateText(key, value) {
     const el = document.querySelector(`[data-path="${key}"]`);
     if(el) {
@@ -130,17 +130,46 @@ function updateText(key, value) {
     }
 }
 
+// --- CRUD Operations ---
+async function editItem(type, index) {
+    const item = appData[type][index];
+    let result;
+
+    if (type === 'experience') {
+        result = await Swal.fire({
+            title: 'تعديل الخبرة',
+            html: `<input id="swal-role" class="swal2-input" value="${item.role}"><input id="swal-co" class="swal2-input" value="${item.company}"><input id="swal-date" class="swal2-input" value="${item.period}"><textarea id="swal-desc" class="swal2-textarea">${item.description}</textarea>`,
+            preConfirm: () => ({ role: document.getElementById('swal-role').value, company: document.getElementById('swal-co').value, period: document.getElementById('swal-date').value, description: document.getElementById('swal-desc').value })
+        });
+    } else if (type === 'projects') {
+        result = await Swal.fire({
+            title: 'تعديل المشروع',
+            html: `<input id="swal-title" class="swal2-input" value="${item.title}"><input id="swal-link" class="swal2-input" value="${item.link}"><textarea id="swal-desc" class="swal2-textarea">${item.desc}</textarea>`,
+            preConfirm: () => ({ title: document.getElementById('swal-title').value, link: document.getElementById('swal-link').value, desc: document.getElementById('swal-desc').value })
+        });
+    } else if (type === 'certificates') {
+        result = await Swal.fire({
+            title: 'تعديل الشهادة',
+            html: `<input id="swal-name" class="swal2-input" value="${item.name}"><input id="swal-iss" class="swal2-input" value="${item.issuer}"><input id="swal-date" class="swal2-input" value="${item.date}">`,
+            preConfirm: () => ({ name: document.getElementById('swal-name').value, issuer: document.getElementById('swal-iss').value, date: document.getElementById('swal-date').value })
+        });
+    }
+
+    if (result && result.value) {
+        appData[type][index] = result.value;
+        renderAll();
+    }
+}
+
 async function addItem(type) {
     if(!isAdmin) return;
-    
-    let value = null;
-    
+    let res;
     if(type === 'skills') {
-        const res = await Swal.fire({ input: 'text', title: 'مهارة جديدة' });
+        res = await Swal.fire({ input: 'text', title: 'مهارة جديدة' });
         if(res.value) appData.skills.push(res.value);
     } 
     else if(type === 'experience') {
-        const res = await Swal.fire({
+        res = await Swal.fire({
             title: 'إضافة خبرة',
             html: '<input id="swal-role" class="swal2-input" placeholder="المسمى"><input id="swal-co" class="swal2-input" placeholder="الشركة"><input id="swal-date" class="swal2-input" placeholder="التاريخ"><textarea id="swal-desc" class="swal2-textarea" placeholder="الوصف"></textarea>',
             preConfirm: () => ({ role: document.getElementById('swal-role').value, company: document.getElementById('swal-co').value, period: document.getElementById('swal-date').value, description: document.getElementById('swal-desc').value })
@@ -148,7 +177,7 @@ async function addItem(type) {
         if(res.value) appData.experience.push(res.value);
     }
     else if(type === 'projects') {
-        const res = await Swal.fire({
+        res = await Swal.fire({
             title: 'إضافة مشروع',
             html: '<input id="swal-title" class="swal2-input" placeholder="العنوان"><input id="swal-link" class="swal2-input" placeholder="الرابط"><textarea id="swal-desc" class="swal2-textarea" placeholder="الوصف"></textarea>',
             preConfirm: () => ({ title: document.getElementById('swal-title').value, link: document.getElementById('swal-link').value, desc: document.getElementById('swal-desc').value })
@@ -156,7 +185,7 @@ async function addItem(type) {
         if(res.value) appData.projects.push(res.value);
     }
     else if(type === 'certificates') {
-         const res = await Swal.fire({
+         res = await Swal.fire({
             title: 'إضافة شهادة',
             html: '<input id="swal-name" class="swal2-input" placeholder="الاسم"><input id="swal-iss" class="swal2-input" placeholder="الجهة"><input id="swal-date" class="swal2-input" placeholder="التاريخ">',
             preConfirm: () => ({ name: document.getElementById('swal-name').value, issuer: document.getElementById('swal-iss').value, date: document.getElementById('swal-date').value })
@@ -167,7 +196,6 @@ async function addItem(type) {
 }
 
 function deleteItem(type, index) {
-    if(!isAdmin) return;
     Swal.fire({
         title: 'حذف العنصر؟',
         icon: 'warning',
@@ -176,11 +204,8 @@ function deleteItem(type, index) {
         confirmButtonText: 'نعم'
     }).then((result) => {
         if (result.isConfirmed) {
-            const arr = getDeepValue(appData, type);
-            if(Array.isArray(arr)) {
-                arr.splice(index, 1);
-                renderAll();
-            }
+            appData[type].splice(index, 1);
+            renderAll();
         }
     });
 }
@@ -194,7 +219,6 @@ async function editImage(key) {
     }
 }
 
-// --- نظام الدخول والحفظ ---
 function setupSecretTrigger() {
     document.getElementById('secret-trigger').addEventListener('click', () => {
         clickCount++;
@@ -219,7 +243,7 @@ function authenticateAndEdit() {
     document.body.classList.add('admin-mode');
     isAdmin = true;
     
-    renderAll(); // إعادة الرسم لإظهار أزرار الإضافة والحذف
+    renderAll();
     showToast('تم تفعيل وضع التعديل', 'success');
 }
 
@@ -247,7 +271,6 @@ async function saveToGitHub() {
     }
 }
 
-// --- دوال مساعدة ---
 function typeWriter(text, elementId) {
     const elm = document.getElementById(elementId);
     elm.innerHTML = "";
