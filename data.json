@@ -1,8 +1,8 @@
 {
   "profile": {
-    "name": "\n",
+    "name": "خسشلالثصُـ",
     "title": "Software Engineer | مهندس برمجيات",
-    "summary": "\n",
+    "summary": "شثنقس6نمي",
     "location": "المدينة المنورة، السعودية",
     "email": "contact@example.com",
     "github": "https://github.com",
@@ -10,7 +10,14 @@
     "image": "https://via.placeholder.com/400"
   },
   "skills": [],
-  "experience": [],
+  "experience": [
+    {
+      "role": "",
+      "company": "",
+      "period": "",
+      "description": "قت"
+    }
+  ],
   "projects": [
     {
       "title": "Local ERP System",
