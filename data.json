@@ -1,38 +1,34 @@
 {
   "profile": {
-    "name": { "ar": "أسامة الحربي", "en": "Osama Al-Harbi" },
-    "title": { "ar": "مهندس برمجيات | مطور شامل", "en": "Software Engineer | Full Stack Developer" },
-    "summary": { "ar": "مطور برمجيات شغوف...", "en": "Passionate Software Engineer..." },
+    "name": "أسامة الحربي",
+    "title": "Software Engineer | مهندس برمجيات",
+    "summary": "مطور برمجيات شغوف، أسعى لبناء تجارب رقمية استثنائية باستخدام أحدث تقنيات الويب. أركز على الجودة، الأداء، والتصميم الجذاب.",
     "email": "contact@example.com",
-    "image": "",
-    "linkedin": "#",
-    "github": "#"
+    "github": "https://github.com",
+    "linkedin": "https://linkedin.com",
+    "image": ""
   },
-  "skills": [
-    { "ar": "جافاسكريبت", "en": "JavaScript" },
-    { "ar": "رياكت", "en": "React.js" },
-    { "ar": "بايثون", "en": "Python" }
-  ],
+  "skills": ["JavaScript", "React.js", "Node.js", "Python", "Tailwind CSS"],
   "experience": [
     {
-      "role": { "ar": "مطور واجهات", "en": "Frontend Developer" },
-      "company": { "ar": "شركة تقنية", "en": "Tech Co." },
-      "period": { "ar": "2024 - الآن", "en": "2024 - Present" },
-      "description": { "ar": "تطوير واجهات...", "en": "Building UI..." }
+      "role": "مطور واجهات (Frontend)",
+      "company": "Tech Solutions",
+      "period": "2024 - الآن",
+      "description": "تطوير وصيانة واجهات المستخدم لتطبيقات الويب باستخدام React."
     }
   ],
   "projects": [
     {
-      "title": { "ar": "متجر إلكتروني", "en": "E-Commerce App" },
-      "desc": { "ar": "منصة بيع...", "en": "Shopping platform..." },
+      "title": "متجر إلكتروني",
+      "desc": "منصة تجارة إلكترونية حديثة مع بوابة دفع.",
       "link": "#"
     }
   ],
   "certificates": [
     {
-      "name": { "ar": "شهادة ويب", "en": "Web Certificate" },
-      "issuer": { "ar": "جوجل", "en": "Google" },
-      "date": { "ar": "2023", "en": "2023" }
+      "name": "شهادة تطوير الويب",
+      "issuer": "Udacity",
+      "date": "2023"
     }
   ]
 }
