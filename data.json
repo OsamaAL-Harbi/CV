@@ -1,34 +1,18 @@
 {
   "profile": {
-    "name": "أسامة الحربي",
-    "title": "Software Engineer | مهندس برمجيات",
-    "summary": "مطور برمجيات شغوف، أسعى لبناء تجارب رقمية استثنائية باستخدام أحدث تقنيات الويب. أركز على الجودة، الأداء، والتصميم الجذاب.",
+    "name": { "ar": "أسامة الحربي", "en": "Osama Al-Harbi" },
+    "title": { "ar": "مهندس برمجيات", "en": "Software Engineer" },
+    "summary": { "ar": "مطور برمجيات شغوف...", "en": "Passionate developer..." },
     "email": "contact@example.com",
-    "github": "https://github.com",
-    "linkedin": "https://linkedin.com",
-    "image": ""
+    "image": "",
+    "linkedin": "#",
+    "github": "#"
   },
-  "skills": ["JavaScript", "React.js", "Node.js", "Python", "Tailwind CSS"],
-  "experience": [
-    {
-      "role": "مطور واجهات (Frontend)",
-      "company": "Tech Solutions",
-      "period": "2024 - الآن",
-      "description": "تطوير وصيانة واجهات المستخدم لتطبيقات الويب باستخدام React."
-    }
+  "skills": [
+    { "ar": "جافاسكريبت", "en": "JavaScript" },
+    { "ar": "رياكت", "en": "React.js" }
   ],
-  "projects": [
-    {
-      "title": "متجر إلكتروني",
-      "desc": "منصة تجارة إلكترونية حديثة مع بوابة دفع.",
-      "link": "#"
-    }
-  ],
-  "certificates": [
-    {
-      "name": "شهادة تطوير الويب",
-      "issuer": "Udacity",
-      "date": "2023"
-    }
-  ]
+  "experience": [],
+  "projects": [],
+  "certificates": []
 }
