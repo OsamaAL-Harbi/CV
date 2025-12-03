@@ -23,7 +23,26 @@
       "en": "JavaScript"
     }
   ],
-  "experience": [],
+  "experience": [
+    {
+      "role": {
+        "ar": "تقنق",
+        "en": "Irjr"
+      },
+      "company": {
+        "ar": "نقنق",
+        "en": "Nddn"
+      },
+      "period": {
+        "ar": "Hrjrjr",
+        "en": "Hrjrjr"
+      },
+      "description": {
+        "ar": "Rjrjr",
+        "en": "Jrjrjr"
+      }
+    }
+  ],
   "projects": [],
   "certificates": []
 }
