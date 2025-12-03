@@ -3,6 +3,9 @@ let githubInfo = { token: '', repo: '', sha: '' };
 let clickCount = 0;
 let isAdmin = false;
 
+// Formspree Config (استبدل هذا برابط النموذج الخاص بك لاحقاً)
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID"; 
+
 document.addEventListener('DOMContentLoaded', () => {
     AOS.init();
     document.getElementById('year').textContent = new Date().getFullYear();
@@ -11,6 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initParticles();
     setupSecretTrigger();
+    setSmartGreeting();
+    
+    // Scroll To Top Logic
+    window.onscroll = () => {
+        const btn = document.getElementById('scrollTopBtn');
+        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) btn.classList.add('show');
+        else btn.classList.remove('show');
+    };
 
     if(localStorage.getItem('saved_repo') && localStorage.getItem('saved_token')) {
         document.getElementById('repo-input').value = localStorage.getItem('saved_repo');
@@ -18,7 +29,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Navigation
+// --- Smart Greeting ---
+function setSmartGreeting() {
+    const hour = new Date().getHours();
+    let greeting = "أهلاً بك";
+    if (hour < 12) greeting = "صباح الخير ☀️";
+    else if (hour < 18) greeting = "مساء الخير 🌤️";
+    else greeting = "مساء النور 🌙";
+    document.getElementById('smart-greeting').innerText = greeting;
+}
+
+// --- Navigation ---
 function showPage(pageId) {
     document.querySelectorAll('.page-section').forEach(sec => {
         sec.classList.remove('active');
@@ -39,7 +60,7 @@ function toggleMobileMenu() {
     else { menu.classList.remove('open'); menu.classList.add('closed'); }
 }
 
-// Data Loading
+// --- Data Loading ---
 async function loadContent() {
     try {
         const res = await fetch(`data.json?t=${Date.now()}`);
@@ -56,14 +77,24 @@ function renderAll() {
     updateText('profile.name', p.name);
     updateText('profile.summary', p.summary);
     
-    // Fix: Fallback image to avoid errors
+    // Image Fallback
     const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=0D8ABC&color=fff&size=200`;
     document.getElementById('profile-img').src = p.image || fallback;
     
     typeWriter(p.title, 'typewriter');
-    document.getElementById('email-contact').href = `mailto:${p.email}`;
+    // document.getElementById('email-contact').href = `mailto:${p.email}`; // removed in favor of form
     document.getElementById('social-linkedin').href = p.linkedin;
     document.getElementById('social-github').href = p.github;
+
+    // Auto Stats Calculation
+    if(appData.experience.length > 0) {
+        // Calculate years from first job to now (Simplified)
+        // You can make this smarter by parsing dates, here we assume current year - 2022 (start)
+        const startYear = 2022; // Or parse from data
+        const currentYear = new Date().getFullYear();
+        document.getElementById('exp-counter').innerText = currentYear - startYear;
+    }
+    document.getElementById('projects-counter').innerText = appData.projects.length;
 
     // Experience
     document.getElementById('experience-container').innerHTML = appData.experience.map((exp, i) => `
@@ -128,7 +159,44 @@ function renderAdminButtons(type, index) {
     </div>`;
 }
 
-// --- CRUD ---
+// --- Contact Form Handling ---
+async function sendEmail(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+    const btn = form.querySelector('button');
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = 'جاري الإرسال...';
+    btn.disabled = true;
+
+    try {
+        // إذا لم يكن لديك Formspree ID، سيظهر نجاح وهمي للتجربة
+        if(FORMSPREE_ENDPOINT.includes("YOUR_FORM_ID")) {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // محاكاة
+            showToast('تم الإرسال بنجاح (وضع التجربة)', 'success');
+        } else {
+            const response = await fetch(FORMSPREE_ENDPOINT, {
+                method: form.method,
+                body: data,
+                headers: { 'Accept': 'application/json' }
+            });
+            if (response.ok) {
+                showToast('تم إرسال رسالتك بنجاح! 🚀', 'success');
+                form.reset();
+            } else {
+                showToast('حدث خطأ في الإرسال', 'error');
+            }
+        }
+    } catch (error) {
+        showToast('خطأ في الاتصال', 'error');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// --- CRUD & Admin ---
 function updateText(key, value) {
     const el = document.querySelector(`[data-path="${key}"]`);
     if(el) {
@@ -170,7 +238,7 @@ async function addItem(type) {
     if(!isAdmin) return;
     let res;
     if(type === 'skills') {
-        res = await Swal.fire({ input: 'text', title: 'مهارة جديدة' });
+        res = await Swal.fire({ input: 'text', title: 'مهارة جديدة', confirmButtonText: 'إضافة' });
         if(res.value) appData.skills.push(res.value);
     } else if(type === 'experience') {
         res = await Swal.fire({
@@ -200,17 +268,16 @@ async function addItem(type) {
 function deleteItem(type, index) {
     if(!isAdmin) return;
     Swal.fire({
-        title: 'حذف العنصر؟', text: "لا يمكن التراجع!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'نعم'
+        title: 'حذف العنصر؟', text: "لن يمكنك استرجاعه!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'نعم'
     }).then((result) => { if (result.isConfirmed) { appData[type].splice(index, 1); renderAll(); } });
 }
 
 async function editImage(key) {
     if(!isAdmin) return;
-    const { value } = await Swal.fire({ input: 'url', title: 'رابط الصورة' });
+    const { value } = await Swal.fire({ input: 'url', title: 'رابط الصورة الجديد', confirmButtonText: 'تحديث' });
     if(value) { setDeepValue(appData, key, value); renderAll(); }
 }
 
-// --- Auth ---
 function setupSecretTrigger() {
     document.getElementById('secret-trigger').addEventListener('click', () => {
         clickCount++;
@@ -221,7 +288,7 @@ function setupSecretTrigger() {
 function authenticateAndEdit() {
     const repo = document.getElementById('repo-input').value.trim();
     const token = document.getElementById('token-input').value.trim();
-    if(!repo || !token) return showToast('بيانات ناقصة', 'error');
+    if(!repo || !token) return showToast('البيانات ناقصة', 'error');
     localStorage.setItem('saved_repo', repo);
     localStorage.setItem('saved_token', token);
     githubInfo.repo = repo; githubInfo.token = token;
@@ -254,7 +321,7 @@ async function saveToGitHub() {
             headers: { 'Authorization': `token ${githubInfo.token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: "Update via Admin", content: content, sha: fileData.sha })
         });
-        Swal.fire('تم الحفظ!', 'تم التحديث بنجاح', 'success');
+        Swal.fire('تم الحفظ!', 'تم تحديث الموقع بنجاح 🚀', 'success');
     } catch(e) { Swal.fire('خطأ', e.message, 'error'); } finally { btn.innerHTML = oldText; }
 }
 
