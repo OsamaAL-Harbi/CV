@@ -1,48 +1,37 @@
 {
   "profile": {
-    "name": {
-      "ar": "أسامة الحربي",
-      "en": "Osama Al-Harbi"
-    },
-    "title": {
-      "ar": "مهندس برمجيات",
-      "en": "Software Engineer"
-    },
-    "summary": {
-      "ar": "مطور شغوف...",
-      "en": "Passionate developer..."
-    },
+    "name": { "ar": "أسامة الحربي", "en": "Osama Al-Harbi" },
+    "title": { "ar": "مهندس برمجيات | مطور شامل", "en": "Software Engineer | Full Stack Developer" },
+    "summary": { "ar": "مطور برمجيات شغوف...", "en": "Passionate Software Engineer..." },
     "email": "contact@example.com",
     "image": "",
     "linkedin": "#",
     "github": "#"
   },
   "skills": [
-    {
-      "ar": "جافاسكريبت",
-      "en": "JavaScript"
-    }
+    { "ar": "جافاسكريبت", "en": "JavaScript" },
+    { "ar": "رياكت", "en": "React.js" }
   ],
   "experience": [
     {
-      "role": {
-        "ar": "تقنق",
-        "en": "Irjr"
-      },
-      "company": {
-        "ar": "نقنق",
-        "en": "Nddn"
-      },
-      "period": {
-        "ar": "Hrjrjr",
-        "en": "Hrjrjr"
-      },
-      "description": {
-        "ar": "Rjrjr",
-        "en": "Jrjrjr"
-      }
+      "role": { "ar": "مطور واجهات", "en": "Frontend Dev" },
+      "company": { "ar": "شركة تقنية", "en": "Tech Co" },
+      "period": { "ar": "2024 - الآن", "en": "2024 - Present" },
+      "description": { "ar": "تطوير...", "en": "Developing..." }
     }
   ],
-  "projects": [],
-  "certificates": []
+  "projects": [
+    {
+      "title": { "ar": "متجر إلكتروني", "en": "E-Commerce" },
+      "desc": { "ar": "وصف المشروع", "en": "Project Description" },
+      "link": "#"
+    }
+  ],
+  "certificates": [
+    {
+      "name": { "ar": "شهادة ويب", "en": "Web Cert" },
+      "issuer": { "ar": "جوجل", "en": "Google" },
+      "date": { "ar": "2023", "en": "2023" }
+    }
+  ]
 }
