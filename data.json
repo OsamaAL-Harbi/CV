@@ -1,18 +1,53 @@
 {
   "profile": {
-    "name": { "ar": "أسامة الحربي", "en": "Osama Al-Harbi" },
-    "title": { "ar": "مهندس برمجيات", "en": "Software Engineer" },
-    "summary": { "ar": "مطور برمجيات شغوف...", "en": "Passionate developer..." },
+    "name": {
+      "ar": "أسامة الحربي",
+      "en": "Osama Al-Harbi"
+    },
+    "title": {
+      "ar": "مهندس برمجيات",
+      "en": "Software Engineer"
+    },
+    "summary": {
+      "ar": "مطور برمجيات شغوف...",
+      "en": "Passionate developer..."
+    },
     "email": "contact@example.com",
     "image": "",
     "linkedin": "#",
     "github": "#"
   },
   "skills": [
-    { "ar": "جافاسكريبت", "en": "JavaScript" },
-    { "ar": "رياكت", "en": "React.js" }
+    {
+      "ar": "جافاسكريبت",
+      "en": "JavaScript"
+    },
+    {
+      "ar": "رياكت",
+      "en": "React.js"
+    },
+    "ت٤ت٤ن"
   ],
-  "experience": [],
-  "projects": [],
-  "certificates": []
+  "experience": [
+    {
+      "role": "ايتبت",
+      "company": "تيتبت",
+      "period": "تنقنقن",
+      "description": "نثنثن"
+    }
+  ],
+  "projects": [
+    {
+      "title": "تتتتو",
+      "link": "تتتت",
+      "desc": "وننم"
+    }
+  ],
+  "certificates": [
+    {
+      "name": "",
+      "issuer": "",
+      "date": ""
+    }
+  ]
 }
