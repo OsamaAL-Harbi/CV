@@ -9,67 +9,10 @@
     "linkedin": "https://linkedin.com",
     "image": "https://via.placeholder.com/400"
   },
-  "skills": [
-    "JavaScript",
-    "React.js",
-    "Node.js",
-    "Python",
-    "Tailwind CSS",
-    "Git",
-    "SQL",
-    "MongoDB",
-    "Figma",
-    "ُلأصُلا",
-    "Editing"
-  ],
-  "experience": [
-    {
-      "role": "مطور واجهات (Frontend)",
-      "company": "Tech Solutions",
-      "period": "2024 - الآن",
-      "description": "تطوير وصيانة واجهات المستخدم لتطبيقات الويب باستخدام React و Tailwind CSS."
-    },
-    {
-      "role": "مبرمج مستقل",
-      "company": "Freelance",
-      "period": "2022 - 2024",
-      "description": "العمل مع عملاء متنوعين لبناء مواقع شخصية ومتاجر إلكترونية."
-    }
-  ],
-  "projects": [
-    {
-      "title": "نظام إدارة المهام",
-      "desc": "تطبيق ويب متكامل لإدارة المهام والمشاريع مع دعم السحب والإفلات.",
-      "link": "#"
-    },
-    {
-      "title": "موقع",
-      "link": "",
-      "desc": "منصة تجارة إلكترونية حديثة مع ولوحة تحكم للإدارة."
-    }
-  ],
-  "certificates": [
-    {
-      "name": "شهادة تطوير الويب",
-      "issuer": "Udacity",
-      "date": "2023"
-    },
-    {
-      "name": "أساسيات الحوسبة السحابية",
-      "issuer": "AWS",
-      "date": "2024"
-    },
-    {
-      "name": "سقفتسق",
-      "issuer": "تقس6تقسي",
-      "date": "تقس6تقس"
-    },
-    {
-      "name": "Test",
-      "issuer": "Edit",
-      "date": "Today"
-    }
-  ],
+  "skills": [],
+  "experience": [],
+  "projects": [],
+  "certificates": [],
   "customSection": {
     "title": "عنوان",
     "items": []
