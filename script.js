@@ -3,9 +3,13 @@ let githubInfo = { token: '', repo: '', sha: '' };
 let clickCount = 0;
 let isAdmin = false;
 
+// ✅ الرابط الخاص بمشروع DevShowcase (تم التحديث)
+const DEV_SHOWCASE_URL = "https://devshowcase-7d9s.onrender.com"; 
+
 document.addEventListener('DOMContentLoaded', () => {
     AOS.init();
-    document.getElementById('year').textContent = new Date().getFullYear();
+    const yearEl = document.getElementById('year');
+    if(yearEl) yearEl.textContent = new Date().getFullYear();
     
     // إعدادات الأساس
     loadContent();
@@ -15,8 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // التحقق من الجلسة المحفوظة
     if(localStorage.getItem('saved_repo') && localStorage.getItem('saved_token')) {
-        document.getElementById('repo-input').value = localStorage.getItem('saved_repo');
-        document.getElementById('token-input').value = localStorage.getItem('saved_token');
+        const repoIn = document.getElementById('repo-input');
+        const tokenIn = document.getElementById('token-input');
+        if(repoIn) repoIn.value = localStorage.getItem('saved_repo');
+        if(tokenIn) tokenIn.value = localStorage.getItem('saved_token');
     }
 });
 
@@ -27,8 +33,10 @@ function showPage(pageId) {
         sec.style.display = 'none';
     });
     const target = document.getElementById(pageId);
-    target.style.display = 'block';
-    setTimeout(() => target.classList.add('active'), 10);
+    if(target) {
+        target.style.display = 'block';
+        setTimeout(() => target.classList.add('active'), 10);
+    }
     
     document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('nav-active'));
     const navBtn = document.getElementById(`nav-${pageId}`);
@@ -57,6 +65,7 @@ async function loadContent() {
         renderAll();
     } catch (err) {
         showToast('خطأ في تحميل البيانات', 'error');
+        console.error(err);
     }
 }
 
@@ -64,38 +73,53 @@ function renderAll() {
     const p = appData.profile;
     updateText('profile.name', p.name);
     updateText('profile.summary', p.summary);
-    document.getElementById('profile-img').src = p.image || 'https://via.placeholder.com/200';
+    
+    const imgEl = document.getElementById('profile-img');
+    if(imgEl) imgEl.src = p.image || 'https://via.placeholder.com/200';
+    
     typeWriter(p.title, 'typewriter');
 
-    document.getElementById('email-contact').href = `mailto:${p.email}`;
-    document.getElementById('social-linkedin').href = p.linkedin;
-    document.getElementById('social-github').href = p.github;
+    const emailEl = document.getElementById('email-contact');
+    if(emailEl) emailEl.href = `mailto:${p.email}`;
+    
+    const linkedinEl = document.getElementById('social-linkedin');
+    if(linkedinEl) linkedinEl.href = p.linkedin;
+    
+    const githubEl = document.getElementById('social-github');
+    if(githubEl) githubEl.href = p.github;
 
     // Experience
-    document.getElementById('experience-container').innerHTML = appData.experience.map((exp, i) => `
-        <div class="relative group mb-8" data-aos="fade-up">
-            ${renderAdminButtons('experience', i)}
-            <div class="absolute -right-[39px] top-1 w-4 h-4 bg-primary rounded-full border-4 border-white dark:border-darkBg z-10 group-hover:scale-125 transition"></div>
-            <div class="mb-1">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white">${exp.role}</h3>
-                <p class="text-primary font-medium text-sm">${exp.company}</p>
+    const expContainer = document.getElementById('experience-container');
+    if(expContainer) {
+        expContainer.innerHTML = appData.experience.map((exp, i) => `
+            <div class="relative group mb-8" data-aos="fade-up">
+                ${renderAdminButtons('experience', i)}
+                <div class="absolute -right-[39px] top-1 w-4 h-4 bg-primary rounded-full border-4 border-white dark:border-darkBg z-10 group-hover:scale-125 transition"></div>
+                <div class="mb-1">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white">${exp.role}</h3>
+                    <p class="text-primary font-medium text-sm">${exp.company}</p>
+                </div>
+                <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs font-bold mb-3">${exp.period}</span>
+                <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${exp.description}</p>
             </div>
-            <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs font-bold mb-3">${exp.period}</span>
-            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${exp.description}</p>
-        </div>
-    `).join('');
+        `).join('');
+    }
 
     // Skills
-    document.getElementById('skills-container').innerHTML = appData.skills.map((s, i) => `
-        <div class="relative group inline-block">
-            <span class="px-3 py-1 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300 cursor-default">${s}</span>
-            ${isAdmin ? `<button onclick="deleteItem('skills', ${i})" class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs hidden group-hover:flex items-center justify-center transition">×</button>` : ''}
-        </div>
-    `).join('');
+    const skillsContainer = document.getElementById('skills-container');
+    if(skillsContainer) {
+        skillsContainer.innerHTML = appData.skills.map((s, i) => `
+            <div class="relative group inline-block">
+                <span class="px-3 py-1 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300 cursor-default">${s}</span>
+                ${isAdmin ? `<button onclick="deleteItem('skills', ${i})" class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs hidden group-hover:flex items-center justify-center transition">×</button>` : ''}
+            </div>
+        `).join('');
+    }
 
     // Certificates
-    if(appData.certificates) {
-        document.getElementById('certificates-container').innerHTML = appData.certificates.map((cert, i) => `
+    const certContainer = document.getElementById('certificates-container');
+    if(certContainer && appData.certificates) {
+        certContainer.innerHTML = appData.certificates.map((cert, i) => `
             <div class="relative group bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4 hover:border-secondary transition">
                 ${renderAdminButtons('certificates', i)}
                 <div class="text-2xl text-secondary"><i class="fas fa-certificate"></i></div>
@@ -107,22 +131,40 @@ function renderAll() {
         `).join('');
     }
 
-    // Projects
-    document.getElementById('projects-container').innerHTML = appData.projects.map((proj, i) => `
-        <div class="relative group bg-white dark:bg-cardBg rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100 dark:border-gray-700 flex flex-col h-full">
-            ${renderAdminButtons('projects', i)}
-            <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center relative overflow-hidden">
-                <i class="fas fa-laptop-code text-5xl text-gray-300 dark:text-gray-700 group-hover:scale-110 transition duration-500"></i>
-                <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm">
-                    <a href="${proj.link}" target="_blank" class="px-6 py-2 bg-white text-gray-900 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition">عرض</a>
+    // 🔥 Projects (الجزء المعدل للربط الذكي)
+    const projContainer = document.getElementById('projects-container');
+    if(projContainer) {
+        projContainer.innerHTML = appData.projects.map((proj, i) => {
+            let targetLink = proj.link;
+            let btnText = "عرض"; // النص العادي
+            let btnClass = "bg-white text-gray-900";
+
+            // ⚡ السحر هنا: إذا لم يبدأ الرابط بـ http، فهو اسم مستودع
+            if (proj.link && !proj.link.startsWith('http')) {
+                targetLink = `${DEV_SHOWCASE_URL}?project=${proj.link}`;
+                btnText = "معاينة 🚀";
+                btnClass = "bg-primary text-white"; // تمييز الزر بلون مختلف
+            }
+
+            return `
+            <div class="relative group bg-white dark:bg-cardBg rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition border border-gray-100 dark:border-gray-700 flex flex-col h-full">
+                ${renderAdminButtons('projects', i)}
+                <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center relative overflow-hidden">
+                    <i class="fas fa-laptop-code text-5xl text-gray-300 dark:text-gray-700 group-hover:scale-110 transition duration-500"></i>
+                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm">
+                        <a href="${targetLink}" target="_blank" class="px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition ${btnClass}">
+                           ${btnText}
+                        </a>
+                    </div>
+                </div>
+                <div class="p-6 flex-grow">
+                    <h3 class="text-lg font-bold mb-2">${proj.title}</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm line-clamp-3">${proj.desc}</p>
                 </div>
             </div>
-            <div class="p-6 flex-grow">
-                <h3 class="text-lg font-bold mb-2">${proj.title}</h3>
-                <p class="text-gray-500 dark:text-gray-400 text-sm line-clamp-3">${proj.desc}</p>
-            </div>
-        </div>
-    `).join('');
+            `;
+        }).join('');
+    }
 }
 
 // دالة مساعدة لرسم أزرار التعديل والحذف
@@ -152,7 +194,6 @@ async function editItem(type, index) {
     const item = appData[type][index];
     let res;
     
-    // نماذج التعديل حسب النوع
     if(type === 'experience') {
         res = await Swal.fire({
             title: 'تعديل الخبرة',
@@ -160,9 +201,15 @@ async function editItem(type, index) {
             preConfirm: () => ({ role: document.getElementById('swal-role').value, company: document.getElementById('swal-co').value, period: document.getElementById('swal-date').value, description: document.getElementById('swal-desc').value })
         });
     } else if(type === 'projects') {
+        // ✨ نموذج تعديل المشروع المحسن
         res = await Swal.fire({
             title: 'تعديل المشروع',
-            html: `<input id="swal-title" class="swal2-input" value="${item.title}"><input id="swal-link" class="swal2-input" value="${item.link}"><textarea id="swal-desc" class="swal2-textarea">${item.desc}</textarea>`,
+            html: `
+                <input id="swal-title" class="swal2-input" value="${item.title}" placeholder="عنوان المشروع">
+                <div class="text-xs text-right text-gray-500 mt-2 mb-1 pr-4">اكتب اسم المستودع فقط (للمعاينة) أو رابط كامل</div>
+                <input id="swal-link" class="swal2-input" value="${item.link}" placeholder="Repo Name (e.g., JobBot) or URL">
+                <textarea id="swal-desc" class="swal2-textarea" placeholder="الوصف">${item.desc}</textarea>
+            `,
             preConfirm: () => ({ title: document.getElementById('swal-title').value, link: document.getElementById('swal-link').value, desc: document.getElementById('swal-desc').value })
         });
     } else if(type === 'certificates') {
@@ -183,7 +230,6 @@ async function addItem(type) {
     if(!isAdmin) return;
     let res;
     
-    // نماذج الإضافة
     if(type === 'skills') {
         res = await Swal.fire({ input: 'text', title: 'مهارة جديدة', confirmButtonText: 'إضافة' });
         if(res.value) appData.skills.push(res.value);
@@ -195,9 +241,15 @@ async function addItem(type) {
         });
         if(res.value) appData.experience.push(res.value);
     } else if(type === 'projects') {
+         // ✨ نموذج إضافة مشروع جديد
         res = await Swal.fire({
             title: 'إضافة مشروع',
-            html: '<input id="swal-title" class="swal2-input" placeholder="العنوان"><input id="swal-link" class="swal2-input" placeholder="الرابط"><textarea id="swal-desc" class="swal2-textarea" placeholder="الوصف"></textarea>',
+            html: `
+                <input id="swal-title" class="swal2-input" placeholder="عنوان المشروع">
+                <div class="text-xs text-right text-gray-500 mt-2 mb-1 pr-4">اكتب اسم المستودع فقط للربط مع DevShowcase</div>
+                <input id="swal-link" class="swal2-input" placeholder="Link (http://...) OR Repo Name">
+                <textarea id="swal-desc" class="swal2-textarea" placeholder="الوصف"></textarea>
+            `,
             preConfirm: () => ({ title: document.getElementById('swal-title').value, link: document.getElementById('swal-link').value, desc: document.getElementById('swal-desc').value })
         });
         if(res.value) appData.projects.push(res.value);
@@ -235,10 +287,13 @@ async function editImage(key) {
 
 // --- المصادقة وحفظ GitHub ---
 function setupSecretTrigger() {
-    document.getElementById('secret-trigger').addEventListener('click', () => {
-        clickCount++;
-        if(clickCount === 3) { document.getElementById('admin-modal').classList.remove('hidden'); clickCount = 0; }
-    });
+    const trigger = document.getElementById('secret-trigger');
+    if(trigger) {
+        trigger.addEventListener('click', () => {
+            clickCount++;
+            if(clickCount === 3) { document.getElementById('admin-modal').classList.remove('hidden'); clickCount = 0; }
+        });
+    }
 }
 
 function authenticateAndEdit() {
@@ -294,7 +349,7 @@ async function saveToGitHub() {
 // --- دوال مساعدة ---
 function typeWriter(text, elementId) {
     const elm = document.getElementById(elementId);
-    if(elm) {
+    if(elm && text) {
         elm.innerHTML = "";
         let i = 0;
         const interval = setInterval(() => {
@@ -306,20 +361,23 @@ function typeWriter(text, elementId) {
 }
 function initTheme() {
     const btn = document.getElementById('theme-btn');
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
-    btn.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-        initParticles();
-    });
+    if(btn) {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
+        btn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            initParticles();
+        });
+    }
 }
 function initParticles() {
     const isDark = document.documentElement.classList.contains('dark');
-    // إعدادات محسنة لتقليل استهلاك البطارية
-    particlesJS("particles-js", {
-        "particles": { "number": { "value": 40 }, "color": { "value": isDark ? "#ffffff" : "#3b82f6" }, "shape": { "type": "circle" }, "opacity": { "value": 0.3 }, "size": { "value": 3 }, "line_linked": { "enable": true, "distance": 150, "color": isDark ? "#ffffff" : "#3b82f6", "opacity": 0.1, "width": 1 }, "move": { "enable": true, "speed": 1 } },
-        "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "grab" } } }, "retina_detect": true
-    });
+    if(window.particlesJS) {
+        particlesJS("particles-js", {
+            "particles": { "number": { "value": 40 }, "color": { "value": isDark ? "#ffffff" : "#3b82f6" }, "shape": { "type": "circle" }, "opacity": { "value": 0.3 }, "size": { "value": 3 }, "line_linked": { "enable": true, "distance": 150, "color": isDark ? "#ffffff" : "#3b82f6", "opacity": 0.1, "width": 1 }, "move": { "enable": true, "speed": 1 } },
+            "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "grab" } } }, "retina_detect": true
+        });
+    }
 }
 function setDeepValue(obj, path, value) { const keys = path.split('.'); let current = obj; for (let i = 0; i < keys.length - 1; i++) current = current[keys[i]]; current[keys[keys.length - 1]] = value; }
-function showToast(msg, type) { Toastify({ text: msg, duration: 3000, style: { background: type === 'success' ? '#10B981' : '#EF4444' } }).showToast(); }
+function showToast(msg, type) { if(window.Toastify) Toastify({ text: msg, duration: 3000, style: { background: type === 'success' ? '#10B981' : '#EF4444' } }).showToast(); }
