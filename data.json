@@ -11,7 +11,50 @@
   },
   "skills": [],
   "experience": [],
-  "projects": [],
+  "projects": [
+    {
+      "title": "Local ERP System",
+      "desc": "نظام إدارة موارد متكامل للشركات، يدعم الفوترة والمخزون. (مشروع خاص)",
+      "link": "Local ERP System",
+      "type": "Local",
+      "stars": 0
+    },
+    {
+      "title": "Data Analysis Script",
+      "desc": "سكربت بايثون لتحليل بيانات المبيعات وإصدار تقارير Excel تلقائية.",
+      "link": "Data Analysis Script",
+      "type": "Local",
+      "stars": 0
+    },
+    {
+      "title": "CV",
+      "desc": "لا يوجد وصف متاح",
+      "link": "CV",
+      "type": "GitHub",
+      "stars": 0
+    },
+    {
+      "title": "my-portfolio",
+      "desc": "لا يوجد وصف متاح",
+      "link": "my-portfolio",
+      "type": "GitHub",
+      "stars": 0
+    },
+    {
+      "title": "VOS",
+      "desc": "VOS_System",
+      "link": "VOS",
+      "type": "GitHub",
+      "stars": 0
+    },
+    {
+      "title": "OsamaAL-Harbi",
+      "desc": "Config files for my GitHub profile.",
+      "link": "OsamaAL-Harbi",
+      "type": "GitHub",
+      "stars": 0
+    }
+  ],
   "certificates": [],
   "customSection": {
     "title": "عنوان",
