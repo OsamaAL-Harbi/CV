@@ -1,15 +1,27 @@
 {
   "profile": {
-    "name": { "ar": "أسامة الحربي", "en": "Osama Al-Harbi" },
-    "title": { "ar": "مهندس برمجيات", "en": "Software Engineer" },
-    "summary": { "ar": "مطور شغوف...", "en": "Passionate developer..." },
+    "name": {
+      "ar": "أسامة الحربي",
+      "en": "Osama Al-Harbi"
+    },
+    "title": {
+      "ar": "مهندس برمجيات",
+      "en": "Software Engineer"
+    },
+    "summary": {
+      "ar": "مطور شغوف...",
+      "en": "Passionate developer..."
+    },
     "email": "contact@example.com",
     "image": "",
     "linkedin": "#",
     "github": "#"
   },
   "skills": [
-    { "ar": "جافاسكريبت", "en": "JavaScript" }
+    {
+      "ar": "جافاسكريبت",
+      "en": "JavaScript"
+    }
   ],
   "experience": [],
   "projects": [],
