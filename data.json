@@ -1,70 +1,38 @@
 {
   "profile": {
-    "name": "خسشلالثصُـ",
-    "title": "Software Engineer | مهندس برمجيات",
-    "summary": "شثنقس6نمي",
-    "location": "المدينة المنورة، السعودية",
+    "name": { "ar": "أسامة الحربي", "en": "Osama Al-Harbi" },
+    "title": { "ar": "مهندس برمجيات | مطور شامل", "en": "Software Engineer | Full Stack Developer" },
+    "summary": { "ar": "مطور برمجيات شغوف...", "en": "Passionate Software Engineer..." },
     "email": "contact@example.com",
-    "github": "https://github.com",
-    "linkedin": "https://linkedin.com",
-    "image": "https://via.placeholder.com/400"
+    "image": "",
+    "linkedin": "#",
+    "github": "#"
   },
-  "skills": [],
+  "skills": [
+    { "ar": "جافاسكريبت", "en": "JavaScript" },
+    { "ar": "رياكت", "en": "React.js" },
+    { "ar": "بايثون", "en": "Python" }
+  ],
   "experience": [
     {
-      "role": "",
-      "company": "",
-      "period": "",
-      "description": "قت"
+      "role": { "ar": "مطور واجهات", "en": "Frontend Developer" },
+      "company": { "ar": "شركة تقنية", "en": "Tech Co." },
+      "period": { "ar": "2024 - الآن", "en": "2024 - Present" },
+      "description": { "ar": "تطوير واجهات...", "en": "Building UI..." }
     }
   ],
   "projects": [
     {
-      "title": "Local ERP System",
-      "desc": "نظام إدارة موارد متكامل للشركات، يدعم الفوترة والمخزون. (مشروع خاص)",
-      "link": "Local ERP System",
-      "type": "Local",
-      "stars": 0
-    },
-    {
-      "title": "Data Analysis Script",
-      "desc": "سكربت بايثون لتحليل بيانات المبيعات وإصدار تقارير Excel تلقائية.",
-      "link": "Data Analysis Script",
-      "type": "Local",
-      "stars": 0
-    },
-    {
-      "title": "CV",
-      "desc": "لا يوجد وصف متاح",
-      "link": "CV",
-      "type": "GitHub",
-      "stars": 0
-    },
-    {
-      "title": "my-portfolio",
-      "desc": "لا يوجد وصف متاح",
-      "link": "my-portfolio",
-      "type": "GitHub",
-      "stars": 0
-    },
-    {
-      "title": "VOS",
-      "desc": "VOS_System",
-      "link": "VOS",
-      "type": "GitHub",
-      "stars": 0
-    },
-    {
-      "title": "OsamaAL-Harbi",
-      "desc": "Config files for my GitHub profile.",
-      "link": "OsamaAL-Harbi",
-      "type": "GitHub",
-      "stars": 0
+      "title": { "ar": "متجر إلكتروني", "en": "E-Commerce App" },
+      "desc": { "ar": "منصة بيع...", "en": "Shopping platform..." },
+      "link": "#"
     }
   ],
-  "certificates": [],
-  "customSection": {
-    "title": "عنوان",
-    "items": []
-  }
+  "certificates": [
+    {
+      "name": { "ar": "شهادة ويب", "en": "Web Certificate" },
+      "issuer": { "ar": "جوجل", "en": "Google" },
+      "date": { "ar": "2023", "en": "2023" }
+    }
+  ]
 }
