@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>أسامة الحربي | Portfolio</title>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KE86NNMX3J"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-KE86NNMX3J');
+    </script>
     <meta name="description" content="الموقع الشخصي للمطور أسامة الحربي.">
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
 
@@ -31,24 +40,16 @@
     <style>
         body { overflow-x: hidden; }
         #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; pointer-events: none; }
-        
         .nav-active { color: #3b82f6; position: relative; }
         .nav-active::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: #3b82f6; border-radius: 2px; }
-        
         .page-section { display: none; animation: fadeIn 0.5s ease-in-out; }
         .page-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Admin UI */
         .editable-active { border: 2px dashed #f59e0b !important; background: rgba(253, 230, 138, 0.1); outline: none; padding: 2px; border-radius: 4px; cursor: text; }
         .admin-element { display: none !important; }
         .admin-mode .admin-element { display: flex !important; }
-        
-        /* Language Support */
         html[dir="ltr"] { font-family: 'Roboto', sans-serif; }
         html[dir="ltr"] .admin-controls { right: 8px; left: auto; }
-        
-        /* Mobile Menu */
         #mobile-menu { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         #mobile-menu.closed { transform: translateX(100%); }
         #mobile-menu.open { transform: translateX(0); }
@@ -62,19 +63,18 @@
         <p class="mt-4 text-sm font-bold tracking-widest animate-pulse text-gray-500">LOADING...</p>
     </div>
 
+    <input type="file" id="image-upload-input" class="hidden" accept="image/*">
     <div id="particles-js" class="opacity-30 dark:opacity-20"></div>
 
     <nav class="fixed top-0 w-full z-50 bg-white/90 dark:bg-darkBg/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-all shadow-sm">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <a href="#" onclick="showPage('home')" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary z-50">OSAMA.</a>
-            
             <div class="hidden md:flex gap-8 font-medium text-sm">
                 <button onclick="showPage('home')" class="nav-link nav-active hover:text-primary transition" id="nav-home" data-lang="nav_home">الرئيسية</button>
                 <button onclick="showPage('resume')" class="nav-link hover:text-primary transition" id="nav-resume" data-lang="nav_resume">السيرة الذاتية</button>
                 <button onclick="showPage('portfolio')" class="nav-link hover:text-primary transition" id="nav-portfolio" data-lang="nav_portfolio">الأعمال</button>
                 <button onclick="showPage('contact')" class="nav-link hover:text-primary transition" id="nav-contact" data-lang="nav_contact">تواصل</button>
             </div>
-
             <div class="flex items-center gap-3 z-50">
                 <button onclick="toggleLanguage()" id="lang-btn" class="px-3 py-1 text-xs font-bold border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">EN</button>
                 <button id="theme-btn" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition border border-gray-200 dark:border-gray-700">🌓</button>
@@ -92,7 +92,6 @@
     </div>
 
     <main class="container mx-auto px-4 pt-32 pb-20 flex-grow relative z-10 max-w-5xl">
-
         <section id="home" class="page-section active min-h-[60vh] flex items-center justify-center text-center">
             <div>
                 <div class="mb-8 relative inline-block group cursor-pointer">
@@ -100,14 +99,12 @@
                     <img id="profile-img" src="" class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl">
                     <button onclick="editImage('profile.image')" class="admin-element absolute inset-0 bg-black/50 rounded-full items-center justify-center text-white opacity-0 hover:opacity-100 transition"><i class="fas fa-camera text-2xl"></i></button>
                 </div>
-                
                 <p id="smart-greeting" class="text-primary font-bold mb-2 animate-pulse">Welcome</p>
                 <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight" data-path="profile.name"></h1>
                 <div class="text-xl md:text-2xl text-primary font-medium mb-6 h-8 flex justify-center gap-2">
                     <span id="typewriter"></span><span class="animate-pulse">|</span>
                 </div>
                 <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed mb-10" data-path="profile.summary"></p>
-                
                 <div class="flex justify-center gap-4">
                     <button onclick="showPage('portfolio')" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-105 transition shadow-lg shadow-primary/30" data-lang="btn_projects">أعمالي</button>
                     <button onclick="openCmdPalette()" class="px-8 py-3 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-xl font-bold hover:scale-105 transition text-xs flex items-center gap-2">Cmd+K</button>
@@ -131,7 +128,6 @@
                         <button onclick="addItem('skills')" class="admin-element bg-green-100 text-green-700 px-3 py-1 rounded-lg text-xs font-bold hover:bg-green-200 gap-1"><i class="fas fa-plus"></i></button>
                     </div>
                     <div id="skills-container" class="flex flex-wrap gap-3 mb-12"></div>
-
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-2xl font-bold flex items-center gap-2 text-secondary"><i class="fas fa-graduation-cap"></i> <span data-lang="sec_certs">الشهادات</span></h3>
                         <button onclick="addItem('certificates')" class="admin-element bg-green-100 text-green-700 px-3 py-1 rounded-lg text-xs font-bold hover:bg-green-200 gap-1"><i class="fas fa-plus"></i></button>
@@ -152,26 +148,17 @@
         <section id="contact" class="page-section">
             <div class="max-w-xl mx-auto bg-white dark:bg-cardBg rounded-3xl p-8 shadow-2xl border border-gray-100 dark:border-gray-800 text-center" data-aos="zoom-in">
                 <h2 class="text-3xl font-bold mb-6" data-lang="contact_title">راسلني</h2>
-                <form id="contactForm" onsubmit="sendEmail(event)" class="space-y-4 text-left" dir="ltr">
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="text" name="name" class="w-full p-3 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right" placeholder="الاسم / Name" required>
-                        <input type="email" name="email" class="w-full p-3 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right" placeholder="البريد / Email" required>
-                    </div>
-                    <textarea name="message" rows="4" class="w-full p-3 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right" placeholder="رسالتك / Message" required></textarea>
-                    <button type="submit" class="w-full py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition" data-lang="btn_email">إرسال</button>
-                </form>
-                
+                <a id="email-contact" href="#" class="block w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition shadow-lg mb-6" data-lang="btn_email">إرسال بريد</a>
                 <div class="flex justify-center gap-8 mt-8 border-t border-gray-100 dark:border-gray-700 pt-6">
                     <a id="social-linkedin" href="#" target="_blank" class="text-2xl text-gray-400 hover:text-blue-500 transition"><i class="fab fa-linkedin"></i></a>
                     <a id="social-github" href="#" target="_blank" class="text-2xl text-gray-400 hover:text-white transition"><i class="fab fa-github"></i></a>
                 </div>
             </div>
         </section>
-
     </main>
 
     <footer class="text-center py-6 text-xs text-gray-500 border-t border-gray-200 dark:border-gray-800">
-        <p id="secret-trigger" class="cursor-pointer select-none hover:text-primary transition inline-block px-4 py-2" title="اضغط 3 مرات">&copy; <span id="year"></span> Osama Al-Harbi</p>
+        <p id="secret-trigger" class="cursor-pointer select-none hover:text-primary transition inline-block px-4 py-2">&copy; <span id="year"></span> Osama Al-Harbi</p>
     </footer>
 
     <div id="cmd-palette" class="hidden fixed inset-0 z-[100] bg-black/50 flex items-start justify-center pt-20 backdrop-blur-sm">
@@ -189,21 +176,10 @@
         <span class="text-xs font-bold text-green-500 flex items-center gap-1">● Admin</span>
         <div class="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
         <button onclick="saveToGitHub()" class="text-sm font-bold text-primary hover:text-blue-600 transition flex items-center gap-1"><i class="fas fa-save"></i> <span data-lang="btn_save">حفظ</span></button>
-        <button onclick="showAnalytics()" class="text-sm font-bold text-purple-500 hover:text-purple-600 transition flex items-center gap-1"><i class="fas fa-chart-line"></i></button>
+        <a href="https://analytics.google.com/" target="_blank" class="text-sm font-bold text-purple-500 hover:text-purple-600 transition flex items-center gap-1"><i class="fas fa-chart-line"></i> Analytics</a>
         <button onclick="restoreBackup()" class="text-sm font-bold text-yellow-500 hover:text-yellow-600 transition flex items-center gap-1"><i class="fas fa-history"></i></button>
         <div class="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
         <button onclick="logout()" class="text-red-500 hover:text-red-700"><i class="fas fa-power-off"></i></button>
-    </div>
-
-    <div id="analytics-modal" class="hidden fixed inset-0 bg-black/80 z-[120] flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-cardBg w-full max-w-md rounded-2xl p-6 relative border border-gray-200 dark:border-gray-700">
-            <button onclick="document.getElementById('analytics-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
-            <h3 class="text-xl font-bold mb-6 text-center">📊 إحصائيات</h3>
-            <div class="bg-gray-50 dark:bg-darkBg p-4 rounded-xl text-center">
-                <p class="text-xs text-gray-500 mb-1">زياراتك (Local)</p>
-                <h2 class="text-4xl font-bold text-primary" id="visit-count">0</h2>
-            </div>
-        </div>
     </div>
 
     <div id="admin-modal" class="hidden fixed inset-0 bg-black/90 z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
