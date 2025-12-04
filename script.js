@@ -1,5 +1,5 @@
 /**
- * OSAMA PORTFOLIO - MASTER EDITION v4.0
+ * OSAMA PORTFOLIO -  v4.0
  * Features: SPA, i18n, Smart CRUD, Drag&Drop, GitHub Sync, Security, PWA, Analytics Link
  */
 
