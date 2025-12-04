@@ -19,12 +19,24 @@
   },
   "skills": [
     {
-      "ar": "جافاسكريبت",
-      "en": "JavaScript"
+      "ar": {
+        "ar": "جافاسكريبت",
+        "en": "جافاسكريبت"
+      },
+      "en": {
+        "ar": "JavaScript",
+        "en": "JavaScript"
+      }
     },
     {
-      "ar": "رياكت",
-      "en": "React.js"
+      "ar": {
+        "ar": "رياكت",
+        "en": "رياكت"
+      },
+      "en": {
+        "ar": "React.js",
+        "en": "React.js"
+      }
     },
     {
       "ar": {
@@ -38,24 +50,6 @@
     }
   ],
   "experience": [
-    {
-      "role": {
-        "ar": "مطور واجهات",
-        "en": "Frontend Dev"
-      },
-      "company": {
-        "ar": "شركة تقنية",
-        "en": "Tech Co"
-      },
-      "period": {
-        "ar": "2024 - الآن",
-        "en": "2024 - Present"
-      },
-      "description": {
-        "ar": "تطوير...",
-        "en": "Developing..."
-      }
-    },
     {
       "role": {
         "ar": "ئقيىئ",
@@ -72,6 +66,24 @@
       "description": {
         "ar": "ئقتئقت",
         "en": "تئقت"
+      }
+    },
+    {
+      "role": {
+        "ar": "مطور واجهات",
+        "en": "Frontend Dev"
+      },
+      "company": {
+        "ar": "شركة تقنية",
+        "en": "Tech Co"
+      },
+      "period": {
+        "ar": "2024 - الآن",
+        "en": "2024 - Present"
+      },
+      "description": {
+        "ar": "تطوير...",
+        "en": "Developing..."
       }
     }
   ],
@@ -96,7 +108,7 @@
         "ar": "ت6يق6ت",
         "en": "نتيق"
       },
-      "link": "يقءتقءيست"
+      "link": "https://devshowcase-7d9s.onrender.com/"
     }
   ],
   "certificates": [
@@ -109,10 +121,7 @@
         "ar": "جوجل",
         "en": "Google"
       },
-      "date": {
-        "ar": "2023",
-        "en": "2023"
-      }
+      "date": "[object Object]"
     },
     {
       "name": {
