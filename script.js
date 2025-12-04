@@ -1,10 +1,10 @@
 /**
- * OSAMA PORTFOLIO - v3.0
- * Features: SPA, i18n, CRUD, Drag&Drop, GitHub Sync, Security, Analytics
+ * OSAMA PORTFOLIO - MASTER EDITION v4.0
+ * Features: SPA, i18n, Smart CRUD, Drag&Drop, GitHub Sync, Security, PWA, Analytics Link
  */
 
 // =========================================
-// 1. Global State & Configurations
+// 1. GLOBAL CONFIGURATION
 // =========================================
 let appData = {};
 let githubInfo = { token: '', repo: '', sha: '' };
@@ -12,32 +12,31 @@ let currentLang = localStorage.getItem('lang') || 'ar';
 let isAdmin = false;
 let clickCount = 0;
 const SESSION_DURATION = 60 * 60 * 1000; // 1 Hour
-
-// Formspree (اختياري: ضع رابط النموذج الخاص بك هنا)
-const FORMSPREE_URL = "https://formspree.io/f/YOUR_FORM_ID";
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID"; // Replace this
 
 // =========================================
-// 2. Initialization
+// 2. INITIALIZATION
 // =========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // تفعيل المكتبات
-    AOS.init();
+    // UI Init
+    AOS.init({ duration: 800, once: true });
     if(document.getElementById('year')) document.getElementById('year').textContent = new Date().getFullYear();
     
-    // إعدادات أساسية
+    // Core Init
     setDirection();
     loadContent();
     initTheme();
     initParticles();
     
-    // تفعيل المزايا الذكية
+    // Features Init
     setupSecretTrigger();
     checkSession();
     setupCmdPalette();
     setupKonamiCode();
     registerPWA();
+    setupScrollTop();
     
-    // استعادة بيانات الدخول (إذا كانت محفوظة)
+    // Auto-fill Credentials
     if(localStorage.getItem('saved_repo')) {
         document.getElementById('repo-input').value = localStorage.getItem('saved_repo');
         document.getElementById('token-input').value = localStorage.getItem('saved_token');
@@ -45,22 +44,18 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function registerPWA() {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(console.error);
-    }
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 // =========================================
-// 3. Navigation & UI Logic
+// 3. NAVIGATION (SPA)
 // =========================================
 function showPage(pageId) {
-    // إخفاء كل الأقسام
     document.querySelectorAll('.page-section').forEach(sec => {
         sec.classList.remove('active');
         sec.style.display = 'none';
     });
     
-    // إظهار القسم المطلوب
     const target = document.getElementById(pageId);
     if(target) {
         target.style.display = 'block';
@@ -68,14 +63,13 @@ function showPage(pageId) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // تحديث القائمة العلوية
     document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('nav-active'));
     const navBtn = document.getElementById(`nav-${pageId}`);
     if(navBtn) navBtn.classList.add('nav-active');
     
-    // إغلاق قائمة الجوال إذا كانت مفتوحة
+    // Mobile menu handling
     const mobileMenu = document.getElementById('mobile-menu');
-    if(mobileMenu && mobileMenu.classList.contains('open')) toggleMobileMenu();
+    if(mobileMenu.classList.contains('open')) toggleMobileMenu();
 }
 
 function toggleMobileMenu() {
@@ -89,11 +83,23 @@ function toggleMobileMenu() {
     }
 }
 
+function setupScrollTop() {
+    window.addEventListener('scroll', () => {
+        const btn = document.getElementById('scrollTopBtn');
+        if (window.scrollY > 300) {
+            btn.classList.add('show');
+            btn.classList.remove('translate-y-10');
+        } else {
+            btn.classList.remove('show');
+            btn.classList.add('translate-y-10');
+        }
+    });
+}
+
 // =========================================
-// 4. Localization (AR/EN System)
+// 4. LOCALIZATION (AR/EN)
 // =========================================
 function t(data) {
-    // دالة الترجمة الذكية: تعيد النص حسب اللغة الحالية
     if (typeof data === 'object' && data !== null && (data.ar || data.en)) {
         return data[currentLang] || data.ar;
     }
@@ -130,7 +136,6 @@ function updateStaticText() {
             contact_title:"Get in Touch"
         }
     };
-    
     document.querySelectorAll('[data-lang]').forEach(el => {
         const key = el.getAttribute('data-lang');
         if(texts[currentLang][key]) el.innerText = texts[currentLang][key];
@@ -138,7 +143,7 @@ function updateStaticText() {
 }
 
 // =========================================
-// 5. Data Loading & Rendering
+// 5. DATA RENDERING ENGINE
 // =========================================
 async function loadContent() {
     try {
@@ -148,47 +153,42 @@ async function loadContent() {
         renderAll();
         updateStaticText();
         setSmartGreeting();
-        
-        // إخفاء شاشة التحميل
-        setTimeout(() => document.getElementById('loading-screen').classList.add('hidden'), 500);
+        setTimeout(() => document.getElementById('loading-screen').classList.add('hidden'), 600);
     } catch (err) {
-        showToast("خطأ في تحميل البيانات", "error");
+        showToast("Error loading data", "error");
         document.getElementById('loading-screen').classList.add('hidden');
     }
 }
 
 function renderAll() {
     const p = appData.profile;
-    
-    // الملف الشخصي
     updateText('profile.name', t(p.name));
     updateText('profile.summary', t(p.summary));
     
-    // صورة مع Fallback
     const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t(p.name))}&background=0D8ABC&color=fff&size=200`;
     const imgEl = document.getElementById('profile-img');
-    imgEl.src = p.image || fallback;
-    imgEl.onerror = function() { this.src = fallback; };
+    if(imgEl) {
+        imgEl.src = p.image || fallback;
+        imgEl.onerror = function() { this.src = fallback; };
+    }
 
     typeWriter(t(p.title), 'typewriter');
-    
-    // الروابط
     if(document.getElementById('email-contact')) document.getElementById('email-contact').href = `mailto:${p.email}`;
     if(document.getElementById('social-linkedin')) document.getElementById('social-linkedin').href = p.linkedin;
     if(document.getElementById('social-github')) document.getElementById('social-github').href = p.github;
 
-    // --- Render Sections with Templates ---
+    // --- Sections ---
     
     // 1. Experience
     renderSection('experience', appData.experience, (item) => `
-        <h3 class="text-xl font-bold dark:text-white" onclick="${isAdmin ? `manageItem('experience', ${appData.experience.indexOf(item)})` : ''}">${t(item.role)}</h3>
+        <h3 class="text-xl font-bold dark:text-white hover:text-primary transition cursor-pointer" onclick="${isAdmin ? `manageItem('experience', ${appData.experience.indexOf(item)})` : ''}">${t(item.role)}</h3>
         <p class="text-primary font-medium text-sm">${t(item.company)}</p>
-        <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs mb-3 font-bold">${t(item.period)}</span>
+        <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs mb-3 font-bold text-gray-500">${t(item.period)}</span>
         <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${t(item.description)}</p>
     `);
 
     // 2. Skills
-    renderSection('skills', appData.skills, (item) => `<span class="font-bold text-sm">${t(item)}</span>`, 'inline-block px-4 py-2 bg-white dark:bg-cardBg rounded-lg border dark:border-gray-700 shadow-sm cursor-default hover:border-primary transition');
+    renderSection('skills', appData.skills, (item) => `<span class="font-bold text-sm text-gray-700 dark:text-gray-300">${t(item)}</span>`, 'inline-block px-4 py-2 bg-white dark:bg-cardBg rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm cursor-default hover:border-primary hover:shadow-md transition duration-300');
 
     // 3. Certificates
     renderSection('certificates', appData.certificates, (item) => `
@@ -197,23 +197,22 @@ function renderAll() {
             <h4 class="font-bold text-sm dark:text-white">${t(item.name)}</h4>
             <p class="text-xs text-gray-500 mt-1">${t(item.issuer)} | ${t(item.date)}</p>
         </div>
-    `, 'flex items-center gap-4 bg-white dark:bg-cardBg p-4 rounded-xl border dark:border-gray-700 shadow-sm');
+    `, 'flex items-center gap-4 bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition');
 
     // 4. Projects
     renderSection('projects', appData.projects, (item) => `
         <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center relative overflow-hidden group">
             <i class="fas fa-laptop-code text-5xl text-gray-300 dark:text-gray-700 group-hover:scale-110 transition duration-500"></i>
-            <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm">
-                <a href="${item.link}" target="_blank" class="px-6 py-2 bg-white text-gray-900 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition">عرض</a>
+            <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 backdrop-blur-sm">
+                <a href="${item.link}" target="_blank" class="px-6 py-2 bg-white text-gray-900 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300 shadow-xl">عرض المشروع</a>
             </div>
         </div>
         <div class="p-6 flex-grow">
-            <h3 class="text-lg font-bold mb-2">${t(item.title)}</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm line-clamp-3">${t(item.desc)}</p>
+            <h3 class="text-lg font-bold mb-2 dark:text-white group-hover:text-primary transition">${t(item.title)}</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm line-clamp-3 leading-relaxed">${t(item.desc)}</p>
         </div>
-    `, 'bg-white dark:bg-cardBg rounded-2xl border dark:border-gray-700 overflow-hidden flex flex-col h-full shadow-sm hover:shadow-xl transition');
+    `, 'bg-white dark:bg-cardBg rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full shadow-sm hover:shadow-2xl transition duration-300 transform hover:-translate-y-1');
 
-    // تفعيل السحب والإفلات إذا كان الأدمن مفعلاً
     if(isAdmin) initSortable();
 }
 
@@ -224,7 +223,7 @@ function renderSection(type, data, contentFn, wrapperClass = 'relative group mb-
     container.innerHTML = data.map((item, i) => `
         <div class="${wrapperClass} sortable-item" data-id="${i}">
             ${renderAdminButtons(type, i)}
-            ${type === 'experience' ? `<div class="absolute -right-[39px] ltr:-left-[39px] top-1 w-4 h-4 bg-primary rounded-full border-4 border-white dark:border-darkBg z-10"></div>` : ''}
+            ${type === 'experience' ? `<div class="absolute -right-[39px] ltr:-left-[39px] top-1 w-4 h-4 bg-primary rounded-full border-4 border-white dark:border-darkBg z-10 group-hover:scale-125 transition duration-300"></div>` : ''}
             ${contentFn(item)}
         </div>
     `).join('');
@@ -232,90 +231,72 @@ function renderSection(type, data, contentFn, wrapperClass = 'relative group mb-
 
 function renderAdminButtons(type, index) {
     if (!isAdmin) return '';
-    return `<div class="admin-element absolute top-2 left-2 ltr:right-2 ltr:left-auto z-20 gap-2 opacity-0 group-hover:opacity-100 transition flex items-center">
-        <span class="drag-handle bg-gray-200 dark:bg-gray-700 text-gray-500 w-7 h-7 rounded shadow flex items-center justify-center hover:bg-gray-300 cursor-move"><i class="fas fa-grip-vertical text-[10px]"></i></span>
-        <button onclick="manageItem('${type}', ${index})" class="bg-blue-500 text-white w-7 h-7 rounded shadow flex items-center justify-center hover:scale-110 transition"><i class="fas fa-pen text-[10px]"></i></button>
-        <button onclick="deleteItem('${type}', ${index})" class="bg-red-500 text-white w-7 h-7 rounded shadow flex items-center justify-center hover:scale-110 transition"><i class="fas fa-trash text-[10px]"></i></button>
+    return `<div class="admin-element absolute top-2 left-2 ltr:right-2 ltr:left-auto z-20 gap-2 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center">
+        <span class="drag-handle bg-gray-200 dark:bg-gray-700 text-gray-500 w-8 h-8 rounded-full shadow flex items-center justify-center hover:bg-gray-300 cursor-move"><i class="fas fa-grip-vertical text-xs"></i></span>
+        <button onclick="manageItem('${type}', ${index})" class="bg-blue-500 text-white w-8 h-8 rounded-full shadow flex items-center justify-center hover:scale-110 transition"><i class="fas fa-pen text-xs"></i></button>
+        <button onclick="deleteItem('${type}', ${index})" class="bg-red-500 text-white w-8 h-8 rounded-full shadow flex items-center justify-center hover:scale-110 transition"><i class="fas fa-trash text-xs"></i></button>
     </div>`;
 }
 
 // =========================================
-// 6. Admin System (CRUD)
+// 6. ADMIN SYSTEM (SMART CRUD)
 // =========================================
-
-// دالة شاملة للإضافة والتعديل معاً
 async function manageItem(type, index = null) {
     if(!isAdmin) return;
     const isEdit = index !== null;
     const item = isEdit ? appData[type][index] : {};
     
-    // تعريف حقول الإدخال لكل قسم
     const schemas = {
-        skills: [
-            {key:'ar', label:'اسم المهارة (عربي)'}, 
-            {key:'en', label:'Skill Name (English)'}
-        ],
+        skills: [{key:'ar', label:'اسم المهارة'}, {key:'en', label:'Skill Name'}],
         experience: [
-            {key:'role', label:'المسمى الوظيفي'}, 
-            {key:'company', label:'الشركة'}, 
-            {key:'period', label:'التاريخ/الفترة'}, 
-            {key:'description', label:'الوصف', type:'textarea'}
+            {key:'role', label:'المسمى (Role)'}, {key:'company', label:'الشركة (Company)'}, 
+            {key:'period', label:'الفترة (Date)'}, {key:'description', label:'الوصف (Desc)', type:'textarea'}
         ],
         projects: [
-            {key:'title', label:'عنوان المشروع'}, 
-            {key:'desc', label:'وصف المشروع', type:'textarea'}, 
-            {key:'link', label:'رابط المشروع', simple:true} // simple means no AR/EN split
+            {key:'title', label:'العنوان (Title)'}, {key:'desc', label:'الوصف (Desc)', type:'textarea'}, 
+            {key:'link', label:'الرابط (Link)', simple:true}
         ],
         certificates: [
-            {key:'name', label:'اسم الشهادة'}, 
-            {key:'issuer', label:'الجهة المانحة'}, 
-            {key:'date', label:'التاريخ', simple:true}
+            {key:'name', label:'الاسم (Name)'}, {key:'issuer', label:'الجهة (Issuer)'}, 
+            {key:'date', label:'التاريخ (Date)', simple:true}
         ]
     };
 
     const schema = schemas[type];
     if(!schema) return;
 
-    // بناء كود HTML للنوافذ المنبثقة
     let html = schema.map(f => {
-        // حقول بسيطة (لا تحتاج ترجمة)
         if(f.simple) {
             const val = isEdit ? (item[f.key] || '') : '';
-            return `<input id="swal-${f.key}" class="swal2-input" placeholder="${f.label}" value="${val}">`;
+            return `<div class="mb-3"><label class="block text-xs mb-1 text-gray-500">${f.label}</label><input id="swal-${f.key}" class="swal2-input m-0 w-full" value="${val}"></div>`;
         }
-        
-        // حقول مزدوجة (عربي + إنجليزي)
         const valAr = isEdit && item[f.key] ? item[f.key].ar : '';
         const valEn = isEdit && item[f.key] ? item[f.key].en : '';
         
         if(f.type === 'textarea') {
-            return `<textarea id="swal-${f.key}-ar" class="swal2-textarea" placeholder="${f.label} (عربي)">${valAr}</textarea>
-                    <textarea id="swal-${f.key}-en" class="swal2-textarea" placeholder="${f.label} (English)">${valEn}</textarea>`;
+            return `<div class="grid grid-cols-2 gap-2 mb-3">
+                        <div><label class="block text-xs mb-1 text-gray-500">${f.label} (AR)</label><textarea id="swal-${f.key}-ar" class="swal2-textarea m-0 w-full h-24">${valAr}</textarea></div>
+                        <div><label class="block text-xs mb-1 text-gray-500">${f.label} (EN)</label><textarea id="swal-${f.key}-en" class="swal2-textarea m-0 w-full h-24">${valEn}</textarea></div>
+                    </div>`;
         }
-        return `<div class="grid grid-cols-2 gap-2">
-                    <input id="swal-${f.key}-ar" class="swal2-input" placeholder="${f.label} (AR)" value="${valAr}">
-                    <input id="swal-${f.key}-en" class="swal2-input" placeholder="${f.label} (EN)" value="${valEn}">
+        return `<div class="grid grid-cols-2 gap-2 mb-3">
+                    <div><label class="block text-xs mb-1 text-gray-500">${f.label} (AR)</label><input id="swal-${f.key}-ar" class="swal2-input m-0 w-full" value="${valAr}"></div>
+                    <div><label class="block text-xs mb-1 text-gray-500">${f.label} (EN)</label><input id="swal-${f.key}-en" class="swal2-input m-0 w-full" value="${valEn}"></div>
                 </div>`;
     }).join('');
 
     const { value } = await Swal.fire({
-        title: isEdit ? 'تعديل العنصر' : 'إضافة عنصر جديد',
-        html: `<div class="text-left text-sm">${html}</div>`,
-        width: '600px',
-        confirmButtonText: 'حفظ',
+        title: isEdit ? 'تعديل العنصر' : 'إضافة جديد',
+        html: `<div class="text-right" dir="rtl">${html}</div>`,
+        width: '700px',
+        confirmButtonText: 'حفظ / Save',
         showCancelButton: true,
         focusConfirm: false,
         preConfirm: () => {
             let obj = {};
             schema.forEach(f => {
-                if(f.simple) {
-                    obj[f.key] = document.getElementById(`swal-${f.key}`).value;
-                } else {
-                    obj[f.key] = { 
-                        ar: document.getElementById(`swal-${f.key}-ar`).value, 
-                        en: document.getElementById(`swal-${f.key}-en`).value 
-                    };
-                }
+                if(f.simple) obj[f.key] = document.getElementById(`swal-${f.key}`).value;
+                else obj[f.key] = { ar: document.getElementById(`swal-${f.key}-ar`).value, en: document.getElementById(`swal-${f.key}-en`).value };
             });
             return obj;
         }
@@ -323,7 +304,6 @@ async function manageItem(type, index = null) {
 
     if(value) {
         if(type === 'skills') {
-             // المهارات لها هيكل بسيط
              if(isEdit) appData.skills[index] = value; else appData.skills.push(value);
         } else {
              if(isEdit) appData[type][index] = value; else appData[type].push(value);
@@ -333,7 +313,6 @@ async function manageItem(type, index = null) {
     }
 }
 
-// دوال مساعدة لربط الأزرار
 function addItem(type) { manageItem(type); }
 function editItem(type, index) { manageItem(type, index); }
 
@@ -341,11 +320,11 @@ function deleteItem(type, index) {
     if(!isAdmin) return;
     Swal.fire({
         title: 'هل أنت متأكد؟',
-        text: "لن تتمكن من التراجع عن الحذف!",
+        text: "لا يمكن التراجع عن الحذف!",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
-        confirmButtonText: 'نعم، احذف'
+        confirmButtonText: 'نعم، حذف'
     }).then((result) => {
         if (result.isConfirmed) {
             appData[type].splice(index, 1);
@@ -368,7 +347,6 @@ function updateText(key, value) {
                 let obj = appData;
                 for(let i=0; i<pathParts.length-1; i++) obj = obj[pathParts[i]];
                 
-                // حفظ التعديل في اللغة الحالية فقط
                 if(typeof obj[pathParts[pathParts.length-1]] === 'object') {
                     obj[pathParts[pathParts.length-1]][currentLang] = val;
                 } else {
@@ -381,12 +359,10 @@ function updateText(key, value) {
 
 async function editImage(key) {
     if(!isAdmin) return;
-    const input = document.getElementById('image-upload-input');
-    // محاكاة رفع صورة (يمكن ربطها بـ API لاحقاً)
     const { value } = await Swal.fire({
-        title: 'تغيير الصورة',
+        title: 'رابط الصورة',
         input: 'url',
-        inputLabel: 'ضع رابط الصورة الجديد (Imgur/GitHub)',
+        inputLabel: 'ضع رابط الصورة المباشر',
         inputPlaceholder: 'https://...'
     });
     if (value) {
@@ -394,6 +370,8 @@ async function editImage(key) {
         renderAll();
     }
 }
+
+async function triggerImageUpload(key) { editImage(key); }
 
 function initSortable() {
     ['experience-container', 'skills-container', 'certificates-container', 'projects-container'].forEach(id => {
@@ -415,14 +393,14 @@ function initSortable() {
 }
 
 // =========================================
-// 7. Security & GitHub Sync
+// 7. SECURITY & SYNC
 // =========================================
 function checkSession() {
     const t = localStorage.getItem('login_time');
     if (localStorage.getItem('saved_token')) {
         if (t && (Date.now() - t > SESSION_DURATION)) {
             logout();
-            showToast("انتهت الجلسة لأمانك", "error");
+            showToast("انتهت الجلسة", "error");
         } else {
             githubInfo.repo = localStorage.getItem('saved_repo');
             githubInfo.token = localStorage.getItem('saved_token');
@@ -444,7 +422,7 @@ function setupSecretTrigger() {
 function authenticateAndEdit() {
     const repo = document.getElementById('repo-input').value.trim();
     const token = document.getElementById('token-input').value.trim();
-    if(!repo || !token) return showToast('البيانات ناقصة', 'error');
+    if(!repo || !token) return showToast('بيانات ناقصة', 'error');
     
     localStorage.setItem('saved_repo', repo);
     localStorage.setItem('saved_token', token);
@@ -455,14 +433,14 @@ function authenticateAndEdit() {
     
     document.getElementById('admin-modal').classList.add('hidden');
     enableAdminMode();
-    showToast('أهلاً بك! تم تفعيل وضع المدير', 'success');
+    showToast('تم تفعيل الأدمن 🚀', 'success');
 }
 
 function enableAdminMode() {
     isAdmin = true;
     document.body.classList.add('admin-mode');
     document.getElementById('admin-toolbar').classList.remove('hidden');
-    renderAll(); // إعادة الرسم لإظهار أدوات التحكم
+    renderAll();
 }
 
 function logout() {
@@ -473,29 +451,27 @@ function logout() {
 async function saveToGitHub() {
     const btn = document.querySelector('#admin-toolbar button');
     const oldText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
     
-    // Auto Backup
-    localStorage.setItem('backup_data', JSON.stringify(appData));
+    localStorage.setItem('backup_data', JSON.stringify(appData)); // Auto Backup
 
     try {
         const url = `https://api.github.com/repos/${githubInfo.repo}/contents/data.json`;
         const getRes = await fetch(url, { headers: { 'Authorization': `token ${githubInfo.token}` } });
-        if(!getRes.ok) throw new Error("فشل الاتصال");
+        if(!getRes.ok) throw new Error("Auth Failed");
         
         const fileData = await getRes.json();
-        // تشفير UTF-8 صحيح للعربية
         const content = btoa(unescape(encodeURIComponent(JSON.stringify(appData, null, 2))));
         
         await fetch(url, {
             method: 'PUT',
             headers: { 'Authorization': `token ${githubInfo.token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: "Updated via Admin Panel", content: content, sha: fileData.sha })
+            body: JSON.stringify({ message: "Update via Admin", content: content, sha: fileData.sha })
         });
         
         showToast('تم الحفظ في GitHub بنجاح! ✅', 'success');
     } catch(e) {
-        showToast('خطأ في الحفظ: ' + e.message, 'error');
+        showToast('خطأ: ' + e.message, 'error');
     } finally {
         btn.innerHTML = oldText;
     }
@@ -508,16 +484,12 @@ function restoreBackup() {
         renderAll();
         showToast('تم استعادة النسخة الاحتياطية', 'success');
     } else {
-        showToast('لا توجد نسخة احتياطية', 'error');
+        showToast('لا توجد نسخة', 'error');
     }
 }
 
-async function triggerImageUpload(key) {
-    editImage(key); // Simplified for now
-}
-
 // =========================================
-// 8. Helpers & Features
+// 8. HELPERS & EXTRAS
 // =========================================
 function setSmartGreeting() {
     const hour = new Date().getHours();
@@ -544,10 +516,10 @@ function setupCmdPalette() {
 
 function renderCmdItems() {
     const items = [
-        { icon: 'fa-home', text: 'الرئيسية / Home', action: () => showPage('home') },
-        { icon: 'fa-language', text: 'تغيير اللغة / Switch Language', action: toggleLanguage },
-        { icon: 'fa-moon', text: 'المظهر / Theme', action: () => document.getElementById('theme-btn').click() },
-        { icon: 'fa-user-cog', text: 'دخول المالك / Admin Login', action: () => document.getElementById('secret-trigger').click() }
+        { icon: 'fa-home', text: 'Home / الرئيسية', action: () => showPage('home') },
+        { icon: 'fa-language', text: 'Language / اللغة', action: toggleLanguage },
+        { icon: 'fa-moon', text: 'Theme / المظهر', action: () => document.getElementById('theme-btn').click() },
+        { icon: 'fa-user-cog', text: 'Admin Login / دخول', action: () => document.getElementById('secret-trigger').click() }
     ];
     document.getElementById('cmd-list').innerHTML = items.map(i => `
         <div class="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer flex gap-3 items-center rounded transition" 
@@ -558,17 +530,17 @@ function renderCmdItems() {
 }
 
 function filterCmd(val) {
-    // Simple filter logic placeholder
+    // Simple filter can be added here
 }
 
 function setupKonamiCode() {
-    const code = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    const code = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','b','a'];
     let idx = 0;
     document.addEventListener('keydown', (e) => {
         if (e.key === code[idx]) {
             idx++;
             if (idx === code.length) {
-                showToast("Party Mode Activated! 🎉", "success");
+                showToast("Party Mode! 🎉", "success");
                 initParticles(true);
                 idx = 0;
             }
@@ -578,9 +550,19 @@ function setupKonamiCode() {
 
 function handleContact(e) {
     e.preventDefault();
-    // Simulate send or link to Formspree
-    showToast("تم الإرسال بنجاح!", "success");
-    e.target.reset();
+    if(FORMSPREE_ENDPOINT.includes("YOUR_FORM_ID")) {
+        showToast("نموذج تجريبي (لم يتم ربطه)", "info");
+    } else {
+        const form = e.target;
+        fetch(FORMSPREE_ENDPOINT, {
+            method: form.method,
+            body: new FormData(form),
+            headers: {'Accept': 'application/json'}
+        }).then(res => {
+            if(res.ok) { showToast("تم الإرسال!", "success"); form.reset(); }
+            else showToast("خطأ في الإرسال", "error");
+        });
+    }
 }
 
 function typeWriter(text, elementId) {
@@ -614,26 +596,19 @@ function initParticles(party = false) {
         "particles": {
             "number": { "value": party ? 100 : 40 },
             "color": { "value": party ? ["#f00", "#0f0", "#00f"] : (isDark ? "#ffffff" : "#3b82f6") },
-            "shape": { "type": "circle" },
             "opacity": { "value": 0.3 },
             "size": { "value": 3 },
             "line_linked": { "enable": true, "distance": 150, "color": isDark ? "#ffffff" : "#3b82f6", "opacity": 0.1, "width": 1 },
             "move": { "enable": true, "speed": party ? 10 : 1 }
         },
-        "interactivity": {
-            "detect_on": "canvas",
-            "events": { "onhover": { "enable": true, "mode": "grab" } }
-        },
-        "retina_detect": true
+        "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "grab" } } }
     });
 }
 
 function setDeepValue(obj, path, value) {
     const keys = path.split('.');
     let current = obj;
-    for (let i = 0; i < keys.length - 1; i++) {
-        current = current[keys[i]];
-    }
+    for (let i = 0; i < keys.length - 1; i++) current = current[keys[i]];
     current[keys[keys.length - 1]] = value;
 }
 
@@ -643,6 +618,6 @@ function showToast(msg, type) {
         duration: 3000,
         gravity: "top",
         position: "center",
-        style: { background: type === 'success' ? '#10B981' : '#EF4444' }
+        style: { background: type === 'success' ? '#10B981' : (type==='info'?'#3b82f6':'#EF4444') }
     }).showToast();
 }
