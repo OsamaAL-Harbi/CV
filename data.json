@@ -1,37 +1,79 @@
 {
   "profile": {
-    "name": { "ar": "أسامة الحربي", "en": "Osama Al-Harbi" },
-    "title": { "ar": "مهندس برمجيات | مطور شامل", "en": "Software Engineer | Full Stack Developer" },
-    "summary": { "ar": "مطور برمجيات شغوف...", "en": "Passionate Software Engineer..." },
+    "name": {
+      "ar": "أسامة الحربي",
+      "en": "Osama Al-Harbi"
+    },
+    "title": {
+      "ar": "مهندس برمجيات | مطور شامل",
+      "en": "Software Engineer | Full Stack Developer"
+    },
+    "summary": {
+      "ar": "مطور برمجيات شغوف...",
+      "en": "Passionate Software Engineer..."
+    },
     "email": "contact@example.com",
     "image": "",
     "linkedin": "#",
     "github": "#"
   },
   "skills": [
-    { "ar": "جافاسكريبت", "en": "JavaScript" },
-    { "ar": "رياكت", "en": "React.js" }
+    {
+      "ar": "جافاسكريبت",
+      "en": "JavaScript"
+    },
+    {
+      "ar": "رياكت",
+      "en": "React.js"
+    }
   ],
   "experience": [
     {
-      "role": { "ar": "مطور واجهات", "en": "Frontend Dev" },
-      "company": { "ar": "شركة تقنية", "en": "Tech Co" },
-      "period": { "ar": "2024 - الآن", "en": "2024 - Present" },
-      "description": { "ar": "تطوير...", "en": "Developing..." }
+      "role": {
+        "ar": "مطور واجهات",
+        "en": "Frontend Dev"
+      },
+      "company": {
+        "ar": "شركة تقنية",
+        "en": "Tech Co"
+      },
+      "period": {
+        "ar": "2024 - الآن",
+        "en": "2024 - Present"
+      },
+      "description": {
+        "ar": "تطوير...",
+        "en": "Developing..."
+      }
     }
   ],
   "projects": [
     {
-      "title": { "ar": "متجر إلكتروني", "en": "E-Commerce" },
-      "desc": { "ar": "وصف المشروع", "en": "Project Description" },
-      "link": "#"
+      "title": {
+        "ar": "متجر إلكتروني",
+        "en": "E-Commerce"
+      },
+      "desc": {
+        "ar": "وصف المشروع",
+        "en": "Project Description"
+      },
+      "link": "https://devshowcase-7d9s.onrender.com/"
     }
   ],
   "certificates": [
     {
-      "name": { "ar": "شهادة ويب", "en": "Web Cert" },
-      "issuer": { "ar": "جوجل", "en": "Google" },
-      "date": { "ar": "2023", "en": "2023" }
+      "name": {
+        "ar": "شهادة ويب",
+        "en": "Web Cert"
+      },
+      "issuer": {
+        "ar": "جوجل",
+        "en": "Google"
+      },
+      "date": {
+        "ar": "2023",
+        "en": "2023"
+      }
     }
   ]
 }
