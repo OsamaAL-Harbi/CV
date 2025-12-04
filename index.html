@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>أسامة الحربي | Portfolio</title>
     
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-KE86NNMX3J"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-KE86NNMX3J');
     </script>
-    <meta name="description" content="الموقع الشخصي للمطور أسامة الحربي.">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -54,16 +55,25 @@
         #mobile-menu.closed { transform: translateX(100%); }
         #mobile-menu.open { transform: translateX(0); }
         html[dir="ltr"] #mobile-menu.closed { transform: translateX(-100%); }
+
+        /* Print CSS (الطباعة الذكية) */
+        @media print {
+            body { background: white !important; color: black !important; }
+            #particles-js, nav, #admin-toolbar, .admin-element, button, .no-print { display: none !important; }
+            .page-section { display: block !important; }
+            a { text-decoration: none; color: black !important; }
+            a[href]:after { content: " (" attr(href) ")"; font-size: 0.8rem; color: #555; }
+            .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            .shadow-xl, .shadow-lg, .shadow-sm { box-shadow: none !important; border: 1px solid #ddd !important; }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-darkBg dark:text-gray-100 font-sans transition-colors duration-300 min-h-screen flex flex-col">
 
     <div id="loading-screen" class="fixed inset-0 z-[200] bg-white dark:bg-darkBg flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 text-sm font-bold tracking-widest animate-pulse text-gray-500">LOADING...</p>
     </div>
 
-    <input type="file" id="image-upload-input" class="hidden" accept="image/*">
     <div id="particles-js" class="opacity-30 dark:opacity-20"></div>
 
     <nav class="fixed top-0 w-full z-50 bg-white/90 dark:bg-darkBg/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-all shadow-sm">
@@ -96,7 +106,7 @@
             <div>
                 <div class="mb-8 relative inline-block group cursor-pointer">
                     <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
-                    <img id="profile-img" src="" class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl">
+                    <img id="profile-img" src="" class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl" loading="lazy">
                     <button onclick="editImage('profile.image')" class="admin-element absolute inset-0 bg-black/50 rounded-full items-center justify-center text-white opacity-0 hover:opacity-100 transition"><i class="fas fa-camera text-2xl"></i></button>
                 </div>
                 <p id="smart-greeting" class="text-primary font-bold mb-2 animate-pulse">Welcome</p>
@@ -148,7 +158,15 @@
         <section id="contact" class="page-section">
             <div class="max-w-xl mx-auto bg-white dark:bg-cardBg rounded-3xl p-8 shadow-2xl border border-gray-100 dark:border-gray-800 text-center" data-aos="zoom-in">
                 <h2 class="text-3xl font-bold mb-6" data-lang="contact_title">راسلني</h2>
-                <a id="email-contact" href="#" class="block w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition shadow-lg mb-6" data-lang="btn_email">إرسال بريد</a>
+                <form id="contactForm" onsubmit="sendEmail(event)" class="space-y-4 text-left" dir="ltr">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" name="name" class="w-full p-3 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right" placeholder="الاسم / Name" required>
+                        <input type="email" name="email" class="w-full p-3 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right" placeholder="البريد / Email" required>
+                    </div>
+                    <textarea name="message" rows="4" class="w-full p-3 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right" placeholder="رسالتك / Message" required></textarea>
+                    <button type="submit" class="w-full py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition" data-lang="btn_email">إرسال</button>
+                </form>
+                
                 <div class="flex justify-center gap-8 mt-8 border-t border-gray-100 dark:border-gray-700 pt-6">
                     <a id="social-linkedin" href="#" target="_blank" class="text-2xl text-gray-400 hover:text-blue-500 transition"><i class="fab fa-linkedin"></i></a>
                     <a id="social-github" href="#" target="_blank" class="text-2xl text-gray-400 hover:text-white transition"><i class="fab fa-github"></i></a>
