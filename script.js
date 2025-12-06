@@ -14,7 +14,7 @@ let currentLang = localStorage.getItem('lang') || 'ar';
 let isAdmin = false;
 let clickCount = 0;
 const SESSION_DURATION = 60 * 60 * 1000; // 1 Hour Session
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID"; // ضع رابطك هنا
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqarljpg"; // ضع رابطك هنا
 
 // =========================================
 // 2. INITIALIZATION (STARTUP)
