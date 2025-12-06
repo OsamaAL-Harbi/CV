@@ -653,7 +653,7 @@ function setupKonamiCode() {
 
 function handleContact(e) {
     e.preventDefault();
-    if(FORMSPREE_ENDPOINT.includes("YOUR_FORM_ID")) {
+    if(FORMSPREE_ENDPOINT.includes("https://formspree.io/f/xqarljpg")) {
         showToast("تم الإرسال بنجاح", "info");
     } else {
         const form = e.target;
