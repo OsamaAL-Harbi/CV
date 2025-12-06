@@ -1,5 +1,5 @@
 /**
- * OSAMA PORTFOLIO - EXTENDED MASTER EDITION
+ * OSAMA PORTFOLIO - EDITION
  * -----------------------------------------
  * This is the full, uncompressed source code controlling the entire website.
  * Contains: SPA Routing, Bilingual System, Admin CRUD, Security, GitHub Sync, PWA.
