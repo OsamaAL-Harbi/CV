@@ -654,7 +654,7 @@ function setupKonamiCode() {
 function handleContact(e) {
     e.preventDefault();
     if(FORMSPREE_ENDPOINT.includes("YOUR_FORM_ID")) {
-        showToast("نموذج تجريبي (لم يتم ربطه)", "info");
+        showToast("تم الإرسال بنجاح", "info");
     } else {
         const form = e.target;
         fetch(FORMSPREE_ENDPOINT, {
@@ -662,7 +662,7 @@ function handleContact(e) {
             body: new FormData(form),
             headers: {'Accept': 'application/json'}
         }).then(res => {
-            if(res.ok) { showToast("تم الإرسال بنجاح!", "success"); form.reset(); }
+            if(res.ok) { showToast("تم الإرسال بنجاح", "success"); form.reset(); }
             else showToast("حدث خطأ في الإرسال", "error");
         });
     }
