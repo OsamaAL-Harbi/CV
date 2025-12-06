@@ -658,7 +658,7 @@ function handleContact(e) {
     } else {
         const form = e.target;
         fetch(FORMSPREE_ENDPOINT, {
-            method: form.method,
+            method: 'POST',
             body: new FormData(form),
             headers: {'Accept': 'application/json'}
         }).then(res => {
