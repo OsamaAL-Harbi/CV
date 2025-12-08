@@ -9,141 +9,234 @@
       "en": "Software Engineer | Full Stack Developer"
     },
     "summary": {
-      "ar": "مطور برمجيات شغوف...",
-      "en": "Passionate Software Engineer..."
+      "ar": "مطور برمجيات شغوف ببناء تجارب ويب حديثة ومبتكرة. أمتلك خبرة في تطوير تطبيقات الويب باستخدام أحدث التقنيات وأساليب التطوير. أؤمن بقوة التعليم المستمر وأسعى دائماً لتطوير مهاراتي.",
+      "en": "Passionate software engineer building modern and innovative web experiences. Experienced in developing web applications using the latest technologies and development methodologies. I believe in the power of continuous learning and always strive to improve my skills."
     },
     "email": "contact@example.com",
     "image": "",
-    "linkedin": "#",
-    "github": "#"
+    "linkedin": "https://www.linkedin.com/in/osama-al-harbi-368a5a23b/",
+    "github": "https://github.com/OsamaAL-Harbi",
+    "cv": "./assets/cv.pdf"
   },
   "skills": [
     {
-      "ar": {
-        "ar": "جافاسكريبت",
-        "en": "جافاسكريبت"
-      },
-      "en": {
-        "ar": "JavaScript",
-        "en": "JavaScript"
-      }
+      "ar": "جافاسكريبت (ES6+)",
+      "en": "JavaScript (ES6+)"
+    },
+    {
+      "ar": "رياكت وجيكس",
+      "en": "React.js & Next.js"
+    },
+    {
+      "ar": "تايلويند CSS",
+      "en": "Tailwind CSS"
+    },
+    {
+      "ar": "نود جي إس وإكسبريس",
+      "en": "Node.js & Express"
+    },
+    {
+      "ar": "بايثون ودجانغو",
+      "en": "Python & Django"
+    },
+    {
+      "ar": "قاعدة بيانات MySQL وMongoDB",
+      "en": "MySQL & MongoDB Databases"
+    },
+    {
+      "ar": "Git وإدارة المشاريع",
+      "en": "Git & Project Management"
     },
     {
       "ar": {
-        "ar": "رياكت",
-        "en": "رياكت"
+        "ar": "التصميم سريع الاستجابة",
+        "en": "التصميم سريع الاستجابة"
       },
       "en": {
-        "ar": "React.js",
-        "en": "React.js"
-      }
-    },
-    {
-      "ar": {
-        "ar": "ثفىشث",
-        "en": "ىتئثسىتسق"
-      },
-      "en": {
-        "ar": "تفقستسق",
-        "en": "تىئسق"
+        "ar": "Responsive Design",
+        "en": "Responsive Design"
       }
     }
   ],
   "experience": [
     {
       "role": {
-        "ar": "ئقيىئ",
-        "en": "ىتئيث"
+        "ar": "مطور واجهات أمامية متقدم",
+        "en": "Senior Frontend Developer"
       },
       "company": {
-        "ar": "تةئث",
-        "en": "ئتةئث"
+        "ar": "شركة التقنية المتطورة",
+        "en": "Advanced Tech Company"
       },
       "period": {
-        "ar": "تئ",
-        "en": "تةئتةئ"
+        "ar": "2022 - الآن",
+        "en": "2022 - Present"
       },
       "description": {
-        "ar": "ئقتئقت",
-        "en": "تئقت"
+        "ar": "تطوير تطبيقات ويب معقدة باستخدام React.js و Next.js. تحسين أداء التطبيقات وتجربة المستخدم. قيادة فريق تطوير مكون من 5 مطورين. تنفيذ أفضل ممارسات التطوير وتطبيق اختبارات الوحدة والتكامل.",
+        "en": "Developing complex web applications using React.js and Next.js. Optimizing application performance and user experience. Leading a development team of 5 developers. Implementing best development practices and applying unit and integration tests."
       }
     },
     {
       "role": {
-        "ar": "مطور واجهات",
-        "en": "Frontend Dev"
+        "ar": "مطور ويب شامل",
+        "en": "Full Stack Web Developer"
       },
       "company": {
-        "ar": "شركة تقنية",
-        "en": "Tech Co"
+        "ar": "شركة الحلول الرقمية",
+        "en": "Digital Solutions Company"
       },
       "period": {
-        "ar": "2024 - الآن",
-        "en": "2024 - Present"
+        "ar": "2020 - 2022",
+        "en": "2020 - 2022"
       },
       "description": {
-        "ar": "تطوير...",
-        "en": "Developing..."
+        "ar": "تطوير تطبيقات ويب كاملة من الصفر. العمل على كل من الواجهات الأمامية والخلفية. التعاون مع المصممين لتحويل التصاميم إلى واجهات تفاعلية. تطوير واجهات برمجة التطبيقات RESTful.",
+        "en": "Developing complete web applications from scratch. Working on both frontend and backend. Collaborating with designers to convert designs into interactive interfaces. Developing RESTful APIs."
+      }
+    },
+    {
+      "role": {
+        "ar": "متدرب تطوير ويب",
+        "en": "Web Development Intern"
+      },
+      "company": {
+        "ar": "شركة الابتكار التقني",
+        "en": "Tech Innovation Company"
+      },
+      "period": {
+        "ar": "2019 - 2020",
+        "en": "2019 - 2020"
+      },
+      "description": {
+        "ar": "المساعدة في تطوير واجهات المستخدم باستخدام HTML/CSS/JavaScript. تعلم أساسيات تطوير الويب وأفضل الممارسات. المشاركة في مشاريع حقيقية تحت إشراف مطورين ذوي خبرة.",
+        "en": "Assisted in developing user interfaces using HTML/CSS/JavaScript. Learned web development fundamentals and best practices. Participated in real projects under the supervision of experienced developers."
       }
     }
   ],
   "projects": [
     {
       "title": {
-        "ar": "متجر إلكتروني",
-        "en": "E-Commerce"
+        "ar": "منصة التجارة الإلكترونية المتكاملة",
+        "en": "Integrated E-Commerce Platform"
       },
       "desc": {
-        "ar": "وصف المشروع",
-        "en": "Project Description"
+        "ar": "منصة تسوق إلكتروني كاملة مع نظام دفع متعدد الخيارات وإدارة طلبات متقدمة. تتضمن لوحة تحكم للمسؤول وتطبيق جوال.",
+        "en": "Complete e-commerce shopping platform with multi-option payment system and advanced order management. Includes admin dashboard and mobile application."
       },
-      "link": "https://devshowcase-7d9s.onrender.com/"
+      "link": "https://github.com/osamaalharbi/ecommerce-platform"
     },
     {
       "title": {
-        "ar": "سقتة",
-        "en": "ءقنةيءق"
+        "ar": "نظام إدارة المهام الذكي",
+        "en": "Smart Task Management System"
       },
       "desc": {
-        "ar": "ت6يق6ت",
-        "en": "نتيق"
+        "ar": "تطبيق ويب لإدارة المهام الشخصية والفريقية مع ميزات السحب والإفلات، الإشعارات الذكية، وتقارير الأداء.",
+        "en": "Web application for personal and team task management with drag-drop features, smart notifications, and performance reports."
       },
-      "link": "https://devshowcase-7d9s.onrender.com/"
+      "link": "https://github.com/osamaalharbi/task-management-system"
+    },
+    {
+      "title": {
+        "ar": "منصة التعليم عن بعد",
+        "en": "E-Learning Platform"
+      },
+      "desc": {
+        "ar": "منصة تعليمية شاملة مع فصول افتراضية، نظام تقييم، شهادات رقمية، وتتبع تقدم الطلاب.",
+        "en": "Comprehensive educational platform with virtual classes, assessment system, digital certificates, and student progress tracking."
+      },
+      "link": "https://github.com/osamaalharbi/elearning-platform"
+    },
+    {
+      "title": {
+        "ar": "تطبيق الطقس الذكي",
+        "en": "Smart Weather App"
+      },
+      "desc": {
+        "ar": "تطبيق طقس تفاعلي مع توقعات دقيقة، خرائط الطقس الحيوية، وإشعارات الطقس القاسي.",
+        "en": "Interactive weather application with accurate forecasts, live weather maps, and severe weather notifications."
+      },
+      "link": "https://github.com/osamaalharbi/weather-app"
+    },
+    {
+      "title": {
+        "ar": "منصة بورتفوليو تفاعلية",
+        "en": "Interactive Portfolio Platform"
+      },
+      "desc": {
+        "ar": "منصة بورتفوليو قابلة للتخصيص مع نظام إدارة محتوى، ميزات PWA، وتكامل مع GitHub.",
+        "en": "Customizable portfolio platform with CMS system, PWA features, and GitHub integration."
+      },
+      "link": "https://github.com/osamaalharbi/portfolio-platform"
+    },
+    {
+      "title": {
+        "ar": "نظام حجز المواعيد",
+        "en": "Appointment Booking System"
+      },
+      "desc": {
+        "ar": "نظام متكامل لحجز المواعيد مع تقويم تفاعلي، إشعارات تذكير، وإدارة العملاء.",
+        "en": "Integrated appointment booking system with interactive calendar, reminder notifications, and client management."
+      },
+      "link": "https://github.com/osamaalharbi/booking-system"
     }
   ],
   "certificates": [
     {
       "name": {
-        "ar": "شهادة ويب",
-        "en": "Web Cert"
+        "ar": "شهادة تطوير الويب المتقدم",
+        "en": "Advanced Web Development Certificate"
       },
       "issuer": {
-        "ar": "جوجل",
-        "en": "Google"
+        "ar": "منصة التعلم الإلكتروني الدولية",
+        "en": "International E-Learning Platform"
       },
-      "date": "[object Object]"
+      "date": "2023"
     },
     {
       "name": {
-        "ar": "قفءةىقء",
-        "en": "فةتئقف"
+        "ar": "شهادة React.js الاحترافية",
+        "en": "Professional React.js Certificate"
       },
       "issuer": {
-        "ar": "تقءفتة",
-        "en": "تةقءفة"
+        "ar": "أكاديمية البرمجة العالمية",
+        "en": "Global Programming Academy"
       },
-      "date": "ءقفاءقت"
+      "date": "2022"
     },
     {
       "name": {
-        "ar": "ثفتئثت",
-        "en": "ت5ئث5ت"
+        "ar": "شهادة JavaScript الحديثة (ES6+)",
+        "en": "Modern JavaScript Certificate (ES6+)"
       },
       "issuer": {
-        "ar": "ئثتئث",
-        "en": "ئثتئث"
+        "ar": "معهد التقنية المتقدمة",
+        "en": "Advanced Technology Institute"
       },
-      "date": "ت5ئث5تع"
+      "date": "2021"
+    },
+    {
+      "name": {
+        "ar": "شهادة أمن المعلومات",
+        "en": "Information Security Certificate"
+      },
+      "issuer": {
+        "ar": "مركز الأمن السيبراني",
+        "en": "Cybersecurity Center"
+      },
+      "date": "2020"
+    },
+    {
+      "name": {
+        "ar": "شهادة إدارة المشاريع الرشيقة (Agile)",
+        "en": "Agile Project Management Certificate"
+      },
+      "issuer": {
+        "ar": "مجلس إدارة المشاريع",
+        "en": "Project Management Council"
+      },
+      "date": "2019"
     }
   ]
 }
