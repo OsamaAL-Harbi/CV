@@ -56,6 +56,16 @@
         "ar": "Responsive Design",
         "en": "Responsive Design"
       }
+    },
+    {
+      "ar": {
+        "ar": "تجربة",
+        "en": "Test"
+      },
+      "en": {
+        "ar": "تجربة",
+        "en": "TEST"
+      }
     }
   ],
   "experience": [
@@ -237,6 +247,17 @@
         "en": "Project Management Council"
       },
       "date": "2019"
+    },
+    {
+      "name": {
+        "ar": "ابوكخالةظظ",
+        "en": "Ggghh"
+      },
+      "issuer": {
+        "ar": "ااىراننربتنظ",
+        "en": "Fghhgf"
+      },
+      "date": ""
     }
   ]
 }
