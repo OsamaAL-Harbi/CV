@@ -1,59 +1,245 @@
 backend:
   name: git-gateway
-  branch: main # تأكد من أن هذا يطابق اسم الفرع الخاص بك (main أو master)
+  branch: main
 
 media_folder: "images"
 public_folder: "images"
-
-display_url: "https://yoursite.netlify.app" # يمكنك تغيير هذا لاحقاً برابط موقعك الفعلي
+display_url: "https://yoursite.netlify.app"
 locale: "ar"
 
 collections:
   - name: "content"
     label: "المحتوى"
     files:
+
       - name: "cv_data"
         label: "بيانات السيرة الذاتية"
         file: "data.json"
         fields:
+
+          # ─── الملف الشخصي ───────────────────────────────
           - label: "الملف الشخصي"
             name: "profile"
             widget: "object"
             fields:
-              - {label: "الاسم", name: "name", widget: "string"}
-              - {label: "المسمى الوظيفي", name: "title", widget: "string"}
-              - {label: "صورة شخصية", name: "image", widget: "image"}
-              - {label: "نبذة عني", name: "summary", widget: "text"}
-              - {label: "البريد الإلكتروني", name: "email", widget: "string"}
-              - {label: "رابط لينكد إن", name: "linkedin", widget: "string", required: false}
-              - {label: "رابط جيت هب", name: "github", widget: "string", required: false}
-          
-          - label: "المهارات"
-            name: "skills"
-            widget: "list"
-            field: {label: "اسم المهارة", name: "skill", widget: "string"}
+              - label: "الاسم"
+                name: "name"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
 
-          - label: "الخبرات"
+              - label: "المسمى الوظيفي"
+                name: "title"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+
+              - label: "نبذة شخصية"
+                name: "summary"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "text" }
+                  - { label: "English", name: "en", widget: "text" }
+
+              - { label: "البريد الإلكتروني", name: "email",    widget: "string" }
+              - { label: "رقم الهاتف",        name: "phone",    widget: "string", required: false }
+              - { label: "الصورة الشخصية",    name: "image",    widget: "image",  required: false }
+              - { label: "رابط LinkedIn",      name: "linkedin", widget: "string", required: false }
+              - { label: "رابط GitHub",        name: "github",   widget: "string", required: false }
+              - { label: "رابط السيرة الذاتية PDF", name: "cv", widget: "string", required: false }
+
+              - label: "الموقع الجغرافي"
+                name: "location"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+
+              - label: "الجنسية"
+                name: "nationality"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+
+          # ─── التعليم ────────────────────────────────────
+          - label: "التعليم"
+            name: "education"
+            widget: "list"
+            fields:
+              - label: "الدرجة العلمية"
+                name: "degree"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "المؤسسة التعليمية"
+                name: "institution"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "التاريخ"
+                name: "period"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "الوصف"
+                name: "description"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "text" }
+                  - { label: "English", name: "en", widget: "text" }
+
+          # ─── الخبرات العملية ────────────────────────────
+          - label: "الخبرات العملية"
             name: "experience"
             widget: "list"
             fields:
-              - {label: "المسمى الوظيفي", name: "role", widget: "string"}
-              - {label: "الشركة", name: "company", widget: "string"}
-              - {label: "الفترة الزمنية", name: "period", widget: "string"}
-              - {label: "الوصف", name: "description", widget: "text"}
+              - label: "المسمى الوظيفي"
+                name: "role"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "الشركة / المؤسسة"
+                name: "company"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "الفترة الزمنية"
+                name: "period"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "الوصف"
+                name: "description"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "text" }
+                  - { label: "English", name: "en", widget: "text" }
 
+          # ─── التطوع ─────────────────────────────────────
+          - label: "الأعمال التطوعية"
+            name: "volunteer"
+            widget: "list"
+            fields:
+              - label: "الدور"
+                name: "role"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "المنظمة"
+                name: "organization"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "الفترة"
+                name: "period"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - { label: "عدد الساعات", name: "hours", widget: "string", required: false }
+              - label: "الوصف"
+                name: "description"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "text" }
+                  - { label: "English", name: "en", widget: "text" }
+
+          # ─── المهارات ────────────────────────────────────
+          - label: "المهارات"
+            name: "skills"
+            widget: "list"
+            fields:
+              - { label: "عربي",    name: "ar", widget: "string" }
+              - { label: "English", name: "en", widget: "string" }
+
+          # ─── المشاريع ────────────────────────────────────
           - label: "المشاريع"
             name: "projects"
             widget: "list"
             fields:
-              - {label: "اسم المشروع", name: "title", widget: "string"}
-              - {label: "الوصف", name: "desc", widget: "text"}
-              - {label: "رابط المشروع", name: "link", widget: "string"}
+              - label: "عنوان المشروع"
+                name: "title"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "الوصف"
+                name: "desc"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "text" }
+                  - { label: "English", name: "en", widget: "text" }
+              - { label: "رابط المشروع", name: "link", widget: "string", required: false }
 
-          - label: "الشهادات"
+          # ─── الشهادات ────────────────────────────────────
+          - label: "الشهادات المهنية"
             name: "certificates"
             widget: "list"
             fields:
-              - {label: "اسم الشهادة", name: "name", widget: "string"}
-              - {label: "جهة الإصدار", name: "issuer", widget: "string"}
-              - {label: "التاريخ", name: "date", widget: "string"}
+              - label: "اسم الشهادة"
+                name: "name"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "الجهة المانحة"
+                name: "issuer"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - { label: "رقم الاعتماد (Credential ID)", name: "credential", widget: "string", required: false }
+              - { label: "التاريخ",                       name: "date",       widget: "string", required: false }
+
+          # ─── ورش العمل ───────────────────────────────────
+          - label: "ورش العمل"
+            name: "workshops"
+            widget: "list"
+            fields:
+              - label: "اسم الورشة"
+                name: "name"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "الجهة المنظمة"
+                name: "organizer"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "التاريخ"
+                name: "date"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+
+          # ─── اللغات ──────────────────────────────────────
+          - label: "اللغات"
+            name: "languages"
+            widget: "list"
+            fields:
+              - label: "اللغة"
+                name: "name"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
+              - label: "المستوى"
+                name: "level"
+                widget: "object"
+                fields:
+                  - { label: "عربي",    name: "ar", widget: "string" }
+                  - { label: "English", name: "en", widget: "string" }
