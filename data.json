@@ -1,263 +1,200 @@
 {
   "profile": {
     "name": {
-      "ar": "أسامة الحربي",
-      "en": "Osama Al-Harbi"
+      "ar": "أسامة عبدالعزيز الحربي",
+      "en": "Osama Abdulaziz Al-Harbi"
     },
     "title": {
-      "ar": "تقنية المعلومات",
-      "en": "Information Technology"
+      "ar": "خريج تقنية المعلومات",
+      "en": "Information Technology Graduate"
     },
     "summary": {
-      "ar": "مطور برمجيات شغوف ببناء تجارب ويب حديثة ومبتكرة. أمتلك خبرة في تطوير تطبيقات الويب باستخدام أحدث التقنيات وأساليب التطوير. أؤمن بقوة التعليم المستمر وأسعى دائماً لتطوير مهاراتي.",
-      "en": "Passionate software engineer building modern and innovative web experiences. Experienced in web applications using the latest technologies and development methodologies. I believe in the power of continuous learning and always strive to improve my skills."
+      "ar": "خريج تقنية معلومات طموح أسعى للعمل في مجال الدعم الفني وإدارة شبكات TCP/IP لضمان كفاءة البنية التحتية واستمرارية الخدمات. أمتلك معرفة متينة في قواعد بيانات SQL وتطوير الأنظمة، مدعومة بشهادات مهنية في الأمن السيبراني من ISC2 وIBM. هدفي المساهمة في التميز الرقمي والتشغيلي من خلال مهارات تحليل البيانات والتوثيق التقني.",
+      "en": "An ambitious IT graduate seeking to utilize skills in technical support and TCP/IP network administration to ensure infrastructure efficiency and service continuity. Possesses strong knowledge of SQL databases and systems development, enhanced by professional cybersecurity certifications from ISC2 and IBM. Goal is to contribute to digital and operational excellence through data analysis and technical documentation skills."
     },
     "email": "osamafcv214@gmail.com",
+    "phone": "+966537820694",
+    "location": {
+      "ar": "المدينة المنورة، المملكة العربية السعودية",
+      "en": "Madinah, Saudi Arabia"
+    },
+    "nationality": {
+      "ar": "سعودي",
+      "en": "Saudi"
+    },
     "image": "",
-    "linkedin": "https://www.linkedin.com/in/osama-al-harbi-368a5a23b/",
+    "linkedin": "https://www.linkedin.com/in/osama-al-harbi",
     "github": "https://github.com/OsamaAL-Harbi",
     "cv": "./assets/cv.pdf"
   },
-  "skills": [
+  "education": [
     {
-      "ar": "جافاسكريبت (ES6+)",
-      "en": "JavaScript (ES6+)"
-    },
-    {
-      "ar": "رياكت وجيكس",
-      "en": "React.js & Next.js"
-    },
-    {
-      "ar": "تايلويند CSS",
-      "en": "Tailwind CSS"
-    },
-    {
-      "ar": "نود جي إس وإكسبريس",
-      "en": "Node.js & Express"
-    },
-    {
-      "ar": "بايثون ودجانغو",
-      "en": "Python & Django"
-    },
-    {
-      "ar": "قاعدة بيانات MySQL وMongoDB",
-      "en": "MySQL & MongoDB Databases"
-    },
-    {
-      "ar": "Git وإدارة المشاريع",
-      "en": "Git & Project Management"
-    },
-    {
-      "ar": {
-        "ar": "التصميم سريع الاستجابة",
-        "en": "التصميم سريع الاستجابة"
+      "degree": {
+        "ar": "بكالوريوس تقنية المعلومات",
+        "en": "Bachelor's Degree in Information Technology"
       },
-      "en": {
-        "ar": "Responsive Design",
-        "en": "Responsive Design"
-      }
-    },
-    {
-      "ar": {
-        "ar": "تجربة",
-        "en": "Test"
+      "institution": {
+        "ar": "الجامعة الإسلامية بالمدينة المنورة",
+        "en": "Islamic University of Madinah"
       },
-      "en": {
-        "ar": "تجربة",
-        "en": "TEST"
+      "period": {
+        "ar": "يناير 2026",
+        "en": "January 2026"
+      },
+      "description": {
+        "ar": "تخرج في تقنية المعلومات مع التركيز على الشبكات وقواعد البيانات وتطوير الأنظمة والأمن السيبراني.",
+        "en": "Graduated in Information Technology with focus on networking, databases, systems development, and cybersecurity."
       }
     }
   ],
   "experience": [
     {
       "role": {
-        "ar": "مطور واجهات أمامية متقدم",
-        "en": "Senior Frontend Developer"
+        "ar": "متدرب تحول رقمي",
+        "en": "Digital Transformation Trainee"
       },
       "company": {
-        "ar": "شركة التقنية المتطورة",
-        "en": "Advanced Tech Company"
+        "ar": "عمادة تقنية المعلومات والتعليم الإلكتروني - الجامعة الإسلامية بالمدينة المنورة",
+        "en": "Deanship of IT & E-Learning - Islamic University of Madinah"
       },
       "period": {
-        "ar": "2022 - الآن",
-        "en": "2022 - Present"
+        "ar": "يناير 2026 - حاضر",
+        "en": "January 2026 – Present"
       },
       "description": {
-        "ar": "تطوير تطبيقات ويب معقدة باستخدام React.js و Next.js. تحسين أداء التطبيقات وتجربة المستخدم. قيادة فريق تطوير مكون من 5 مطورين. تنفيذ أفضل ممارسات التطوير وتطبيق اختبارات الوحدة والتكامل.",
-        "en": "Developing complex web applications using React.js and Next.js. Optimizing application performance and user experience. Leading a development team of 5 developers. Implementing best development practices and applying unit and integration tests."
+        "ar": "تحليل ومراجعة تقارير قياس التحول الرقمي الصادرة عن هيئة الحكومة الرقمية. تطوير وتدقيق الأدلة التقنية لمعايير النضج الرقمي الوطنية. الإشراف على إصدار التقارير الدورية لحوكمة البيانات. إدارة منصة رقمي وتسجيل الخدمات الرقمية. إنشاء وتحديث مخزونات أصول البرمجيات والتقارير التقنية.",
+        "en": "Analyzed Digital Transformation Measurement reports from the Digital Government Authority (DGA). Developed and audited technical evidence for national Digital Maturity standards. Oversaw periodic reports for data governance. Managed digital services registration via 'Raqmi' portal. Established software asset inventories and coordinated with technical teams on BRDs."
       }
     },
     {
       "role": {
-        "ar": "مطور ويب شامل",
-        "en": "Full Stack Web Developer"
+        "ar": "متدرب إدارة الجودة الشاملة (تعاوني)",
+        "en": "TQM CO-OP Trainee"
       },
       "company": {
-        "ar": "شركة الحلول الرقمية",
-        "en": "Digital Solutions Company"
+        "ar": "عمادة تقنية المعلومات والتعليم الإلكتروني - الجامعة الإسلامية بالمدينة المنورة",
+        "en": "Deanship of IT & E-Learning - Islamic University of Madinah"
       },
       "period": {
-        "ar": "2020 - 2022",
-        "en": "2020 - 2022"
+        "ar": "يونيو 2025 - أغسطس 2025",
+        "en": "June 2025 – August 2025"
       },
       "description": {
-        "ar": "تطوير تطبيقات ويب كاملة من الصفر. العمل على كل من الواجهات الأمامية والخلفية. التعاون مع المصممين لتحويل التصاميم إلى واجهات تفاعلية. تطوير واجهات برمجة التطبيقات RESTful.",
-        "en": "Developing complete web applications from scratch. Working on both frontend and backend. Collaborating with designers to convert designs into interactive interfaces. Developing RESTful APIs."
-      }
-    },
-    {
-      "role": {
-        "ar": "متدرب تطوير ويب",
-        "en": "Web Development Intern"
-      },
-      "company": {
-        "ar": "شركة الابتكار التقني",
-        "en": "Tech Innovation Company"
-      },
-      "period": {
-        "ar": "2019 - 2020",
-        "en": "2019 - 2020"
-      },
-      "description": {
-        "ar": "المساعدة في تطوير واجهات المستخدم باستخدام HTML/CSS/JavaScript. تعلم أساسيات تطوير الويب وأفضل الممارسات. المشاركة في مشاريع حقيقية تحت إشراف مطورين ذوي خبرة.",
-        "en": "Assisted in developing user interfaces using HTML/CSS/JavaScript. Learned web development fundamentals and best practices. Participated in real projects under the supervision of experienced developers."
+        "ar": "تقديم الدعم الفني والتشغيلي في بيئة تقنية المعلومات الجامعية. مراجعة إجراءات التشغيل وتوثيق الأنظمة. المساعدة في تحديد مشكلات الأنظمة وفجوات الخدمة. دعم قياس الأداء وحساب مؤشرات KPI لوقت التشغيل ورضا المستخدمين. استخدام أدوات Microsoft Visio لتحليل سير العمل.",
+        "en": "Provided technical and operational support in a university IT environment. Reviewed IT procedures and system documentation to ensure compliance. Assisted in identifying system issues and service gaps. Supported performance measurement by collecting data and calculating KPIs for service uptime and user satisfaction. Utilized Microsoft Visio to analyse workflows."
       }
     }
+  ],
+  "volunteer": [
+    {
+      "role": {
+        "ar": "متطوع تقني",
+        "en": "Technical Volunteer"
+      },
+      "organization": {
+        "ar": "عمادة تقنية المعلومات - الجامعة الإسلامية (بوابة المتطوعين الوطنية)",
+        "en": "Deanship of IT - Islamic University (National Volunteer Portal)"
+      },
+      "period": {
+        "ar": "أغسطس 2025",
+        "en": "August 2025"
+      },
+      "hours": "96",
+      "description": {
+        "ar": "96 ساعة تطوعية معتمدة تركزت على تطبيق التدريب التعاوني للبرامج والأنظمة التقنية. دعم مبادرات المركز الوطني لقطاع غير الربحي وتعزيز كفاءة استخدام البرمجيات التقنية.",
+        "en": "Completed 96 certified volunteer hours focused on implementing cooperative training for technical programs and systems. Supported the National Center for Non-Profit Sector's initiatives and enhanced technical software utilization efficiency."
+      }
+    }
+  ],
+  "skills": [
+    { "ar": "تحليل البيانات", "en": "Data Analysis" },
+    { "ar": "بروتوكولات الشبكات (TCP/IP)", "en": "Network Protocols (TCP/IP)" },
+    { "ar": "أنظمة التشغيل (Windows & Linux)", "en": "Operating Systems (Windows & Linux)" },
+    { "ar": "Microsoft Office", "en": "Microsoft Office" },
+    { "ar": "SQL & MySQL", "en": "SQL & MySQL" },
+    { "ar": "HTML5 & CSS3", "en": "HTML5 & CSS3" },
+    { "ar": "التوثيق التقني", "en": "Technical Documentation" },
+    { "ar": "حل المشكلات والتفكير النقدي", "en": "Problem-Solving & Critical Thinking" },
+    { "ar": "الانتباه للتفاصيل", "en": "Attention to Detail" },
+    { "ar": "العمل الجماعي والتعاون", "en": "Teamwork & Collaboration" },
+    { "ar": "إدارة الوقت والتنظيم", "en": "Time Management & Organization" },
+    { "ar": "المبادرة والاستباقية", "en": "Proactivity & Initiative" }
   ],
   "projects": [
     {
       "title": {
-        "ar": "منصة التجارة الإلكترونية المتكاملة",
-        "en": "Integrated E-Commerce Platform"
+        "ar": "نظام إدارة شكاوى الطلاب (صوت الطالب)",
+        "en": "Student Complaints Management System (Voice of Student)"
       },
       "desc": {
-        "ar": "منصة تسوق إلكتروني كاملة مع نظام دفع متعدد الخيارات وإدارة طلبات متقدمة. تتضمن لوحة تحكم للمسؤول وتطبيق جوال.",
-        "en": "Complete e-commerce shopping platform with multi-option payment system and advanced order management. Includes admin dashboard and mobile application."
+        "ar": "مشروع التخرج: نظام سير عمل آلي لتحويل الإجراءات الإدارية اليدوية إلى منصة رقمية متكاملة. يشمل: قاعدة بيانات SQL/MySQL محسّنة وآمنة، واجهة مستخدم بـ HTML وCSS وJavaScript، ونظام صلاحيات متعدد المستويات (مستخدم، أستاذ، مسؤول)، مع مراحل اختبار شاملة لضمان موثوقية النظام.",
+        "en": "Graduation Project: Automated workflow system to transition manual administrative procedures into a digital platform. Features: optimized SQL/MySQL database, HTML/CSS/JavaScript interface, multi-tier authorization framework (User, Faculty, Admin), and rigorous system testing for high reliability and stability in complaint tracking."
       },
-      "link": "https://github.com/osamaalharbi/ecommerce-platform"
-    },
-    {
-      "title": {
-        "ar": "نظام إدارة المهام الذكي",
-        "en": "Smart Task Management System"
-      },
-      "desc": {
-        "ar": "تطبيق ويب لإدارة المهام الشخصية والفريقية مع ميزات السحب والإفلات، الإشعارات الذكية، وتقارير الأداء.",
-        "en": "Web application for personal and team task management with drag-drop features, smart notifications, and performance reports."
-      },
-      "link": "https://github.com/osamaalharbi/task-management-system"
-    },
-    {
-      "title": {
-        "ar": "منصة التعليم عن بعد",
-        "en": "E-Learning Platform"
-      },
-      "desc": {
-        "ar": "منصة تعليمية شاملة مع فصول افتراضية، نظام تقييم، شهادات رقمية، وتتبع تقدم الطلاب.",
-        "en": "Comprehensive educational platform with virtual classes, assessment system, digital certificates, and student progress tracking."
-      },
-      "link": "https://github.com/osamaalharbi/elearning-platform"
-    },
-    {
-      "title": {
-        "ar": "تطبيق الطقس الذكي",
-        "en": "Smart Weather App"
-      },
-      "desc": {
-        "ar": "تطبيق طقس تفاعلي مع توقعات دقيقة، خرائط الطقس الحيوية، وإشعارات الطقس القاسي.",
-        "en": "Interactive weather application with accurate forecasts, live weather maps, and severe weather notifications."
-      },
-      "link": "https://github.com/osamaalharbi/weather-app"
-    },
-    {
-      "title": {
-        "ar": "منصة بورتفوليو تفاعلية",
-        "en": "Interactive Portfolio Platform"
-      },
-      "desc": {
-        "ar": "منصة بورتفوليو قابلة للتخصيص مع نظام إدارة محتوى، ميزات PWA، وتكامل مع GitHub.",
-        "en": "Customizable portfolio platform with CMS system, PWA features, and GitHub integration."
-      },
-      "link": "https://github.com/osamaalharbi/portfolio-platform"
-    },
-    {
-      "title": {
-        "ar": "نظام حجز المواعيد",
-        "en": "Appointment Booking System"
-      },
-      "desc": {
-        "ar": "نظام متكامل لحجز المواعيد مع تقويم تفاعلي، إشعارات تذكير، وإدارة العملاء.",
-        "en": "Integrated appointment booking system with interactive calendar, reminder notifications, and client management."
-      },
-      "link": "https://github.com/osamaalharbi/booking-system"
+      "link": "#"
     }
   ],
   "certificates": [
     {
       "name": {
-        "ar": "شهادة تطوير الويب المتقدم",
-        "en": "Advanced Web Development Certificate"
+        "ar": "أمن الشبكات والاتصالات",
+        "en": "Network and Communications Security"
       },
       "issuer": {
-        "ar": "منصة التعلم الإلكتروني الدولية",
-        "en": "International E-Learning Platform"
+        "ar": "ISC2",
+        "en": "ISC2"
       },
-      "date": "2023"
+      "credential": "HPUZITAO56UA",
+      "date": "January 2025"
     },
     {
       "name": {
-        "ar": "شهادة React.js الاحترافية",
-        "en": "Professional React.js Certificate"
+        "ar": "مبادئ الأمن",
+        "en": "Principles of Security"
       },
       "issuer": {
-        "ar": "أكاديمية البرمجة العالمية",
-        "en": "Global Programming Academy"
+        "ar": "ISC2",
+        "en": "ISC2"
       },
-      "date": "2022"
+      "credential": "RHKTIRIVXJFL",
+      "date": "January 2025"
     },
     {
       "name": {
-        "ar": "شهادة JavaScript الحديثة (ES6+)",
-        "en": "Modern JavaScript Certificate (ES6+)"
+        "ar": "مقدمة في أدوات الأمن السيبراني والهجمات الإلكترونية",
+        "en": "Introduction to Cybersecurity Tools & Cyber Attacks"
       },
       "issuer": {
-        "ar": "معهد التقنية المتقدمة",
-        "en": "Advanced Technology Institute"
+        "ar": "IBM",
+        "en": "IBM"
       },
-      "date": "2021"
-    },
+      "credential": "DZ93HR2XW4I1",
+      "date": "January 2025"
+    }
+  ],
+  "workshops": [
     {
       "name": {
-        "ar": "شهادة أمن المعلومات",
-        "en": "Information Security Certificate"
+        "ar": "التغلب على التحديات واغتنام الفرص في هندسة البرمجيات",
+        "en": "Overcoming Challenges and Seizing Opportunities in Software Engineering"
       },
-      "issuer": {
-        "ar": "مركز الأمن السيبراني",
-        "en": "Cybersecurity Center"
+      "organizer": {
+        "ar": "عمادة الدراسات العليا - الجامعة الإسلامية بالمدينة المنورة",
+        "en": "Deanship of Graduate Studies - Islamic University of Madinah"
       },
-      "date": "2020"
+      "date": {
+        "ar": "أبريل 2024 (5 ساعات)",
+        "en": "April 2024 (5 hours)"
+      }
+    }
+  ],
+  "languages": [
+    {
+      "name": { "ar": "العربية", "en": "Arabic" },
+      "level": { "ar": "اللغة الأم", "en": "Native" }
     },
     {
-      "name": {
-        "ar": "شهادة إدارة المشاريع الرشيقة (Agile)",
-        "en": "Agile Project Management Certificate"
-      },
-      "issuer": {
-        "ar": "مجلس إدارة المشاريع",
-        "en": "Project Management Council"
-      },
-      "date": "2019"
-    },
-    {
-      "name": {
-        "ar": "ابوكخالةظظ",
-        "en": "Ggghh"
-      },
-      "issuer": {
-        "ar": "ااىراننربتنظ",
-        "en": "Fghhgf"
-      },
-      "date": ""
+      "name": { "ar": "الإنجليزية", "en": "English" },
+      "level": { "ar": "درجة STEP: 60", "en": "STEP Score: 60" }
     }
   ]
 }
