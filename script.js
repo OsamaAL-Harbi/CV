@@ -286,9 +286,13 @@ function renderWorkshopItem(item) {
 
 // --- Project Card (with view counter badge) ---
 function renderProjectItem(item, i) {
-    const views  = JSON.parse(sessionStorage.getItem('project_views') || '{}');
-    const count  = views[i] || 0;
-    const viewLabel = currentLang === 'ar' ? 'مشاهدة' : 'views';
+    // Always read fresh from sessionStorage so badge updates after openProjectModal
+    const views     = JSON.parse(sessionStorage.getItem('project_views') || '{}');
+    const count     = views[i] || 0;
+    const viewLabel = count === 1
+        ? (currentLang === 'ar' ? 'مشاهدة' : 'view')
+        : (currentLang === 'ar' ? 'مشاهدة' : 'views');
+
     return `
         <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center relative overflow-hidden group cursor-pointer" onclick="openProjectModal(${i})">
             <i class="fas fa-laptop-code text-5xl text-gray-300 dark:text-gray-700 group-hover:scale-110 transition duration-500"></i>
@@ -297,7 +301,10 @@ function renderProjectItem(item, i) {
                     ${currentLang === 'ar' ? 'عرض التفاصيل' : 'View Details'}
                 </span>
             </div>
-            ${count > 0 ? `<span class="absolute top-3 right-3 ltr:left-3 ltr:right-auto bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1"><i class="fas fa-eye text-[10px]"></i> ${count} ${viewLabel}</span>` : ''}
+            ${count > 0 ? `
+                <span class="absolute top-3 right-3 ltr:left-3 ltr:right-auto bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    <i class="fas fa-eye text-[10px]"></i> ${count} ${viewLabel}
+                </span>` : ''}
         </div>
         <div class="p-6 flex-grow">
             <h3 class="text-lg font-bold mb-2">${t(item.title)}</h3>
@@ -311,19 +318,24 @@ function renderProjectItem(item, i) {
     `;
 }
 
-// --- Languages ---
-function renderLanguages() {
-    const container = document.getElementById('languages-container');
-    if (!container || !appData.languages) return;
-    container.innerHTML = appData.languages.map(lang => `
-        <div class="flex items-center gap-3 bg-white dark:bg-cardBg px-4 py-3 rounded-xl border dark:border-gray-700 shadow-sm">
-            <i class="fas fa-language text-teal-500 text-lg"></i>
-            <div>
-                <p class="font-bold text-sm">${t(lang.name)}</p>
-                <p class="text-xs text-gray-500">${t(lang.level)}</p>
-            </div>
+// --- Languages (with full admin support) ---
+function renderLanguageItem(item, i) {
+    return `
+        <i class="fas fa-language text-teal-500 text-lg flex-shrink-0 mt-0.5"></i>
+        <div>
+            <p class="font-bold text-sm dark:text-white">${t(item.name)}</p>
+            <p class="text-xs text-gray-500">${t(item.level)}</p>
         </div>
-    `).join('');
+    `;
+}
+
+function renderLanguages() {
+    renderSection(
+        'languages',
+        appData.languages || [],
+        renderLanguageItem,
+        'relative group flex items-center gap-3 bg-white dark:bg-cardBg px-4 py-3 rounded-xl border dark:border-gray-700 shadow-sm hover:shadow-md transition'
+    );
 }
 
 // --- Print Header (for @media print) ---
@@ -449,7 +461,7 @@ function openProjectModal(index) {
     const item = (appData.projects || [])[index];
     if (!item) return;
 
-    // Update view counter in sessionStorage
+    // Increment view counter in sessionStorage (session-based, resets on tab close)
     const views = JSON.parse(sessionStorage.getItem('project_views') || '{}');
     views[index] = (views[index] || 0) + 1;
     sessionStorage.setItem('project_views', JSON.stringify(views));
@@ -459,7 +471,10 @@ function openProjectModal(index) {
     document.getElementById('modal-desc').textContent  = t(item.desc);
 
     const viewCount = document.getElementById('modal-views-count');
-    if (viewCount) viewCount.textContent = views[index];
+    if (viewCount) {
+        const viewLabel = currentLang === 'ar' ? 'مشاهدة' : (views[index] === 1 ? 'view' : 'views');
+        viewCount.textContent = `${views[index]} ${viewLabel}`;
+    }
 
     // Technologies
     const techContainer = document.getElementById('modal-technologies');
@@ -490,14 +505,14 @@ function openProjectModal(index) {
         linkSection.style.display = 'none';
     }
 
+    // Re-render project cards to update view badge (reads fresh sessionStorage)
+    renderSection('projects', appData.projects || [], renderProjectItem,
+        'bg-white dark:bg-cardBg rounded-2xl border dark:border-gray-700 overflow-hidden flex flex-col h-full shadow-sm hover:shadow-2xl transition duration-300 transform hover:-translate-y-1');
+
     // Show modal
     const modal = document.getElementById('project-modal');
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
-
-    // Re-render project cards to update view count badge
-    renderSection('projects', appData.projects || [], renderProjectItem,
-        'bg-white dark:bg-cardBg rounded-2xl border dark:border-gray-700 overflow-hidden flex flex-col h-full shadow-sm hover:shadow-2xl transition duration-300 transform hover:-translate-y-1');
 }
 
 function closeProjectModal(event) {
@@ -701,6 +716,10 @@ const SCHEMAS = {
         { key: 'name',      label: 'اسم الورشة / Name' },
         { key: 'organizer', label: 'الجهة / Organizer' },
         { key: 'date',      label: 'التاريخ / Date' }
+    ],
+    languages: [
+        { key: 'name',  label: 'اللغة / Language' },
+        { key: 'level', label: 'المستوى / Level' }
     ]
 };
 
@@ -789,7 +808,7 @@ function deleteItem(type, index) {
 // 16. DRAG & DROP (Sortable)
 // =========================================================
 function initSortable() {
-    ['experience','education','volunteer','skills','certificates','workshops','projects'].forEach(type => {
+    ['experience','education','volunteer','skills','certificates','workshops','projects','languages'].forEach(type => {
         const el = document.getElementById(`${type}-container`);
         if (!el) return;
         new Sortable(el, {
