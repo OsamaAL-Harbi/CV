@@ -1,33 +1,42 @@
 /**
- * OSAMA PORTFOLIO — script.js  v3.0
- * Fixes:
- *  1. relative+group on ALL section wrappers → admin buttons visible & hover works
- *  2. overflow-hidden moved off projects outer wrapper → buttons not clipped
- *  3. skills sortable uses real appData indices not filtered indices
- *  4. typeWriter clears previous interval before starting
- *  5. AOS.refresh() called after every renderAll
- *  6. sessionStorage uses stable title-based key not array index
- *  7. enableAdminMode only re-renders after appData is loaded
+ * OSAMA PORTFOLIO — script.js  v4.0
+ * =====================================================
+ * New in v4:
+ *  20. Dynamic SEO meta tags per page + hash URL routing
+ *  21. Custom 404 handler
+ *  22. Project filtering by technology
+ *  23. Live Demo button on projects
+ *  24. Particles hue-rotate by section
+ *  25. Admin analytics dashboard (session stats + GA4 link)
+ *  26. Contact actions (email copy, LinkedIn, GitHub open)
+ *  27. sendMailto & char counter
+ *  28. Page visit tracking in sessionStorage
+ * =====================================================
  */
 
-// =========================================================
+// =====================================================
 // 1. GLOBALS
-// =========================================================
+// =====================================================
 let appData        = {};
 let githubInfo     = { token: '', repo: '' };
 let currentLang    = localStorage.getItem('lang') || 'ar';
 let isAdmin        = false;
 let clickCount     = 0;
 let activeSkillTab = 'hard';
-let dataLoaded     = false;        // guard: skip admin renderAll before data loads
-let twInterval     = null;         // typewriter interval handle
+let activeFilter   = 'all';          // project filter
+let dataLoaded     = false;
+let twInterval     = null;
 
 const SESSION_DURATION   = 60 * 60 * 1000;
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqarljpg";
+const VALID_PAGES        = ['home', 'resume', 'portfolio', 'contact'];
 
-// =========================================================
+// Particles hue-rotation per section
+const SECTION_HUE = { home: 0, resume: 180, portfolio: 120, contact: 90, 'not-found': 0 };
+
+// =====================================================
 // 2. BOOT
-// =========================================================
+// =====================================================
 document.addEventListener('DOMContentLoaded', () => {
     AOS.init({ duration: 800, once: true });
 
@@ -46,14 +55,20 @@ document.addEventListener('DOMContentLoaded', () => {
     initStatsObserver();
 
     if (localStorage.getItem('saved_repo')) {
-        document.getElementById('repo-input').value = localStorage.getItem('saved_repo');
-        // Token not pre-filled (security: user must re-enter each browser session)
+        const ri = document.getElementById('repo-input');
+        const ti = document.getElementById('token-input');
+        if (ri) ri.value = localStorage.getItem('saved_repo');
+        if (ti) ti.value = localStorage.getItem('saved_token');
     }
 
-    // Load data FIRST, then check session so admin renderAll has real data
+    // Hash routing — must run after data loads
     loadContent().then(() => {
         checkSession();
+        handleHash();                  // respect URL hash on first load
     });
+
+    // React to hash changes (back/forward browser buttons + nav links)
+    window.addEventListener('hashchange', handleHash);
 });
 
 function registerPWA() {
@@ -62,26 +77,65 @@ function registerPWA() {
     }
 }
 
-// =========================================================
-// 3. NAVIGATION (SPA)
-// =========================================================
-function showPage(pageId) {
+// =====================================================
+// 3. NAVIGATION + HASH ROUTING
+// =====================================================
+
+// Called on every hashchange and on first load
+function handleHash() {
+    const hash   = window.location.hash.replace('#', '').trim();
+    const pageId = VALID_PAGES.includes(hash) ? hash : (hash === '' ? 'home' : null);
+    if (pageId) showPage(pageId, false);  // false = don't push state again
+    else if (hash !== '') show404();
+}
+
+function showPage(pageId, pushState = true) {
+    if (!VALID_PAGES.includes(pageId)) { show404(); return; }
+
     document.querySelectorAll('.page-section').forEach(sec => {
         sec.classList.remove('active');
         sec.style.display = 'none';
     });
+
     const target = document.getElementById(pageId);
     if (target) {
         target.style.display = 'block';
         setTimeout(() => { target.classList.add('active'); AOS.refresh(); }, 10);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
     document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('nav-active'));
     const navBtn = document.getElementById(`nav-${pageId}`);
     if (navBtn) navBtn.classList.add('nav-active');
 
     const mobileMenu = document.getElementById('mobile-menu');
     if (mobileMenu && mobileMenu.classList.contains('open')) toggleMobileMenu();
+
+    // Update hash without triggering hashchange again
+    if (pushState && window.location.hash !== `#${pageId}`) {
+        history.pushState(null, '', `#${pageId}`);
+    }
+
+    // Update dynamic SEO meta tags
+    updateMetaTags(pageId);
+
+    // Shift particles hue per section
+    const hue = SECTION_HUE[pageId] ?? 0;
+    const pEl = document.getElementById('particles-js');
+    if (pEl) pEl.style.filter = `hue-rotate(${hue}deg)`;
+
+    // Track page visit in sessionStorage
+    trackPageVisit(pageId);
+}
+
+function show404() {
+    document.querySelectorAll('.page-section').forEach(sec => {
+        sec.classList.remove('active');
+        sec.style.display = 'none';
+    });
+    const el = document.getElementById('not-found');
+    if (el) { el.style.display = 'block'; setTimeout(() => { el.classList.add('active'); AOS.refresh(); }, 10); }
+    document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('nav-active'));
 }
 
 function toggleMobileMenu() {
@@ -99,9 +153,43 @@ function setupScrollTop() {
     });
 }
 
-// =========================================================
-// 4. LOCALISATION
-// =========================================================
+// =====================================================
+// 4. DYNAMIC SEO META TAGS
+// =====================================================
+const PAGE_META = {
+    ar: {
+        home:      { title: 'أسامة الحربي | الرئيسية',                    desc: 'الموقع الشخصي لأسامة عبدالعزيز الحربي - خريج تقنية المعلومات من الجامعة الإسلامية بالمدينة المنورة.' },
+        resume:    { title: 'السيرة الذاتية | أسامة الحربي',              desc: 'السيرة الذاتية الكاملة لأسامة الحربي: خبرات، تعليم، مهارات، شهادات.' },
+        portfolio: { title: 'معرض الأعمال | أسامة الحربي',                desc: 'مشاريع أسامة الحربي البرمجية والتقنية.' },
+        contact:   { title: 'تواصل معي | أسامة الحربي',                   desc: 'تواصل مع أسامة الحربي عبر البريد الإلكتروني أو LinkedIn.' }
+    },
+    en: {
+        home:      { title: 'Osama Al-Harbi | Portfolio',                  desc: 'Personal website of Osama Abdulaziz Al-Harbi – IT Graduate, Islamic University of Madinah.' },
+        resume:    { title: 'Resume | Osama Al-Harbi',                     desc: 'Full resume of Osama Al-Harbi: experience, education, skills, certifications.' },
+        portfolio: { title: 'Portfolio | Osama Al-Harbi',                  desc: 'Technical and programming projects by Osama Al-Harbi.' },
+        contact:   { title: 'Contact | Osama Al-Harbi',                    desc: 'Get in touch with Osama Al-Harbi via email or LinkedIn.' }
+    }
+};
+
+function updateMetaTags(pageId) {
+    const meta    = PAGE_META[currentLang]?.[pageId];
+    if (!meta) return;
+    const pageUrl = `${window.location.origin}${window.location.pathname}#${pageId}`;
+
+    document.title = meta.title;
+
+    const setMeta = (id, attr, val) => { const el = document.getElementById(id); if (el) el.setAttribute(attr, val); };
+    setMeta('meta-description', 'content', meta.desc);
+    setMeta('og-title',         'content', meta.title);
+    setMeta('og-description',   'content', meta.desc);
+    setMeta('og-url',           'content', pageUrl);
+    setMeta('tw-title',         'content', meta.title);
+    setMeta('canonical',        'href',    pageUrl);
+}
+
+// =====================================================
+// 5. LOCALISATION
+// =====================================================
 function t(data) {
     if (data === null || data === undefined) return '';
     if (typeof data === 'object') return data[currentLang] || data.ar || '';
@@ -114,6 +202,9 @@ function toggleLanguage() {
     setDirection();
     renderAll();
     updateStaticText();
+    // Re-apply meta for current page
+    const hash = window.location.hash.replace('#', '') || 'home';
+    updateMetaTags(hash);
 }
 
 function setDirection() {
@@ -126,25 +217,41 @@ function setDirection() {
 const STATIC_TEXT = {
     ar: {
         nav_home:'الرئيسية', nav_resume:'السيرة الذاتية', nav_portfolio:'الأعمال', nav_contact:'تواصل',
-        btn_projects:'أعمالي', btn_save:'حفظ', btn_email:'إرسال',
+        btn_projects:'أعمالي', btn_save:'حفظ', btn_email:'فتح تطبيق الإيميل للإرسال',
         btn_download_cv:'تحميل PDF', btn_share:'مشاركة', btn_print:'طباعة',
         sec_resume:'السيرة الذاتية', sec_exp:'الخبرات', sec_edu:'التعليم',
         sec_volunteer:'التطوع', sec_skills:'المهارات', sec_certs:'الشهادات',
         sec_workshops:'ورش العمل', sec_languages:'اللغات', sec_projects:'معرض المشاريع',
-        contact_title:'راسلني', tab_hard:'تقنية', tab_soft:'شخصية',
+        contact_title:'تواصل معي', contact_email_label:'البريد الإلكتروني',
+        contact_click_copy:'انقر للنسخ', contact_open:'فتح الملف',
+        contact_compose:'اكتب رسالة', contact_subject_label:'الموضوع',
+        contact_message_label:'الرسالة', contact_mailto_note:'سيفتح تطبيق الإيميل على جهازك',
+        contact_cv_title:'هل تريد مراجعة سيرتي الذاتية أولاً؟', contact_cv_sub:'تحميل مباشر — PDF جاهز',
+        tab_hard:'تقنية', tab_soft:'شخصية',
         stat_certs:'شهادات مهنية', stat_volunteer:'ساعة تطوع',
-        stat_projects:'مشروع تخرج', stat_graduation:'سنة التخرج'
+        stat_projects:'مشروع تخرج', stat_graduation:'سنة التخرج',
+        not_found_title:'الصفحة غير موجودة', not_found_desc:'يبدو أن الرابط الذي طلبته غير موجود',
+        not_found_btn:'العودة للرئيسية',
+        filter_all:'الكل'
     },
     en: {
         nav_home:'Home', nav_resume:'Resume', nav_portfolio:'Portfolio', nav_contact:'Contact',
-        btn_projects:'My Work', btn_save:'Save', btn_email:'Send',
+        btn_projects:'My Work', btn_save:'Save', btn_email:'Open Email App',
         btn_download_cv:'Download PDF', btn_share:'Share', btn_print:'Print',
         sec_resume:'Resume', sec_exp:'Experience', sec_edu:'Education',
         sec_volunteer:'Volunteer', sec_skills:'Skills', sec_certs:'Certificates',
         sec_workshops:'Workshops', sec_languages:'Languages', sec_projects:'Portfolio',
-        contact_title:'Get in Touch', tab_hard:'Technical', tab_soft:'Soft Skills',
+        contact_title:'Get in Touch', contact_email_label:'Email',
+        contact_click_copy:'Click to copy', contact_open:'Open Profile',
+        contact_compose:'Write a Message', contact_subject_label:'Subject',
+        contact_message_label:'Message', contact_mailto_note:'Your email app will open with the message',
+        contact_cv_title:'Want to review my CV first?', contact_cv_sub:'Direct download — PDF ready',
+        tab_hard:'Technical', tab_soft:'Soft Skills',
         stat_certs:'Certifications', stat_volunteer:'Volunteer Hours',
-        stat_projects:'Graduation Project', stat_graduation:'Graduation Year'
+        stat_projects:'Graduation Project', stat_graduation:'Graduation Year',
+        not_found_title:'Page Not Found', not_found_desc:'The link you requested does not exist',
+        not_found_btn:'Back to Home',
+        filter_all:'All'
     }
 };
 
@@ -155,9 +262,9 @@ function updateStaticText() {
     });
 }
 
-// =========================================================
-// 5. DATA LOADING
-// =========================================================
+// =====================================================
+// 6. DATA LOADING
+// =====================================================
 async function loadContent() {
     try {
         const res = await fetch(`data.json?t=${Date.now()}`);
@@ -167,33 +274,25 @@ async function loadContent() {
         renderAll();
         updateStaticText();
         setSmartGreeting();
-        const loadingEl = document.getElementById('loading-screen');
-        loadingEl.style.transition = 'opacity 0.6s ease';
-        loadingEl.style.opacity    = '0';
-        setTimeout(() => loadingEl.classList.add('hidden'), 650);
+        setTimeout(() => document.getElementById('loading-screen').classList.add('hidden'), 500);
     } catch (err) {
         showToast('خطأ في تحميل البيانات / Error loading data', 'error');
         document.getElementById('loading-screen').classList.add('hidden');
     }
 }
 
-// =========================================================
-// 6. RENDER ENGINE
-// =========================================================
+// =====================================================
+// 7. RENDER ENGINE
+// =====================================================
 
-// WRAPPER CLASSES — all include 'relative group' so:
-//   • admin buttons (absolute) are positioned inside the card
-//   • group-hover:opacity-100 triggers on mouse enter
 const WC = {
     experience:   'relative group mb-8',
     education:    'relative group mb-6',
     volunteer:    'relative group mb-6',
-    // projects outer wrapper must NOT have overflow-hidden (clips admin buttons)
-    // overflow-hidden is on the inner image div only
     projects:     'relative group bg-white dark:bg-cardBg rounded-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-full shadow-sm hover:shadow-2xl transition duration-300 transform hover:-translate-y-1',
     certificates: 'relative group flex items-center gap-4 bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
     workshops:    'relative group bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
-    languages:    'relative group flex items-center gap-3 bg-white dark:bg-cardBg px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
+    languages:    'relative group flex items-center gap-3 bg-white dark:bg-cardBg px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition'
 };
 
 function renderAll() {
@@ -204,16 +303,16 @@ function renderAll() {
     renderSkillsWithProgress(activeSkillTab);
     renderSection('certificates', appData.certificates || [], renderCertItem,        WC.certificates);
     renderSection('workshops',    appData.workshops    || [], renderWorkshopItem,    WC.workshops);
-    renderSection('projects',     appData.projects     || [], renderProjectItem,     WC.projects);
-    renderProjectFilters();
     renderSection('languages',    appData.languages    || [], renderLanguageItem,    WC.languages);
+    // Projects: filters first, then filtered grid
+    renderProjectFilters();
+    renderFilteredProjects();
     updatePrintHeader();
     if (isAdmin) initSortable();
-    // Refresh AOS so newly rendered elements animate on scroll
     setTimeout(() => AOS.refresh(), 50);
 }
 
-// ─── Profile ───────────────────────────────────────────────
+// ─── Profile ──────────────────────────────────────────
 function renderProfile() {
     const p = appData.profile;
     if (!p) return;
@@ -223,14 +322,9 @@ function renderProfile() {
 
     const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t(p.name))}&background=0D8ABC&color=fff&size=200`;
     const imgEl = document.getElementById('profile-img');
-    if (imgEl) {
-        imgEl.src = p.image || fallback;
-        imgEl.loading = 'lazy';
-        imgEl.onerror = () => { imgEl.src = fallback; };
-    }
+    if (imgEl) { imgEl.src = p.image || fallback; imgEl.onerror = () => { imgEl.src = fallback; }; }
 
-    // FIX: clear previous typewriter interval before starting a new one
-    if (twInterval) { clearInterval(twInterval); twInterval = null; }
+    if (twInterval) clearInterval(twInterval);
     typeWriter(t(p.title), 'typewriter');
 
     const locEl = document.getElementById('profile-location');
@@ -240,98 +334,37 @@ function renderProfile() {
     if (emailDisplay) emailDisplay.textContent = p.email;
     const locDisplay = document.getElementById('contact-location-display');
     if (locDisplay) locDisplay.textContent = t(p.location);
-
-    const linkedin = document.getElementById('social-linkedin');
-    if (linkedin) linkedin.href = p.linkedin || '#';
-    const github = document.getElementById('social-github');
-    if (github) github.href = p.github || '#';
-
-    // C — Update OG & Twitter meta tags dynamically
-    const fullName  = t(p.name);
-    const summary   = t(p.summary).substring(0, 160);
-    const avatar    = p.image || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
-    _setMeta('og-title',       fullName + ' | Portfolio');
-    _setMeta('og-description', summary);
-    _setMeta('og-image',       avatar);
-    _setMeta('og-locale',      currentLang === 'ar' ? 'ar_SA' : 'en_US');
-    _setMeta('tw-title',       fullName + ' | Portfolio');
-    _setMeta('tw-description', summary);
-    document.title = fullName + ' | Portfolio';
-
-    // A — Availability badge
-    renderAvailability(p);
 }
 
-function _setMeta(id, content) {
-    const el = document.getElementById(id);
-    if (el) el.setAttribute('content', content);
-}
-
-// A2 — Availability badge
-function renderAvailability(p) {
-    const badge  = document.getElementById('availability-badge');
-    const pill   = document.getElementById('availability-pill');
-    const dot    = document.getElementById('availability-dot');
-    const text   = document.getElementById('availability-text');
-    if (!badge || !p) return;
-
-    const available = p.available !== false; // default true if not set
-    badge.classList.remove('hidden');
-    badge.classList.add('flex');
-
-    if (available) {
-        pill.className  = 'inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-700 transition-all';
-        dot.className   = 'w-2 h-2 rounded-full bg-green-500 animate-pulse';
-        text.textContent = currentLang === 'ar' ? 'متاح للعمل' : 'Open to Work';
-    } else {
-        pill.className  = 'inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 transition-all';
-        dot.className   = 'w-2 h-2 rounded-full bg-gray-400';
-        text.textContent = currentLang === 'ar' ? 'غير متاح حالياً' : 'Not Available';
-    }
-}
-
-// ─── Generic section renderer ──────────────────────────────
+// ─── Generic section renderer ─────────────────────────
 function renderSection(type, data, contentFn, wrapperClass) {
     const container = document.getElementById(`${type}-container`);
     if (!container) return;
-
-    const hasTimeline = ['experience', 'education', 'volunteer'].includes(type);
-
+    const hasTimeline = ['experience','education','volunteer'].includes(type);
     container.innerHTML = data.map((item, i) => `
         <div class="${wrapperClass} sortable-item" data-index="${i}">
             ${renderAdminButtons(type, i)}
-            ${hasTimeline
-                ? `<div class="absolute -right-[39px] ltr:-left-[39px] ltr:right-auto top-1 w-4 h-4 bg-primary rounded-full border-4 border-white dark:border-darkBg z-10 group-hover:scale-125 transition"></div>`
-                : ''}
+            ${hasTimeline ? `<div class="absolute -right-[39px] ltr:-left-[39px] ltr:right-auto top-1 w-4 h-4 bg-primary rounded-full border-4 border-white dark:border-darkBg z-10 group-hover:scale-125 transition"></div>` : ''}
             ${contentFn(item, i)}
         </div>
     `).join('');
 }
 
-// ─── Item renderers ────────────────────────────────────────
+// ─── Item renderers ───────────────────────────────────
 function renderExperienceItem(item) {
-    // Extract year from period for timeline badge
-    const periodStr = t(item.period);
-    const yearMatch = periodStr.match(/\d{4}/);
-    const yearBadge = yearMatch ? `<span class="timeline-year">${yearMatch[0]}</span>` : '';
     return `
-        ${yearBadge}
         <h3 class="text-xl font-bold dark:text-white hover:text-primary transition">${t(item.role)}</h3>
         <p class="text-primary font-medium text-sm">${t(item.company)}</p>
-        <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs mb-3 font-bold">${periodStr}</span>
-        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${t(item.description)}</p>
-    `;
+        <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs mb-3 font-bold">${t(item.period)}</span>
+        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${t(item.description)}</p>`;
 }
-
 function renderEducationItem(item) {
     return `
         <h3 class="text-xl font-bold dark:text-white hover:text-blue-500 transition">${t(item.degree)}</h3>
         <p class="text-blue-500 font-medium text-sm">${t(item.institution)}</p>
         <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs mb-3 font-bold">${t(item.period)}</span>
-        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${t(item.description)}</p>
-    `;
+        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${t(item.description)}</p>`;
 }
-
 function renderVolunteerItem(item) {
     return `
         <h3 class="text-xl font-bold dark:text-white hover:text-orange-500 transition">${t(item.role)}</h3>
@@ -340,10 +373,8 @@ function renderVolunteerItem(item) {
             <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs font-bold">${t(item.period)}</span>
             ${item.hours ? `<span class="inline-block bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-3 py-1 rounded text-xs font-bold">${item.hours} ${currentLang === 'ar' ? 'ساعة' : 'hrs'}</span>` : ''}
         </div>
-        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${t(item.description)}</p>
-    `;
+        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${t(item.description)}</p>`;
 }
-
 function renderCertItem(item) {
     return `
         <div class="text-2xl text-secondary flex-shrink-0"><i class="fas fa-certificate"></i></div>
@@ -351,10 +382,8 @@ function renderCertItem(item) {
             <h4 class="font-bold text-sm dark:text-white">${t(item.name)}</h4>
             <p class="text-xs text-gray-500 mt-1">${t(item.issuer)}${item.credential ? ` · ${item.credential}` : ''}</p>
             ${item.date ? `<p class="text-xs text-gray-400 mt-0.5">${item.date}</p>` : ''}
-        </div>
-    `;
+        </div>`;
 }
-
 function renderWorkshopItem(item) {
     return `
         <div class="flex items-start gap-3">
@@ -364,117 +393,65 @@ function renderWorkshopItem(item) {
                 <p class="text-xs text-gray-500 mt-1">${t(item.organizer)}</p>
                 <p class="text-xs text-gray-400 mt-0.5">${t(item.date)}</p>
             </div>
-        </div>
-    `;
+        </div>`;
 }
-
-// FIX: projects outer wrapper has NO overflow-hidden (moved to image div only)
-function renderProjectItem(item, i) {
-    // FIX: stable key = title string, not array index → survives drag-reorder
-    // FIX: extract string safely before calling replace
-    const _titleStr = (typeof item.title === 'object')
-        ? (item.title.en || item.title.ar || String(i))
-        : String(item.title || i);
-    const stableKey = 'pv_' + _titleStr.replace(/[^a-zA-Z0-9؀-ۿ]/g, '_');
-    const views     = JSON.parse(sessionStorage.getItem('project_views') || '{}');
-    const count     = views[stableKey] || 0;
-    const viewLabel = count === 1
-        ? (currentLang === 'ar' ? 'مشاهدة' : 'view')
-        : (currentLang === 'ar' ? 'مشاهدة' : 'views');
-
-    return `
-        <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900
-                    flex items-center justify-center relative overflow-hidden rounded-t-2xl group cursor-pointer"
-             onclick="openProjectModal(${i})">
-            <i class="fas fa-laptop-code text-5xl text-gray-300 dark:text-gray-700 group-hover:scale-110 transition duration-500"></i>
-            <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 backdrop-blur-sm">
-                <span class="px-6 py-2 bg-white text-gray-900 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300 shadow-xl">
-                    ${currentLang === 'ar' ? 'عرض التفاصيل' : 'View Details'}
-                </span>
-            </div>
-            ${count > 0 ? `
-                <span class="absolute top-3 right-3 ltr:left-3 ltr:right-auto bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 pointer-events-none">
-                    <i class="fas fa-eye" style="font-size:10px"></i>&nbsp;${count} ${viewLabel}
-                </span>` : ''}
-        </div>
-        <div class="p-5 flex-grow flex flex-col">
-            <h3 class="text-base font-bold mb-2 dark:text-white">${t(item.title)}</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed flex-grow line-clamp-3">${t(item.desc)}</p>
-            ${item.technologies?.length ? `
-                <div class="flex flex-wrap gap-1.5 mt-3">
-                    ${item.technologies.map(tech =>
-                        `<span class="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded font-bold">${tech}</span>`
-                    ).join('')}
-                </div>` : ''}
-        </div>
-    `;
-}
-
 function renderLanguageItem(item) {
     return `
         <i class="fas fa-language text-teal-500 text-lg flex-shrink-0"></i>
         <div>
             <p class="font-bold text-sm dark:text-white">${t(item.name)}</p>
             <p class="text-xs text-gray-500">${t(item.level)}</p>
-        </div>
-    `;
-}
-
-// ─── A: Project Filters ────────────────────────────────
-let activeFilter = 'all';
-
-function renderProjectFilters() {
-    const container = document.getElementById('project-filters');
-    if (!container) return;
-
-    // Collect all unique technologies across projects
-    const allTechs = new Set();
-    (appData.projects || []).forEach(p => {
-        (p.technologies || []).forEach(t => allTechs.add(t));
-    });
-
-    if (allTechs.size === 0) { container.innerHTML = ''; return; }
-
-    const allLabel = currentLang === 'ar' ? 'الكل' : 'All';
-    const buttons  = [`<button onclick="filterProjects('all')"
-        class="filter-btn ${activeFilter === 'all' ? 'active' : ''} px-4 py-1.5 text-xs font-bold rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-cardBg text-gray-600 dark:text-gray-300 hover:border-primary transition"
-        >${allLabel}</button>`];
-
-    [...allTechs].sort().forEach(tech => {
-        buttons.push(`<button onclick="filterProjects('${tech}')"
-            class="filter-btn ${activeFilter === tech ? 'active' : ''} px-4 py-1.5 text-xs font-bold rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-cardBg text-gray-600 dark:text-gray-300 hover:border-primary transition"
-            >${tech}</button>`);
-    });
-
-    container.innerHTML = buttons.join('');
-}
-
-function filterProjects(tech) {
-    activeFilter = tech;
-    const projects  = appData.projects || [];
-    const filtered  = tech === 'all'
-        ? projects
-        : projects.filter(p => (p.technologies || []).includes(tech));
-
-    // Re-render only visible cards (keep real indices for modal)
-    const container = document.getElementById('projects-container');
-    if (!container) return;
-
-    container.innerHTML = filtered.map(item => {
-        const realIdx = projects.indexOf(item);
-        return `<div class="${WC.projects} sortable-item" data-index="${realIdx}">
-            ${renderAdminButtons('projects', realIdx)}
-            ${renderProjectItem(item, realIdx)}
         </div>`;
-    }).join('');
-
-    // Update active state on filter buttons
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.trim() === tech || (tech === 'all' && (btn.textContent.trim() === 'الكل' || btn.textContent.trim() === 'All')));
-    });
 }
 
-// ─── Print header ──────────────────────────────────────────
+// ─── Project Card ─────────────────────────────────────
+// Uses stable key (title-based) for sessionStorage, not array index
+function getProjectKey(item, fallback) {
+    const raw = item.title?.en || item.title?.ar || String(fallback);
+    return 'pv_' + raw.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').substring(0, 40);
+}
+
+function renderProjectItem(item, realIdx) {
+    const key       = getProjectKey(item, realIdx);
+    const views     = JSON.parse(sessionStorage.getItem('project_views') || '{}');
+    const count     = views[key] || 0;
+    const viewLabel = count === 1
+        ? (currentLang === 'ar' ? 'مشاهدة' : 'view')
+        : (currentLang === 'ar' ? 'مشاهدة' : 'views');
+    const hasLive   = item.liveUrl && item.liveUrl.trim() !== '' && item.liveUrl !== '#';
+
+    return `
+        <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900
+                    flex items-center justify-center relative overflow-hidden rounded-t-2xl cursor-pointer"
+             onclick="openProjectModal(${realIdx})">
+            <i class="fas fa-laptop-code text-5xl text-gray-300 dark:text-gray-700 group-hover:scale-110 transition duration-500"></i>
+            <div class="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition duration-300 backdrop-blur-sm">
+                <span class="px-4 py-2 bg-white text-gray-900 rounded-full font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition duration-300 shadow-xl">
+                    ${currentLang === 'ar' ? 'التفاصيل' : 'Details'}
+                </span>
+                ${hasLive ? `<a href="${item.liveUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"
+                    class="px-4 py-2 bg-green-500 text-white rounded-full font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition duration-500 shadow-xl">
+                    Live Demo</a>` : ''}
+            </div>
+            ${count > 0 ? `
+                <span class="absolute top-3 right-3 ltr:left-3 ltr:right-auto bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 pointer-events-none">
+                    <i class="fas fa-eye" style="font-size:10px"></i>&nbsp;${count} ${viewLabel}
+                </span>` : ''}
+            ${hasLive ? `<span class="absolute top-3 left-3 ltr:right-3 ltr:left-auto bg-green-500/90 text-white text-xs px-2 py-1 rounded-full font-bold pointer-events-none">Live</span>` : ''}
+        </div>
+        <div class="p-5 flex-grow flex flex-col">
+            <h3 class="text-base font-bold mb-2 dark:text-white">${t(item.title)}</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed flex-grow">${t(item.desc)}</p>
+            ${item.technologies?.length ? `
+                <div class="flex flex-wrap gap-1.5 mt-3">
+                    ${item.technologies.map(tech =>
+                        `<span class="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded font-bold">${tech}</span>`
+                    ).join('')}
+                </div>` : ''}
+        </div>`;
+}
+
+// ─── Print header ──────────────────────────────────────
 function updatePrintHeader() {
     const p = appData.profile;
     if (!p) return;
@@ -484,19 +461,75 @@ function updatePrintHeader() {
     if (contactEl) contactEl.textContent = `${p.email} · ${p.phone || ''} · ${t(p.location)}`;
 }
 
-// =========================================================
-// 7. SKILL PROGRESS BARS
-// =========================================================
+// =====================================================
+// 8. PROJECT FILTERING
+// =====================================================
+function renderProjectFilters() {
+    const container = document.getElementById('project-filters');
+    if (!container) return;
+
+    // Collect all unique techs across all projects
+    const techSet = new Set();
+    (appData.projects || []).forEach(p => (p.technologies || []).forEach(t => techSet.add(t)));
+
+    if (techSet.size === 0) { container.innerHTML = ''; return; }
+
+    const allLabel = STATIC_TEXT[currentLang]?.filter_all || 'الكل';
+    const techs    = [{ key: 'all', label: allLabel }, ...Array.from(techSet).map(t => ({ key: t, label: t }))];
+
+    container.innerHTML = techs.map(({ key, label }) => `
+        <button onclick="setProjectFilter('${key}')"
+                class="filter-btn px-3 py-1.5 text-xs font-bold rounded-full border border-gray-200 dark:border-gray-700 transition hover:border-primary hover:text-primary ${activeFilter === key ? 'active bg-primary text-white border-primary' : 'bg-white dark:bg-cardBg text-gray-600 dark:text-gray-300'}">
+            ${label}
+        </button>
+    `).join('');
+}
+
+function setProjectFilter(tech) {
+    activeFilter = tech;
+    renderProjectFilters();
+    renderFilteredProjects();
+}
+
+// FIX: use original array index for modal so openProjectModal gets correct item
+function renderFilteredProjects() {
+    const container  = document.getElementById('projects-container');
+    if (!container) return;
+    const allProjects = appData.projects || [];
+    const filtered    = activeFilter === 'all'
+        ? allProjects.map((item, i) => ({ item, realIdx: i }))
+        : allProjects.map((item, i) => ({ item, realIdx: i })).filter(({ item }) =>
+            (item.technologies || []).includes(activeFilter));
+
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-16 text-gray-400">
+                <i class="fas fa-search text-4xl mb-4 block opacity-30"></i>
+                <p class="font-medium">${currentLang === 'ar' ? 'لا توجد مشاريع بهذه التقنية' : 'No projects found for this technology'}</p>
+                <button onclick="setProjectFilter('all')" class="mt-4 text-primary text-sm font-bold hover:underline">${STATIC_TEXT[currentLang]?.filter_all}</button>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = filtered.map(({ item, realIdx }) => `
+        <div class="${WC.projects} sortable-item" data-index="${realIdx}">
+            ${renderAdminButtons('projects', realIdx)}
+            ${renderProjectItem(item, realIdx)}
+        </div>
+    `).join('');
+}
+
+// =====================================================
+// 9. SKILL PROGRESS BARS
+// =====================================================
 let skillBarsAnimated = false;
 
 function setSkillTab(tab) {
     activeSkillTab    = tab;
     skillBarsAnimated = false;
-
     const tabHard = document.getElementById('tab-hard');
     const tabSoft = document.getElementById('tab-soft');
     if (!tabHard || !tabSoft) return;
-
     if (tab === 'hard') {
         tabHard.className = 'px-4 py-1.5 text-xs font-bold rounded-full bg-primary text-white transition';
         tabSoft.className = 'px-4 py-1.5 text-xs font-bold rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 transition';
@@ -508,9 +541,8 @@ function setSkillTab(tab) {
 }
 
 function renderSkillsWithProgress(tab = 'hard') {
-    const container = document.getElementById('skills-container');
+    const container  = document.getElementById('skills-container');
     if (!container) return;
-
     const allSkills  = appData.skills || [];
     const filtered   = allSkills.filter(s => s.category === tab);
     const barColor   = tab === 'hard'
@@ -518,7 +550,6 @@ function renderSkillsWithProgress(tab = 'hard') {
         : 'bg-gradient-to-r from-secondary to-pink-400';
 
     container.innerHTML = filtered.map(skill => {
-        // FIX: use real index in appData.skills for admin operations
         const realIdx = allSkills.indexOf(skill);
         return `
         <div class="skill-item relative group sortable-item" data-real-index="${realIdx}">
@@ -528,8 +559,7 @@ function renderSkillsWithProgress(tab = 'hard') {
                 <span class="text-xs font-bold text-gray-400">${skill.level || 0}%</span>
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
-                <div class="skill-bar-fill h-2.5 rounded-full ${barColor}"
-                     style="--target-width: ${skill.level || 0}%"></div>
+                <div class="skill-bar-fill h-2.5 rounded-full ${barColor}" style="--target-width: ${skill.level || 0}%"></div>
             </div>
         </div>`;
     }).join('');
@@ -546,32 +576,23 @@ function initSkillsObserver() {
     const container = document.getElementById('skills-container');
     if (!container || !window.IntersectionObserver) return;
     const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && !skillBarsAnimated) animateSkillBars();
-        });
+        entries.forEach(entry => { if (entry.isIntersecting && !skillBarsAnimated) animateSkillBars(); });
     }, { threshold: 0.2 });
     observer.observe(container);
 }
 
-// =========================================================
-// 8. STATS COUNTER ANIMATION
-// =========================================================
+// =====================================================
+// 10. STATS COUNTER
+// =====================================================
 function initStatsObserver() {
     if (!window.IntersectionObserver) return;
     let animated = false;
     const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && !animated) {
-                animated = true;
-                animateCounters();
-            }
-        });
+        entries.forEach(entry => { if (entry.isIntersecting && !animated) { animated = true; animateCounters(); } });
     }, { threshold: 0.3 });
-    // Observer might run before stats-section is in DOM - retry
     const tryObserve = () => {
         const el = document.getElementById('stats-section');
-        if (el) observer.observe(el);
-        else    setTimeout(tryObserve, 200);
+        if (el) observer.observe(el); else setTimeout(tryObserve, 200);
     };
     tryObserve();
 }
@@ -590,33 +611,26 @@ function animateCounters() {
     });
 }
 
-// =========================================================
-// 9. PROJECT MODAL + VIEW COUNTER
-// =========================================================
+// =====================================================
+// 11. PROJECT MODAL + VIEW COUNTER
+// =====================================================
 function openProjectModal(index) {
     const item = (appData.projects || [])[index];
     if (!item) return;
 
-    // FIX: use stable key based on project title, not array index
-    const _titleStr2 = (typeof item.title === 'object')
-        ? (item.title.en || item.title.ar || String(index))
-        : String(item.title || index);
-    const stableKey = 'pv_' + _titleStr2.replace(/[^a-zA-Z0-9؀-ۿ]/g, '_');
-    const views     = JSON.parse(sessionStorage.getItem('project_views') || '{}');
-    views[stableKey] = (views[stableKey] || 0) + 1;
+    // Stable key per project title
+    const key     = getProjectKey(item, index);
+    const views   = JSON.parse(sessionStorage.getItem('project_views') || '{}');
+    views[key]    = (views[key] || 0) + 1;
     sessionStorage.setItem('project_views', JSON.stringify(views));
 
-    const count      = views[stableKey];
+    const count      = views[key];
     const viewLabel  = currentLang === 'ar' ? 'مشاهدة' : (count === 1 ? 'view' : 'views');
 
-    // Populate modal fields
     document.getElementById('modal-title').textContent = t(item.title);
     document.getElementById('modal-desc').textContent  = t(item.desc);
+    document.getElementById('modal-views-count').textContent = `${count} ${viewLabel}`;
 
-    const viewCount = document.getElementById('modal-views-count');
-    if (viewCount) viewCount.textContent = `${count} ${viewLabel}`;
-
-    // Technologies
     const techContainer = document.getElementById('modal-technologies');
     const techSection   = document.getElementById('modal-tech-section');
     if (techContainer) {
@@ -626,31 +640,32 @@ function openProjectModal(index) {
     }
     if (techSection) techSection.style.display = item.technologies?.length ? 'block' : 'none';
 
-    // Labels
     document.getElementById('modal-tech-label').textContent       = currentLang === 'ar' ? 'التقنيات المستخدمة' : 'Technologies Used';
     document.getElementById('modal-challenges-label').textContent = currentLang === 'ar' ? 'التحديات'           : 'Challenges';
     document.getElementById('modal-results-label').textContent    = currentLang === 'ar' ? 'النتائج والإنجازات' : 'Results & Achievements';
-    document.getElementById('modal-link-label').textContent       = currentLang === 'ar' ? 'عرض المشروع'        : 'View Project';
+    document.getElementById('modal-link-label').textContent       = 'GitHub';
+    document.getElementById('modal-live-label').textContent       = 'Live Demo';
 
     document.getElementById('modal-challenges').textContent = item.details ? t(item.details.challenges) : '';
     document.getElementById('modal-results').textContent    = item.details ? t(item.details.results)    : '';
 
-    // Link
-    const linkSection = document.getElementById('modal-link-section');
-    const linkEl      = document.getElementById('modal-link');
-    if (item.link && item.link !== '#') { linkEl.href = item.link; linkSection.style.display = 'block'; }
-    else                                { linkSection.style.display = 'none'; }
-
-    // Re-render project cards so badge updates immediately
-    renderSection('projects', appData.projects || [], renderProjectItem, WC.projects);
-    if (isAdmin) {
-        // Re-attach sortable after innerHTML replacement
-        const el = document.getElementById('projects-container');
-        if (el) new Sortable(el, {
-            animation: 150, handle: '.drag-handle', ghostClass: 'opacity-50',
-            onEnd(evt) { reorderSection('projects', evt.oldIndex, evt.newIndex); }
-        });
+    // GitHub link
+    const githubLink = document.getElementById('modal-github-link');
+    if (githubLink) {
+        if (item.link && item.link !== '#') { githubLink.href = item.link; githubLink.style.display = 'inline-flex'; }
+        else githubLink.style.display = 'none';
     }
+
+    // Live Demo link
+    const liveLink = document.getElementById('modal-live-link');
+    if (liveLink) {
+        if (item.liveUrl && item.liveUrl.trim() !== '' && item.liveUrl !== '#') {
+            liveLink.href = item.liveUrl; liveLink.style.display = 'inline-flex';
+        } else liveLink.style.display = 'none';
+    }
+
+    // Re-render cards to update badge
+    renderFilteredProjects();
 
     document.getElementById('project-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -664,13 +679,95 @@ function _closeProjectModal() {
     document.getElementById('project-modal').classList.add('hidden');
     document.body.style.overflow = '';
 }
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') _closeProjectModal();
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') _closeProjectModal(); });
 
-// =========================================================
-// 10. PDF GENERATION
-// =========================================================
+// =====================================================
+// 12. PAGE VISIT TRACKING (sessionStorage)
+// =====================================================
+function trackPageVisit(pageId) {
+    const visits = JSON.parse(sessionStorage.getItem('page_visits') || '{}');
+    visits[pageId] = (visits[pageId] || 0) + 1;
+    sessionStorage.setItem('page_visits', JSON.stringify(visits));
+}
+
+// =====================================================
+// 13. ADMIN ANALYTICS DASHBOARD
+// =====================================================
+function showAnalyticsDashboard() {
+    const visits  = JSON.parse(sessionStorage.getItem('page_visits')  || '{}');
+    const pViews  = JSON.parse(sessionStorage.getItem('project_views') || '{}');
+    const allProjects = appData.projects || [];
+
+    const pageNames = {
+        ar: { home:'الرئيسية', resume:'السيرة الذاتية', portfolio:'الأعمال', contact:'تواصل' },
+        en: { home:'Home', resume:'Resume', portfolio:'Portfolio', contact:'Contact' }
+    };
+
+    const visitRows = VALID_PAGES.map(p => `
+        <tr class="border-b border-gray-100 dark:border-gray-700">
+            <td class="py-2 px-3 font-medium text-sm">${pageNames[currentLang][p] || p}</td>
+            <td class="py-2 px-3 text-center">
+                <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-bold text-xs">${visits[p] || 0}</span>
+            </td>
+        </tr>
+    `).join('');
+
+    const projectRows = allProjects.map((proj, i) => {
+        const key   = getProjectKey(proj, i);
+        const count = pViews[key] || 0;
+        return `
+        <tr class="border-b border-gray-100 dark:border-gray-700">
+            <td class="py-2 px-3 font-medium text-xs">${t(proj.title)}</td>
+            <td class="py-2 px-3 text-center">
+                <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded font-bold text-xs">${count}</span>
+            </td>
+        </tr>`;
+    }).join('');
+
+    Swal.fire({
+        title: currentLang === 'ar' ? '📊 لوحة الإحصائيات' : '📊 Analytics Dashboard',
+        html: `
+        <div class="text-right" dir="${currentLang === 'ar' ? 'rtl' : 'ltr'}">
+            <p class="text-xs text-gray-400 mb-4">${currentLang === 'ar' ? 'بيانات الجلسة الحالية فقط' : 'Current session data only'}</p>
+
+            <h4 class="font-bold text-sm mb-2">${currentLang === 'ar' ? 'زيارات الصفحات' : 'Page Visits'}</h4>
+            <table class="w-full mb-6 text-right">
+                <thead><tr class="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500">
+                    <th class="py-2 px-3 text-right">${currentLang === 'ar' ? 'الصفحة' : 'Page'}</th>
+                    <th class="py-2 px-3 text-center">${currentLang === 'ar' ? 'الزيارات' : 'Visits'}</th>
+                </tr></thead>
+                <tbody>${visitRows}</tbody>
+            </table>
+
+            <h4 class="font-bold text-sm mb-2">${currentLang === 'ar' ? 'مشاهدات المشاريع' : 'Project Views'}</h4>
+            <table class="w-full mb-6 text-right">
+                <thead><tr class="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500">
+                    <th class="py-2 px-3 text-right">${currentLang === 'ar' ? 'المشروع' : 'Project'}</th>
+                    <th class="py-2 px-3 text-center">${currentLang === 'ar' ? 'المشاهدات' : 'Views'}</th>
+                </tr></thead>
+                <tbody>${projectRows}</tbody>
+            </table>
+
+            <div class="flex gap-2 flex-wrap justify-center mt-4">
+                <a href="https://analytics.google.com/" target="_blank"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition">
+                   <i class="fab fa-google"></i> Google Analytics
+                </a>
+                <a href="https://clarity.microsoft.com/" target="_blank"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition">
+                   <i class="fas fa-eye"></i> Microsoft Clarity
+                </a>
+            </div>
+        </div>`,
+        width: '600px',
+        showConfirmButton: false,
+        showCloseButton: true
+    });
+}
+
+// =====================================================
+// 14. PDF GENERATION
+// =====================================================
 async function generatePDF() {
     showToast(currentLang === 'ar' ? 'جاري إنشاء PDF...' : 'Generating PDF...', 'info');
     const resumeEl  = document.getElementById('resume');
@@ -679,20 +776,19 @@ async function generatePDF() {
     await new Promise(r => setTimeout(r, 600));
     try {
         const { jsPDF } = window.jspdf;
-        const canvas    = await html2canvas(resumeEl, {
+        const canvas = await html2canvas(resumeEl, {
             scale: 2, useCORS: true, allowTaint: true,
             backgroundColor: document.documentElement.classList.contains('dark') ? '#0b1120' : '#ffffff',
             logging: false, windowWidth: 1200
         });
-        const pdf    = new jsPDF('p', 'mm', 'a4');
-        const pageW  = pdf.internal.pageSize.getWidth();
-        const pageH  = pdf.internal.pageSize.getHeight();
-        const imgW   = pageW;
-        const imgH   = (canvas.height * imgW) / canvas.width;
+        const pdf   = new jsPDF('p', 'mm', 'a4');
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const imgH  = (canvas.height * pageW) / canvas.width;
         let pos = 0, left = imgH;
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, pos, imgW, imgH);
-        left -= pageH;
-        while (left > 0) { pos -= pageH; pdf.addPage(); pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, pos, imgW, imgH); left -= pageH; }
+        const img = canvas.toDataURL('image/jpeg', 0.92);
+        pdf.addImage(img, 'JPEG', 0, pos, pageW, imgH); left -= pageH;
+        while (left > 0) { pos -= pageH; pdf.addPage(); pdf.addImage(img, 'JPEG', 0, pos, pageW, imgH); left -= pageH; }
         const name = t(appData.profile?.name || { ar: 'Osama', en: 'Osama' }).replace(/\s+/g, '_');
         pdf.save(`${name}_CV.pdf`);
         showToast(currentLang === 'ar' ? 'تم تحميل PDF ✅' : 'PDF downloaded ✅', 'success');
@@ -704,17 +800,11 @@ async function generatePDF() {
     }
 }
 
-// =========================================================
-// 11. PRINT MODE
-// =========================================================
-function triggerPrint() {
-    showPage('resume');
-    setTimeout(() => window.print(), 400);
-}
+function triggerPrint() { showPage('resume'); setTimeout(() => window.print(), 400); }
 
-// =========================================================
-// 12. SHARE PROFILE
-// =========================================================
+// =====================================================
+// 15. SHARE PROFILE
+// =====================================================
 async function shareProfile() {
     const name    = t(appData.profile?.name || { ar: 'أسامة الحربي', en: 'Osama Al-Harbi' });
     const summary = t(appData.profile?.summary || {});
@@ -732,48 +822,77 @@ async function copyToClipboard(text) {
     } catch { showToast(currentLang === 'ar' ? 'تعذّر النسخ' : 'Copy failed', 'error'); }
 }
 
-// =========================================================
-// 13. LINKEDIN REFERRER
-// =========================================================
+// =====================================================
+// 16. CONTACT ACTIONS
+// =====================================================
+function contactAction(type) {
+    const p = appData.profile;
+    if (!p) return;
+    if (type === 'email') {
+        navigator.clipboard.writeText(p.email).then(() => {
+            showToast(currentLang === 'ar' ? 'تم نسخ البريد ✅' : 'Email copied ✅', 'success');
+        }).catch(() => showToast(p.email, 'info'));
+    } else if (type === 'linkedin') {
+        window.open(p.linkedin, '_blank', 'noopener');
+    } else if (type === 'github') {
+        window.open(p.github, '_blank', 'noopener');
+    }
+}
+
+function sendMailto() {
+    const p       = appData.profile;
+    const subject = encodeURIComponent(document.getElementById('contact-subject')?.value || '');
+    const body    = encodeURIComponent(document.getElementById('contact-message')?.value || '');
+    if (!subject && !body) {
+        showToast(currentLang === 'ar' ? 'يرجى كتابة موضوع أو رسالة' : 'Please enter a subject or message', 'error');
+        return;
+    }
+    window.location.href = `mailto:${p?.email || 'osamafcv214@gmail.com'}?subject=${subject}&body=${body}`;
+}
+
+function updateCharCounter(el) {
+    const counter = document.getElementById('char-counter');
+    if (counter) counter.textContent = `${el.value.length} / 2000`;
+    if (el.value.length > 2000) el.value = el.value.substring(0, 2000);
+}
+
+// =====================================================
+// 17. LINKEDIN REFERRER
+// =====================================================
 function checkLinkedInReferrer() {
     if (document.referrer && document.referrer.includes('linkedin.com')) {
         setTimeout(() => showToast(
-            currentLang === 'ar' ? 'مرحباً، يبدو أنك قادم من LinkedIn 👋' : 'Welcome from LinkedIn! 👋',
-            'info'
+            currentLang === 'ar' ? 'مرحباً، يبدو أنك قادم من LinkedIn 👋' : 'Welcome from LinkedIn! 👋', 'info'
         ), 2000);
     }
 }
 
-// =========================================================
-// 14. ADMIN BUTTONS
-// =========================================================
+// =====================================================
+// 18. ADMIN BUTTONS
+// =====================================================
 function renderAdminButtons(type, index) {
     if (!isAdmin) return '';
     return `
         <div class="admin-element absolute top-2 right-2 ltr:left-2 ltr:right-auto z-30
                     gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
             <span class="drag-handle bg-white dark:bg-gray-700 text-gray-500 w-7 h-7 rounded-lg shadow
-                         flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600 cursor-move border border-gray-200 dark:border-gray-600"
-                  title="سحب لإعادة الترتيب">
+                         flex items-center justify-center hover:bg-gray-100 cursor-move border border-gray-200 dark:border-gray-600">
                 <i class="fas fa-grip-vertical" style="font-size:10px"></i>
             </span>
             <button onclick="event.stopPropagation(); manageItem('${type}', ${index})"
-                    class="bg-blue-500 text-white w-7 h-7 rounded-lg shadow flex items-center justify-center hover:bg-blue-600 hover:scale-110 transition"
-                    title="تعديل">
+                    class="bg-blue-500 text-white w-7 h-7 rounded-lg shadow flex items-center justify-center hover:bg-blue-600 hover:scale-110 transition">
                 <i class="fas fa-pen" style="font-size:10px"></i>
             </button>
             <button onclick="event.stopPropagation(); deleteItem('${type}', ${index})"
-                    class="bg-red-500 text-white w-7 h-7 rounded-lg shadow flex items-center justify-center hover:bg-red-600 hover:scale-110 transition"
-                    title="حذف">
+                    class="bg-red-500 text-white w-7 h-7 rounded-lg shadow flex items-center justify-center hover:bg-red-600 hover:scale-110 transition">
                 <i class="fas fa-trash" style="font-size:10px"></i>
             </button>
-        </div>
-    `;
+        </div>`;
 }
 
-// =========================================================
-// 15. ADMIN CRUD
-// =========================================================
+// =====================================================
+// 19. ADMIN CRUD (SCHEMAS)
+// =====================================================
 const SCHEMAS = {
     skills: [
         { key: 'ar',       label: 'اسم المهارة (عربي)',   simple: true },
@@ -801,12 +920,10 @@ const SCHEMAS = {
         { key: 'description',  label: 'الوصف / Description', type: 'textarea' }
     ],
     projects: [
-        { key: 'title',        label: 'العنوان / Title' },
-        { key: 'desc',         label: 'الوصف / Description', type: 'textarea' },
-        { key: 'technologies', label: 'التقنيات — افصل بفاصلة: Python,SQL,HTML5', simple: true, isArray: true },
-        { key: 'challenges',   label: 'التحديات / Challenges', type: 'textarea', nested: 'details' },
-        { key: 'results',      label: 'النتائج / Results',     type: 'textarea', nested: 'details' },
-        { key: 'link',         label: 'الرابط / Link', simple: true }
+        { key: 'title',   label: 'العنوان / Title' },
+        { key: 'desc',    label: 'الوصف / Description', type: 'textarea' },
+        { key: 'link',    label: 'رابط GitHub', simple: true },
+        { key: 'liveUrl', label: 'رابط Live Demo', simple: true }
     ],
     certificates: [
         { key: 'name',       label: 'اسم الشهادة / Name' },
@@ -832,105 +949,60 @@ async function manageItem(type, index = null) {
     const schema = SCHEMAS[type];
     if (!schema) return;
 
-    // Get value helper — supports nested keys (e.g. details.challenges)
-    const getVal = (obj, f, lang) => {
-        const src = f.nested ? (obj[f.nested] || {}) : obj;
-        const v   = src[f.key];
-        if (!v) return '';
-        if (typeof v === 'object') return v[lang] || '';
-        return String(v);
-    };
-
-    // For isArray fields, show comma-separated string of current array
-    const getArrayVal = (obj, f) => {
-        const arr = obj[f.key];
-        if (!arr) return '';
-        if (Array.isArray(arr)) return arr.join(', ');
-        return String(arr);
+    const getVal = (obj, key, lang) => {
+        if (!obj[key]) return '';
+        if (typeof obj[key] === 'object') return obj[key][lang] || '';
+        return String(obj[key]);
     };
 
     const html = schema.map(f => {
-        // simple text input (also handles isArray and nested-simple)
         if (f.simple) {
-            const val = isEdit
-                ? (f.isArray ? getArrayVal(item, f) : (item[f.key] ?? ''))
-                : '';
+            const val = isEdit ? (item[f.key] ?? '') : '';
             return `<div class="mb-3">
                 <label class="block text-xs mb-1 text-gray-500 text-right">${f.label}</label>
                 <input id="swal-${f.key}" class="swal2-input m-0 w-full" value="${val}" dir="ltr">
             </div>`;
         }
-        // bilingual textarea or input (supports nested)
-        const valAr = getVal(item, f, 'ar');
-        const valEn = getVal(item, f, 'en');
+        const valAr = getVal(item, f.key, 'ar');
+        const valEn = getVal(item, f.key, 'en');
         if (f.type === 'textarea') {
             return `<div class="grid grid-cols-2 gap-2 mb-3">
-                <div>
-                    <label class="block text-xs mb-1 text-gray-500 text-right">${f.label} (AR)</label>
-                    <textarea id="swal-${f.key}-ar" class="swal2-textarea m-0 w-full h-24 text-right" dir="rtl">${valAr}</textarea>
-                </div>
-                <div>
-                    <label class="block text-xs mb-1 text-gray-500 text-left">${f.label} (EN)</label>
-                    <textarea id="swal-${f.key}-en" class="swal2-textarea m-0 w-full h-24 text-left" dir="ltr">${valEn}</textarea>
-                </div>
+                <div><label class="block text-xs mb-1 text-gray-500 text-right">${f.label} (AR)</label>
+                <textarea id="swal-${f.key}-ar" class="swal2-textarea m-0 w-full h-24 text-right" dir="rtl">${valAr}</textarea></div>
+                <div><label class="block text-xs mb-1 text-gray-500 text-left">${f.label} (EN)</label>
+                <textarea id="swal-${f.key}-en" class="swal2-textarea m-0 w-full h-24 text-left" dir="ltr">${valEn}</textarea></div>
             </div>`;
         }
         return `<div class="grid grid-cols-2 gap-2 mb-3">
-            <div>
-                <label class="block text-xs mb-1 text-gray-500 text-right">${f.label} (AR)</label>
-                <input id="swal-${f.key}-ar" class="swal2-input m-0 w-full text-right" value="${valAr}" dir="rtl">
-            </div>
-            <div>
-                <label class="block text-xs mb-1 text-gray-500 text-left">${f.label} (EN)</label>
-                <input id="swal-${f.key}-en" class="swal2-input m-0 w-full text-left" value="${valEn}" dir="ltr">
-            </div>
+            <div><label class="block text-xs mb-1 text-gray-500 text-right">${f.label} (AR)</label>
+            <input id="swal-${f.key}-ar" class="swal2-input m-0 w-full text-right" value="${valAr}" dir="rtl"></div>
+            <div><label class="block text-xs mb-1 text-gray-500 text-left">${f.label} (EN)</label>
+            <input id="swal-${f.key}-en" class="swal2-input m-0 w-full text-left" value="${valEn}" dir="ltr"></div>
         </div>`;
     }).join('');
 
     const { value } = await Swal.fire({
         title: isEdit ? 'تعديل البيانات' : 'إضافة جديدة',
         html: `<div class="text-right" dir="rtl">${html}</div>`,
-        width: '700px',
-        confirmButtonText: 'حفظ التغييرات',
-        showCancelButton: true,
-        cancelButtonText: 'إلغاء',
+        width: '700px', confirmButtonText: 'حفظ التغييرات',
+        showCancelButton: true, cancelButtonText: 'إلغاء',
         focusConfirm: false,
         preConfirm: () => {
-            const obj   = {};
-            const nestedGroups = {};   // accumulates nested keys e.g. details: { challenges: {}, results: {} }
-
+            const obj = {};
             schema.forEach(f => {
-                if (f.simple) {
-                    const raw = document.getElementById(`swal-${f.key}`)?.value ?? '';
-                    // isArray: split comma-separated string into array, trim each element
-                    obj[f.key] = f.isArray
-                        ? raw.split(',').map(s => s.trim()).filter(Boolean)
-                        : raw;
-                } else {
-                    const biVal = {
-                        ar: document.getElementById(`swal-${f.key}-ar`)?.value ?? '',
-                        en: document.getElementById(`swal-${f.key}-en`)?.value ?? ''
-                    };
-                    if (f.nested) {
-                        // group under the parent key e.g. details.challenges
-                        if (!nestedGroups[f.nested]) nestedGroups[f.nested] = {};
-                        nestedGroups[f.nested][f.key] = biVal;
-                    } else {
-                        obj[f.key] = biVal;
-                    }
-                }
+                if (f.simple) obj[f.key] = document.getElementById(`swal-${f.key}`)?.value ?? '';
+                else obj[f.key] = {
+                    ar: document.getElementById(`swal-${f.key}-ar`)?.value ?? '',
+                    en: document.getElementById(`swal-${f.key}-en`)?.value ?? ''
+                };
             });
-
-            // Merge nested groups into obj
-            Object.assign(obj, nestedGroups);
             return obj;
         }
     });
 
     if (value) {
         if (!appData[type]) appData[type] = [];
-        if (isEdit) appData[type][index] = value;
-        else        appData[type].push(value);
+        if (isEdit) appData[type][index] = value; else appData[type].push(value);
         renderAll();
         showToast(isEdit ? 'تم التعديل ✅' : 'تمت الإضافة ✅', 'success');
     }
@@ -946,18 +1018,13 @@ function deleteItem(type, index) {
         showCancelButton: true, confirmButtonColor: '#d33',
         confirmButtonText: 'نعم، احذف', cancelButtonText: 'تراجع'
     }).then(result => {
-        if (result.isConfirmed) {
-            appData[type].splice(index, 1);
-            renderAll();
-            showToast('تم الحذف', 'success');
-        }
+        if (result.isConfirmed) { appData[type].splice(index, 1); renderAll(); showToast('تم الحذف', 'success'); }
     });
 }
 
-// =========================================================
-// 16. DRAG & DROP (Sortable)
-// =========================================================
-// FIX: skills container shows FILTERED items → must map filtered index back to real appData index
+// =====================================================
+// 20. DRAG & DROP (Sortable)
+// =====================================================
 function reorderSection(type, oldIdx, newIdx) {
     const moved = appData[type].splice(oldIdx, 1)[0];
     appData[type].splice(newIdx, 0, moved);
@@ -965,22 +1032,20 @@ function reorderSection(type, oldIdx, newIdx) {
 }
 
 function reorderSkills(tab, oldFilteredIdx, newFilteredIdx) {
-    const allSkills    = appData.skills || [];
-    const filteredSkills = allSkills.filter(s => s.category === tab);
-    const movedItem    = filteredSkills[oldFilteredIdx];
-    const targetItem   = filteredSkills[newFilteredIdx];
-    const realOld      = allSkills.indexOf(movedItem);
-    const realNew      = allSkills.indexOf(targetItem);
+    const all      = appData.skills || [];
+    const filtered = all.filter(s => s.category === tab);
+    const moved    = filtered[oldFilteredIdx];
+    const target   = filtered[newFilteredIdx];
+    const realOld  = all.indexOf(moved);
+    const realNew  = all.indexOf(target);
     if (realOld === -1 || realNew === -1) return;
-    allSkills.splice(realOld, 1);
-    const adjustedNew = realNew > realOld ? realNew - 1 : realNew; // index shifts after splice
-    allSkills.splice(adjustedNew, 0, movedItem);
+    all.splice(realOld, 1);
+    all.splice(realNew > realOld ? realNew - 1 : realNew, 0, moved);
     renderAll();
 }
 
 function initSortable() {
-    const types = ['experience', 'education', 'volunteer', 'certificates', 'workshops', 'projects', 'languages'];
-    types.forEach(type => {
+    ['experience','education','volunteer','certificates','workshops','languages'].forEach(type => {
         const el = document.getElementById(`${type}-container`);
         if (!el) return;
         new Sortable(el, {
@@ -989,7 +1054,21 @@ function initSortable() {
         });
     });
 
-    // FIX: skills needs special reorder because container is filtered
+    // Projects: sortable on full array (filter is visual only)
+    const projEl = document.getElementById('projects-container');
+    if (projEl) {
+        new Sortable(projEl, {
+            animation: 150, handle: '.drag-handle', ghostClass: 'opacity-40',
+            onEnd(evt) {
+                // Get real indices from data-index attributes
+                const items  = [...projEl.querySelectorAll('.sortable-item')];
+                const oldReal = parseInt(items[evt.oldIndex]?.dataset.index ?? evt.oldIndex);
+                const newReal = parseInt(items[evt.newIndex]?.dataset.index ?? evt.newIndex);
+                reorderSection('projects', oldReal, newReal);
+            }
+        });
+    }
+
     const skillsEl = document.getElementById('skills-container');
     if (skillsEl) {
         new Sortable(skillsEl, {
@@ -999,9 +1078,9 @@ function initSortable() {
     }
 }
 
-// =========================================================
-// 17. INLINE EDITING (profile text)
-// =========================================================
+// =====================================================
+// 21. INLINE EDITING
+// =====================================================
 function updateText(key, value) {
     const el = document.querySelector(`[data-path="${key}"]`);
     if (!el) return;
@@ -1024,39 +1103,29 @@ async function editImage(key) {
     if (!isAdmin) return;
     const { value } = await Swal.fire({
         title: 'تغيير الصورة الشخصية', input: 'url',
-        inputLabel: 'رابط الصورة (Imgur, GitHub, Drive)',
-        inputPlaceholder: 'https://...'
+        inputLabel: 'رابط الصورة (Imgur, GitHub, Drive)', inputPlaceholder: 'https://...'
     });
     if (value) { setDeepValue(appData, key, value); renderAll(); }
 }
 
-// =========================================================
-// 18. AUTH & GITHUB SYNC
-// =========================================================
+// =====================================================
+// 22. AUTH & GITHUB SYNC
+// =====================================================
 function checkSession() {
-    // Only called AFTER loadContent() resolves so appData is populated
     const loginTime = localStorage.getItem('login_time');
-    // D — token is in sessionStorage; if tab was closed token is gone
-    const savedToken = sessionStorage.getItem('saved_token') || localStorage.getItem('saved_token');
-    if (!savedToken) return;
-
+    if (!localStorage.getItem('saved_token')) return;
     if (loginTime && (Date.now() - Number(loginTime) > SESSION_DURATION)) {
-        logout();
-        showToast('انتهت الجلسة، يرجى تسجيل الدخول مجدداً', 'error');
-        return;
+        logout(); showToast('انتهت الجلسة، يرجى تسجيل الدخول مجدداً', 'error'); return;
     }
     githubInfo.repo  = localStorage.getItem('saved_repo');
-    githubInfo.token = savedToken;
+    githubInfo.token = localStorage.getItem('saved_token');
     enableAdminMode();
 }
 
 function setupSecretTrigger() {
     document.getElementById('secret-trigger').addEventListener('click', () => {
         clickCount++;
-        if (clickCount >= 3) {
-            document.getElementById('admin-modal').classList.remove('hidden');
-            clickCount = 0;
-        }
+        if (clickCount >= 3) { document.getElementById('admin-modal').classList.remove('hidden'); clickCount = 0; }
     });
 }
 
@@ -1064,15 +1133,9 @@ function authenticateAndEdit() {
     const repo  = document.getElementById('repo-input').value.trim();
     const token = document.getElementById('token-input').value.trim();
     if (!repo || !token) return showToast('يرجى إدخال البيانات كاملة', 'error');
-
-    // D — Security: token in sessionStorage only (cleared on tab close)
-    //     repo name (not sensitive) in localStorage for convenience
-    localStorage.setItem('saved_repo',   repo);
-    sessionStorage.setItem('saved_token', token);  // never persisted to disk
-    localStorage.setItem('login_time',   Date.now());
-
-    githubInfo.repo  = repo;
-    githubInfo.token = token;
+    localStorage.setItem('saved_repo', repo); localStorage.setItem('saved_token', token);
+    localStorage.setItem('login_time', Date.now());
+    githubInfo.repo = repo; githubInfo.token = token;
     document.getElementById('admin-modal').classList.add('hidden');
     enableAdminMode();
     showToast('تم تفعيل وضع المدير 🚀', 'success');
@@ -1082,26 +1145,24 @@ function enableAdminMode() {
     isAdmin = true;
     document.body.classList.add('admin-mode');
     document.getElementById('admin-toolbar').classList.remove('hidden');
-    if (dataLoaded) renderAll();   // FIX: only render if data is loaded
+    if (dataLoaded) renderAll();
     initSkillsObserver();
 }
 
 function logout() {
-    ['saved_repo', 'login_time'].forEach(k => localStorage.removeItem(k));
-    sessionStorage.removeItem('saved_token');
-    localStorage.removeItem('saved_token'); // clean up old storage too
+    ['saved_repo','saved_token','login_time'].forEach(k => localStorage.removeItem(k));
     location.reload();
 }
 
 async function saveToGitHub() {
-    const saveBtn  = document.querySelector('#admin-toolbar button');
-    const origHTML = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    const btn      = document.querySelector('#admin-toolbar button');
+    const origHTML = btn.innerHTML;
+    btn.innerHTML  = '<i class="fas fa-spinner fa-spin"></i>';
     localStorage.setItem('backup_data', JSON.stringify(appData));
     try {
         const url    = `https://api.github.com/repos/${githubInfo.repo}/contents/data.json`;
         const getRes = await fetch(url, { headers: { Authorization: `token ${githubInfo.token}` } });
-        if (!getRes.ok) throw new Error('فشل الاتصال بـ GitHub. تأكد من الـ Token.');
+        if (!getRes.ok) throw new Error('فشل الاتصال. تحقق من الـ Token.');
         const fileData = await getRes.json();
         const content  = btoa(unescape(encodeURIComponent(JSON.stringify(appData, null, 2))));
         const putRes   = await fetch(url, {
@@ -1113,9 +1174,7 @@ async function saveToGitHub() {
         showToast('تم الحفظ في GitHub ✅', 'success');
     } catch (e) {
         showToast('خطأ: ' + e.message, 'error');
-    } finally {
-        saveBtn.innerHTML = origHTML;
-    }
+    } finally { btn.innerHTML = origHTML; }
 }
 
 function restoreBackup() {
@@ -1124,21 +1183,20 @@ function restoreBackup() {
     else showToast('لا توجد نسخة احتياطية', 'error');
 }
 
-// =========================================================
-// 19. UTILITIES
-// =========================================================
+// =====================================================
+// 23. UTILITIES
+// =====================================================
 function setSmartGreeting() {
     const hour = new Date().getHours();
     const msgs = {
-        ar: { m: 'صباح الخير ☀️', a: 'مساء الخير 🌤️', e: 'مساء النور 🌙' },
-        en: { m: 'Good Morning ☀️', a: 'Good Afternoon 🌤️', e: 'Good Evening 🌙' }
+        ar: { m:'صباح الخير ☀️', a:'مساء الخير 🌤️', e:'مساء النور 🌙' },
+        en: { m:'Good Morning ☀️', a:'Good Afternoon 🌤️', e:'Good Evening 🌙' }
     };
     const key = hour < 12 ? 'm' : (hour < 18 ? 'a' : 'e');
     const el  = document.getElementById('smart-greeting');
     if (el) el.innerText = msgs[currentLang][key];
 }
 
-// FIX: clear previous interval to prevent stacked animations
 function typeWriter(text, elementId) {
     const el = document.getElementById(elementId);
     if (!el) return;
@@ -1227,86 +1285,11 @@ function setupKonamiCode() {
     });
 }
 
-// D — Rate limiting: max 3 messages per 60 minutes
-const CONTACT_RATE = { max: 3, window: 60 * 60 * 1000 };
-
-function getContactAttempts() {
-    try {
-        const raw = sessionStorage.getItem('contact_attempts');
-        if (!raw) return [];
-        return JSON.parse(raw).filter(ts => Date.now() - ts < CONTACT_RATE.window);
-    } catch { return []; }
-}
-
-function recordContactAttempt() {
-    const attempts = getContactAttempts();
-    attempts.push(Date.now());
-    sessionStorage.setItem('contact_attempts', JSON.stringify(attempts));
-}
-
-function updateContactRateUI() {
-    const attempts  = getContactAttempts();
-    const remaining = CONTACT_RATE.max - attempts.length;
-    const infoEl    = document.getElementById('contact-rate-info');
-    const btnEl     = document.getElementById('contact-submit-btn');
-    if (!infoEl || !btnEl) return;
-    if (remaining <= 1 && remaining > 0) {
-        infoEl.classList.remove('hidden');
-        infoEl.textContent = currentLang === 'ar'
-            ? `متبقي ${remaining} محاولة`
-            : `${remaining} attempt remaining`;
-    } else if (remaining <= 0) {
-        infoEl.classList.remove('hidden');
-        infoEl.textContent = currentLang === 'ar'
-            ? 'تم الوصول للحد الأقصى. حاول بعد ساعة.'
-            : 'Rate limit reached. Try again in an hour.';
-        btnEl.disabled = true;
-        btnEl.classList.add('opacity-50', 'cursor-not-allowed');
-    }
-}
-
-function handleContact(e) {
-    e.preventDefault();
-
-    // D — Honeypot check
-    const honeypot = e.target.querySelector('input[name="_gotcha"]');
-    if (honeypot && honeypot.value) return; // bot detected, silently ignore
-
-    // D — Rate limit check
-    const attempts = getContactAttempts();
-    if (attempts.length >= CONTACT_RATE.max) {
-        showToast(
-            currentLang === 'ar' ? 'تم الوصول للحد الأقصى. حاول بعد ساعة.' : 'Rate limit reached. Try again in an hour.',
-            'error'
-        );
-        return;
-    }
-
-    const btn     = document.getElementById('contact-submit-btn');
-    const origTxt = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.textContent = '...'; }
-
-    recordContactAttempt();
-    updateContactRateUI();
-
-    fetch(FORMSPREE_ENDPOINT, {
-        method: 'POST', body: new FormData(e.target), headers: { Accept: 'application/json' }
-    }).then(res => {
-        if (res.ok) {
-            showToast('تم الإرسال بنجاح ✅', 'success');
-            e.target.reset();
-        } else {
-            showToast('حدث خطأ في الإرسال', 'error');
-        }
-    }).catch(() => showToast('تعذّر الاتصال بالخادم', 'error'))
-    .finally(() => { if (btn && btn.disabled && getContactAttempts().length < CONTACT_RATE.max) { btn.disabled = false; btn.textContent = origTxt; } });
-}
-
 function setDeepValue(obj, path, value) {
-    const keys    = path.split('.');
-    let   current = obj;
-    for (let i = 0; i < keys.length - 1; i++) current = current[keys[i]];
-    current[keys[keys.length - 1]] = value;
+    const keys = path.split('.');
+    let cur = obj;
+    for (let i = 0; i < keys.length - 1; i++) cur = cur[keys[i]];
+    cur[keys[keys.length - 1]] = value;
 }
 
 function showToast(msg, type = 'info') {
