@@ -879,7 +879,7 @@ function renderAdminButtons(type, index) {
                          flex items-center justify-center hover:bg-gray-100 cursor-move border border-gray-200 dark:border-gray-600">
                 <i class="fas fa-grip-vertical" style="font-size:10px"></i>
             </span>
-            <button onclick="event.stopPropagation(); manageItem('${type}', ${index})"
+            <button onclick="event.stopPropagation(); editItem('${type}', ${index})"
                     class="bg-blue-500 text-white w-7 h-7 rounded-lg shadow flex items-center justify-center hover:bg-blue-600 hover:scale-110 transition">
                 <i class="fas fa-pen" style="font-size:10px"></i>
             </button>
@@ -1045,8 +1045,152 @@ async function manageItem(type, index = null) {
     }
 }
 
-function addItem(type)         { manageItem(type); }
-function editItem(type, index) { manageItem(type, index); }
+function addItem(type)         { if (type === 'projects') manageProjectItem(); else manageItem(type); }
+function editItem(type, index) { if (type === 'projects') manageProjectItem(index); else manageItem(type, index); }
+
+// ── Dedicated project editor (handles technologies array + nested details) ──
+async function manageProjectItem(index = null) {
+    if (!isAdmin) return;
+    const isEdit = index !== null;
+    const item   = isEdit ? (appData.projects || [])[index] : {};
+
+    // Helper: extract bilingual string
+    const bv = (obj, lang) => {
+        if (!obj) return '';
+        if (typeof obj === 'object') return obj[lang] || obj.ar || '';
+        return String(obj);
+    };
+
+    const techVal   = Array.isArray(item.technologies) ? item.technologies.join(', ') : (item.technologies || '');
+    const challAr   = bv(item.details?.challenges, 'ar');
+    const challEn   = bv(item.details?.challenges, 'en');
+    const resultsAr = bv(item.details?.results,    'ar');
+    const resultsEn = bv(item.details?.results,    'en');
+
+    const { value } = await Swal.fire({
+        title: isEdit
+            ? (currentLang === 'ar' ? 'تعديل المشروع' : 'Edit Project')
+            : (currentLang === 'ar' ? 'إضافة مشروع جديد' : 'Add New Project'),
+        html: `<div class="text-right space-y-3" dir="rtl">
+
+          <!-- Title -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">عنوان المشروع (AR)</label>
+              <input id="pj-title-ar" class="swal2-input m-0 w-full text-right" value="${bv(item.title,'ar')}" dir="rtl" placeholder="اسم المشروع بالعربي">
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Project Title (EN)</label>
+              <input id="pj-title-en" class="swal2-input m-0 w-full text-left" value="${bv(item.title,'en')}" dir="ltr" placeholder="Project name in English">
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">وصف المشروع (AR)</label>
+              <textarea id="pj-desc-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl" placeholder="وصف مختصر...">${bv(item.desc,'ar')}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Description (EN)</label>
+              <textarea id="pj-desc-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Short description...">${bv(item.desc,'en')}</textarea>
+            </div>
+          </div>
+
+          <!-- Technologies -->
+          <div>
+            <label class="block text-xs mb-1 text-gray-500">
+              التقنيات المستخدمة / Technologies
+              <span class="text-gray-400 mr-1">(مفصولة بفاصلة — e.g. SQL, HTML5, CSS3)</span>
+            </label>
+            <input id="pj-tech" class="swal2-input m-0 w-full" value="${techVal}" dir="ltr" placeholder="SQL, MySQL, HTML5, CSS3, JavaScript">
+          </div>
+
+          <!-- Challenges -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">التحديات (AR)</label>
+              <textarea id="pj-chal-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl" placeholder="التحديات التي واجهتها...">${challAr}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Challenges (EN)</label>
+              <textarea id="pj-chal-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Challenges faced...">${challEn}</textarea>
+            </div>
+          </div>
+
+          <!-- Results -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">النتائج والإنجازات (AR)</label>
+              <textarea id="pj-res-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl" placeholder="النتائج والإنجازات...">${resultsAr}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Results & Achievements (EN)</label>
+              <textarea id="pj-res-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Results achieved...">${resultsEn}</textarea>
+            </div>
+          </div>
+
+          <!-- Links -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
+              <input id="pj-link" class="swal2-input m-0 w-full" value="${item.link || ''}" dir="ltr" placeholder="https://github.com/...">
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500">رابط Live Demo</label>
+              <input id="pj-live" class="swal2-input m-0 w-full" value="${item.liveUrl || ''}" dir="ltr" placeholder="https://...">
+            </div>
+          </div>
+
+        </div>`,
+        width: '760px',
+        confirmButtonText: isEdit ? 'حفظ التغييرات' : 'إضافة المشروع',
+        showCancelButton: true,
+        cancelButtonText: 'إلغاء',
+        focusConfirm: false,
+        preConfirm: () => {
+            const titleAr = document.getElementById('pj-title-ar')?.value.trim();
+            const titleEn = document.getElementById('pj-title-en')?.value.trim();
+            if (!titleAr && !titleEn) {
+                Swal.showValidationMessage(currentLang === 'ar' ? 'يرجى إدخال عنوان المشروع' : 'Please enter a project title');
+                return false;
+            }
+            const rawTech = document.getElementById('pj-tech')?.value || '';
+            const techs   = rawTech.split(',').map(t => t.trim()).filter(Boolean);
+            return {
+                title: {
+                    ar: titleAr || titleEn,
+                    en: titleEn || titleAr
+                },
+                desc: {
+                    ar: document.getElementById('pj-desc-ar')?.value.trim() || '',
+                    en: document.getElementById('pj-desc-en')?.value.trim() || ''
+                },
+                technologies: techs,
+                link:    document.getElementById('pj-link')?.value.trim() || '#',
+                liveUrl: document.getElementById('pj-live')?.value.trim() || '',
+                details: {
+                    challenges: {
+                        ar: document.getElementById('pj-chal-ar')?.value.trim() || '',
+                        en: document.getElementById('pj-chal-en')?.value.trim() || ''
+                    },
+                    results: {
+                        ar: document.getElementById('pj-res-ar')?.value.trim() || '',
+                        en: document.getElementById('pj-res-en')?.value.trim() || ''
+                    }
+                }
+            };
+        }
+    });
+
+    if (value) {
+        if (!appData.projects) appData.projects = [];
+        if (isEdit) appData.projects[index] = value;
+        else        appData.projects.push(value);
+        renderAll();
+        showToast(isEdit ? 'تم تعديل المشروع ✅' : 'تمت إضافة المشروع ✅', 'success');
+    }
+}
 
 // ── Profile editor ─────────────────────────────────────────────────────────
 async function manageProfile() {
