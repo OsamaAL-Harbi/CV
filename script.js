@@ -46,8 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initStatsObserver();
 
     if (localStorage.getItem('saved_repo')) {
-        document.getElementById('repo-input').value  = localStorage.getItem('saved_repo');
-        document.getElementById('token-input').value = localStorage.getItem('saved_token');
+        document.getElementById('repo-input').value = localStorage.getItem('saved_repo');
+        // Token not pre-filled (security: user must re-enter each browser session)
     }
 
     // Load data FIRST, then check session so admin renderAll has real data
@@ -167,7 +167,10 @@ async function loadContent() {
         renderAll();
         updateStaticText();
         setSmartGreeting();
-        setTimeout(() => document.getElementById('loading-screen').classList.add('hidden'), 500);
+        const loadingEl = document.getElementById('loading-screen');
+        loadingEl.style.transition = 'opacity 0.6s ease';
+        loadingEl.style.opacity    = '0';
+        setTimeout(() => loadingEl.classList.add('hidden'), 650);
     } catch (err) {
         showToast('خطأ في تحميل البيانات / Error loading data', 'error');
         document.getElementById('loading-screen').classList.add('hidden');
@@ -202,6 +205,7 @@ function renderAll() {
     renderSection('certificates', appData.certificates || [], renderCertItem,        WC.certificates);
     renderSection('workshops',    appData.workshops    || [], renderWorkshopItem,    WC.workshops);
     renderSection('projects',     appData.projects     || [], renderProjectItem,     WC.projects);
+    renderProjectFilters();
     renderSection('languages',    appData.languages    || [], renderLanguageItem,    WC.languages);
     updatePrintHeader();
     if (isAdmin) initSortable();
@@ -221,6 +225,7 @@ function renderProfile() {
     const imgEl = document.getElementById('profile-img');
     if (imgEl) {
         imgEl.src = p.image || fallback;
+        imgEl.loading = 'lazy';
         imgEl.onerror = () => { imgEl.src = fallback; };
     }
 
@@ -240,6 +245,49 @@ function renderProfile() {
     if (linkedin) linkedin.href = p.linkedin || '#';
     const github = document.getElementById('social-github');
     if (github) github.href = p.github || '#';
+
+    // C — Update OG & Twitter meta tags dynamically
+    const fullName  = t(p.name);
+    const summary   = t(p.summary).substring(0, 160);
+    const avatar    = p.image || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+    _setMeta('og-title',       fullName + ' | Portfolio');
+    _setMeta('og-description', summary);
+    _setMeta('og-image',       avatar);
+    _setMeta('og-locale',      currentLang === 'ar' ? 'ar_SA' : 'en_US');
+    _setMeta('tw-title',       fullName + ' | Portfolio');
+    _setMeta('tw-description', summary);
+    document.title = fullName + ' | Portfolio';
+
+    // A — Availability badge
+    renderAvailability(p);
+}
+
+function _setMeta(id, content) {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('content', content);
+}
+
+// A2 — Availability badge
+function renderAvailability(p) {
+    const badge  = document.getElementById('availability-badge');
+    const pill   = document.getElementById('availability-pill');
+    const dot    = document.getElementById('availability-dot');
+    const text   = document.getElementById('availability-text');
+    if (!badge || !p) return;
+
+    const available = p.available !== false; // default true if not set
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
+
+    if (available) {
+        pill.className  = 'inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-700 transition-all';
+        dot.className   = 'w-2 h-2 rounded-full bg-green-500 animate-pulse';
+        text.textContent = currentLang === 'ar' ? 'متاح للعمل' : 'Open to Work';
+    } else {
+        pill.className  = 'inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 transition-all';
+        dot.className   = 'w-2 h-2 rounded-full bg-gray-400';
+        text.textContent = currentLang === 'ar' ? 'غير متاح حالياً' : 'Not Available';
+    }
 }
 
 // ─── Generic section renderer ──────────────────────────────
@@ -262,10 +310,15 @@ function renderSection(type, data, contentFn, wrapperClass) {
 
 // ─── Item renderers ────────────────────────────────────────
 function renderExperienceItem(item) {
+    // Extract year from period for timeline badge
+    const periodStr = t(item.period);
+    const yearMatch = periodStr.match(/\d{4}/);
+    const yearBadge = yearMatch ? `<span class="timeline-year">${yearMatch[0]}</span>` : '';
     return `
+        ${yearBadge}
         <h3 class="text-xl font-bold dark:text-white hover:text-primary transition">${t(item.role)}</h3>
         <p class="text-primary font-medium text-sm">${t(item.company)}</p>
-        <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs mb-3 font-bold">${t(item.period)}</span>
+        <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs mb-3 font-bold">${periodStr}</span>
         <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${t(item.description)}</p>
     `;
 }
@@ -365,6 +418,60 @@ function renderLanguageItem(item) {
             <p class="text-xs text-gray-500">${t(item.level)}</p>
         </div>
     `;
+}
+
+// ─── A: Project Filters ────────────────────────────────
+let activeFilter = 'all';
+
+function renderProjectFilters() {
+    const container = document.getElementById('project-filters');
+    if (!container) return;
+
+    // Collect all unique technologies across projects
+    const allTechs = new Set();
+    (appData.projects || []).forEach(p => {
+        (p.technologies || []).forEach(t => allTechs.add(t));
+    });
+
+    if (allTechs.size === 0) { container.innerHTML = ''; return; }
+
+    const allLabel = currentLang === 'ar' ? 'الكل' : 'All';
+    const buttons  = [`<button onclick="filterProjects('all')"
+        class="filter-btn ${activeFilter === 'all' ? 'active' : ''} px-4 py-1.5 text-xs font-bold rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-cardBg text-gray-600 dark:text-gray-300 hover:border-primary transition"
+        >${allLabel}</button>`];
+
+    [...allTechs].sort().forEach(tech => {
+        buttons.push(`<button onclick="filterProjects('${tech}')"
+            class="filter-btn ${activeFilter === tech ? 'active' : ''} px-4 py-1.5 text-xs font-bold rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-cardBg text-gray-600 dark:text-gray-300 hover:border-primary transition"
+            >${tech}</button>`);
+    });
+
+    container.innerHTML = buttons.join('');
+}
+
+function filterProjects(tech) {
+    activeFilter = tech;
+    const projects  = appData.projects || [];
+    const filtered  = tech === 'all'
+        ? projects
+        : projects.filter(p => (p.technologies || []).includes(tech));
+
+    // Re-render only visible cards (keep real indices for modal)
+    const container = document.getElementById('projects-container');
+    if (!container) return;
+
+    container.innerHTML = filtered.map(item => {
+        const realIdx = projects.indexOf(item);
+        return `<div class="${WC.projects} sortable-item" data-index="${realIdx}">
+            ${renderAdminButtons('projects', realIdx)}
+            ${renderProjectItem(item, realIdx)}
+        </div>`;
+    }).join('');
+
+    // Update active state on filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim() === tech || (tech === 'all' && (btn.textContent.trim() === 'الكل' || btn.textContent.trim() === 'All')));
+    });
 }
 
 // ─── Print header ──────────────────────────────────────────
@@ -929,7 +1036,9 @@ async function editImage(key) {
 function checkSession() {
     // Only called AFTER loadContent() resolves so appData is populated
     const loginTime = localStorage.getItem('login_time');
-    if (!localStorage.getItem('saved_token')) return;
+    // D — token is in sessionStorage; if tab was closed token is gone
+    const savedToken = sessionStorage.getItem('saved_token') || localStorage.getItem('saved_token');
+    if (!savedToken) return;
 
     if (loginTime && (Date.now() - Number(loginTime) > SESSION_DURATION)) {
         logout();
@@ -937,7 +1046,7 @@ function checkSession() {
         return;
     }
     githubInfo.repo  = localStorage.getItem('saved_repo');
-    githubInfo.token = localStorage.getItem('saved_token');
+    githubInfo.token = savedToken;
     enableAdminMode();
 }
 
@@ -955,9 +1064,13 @@ function authenticateAndEdit() {
     const repo  = document.getElementById('repo-input').value.trim();
     const token = document.getElementById('token-input').value.trim();
     if (!repo || !token) return showToast('يرجى إدخال البيانات كاملة', 'error');
-    localStorage.setItem('saved_repo',  repo);
-    localStorage.setItem('saved_token', token);
-    localStorage.setItem('login_time',  Date.now());
+
+    // D — Security: token in sessionStorage only (cleared on tab close)
+    //     repo name (not sensitive) in localStorage for convenience
+    localStorage.setItem('saved_repo',   repo);
+    sessionStorage.setItem('saved_token', token);  // never persisted to disk
+    localStorage.setItem('login_time',   Date.now());
+
     githubInfo.repo  = repo;
     githubInfo.token = token;
     document.getElementById('admin-modal').classList.add('hidden');
@@ -974,7 +1087,9 @@ function enableAdminMode() {
 }
 
 function logout() {
-    ['saved_repo', 'saved_token', 'login_time'].forEach(k => localStorage.removeItem(k));
+    ['saved_repo', 'login_time'].forEach(k => localStorage.removeItem(k));
+    sessionStorage.removeItem('saved_token');
+    localStorage.removeItem('saved_token'); // clean up old storage too
     location.reload();
 }
 
@@ -1112,14 +1227,79 @@ function setupKonamiCode() {
     });
 }
 
+// D — Rate limiting: max 3 messages per 60 minutes
+const CONTACT_RATE = { max: 3, window: 60 * 60 * 1000 };
+
+function getContactAttempts() {
+    try {
+        const raw = sessionStorage.getItem('contact_attempts');
+        if (!raw) return [];
+        return JSON.parse(raw).filter(ts => Date.now() - ts < CONTACT_RATE.window);
+    } catch { return []; }
+}
+
+function recordContactAttempt() {
+    const attempts = getContactAttempts();
+    attempts.push(Date.now());
+    sessionStorage.setItem('contact_attempts', JSON.stringify(attempts));
+}
+
+function updateContactRateUI() {
+    const attempts  = getContactAttempts();
+    const remaining = CONTACT_RATE.max - attempts.length;
+    const infoEl    = document.getElementById('contact-rate-info');
+    const btnEl     = document.getElementById('contact-submit-btn');
+    if (!infoEl || !btnEl) return;
+    if (remaining <= 1 && remaining > 0) {
+        infoEl.classList.remove('hidden');
+        infoEl.textContent = currentLang === 'ar'
+            ? `متبقي ${remaining} محاولة`
+            : `${remaining} attempt remaining`;
+    } else if (remaining <= 0) {
+        infoEl.classList.remove('hidden');
+        infoEl.textContent = currentLang === 'ar'
+            ? 'تم الوصول للحد الأقصى. حاول بعد ساعة.'
+            : 'Rate limit reached. Try again in an hour.';
+        btnEl.disabled = true;
+        btnEl.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+}
+
 function handleContact(e) {
     e.preventDefault();
+
+    // D — Honeypot check
+    const honeypot = e.target.querySelector('input[name="_gotcha"]');
+    if (honeypot && honeypot.value) return; // bot detected, silently ignore
+
+    // D — Rate limit check
+    const attempts = getContactAttempts();
+    if (attempts.length >= CONTACT_RATE.max) {
+        showToast(
+            currentLang === 'ar' ? 'تم الوصول للحد الأقصى. حاول بعد ساعة.' : 'Rate limit reached. Try again in an hour.',
+            'error'
+        );
+        return;
+    }
+
+    const btn     = document.getElementById('contact-submit-btn');
+    const origTxt = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = '...'; }
+
+    recordContactAttempt();
+    updateContactRateUI();
+
     fetch(FORMSPREE_ENDPOINT, {
         method: 'POST', body: new FormData(e.target), headers: { Accept: 'application/json' }
     }).then(res => {
-        if (res.ok) { showToast('تم الإرسال بنجاح ✅', 'success'); e.target.reset(); }
-        else showToast('حدث خطأ في الإرسال', 'error');
-    }).catch(() => showToast('تعذّر الاتصال بالخادم', 'error'));
+        if (res.ok) {
+            showToast('تم الإرسال بنجاح ✅', 'success');
+            e.target.reset();
+        } else {
+            showToast('حدث خطأ في الإرسال', 'error');
+        }
+    }).catch(() => showToast('تعذّر الاتصال بالخادم', 'error'))
+    .finally(() => { if (btn && btn.disabled && getContactAttempts().length < CONTACT_RATE.max) { btn.disabled = false; btn.textContent = origTxt; } });
 }
 
 function setDeepValue(obj, path, value) {
