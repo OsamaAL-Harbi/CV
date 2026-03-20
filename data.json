@@ -1,82 +1,185 @@
 {
   "profile": {
-    "name":     { "ar": "أسامة عبدالعزيز الحربي",  "en": "Osama Abdulaziz Al-Harbi" },
-    "title":    { "ar": "خريج تقنية المعلومات",      "en": "Information Technology Graduate" },
+    "name": {
+      "ar": "أسامة عبدالعزيز الحربي",
+      "en": "Osama Abdulaziz Al-Harbi"
+    },
+    "title": {
+      "ar": "خريج تقنية المعلومات",
+      "en": "Information Technology Graduate"
+    },
     "summary": {
       "ar": "خريج تقنية معلومات طموح أسعى للعمل في مجال الدعم الفني وإدارة شبكات TCP/IP لضمان كفاءة البنية التحتية واستمرارية الخدمات. أمتلك معرفة متينة في قواعد بيانات SQL وتطوير الأنظمة، مدعومة بشهادات مهنية في الأمن السيبراني من ISC2 وIBM.",
       "en": "An ambitious IT graduate seeking to utilize skills in technical support and TCP/IP network administration to ensure infrastructure efficiency and service continuity. Possesses strong knowledge of SQL databases and systems development, enhanced by professional cybersecurity certifications from ISC2 and IBM."
     },
-    "email":    "osamafcv214@gmail.com",
-    "phone":    "+966537820694",
-    "location": { "ar": "المدينة المنورة، المملكة العربية السعودية", "en": "Madinah, Saudi Arabia" },
-    "nationality": { "ar": "سعودي", "en": "Saudi" },
-    "image":    "",
+    "email": "osamafcv214@gmail.com",
+    "phone": "+966537820694",
+    "location": {
+      "ar": "المدينة المنورة، المملكة العربية السعودية",
+      "en": "Madinah, Saudi Arabia"
+    },
+    "nationality": {
+      "ar": "سعودي",
+      "en": "Saudi"
+    },
+    "image": "",
     "linkedin": "https://www.linkedin.com/in/osama-al-harbi",
-    "github":   "https://github.com/OsamaAL-Harbi",
-    "cv":       "Osama_Alharbi_IT_CV.pdf"
+    "github": "https://github.com/OsamaAL-Harbi",
+    "cv": "Osama_Alharbi_IT_CV.pdf"
   },
-
   "education": [
     {
-      "degree":      { "ar": "بكالوريوس تقنية المعلومات",           "en": "Bachelor's Degree in Information Technology" },
-      "institution": { "ar": "الجامعة الإسلامية بالمدينة المنورة", "en": "Islamic University of Madinah" },
-      "period":      { "ar": "يناير 2026",                          "en": "January 2026" },
+      "degree": {
+        "ar": "بكالوريوس تقنية المعلومات",
+        "en": "Bachelor's Degree in Information Technology"
+      },
+      "institution": {
+        "ar": "الجامعة الإسلامية بالمدينة المنورة",
+        "en": "Islamic University of Madinah"
+      },
+      "period": {
+        "ar": "يناير 2026",
+        "en": "January 2026"
+      },
       "description": {
         "ar": "تخرج في تقنية المعلومات مع التركيز على الشبكات وقواعد البيانات وتطوير الأنظمة والأمن السيبراني.",
         "en": "Graduated in Information Technology with focus on networking, databases, systems development, and cybersecurity."
       }
     }
   ],
-
   "experience": [
     {
-      "role":    { "ar": "متدرب تحول رقمي", "en": "Digital Transformation Trainee" },
-      "company": { "ar": "عمادة تقنية المعلومات والتعليم الإلكتروني - الجامعة الإسلامية بالمدينة المنورة", "en": "Deanship of IT & E-Learning - Islamic University of Madinah" },
-      "period":  { "ar": "يناير 2026 - حاضر", "en": "January 2026 – Present" },
+      "role": {
+        "ar": "متدرب تحول رقمي",
+        "en": "Digital Transformation Trainee"
+      },
+      "company": {
+        "ar": "عمادة تقنية المعلومات والتعليم الإلكتروني - الجامعة الإسلامية بالمدينة المنورة",
+        "en": "Deanship of IT & E-Learning - Islamic University of Madinah"
+      },
+      "period": {
+        "ar": "يناير 2026 - حاضر",
+        "en": "January 2026 – Present"
+      },
       "description": {
         "ar": "تحليل ومراجعة تقارير قياس التحول الرقمي الصادرة عن هيئة الحكومة الرقمية. تطوير وتدقيق الأدلة التقنية لمعايير النضج الرقمي الوطنية. الإشراف على إصدار التقارير الدورية لحوكمة البيانات. إدارة منصة رقمي وتسجيل الخدمات الرقمية.",
         "en": "Analyzed Digital Transformation Measurement reports from the Digital Government Authority (DGA). Developed and audited technical evidence for national Digital Maturity standards. Oversaw periodic reports for data governance. Managed digital services registration via 'Raqmi' portal."
       }
     },
     {
-      "role":    { "ar": "متدرب إدارة الجودة الشاملة (تعاوني)", "en": "TQM CO-OP Trainee" },
-      "company": { "ar": "عمادة تقنية المعلومات والتعليم الإلكتروني - الجامعة الإسلامية بالمدينة المنورة", "en": "Deanship of IT & E-Learning - Islamic University of Madinah" },
-      "period":  { "ar": "يونيو 2025 - أغسطس 2025", "en": "June 2025 – August 2025" },
+      "role": {
+        "ar": "متدرب إدارة الجودة الشاملة (تعاوني)",
+        "en": "TQM CO-OP Trainee"
+      },
+      "company": {
+        "ar": "عمادة تقنية المعلومات والتعليم الإلكتروني - الجامعة الإسلامية بالمدينة المنورة",
+        "en": "Deanship of IT & E-Learning - Islamic University of Madinah"
+      },
+      "period": {
+        "ar": "يونيو 2025 - أغسطس 2025",
+        "en": "June 2025 – August 2025"
+      },
       "description": {
         "ar": "تقديم الدعم الفني والتشغيلي في بيئة تقنية المعلومات الجامعية. مراجعة إجراءات التشغيل وتوثيق الأنظمة. المساعدة في تحديد مشكلات الأنظمة وفجوات الخدمة. دعم قياس الأداء وحساب مؤشرات KPI. استخدام Microsoft Visio لتحليل سير العمل.",
         "en": "Provided technical and operational support in a university IT environment. Reviewed IT procedures and system documentation. Assisted in identifying system issues and service gaps. Supported KPI calculation for service uptime. Utilized Microsoft Visio to analyse workflows."
       }
     }
   ],
-
   "volunteer": [
     {
-      "role":         { "ar": "متطوع تقني", "en": "Technical Volunteer" },
-      "organization": { "ar": "عمادة تقنية المعلومات - الجامعة الإسلامية (بوابة المتطوعين الوطنية)", "en": "Deanship of IT - Islamic University (National Volunteer Portal)" },
-      "period":       { "ar": "أغسطس 2025", "en": "August 2025" },
-      "hours":        "96",
+      "role": {
+        "ar": "متطوع تقني",
+        "en": "Technical Volunteer"
+      },
+      "organization": {
+        "ar": "عمادة تقنية المعلومات - الجامعة الإسلامية (بوابة المتطوعين الوطنية)",
+        "en": "Deanship of IT - Islamic University (National Volunteer Portal)"
+      },
+      "period": {
+        "ar": "أغسطس 2025",
+        "en": "August 2025"
+      },
+      "hours": "96",
       "description": {
         "ar": "96 ساعة تطوعية معتمدة تركزت على تطبيق التدريب التعاوني للبرامج والأنظمة التقنية. دعم مبادرات المركز الوطني لقطاع غير الربحي.",
         "en": "Completed 96 certified volunteer hours focused on implementing cooperative training for technical programs and systems. Supported the National Center for Non-Profit Sector's initiatives."
       }
     }
   ],
-
   "skills": [
-    { "ar": "تحليل البيانات",                "en": "Data Analysis",                      "level": 80, "category": "hard" },
-    { "ar": "بروتوكولات الشبكات (TCP/IP)",   "en": "Network Protocols (TCP/IP)",         "level": 75, "category": "hard" },
-    { "ar": "أنظمة التشغيل (Win & Linux)",   "en": "Operating Systems (Win & Linux)",    "level": 80, "category": "hard" },
-    { "ar": "Microsoft Office",               "en": "Microsoft Office",                   "level": 90, "category": "hard" },
-    { "ar": "SQL & MySQL",                    "en": "SQL & MySQL",                        "level": 75, "category": "hard" },
-    { "ar": "HTML5 & CSS3",                   "en": "HTML5 & CSS3",                       "level": 70, "category": "hard" },
-    { "ar": "التوثيق التقني",                "en": "Technical Documentation",            "level": 85, "category": "hard" },
-    { "ar": "حل المشكلات والتفكير النقدي",   "en": "Problem-Solving & Critical Thinking","level": 85, "category": "soft" },
-    { "ar": "الانتباه للتفاصيل",             "en": "Attention to Detail",                "level": 90, "category": "soft" },
-    { "ar": "العمل الجماعي والتعاون",        "en": "Teamwork & Collaboration",           "level": 85, "category": "soft" },
-    { "ar": "إدارة الوقت والتنظيم",          "en": "Time Management & Organization",     "level": 80, "category": "soft" },
-    { "ar": "المبادرة والاستباقية",           "en": "Proactivity & Initiative",           "level": 85, "category": "soft" }
+    {
+      "ar": "تحليل البيانات",
+      "en": "Data Analysis",
+      "level": 80,
+      "category": "hard"
+    },
+    {
+      "ar": "بروتوكولات الشبكات (TCP/IP)",
+      "en": "Network Protocols (TCP/IP)",
+      "level": 75,
+      "category": "hard"
+    },
+    {
+      "ar": "أنظمة التشغيل (Win & Linux)",
+      "en": "Operating Systems (Win & Linux)",
+      "level": 80,
+      "category": "hard"
+    },
+    {
+      "ar": "Microsoft Office",
+      "en": "Microsoft Office",
+      "level": 90,
+      "category": "hard"
+    },
+    {
+      "ar": "SQL & MySQL",
+      "en": "SQL & MySQL",
+      "level": 75,
+      "category": "hard"
+    },
+    {
+      "ar": "HTML5 & CSS3",
+      "en": "HTML5 & CSS3",
+      "level": 70,
+      "category": "hard"
+    },
+    {
+      "ar": "التوثيق التقني",
+      "en": "Technical Documentation",
+      "level": 85,
+      "category": "hard"
+    },
+    {
+      "ar": "حل المشكلات والتفكير النقدي",
+      "en": "Problem-Solving & Critical Thinking",
+      "level": 85,
+      "category": "soft"
+    },
+    {
+      "ar": "الانتباه للتفاصيل",
+      "en": "Attention to Detail",
+      "level": 90,
+      "category": "soft"
+    },
+    {
+      "ar": "العمل الجماعي والتعاون",
+      "en": "Teamwork & Collaboration",
+      "level": 85,
+      "category": "soft"
+    },
+    {
+      "ar": "إدارة الوقت والتنظيم",
+      "en": "Time Management & Organization",
+      "level": 80,
+      "category": "soft"
+    },
+    {
+      "ar": "المبادرة والاستباقية",
+      "en": "Proactivity & Initiative",
+      "level": 85,
+      "category": "soft"
+    }
   ],
-
   "projects": [
     {
       "title": {
@@ -87,7 +190,13 @@
         "ar": "مشروع التخرج: نظام سير عمل آلي لتحويل الإجراءات الإدارية اليدوية إلى منصة رقمية متكاملة مع نظام صلاحيات متعدد المستويات.",
         "en": "Graduation Project: Automated workflow system to transition manual administrative procedures into a digital platform with a multi-tier authorization framework."
       },
-      "technologies": ["SQL", "MySQL", "HTML5", "CSS3", "JavaScript"],
+      "technologies": [
+        "SQL",
+        "MySQL",
+        "HTML5",
+        "CSS3",
+        "JavaScript"
+      ],
       "details": {
         "challenges": {
           "ar": "تصميم قاعدة بيانات آمنة وفعّالة تدعم تدفقات عمل معقدة مع ضمان سرية البيانات، وبناء نظام صلاحيات متعدد المستويات يتناسب مع الهيكل الأكاديمي.",
@@ -102,28 +211,44 @@
       "liveUrl": ""
     }
   ],
-
   "certificates": [
     {
-      "name":   { "ar": "أمن الشبكات والاتصالات",                              "en": "Network and Communications Security"             },
-      "issuer": { "ar": "ISC2", "en": "ISC2" },
+      "name": {
+        "ar": "أمن الشبكات والاتصالات",
+        "en": "Network and Communications Security"
+      },
+      "issuer": {
+        "ar": "ISC2",
+        "en": "ISC2"
+      },
       "credential": "HPUZITAO56UA",
       "date": "January 2025"
     },
     {
-      "name":   { "ar": "مبادئ الأمن",                                          "en": "Principles of Security"                          },
-      "issuer": { "ar": "ISC2", "en": "ISC2" },
+      "name": {
+        "ar": "مبادئ الأمن",
+        "en": "Principles of Security"
+      },
+      "issuer": {
+        "ar": "ISC2",
+        "en": "ISC2"
+      },
       "credential": "RHKTIRIVXJFL",
       "date": "January 2025"
     },
     {
-      "name":   { "ar": "مقدمة في أدوات الأمن السيبراني والهجمات الإلكترونية", "en": "Introduction to Cybersecurity Tools & Cyber Attacks" },
-      "issuer": { "ar": "IBM", "en": "IBM" },
+      "name": {
+        "ar": "مقدمة في أدوات الأمن السيبراني والهجمات الإلكترونية",
+        "en": "Introduction to Cybersecurity Tools & Cyber Attacks"
+      },
+      "issuer": {
+        "ar": "IBM",
+        "en": "IBM"
+      },
       "credential": "DZ93HR2XW4I1",
       "date": "January 2025"
     }
   ],
-
   "workshops": [
     {
       "name": {
@@ -140,9 +265,26 @@
       }
     }
   ],
-
   "languages": [
-    { "name": { "ar": "العربية",    "en": "Arabic"  }, "level": { "ar": "اللغة الأم",   "en": "Native"        } },
-    { "name": { "ar": "الإنجليزية","en": "English" }, "level": { "ar": "درجة STEP: 60","en": "STEP Score: 60" } }
+    {
+      "name": {
+        "ar": "العربية",
+        "en": "Arabic"
+      },
+      "level": {
+        "ar": "اللغة الأم",
+        "en": "Native"
+      }
+    },
+    {
+      "name": {
+        "ar": "الإنجليزية",
+        "en": "English"
+      },
+      "level": {
+        "ar": "درجة STEP: 60",
+        "en": "STEP Score: 60"
+      }
+    }
   ]
 }
