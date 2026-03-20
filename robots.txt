@@ -1,0 +1,10 @@
+# robots.txt — Osama Al-Harbi Portfolio
+# https://osamaal-harbi.github.io/portfolio/
+
+User-agent: *
+Allow: /
+
+# Keep admin panel out of search indexes
+Disallow: /admin/
+
+Sitemap: https://osamaal-harbi.github.io/portfolio/sitemap.xml
