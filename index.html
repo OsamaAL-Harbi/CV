@@ -251,6 +251,10 @@
                         </button>
                     </div>
 
+                    <!-- Admin: edit profile button below image -->
+                    <button onclick="manageProfile()" class="admin-element mt-2 mb-4 mx-auto items-center gap-2 px-4 py-1.5 bg-teal-500 text-white rounded-full text-xs font-bold hover:bg-teal-600 transition">
+                        <i class="fas fa-user-edit"></i> تعديل الملف الشخصي
+                    </button>
                     <p id="smart-greeting" class="text-primary font-bold mb-2 animate-pulse text-lg">مرحباً</p>
                     <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight leading-tight" data-path="profile.name"></h1>
                     <div class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 font-medium mb-6 h-8 flex justify-center gap-2">
@@ -535,6 +539,7 @@
         <span class="text-xs font-bold text-green-500 flex items-center gap-1"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Admin</span>
         <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
         <button onclick="saveToGitHub()" class="text-sm font-bold text-primary hover:text-blue-600 transition flex items-center gap-2"><i class="fas fa-save"></i><span data-lang="btn_save">حفظ</span></button>
+        <button onclick="manageProfile()" class="text-sm font-bold text-teal-500 hover:text-teal-600 transition flex items-center gap-2" title="تعديل الملف الشخصي"><i class="fas fa-user-edit"></i></button>
         <button onclick="showAnalyticsDashboard()" class="text-sm font-bold text-purple-500 hover:text-purple-600 transition" title="Analytics Dashboard"><i class="fas fa-chart-bar"></i></button>
         <button onclick="restoreBackup()" class="text-sm font-bold text-yellow-500 hover:text-yellow-600 transition" title="Restore Backup"><i class="fas fa-history"></i></button>
         <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
