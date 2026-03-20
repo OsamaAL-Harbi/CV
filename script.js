@@ -318,7 +318,11 @@ function renderWorkshopItem(item) {
 // FIX: projects outer wrapper has NO overflow-hidden (moved to image div only)
 function renderProjectItem(item, i) {
     // FIX: stable key = title string, not array index → survives drag-reorder
-    const stableKey = 'pv_' + (item.title?.en || item.title?.ar || i).replace(/\s+/g, '_');
+    // FIX: extract string safely before calling replace
+    const _titleStr = (typeof item.title === 'object')
+        ? (item.title.en || item.title.ar || String(i))
+        : String(item.title || i);
+    const stableKey = 'pv_' + _titleStr.replace(/[^a-zA-Z0-9؀-ۿ]/g, '_');
     const views     = JSON.parse(sessionStorage.getItem('project_views') || '{}');
     const count     = views[stableKey] || 0;
     const viewLabel = count === 1
@@ -342,7 +346,7 @@ function renderProjectItem(item, i) {
         </div>
         <div class="p-5 flex-grow flex flex-col">
             <h3 class="text-base font-bold mb-2 dark:text-white">${t(item.title)}</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed flex-grow">${t(item.desc)}</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed flex-grow line-clamp-3">${t(item.desc)}</p>
             ${item.technologies?.length ? `
                 <div class="flex flex-wrap gap-1.5 mt-3">
                     ${item.technologies.map(tech =>
@@ -487,7 +491,10 @@ function openProjectModal(index) {
     if (!item) return;
 
     // FIX: use stable key based on project title, not array index
-    const stableKey = 'pv_' + (item.title?.en || item.title?.ar || index).replace(/\s+/g, '_');
+    const _titleStr2 = (typeof item.title === 'object')
+        ? (item.title.en || item.title.ar || String(index))
+        : String(item.title || index);
+    const stableKey = 'pv_' + _titleStr2.replace(/[^a-zA-Z0-9؀-ۿ]/g, '_');
     const views     = JSON.parse(sessionStorage.getItem('project_views') || '{}');
     views[stableKey] = (views[stableKey] || 0) + 1;
     sessionStorage.setItem('project_views', JSON.stringify(views));
@@ -687,9 +694,12 @@ const SCHEMAS = {
         { key: 'description',  label: 'الوصف / Description', type: 'textarea' }
     ],
     projects: [
-        { key: 'title', label: 'العنوان / Title' },
-        { key: 'desc',  label: 'الوصف / Description', type: 'textarea' },
-        { key: 'link',  label: 'الرابط / Link', simple: true }
+        { key: 'title',        label: 'العنوان / Title' },
+        { key: 'desc',         label: 'الوصف / Description', type: 'textarea' },
+        { key: 'technologies', label: 'التقنيات — افصل بفاصلة: Python,SQL,HTML5', simple: true, isArray: true },
+        { key: 'challenges',   label: 'التحديات / Challenges', type: 'textarea', nested: 'details' },
+        { key: 'results',      label: 'النتائج / Results',     type: 'textarea', nested: 'details' },
+        { key: 'link',         label: 'الرابط / Link', simple: true }
     ],
     certificates: [
         { key: 'name',       label: 'اسم الشهادة / Name' },
@@ -715,22 +725,37 @@ async function manageItem(type, index = null) {
     const schema = SCHEMAS[type];
     if (!schema) return;
 
-    const getVal = (obj, key, lang) => {
-        if (!obj[key]) return '';
-        if (typeof obj[key] === 'object') return obj[key][lang] || '';
-        return String(obj[key]);
+    // Get value helper — supports nested keys (e.g. details.challenges)
+    const getVal = (obj, f, lang) => {
+        const src = f.nested ? (obj[f.nested] || {}) : obj;
+        const v   = src[f.key];
+        if (!v) return '';
+        if (typeof v === 'object') return v[lang] || '';
+        return String(v);
+    };
+
+    // For isArray fields, show comma-separated string of current array
+    const getArrayVal = (obj, f) => {
+        const arr = obj[f.key];
+        if (!arr) return '';
+        if (Array.isArray(arr)) return arr.join(', ');
+        return String(arr);
     };
 
     const html = schema.map(f => {
+        // simple text input (also handles isArray and nested-simple)
         if (f.simple) {
-            const val = isEdit ? (item[f.key] ?? '') : '';
+            const val = isEdit
+                ? (f.isArray ? getArrayVal(item, f) : (item[f.key] ?? ''))
+                : '';
             return `<div class="mb-3">
                 <label class="block text-xs mb-1 text-gray-500 text-right">${f.label}</label>
                 <input id="swal-${f.key}" class="swal2-input m-0 w-full" value="${val}" dir="ltr">
             </div>`;
         }
-        const valAr = getVal(item, f.key, 'ar');
-        const valEn = getVal(item, f.key, 'en');
+        // bilingual textarea or input (supports nested)
+        const valAr = getVal(item, f, 'ar');
+        const valEn = getVal(item, f, 'en');
         if (f.type === 'textarea') {
             return `<div class="grid grid-cols-2 gap-2 mb-3">
                 <div>
@@ -764,17 +789,33 @@ async function manageItem(type, index = null) {
         cancelButtonText: 'إلغاء',
         focusConfirm: false,
         preConfirm: () => {
-            const obj = {};
+            const obj   = {};
+            const nestedGroups = {};   // accumulates nested keys e.g. details: { challenges: {}, results: {} }
+
             schema.forEach(f => {
                 if (f.simple) {
-                    obj[f.key] = document.getElementById(`swal-${f.key}`)?.value ?? '';
+                    const raw = document.getElementById(`swal-${f.key}`)?.value ?? '';
+                    // isArray: split comma-separated string into array, trim each element
+                    obj[f.key] = f.isArray
+                        ? raw.split(',').map(s => s.trim()).filter(Boolean)
+                        : raw;
                 } else {
-                    obj[f.key] = {
+                    const biVal = {
                         ar: document.getElementById(`swal-${f.key}-ar`)?.value ?? '',
                         en: document.getElementById(`swal-${f.key}-en`)?.value ?? ''
                     };
+                    if (f.nested) {
+                        // group under the parent key e.g. details.challenges
+                        if (!nestedGroups[f.nested]) nestedGroups[f.nested] = {};
+                        nestedGroups[f.nested][f.key] = biVal;
+                    } else {
+                        obj[f.key] = biVal;
+                    }
                 }
             });
+
+            // Merge nested groups into obj
+            Object.assign(obj, nestedGroups);
             return obj;
         }
     });
