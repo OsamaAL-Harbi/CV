@@ -1,13 +1,35 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" class="scroll-smooth">
 <head>
-    <meta property="og:title"       content="أسامة الحربي | Portfolio">
-    <meta property="og:description" content="الموقع الشخصي لأسامة عبدالعزيز الحربي - خريج تقنية المعلومات.">
-    <meta property="og:image"       content="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-    <meta property="og:url"         content="https://your-domain.com">
-    <meta property="og:type"        content="website">
-    <meta name="twitter:card"       content="summary_large_image">
-    <meta name="twitter:title"      content="أسامة الحربي | Portfolio">
+    <!-- Open Graph (updated dynamically after data.json loads) -->
+    <meta id="og-title"       property="og:title"       content="أسامة الحربي | Portfolio">
+    <meta id="og-description" property="og:description" content="خريج تقنية المعلومات - الجامعة الإسلامية بالمدينة المنورة">
+    <meta id="og-image"       property="og:image"       content="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <meta id="og-url"         property="og:url"         content="https://osamaalharbi.github.io/portfolio/">
+    <meta                     property="og:type"        content="website">
+    <meta id="og-locale"      property="og:locale"      content="ar_SA">
+    <meta id="tw-card"        name="twitter:card"       content="summary_large_image">
+    <meta id="tw-title"       name="twitter:title"      content="أسامة الحربي | Portfolio">
+    <meta id="tw-description" name="twitter:description" content="خريج تقنية المعلومات">
+    <!-- Schema.org JSON-LD Person markup -->
+    <script type="application/ld+json" id="schema-person">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Osama Abdulaziz Al-Harbi",
+      "alternateName": "أسامة عبدالعزيز الحربي",
+      "jobTitle": "Information Technology Graduate",
+      "email": "osamafcv214@gmail.com",
+      "telephone": "+966537820694",
+      "nationality": "Saudi",
+      "address": { "@type": "PostalAddress", "addressLocality": "Madinah", "addressCountry": "SA" },
+      "alumniOf": { "@type": "CollegeOrUniversity", "name": "Islamic University of Madinah" },
+      "sameAs": [
+        "https://www.linkedin.com/in/osama-al-harbi",
+        "https://github.com/OsamaAL-Harbi"
+      ]
+    }
+    </script>
     <meta name="apple-mobile-web-app-capable"           content="yes">
     <meta name="apple-mobile-web-app-status-bar-style"  content="black-translucent">
     <meta name="apple-mobile-web-app-title"             content="Osama Portfolio">
@@ -100,6 +122,35 @@
         /* Line clamp utility */
         .line-clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 
+        /* ─── TIMELINE VISUAL ─────────────────────────── */
+        .timeline-item { position: relative; }
+        .timeline-year {
+            position: absolute;
+            top: 0;
+            font-size: 10px;
+            font-weight: 700;
+            color: #3b82f6;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 1px 6px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+        html[dir="rtl"] .timeline-year { left: -52px; }
+        html[dir="ltr"] .timeline-year { right: -52px; }
+        .dark .timeline-year { background: #1e3a5f; border-color: #3b82f6; color: #93c5fd; }
+
+        /* ─── SKELETON PULSE ───────────────────────────── */
+        @keyframes skeleton-pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+        }
+        .skeleton-pulse { animation: skeleton-pulse 1.5s ease-in-out infinite; }
+
+        /* ─── PROJECT FILTER BUTTONS ───────────────────── */
+        .filter-btn { transition: all 0.2s; }
+        .filter-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+
         /* ─── PRINT MODE ────────────────────────────────── */
         @media print {
             #particles-js, nav, #mobile-menu, #scrollTopBtn,
@@ -127,10 +178,29 @@
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-darkBg dark:text-gray-100 font-sans transition-colors duration-300 min-h-screen flex flex-col">
 
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="fixed inset-0 z-[200] bg-white dark:bg-darkBg flex flex-col items-center justify-center transition-opacity duration-500">
-        <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 text-sm font-bold tracking-widest animate-pulse text-gray-500">LOADING...</p>
+    <!-- Skeleton Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 z-[200] bg-white dark:bg-darkBg flex flex-col items-center justify-center transition-opacity duration-700 px-8">
+        <div class="w-full max-w-sm space-y-4 animate-pulse">
+            <!-- Avatar skeleton -->
+            <div class="flex justify-center mb-6">
+                <div class="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+            </div>
+            <!-- Name line -->
+            <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 mx-auto"></div>
+            <!-- Subtitle line -->
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/2 mx-auto"></div>
+            <!-- Summary lines -->
+            <div class="space-y-2 mt-4">
+                <div class="h-3 bg-gray-100 dark:bg-gray-800 rounded w-full"></div>
+                <div class="h-3 bg-gray-100 dark:bg-gray-800 rounded w-5/6"></div>
+                <div class="h-3 bg-gray-100 dark:bg-gray-800 rounded w-4/6"></div>
+            </div>
+            <!-- Button skeletons -->
+            <div class="flex justify-center gap-3 mt-6">
+                <div class="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                <div class="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+            </div>
+        </div>
     </div>
 
     <input type="file" id="image-upload-input" class="hidden" accept="image/*">
@@ -186,6 +256,13 @@
                     </div>
 
                     <p id="smart-greeting" class="text-primary font-bold mb-2 animate-pulse text-lg">مرحباً</p>
+                    <!-- Availability badge (controlled from data.json → profile.available) -->
+                    <div id="availability-badge" class="hidden justify-center mb-4">
+                        <span id="availability-pill" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border transition-all">
+                            <span id="availability-dot" class="w-2 h-2 rounded-full"></span>
+                            <span id="availability-text"></span>
+                        </span>
+                    </div>
                     <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight leading-tight" data-path="profile.name"></h1>
                     <div class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 font-medium mb-6 h-8 flex justify-center gap-2">
                         <span id="typewriter"></span><span class="animate-pulse text-primary">|</span>
@@ -334,11 +411,13 @@
 
         <!-- ─── PORTFOLIO ───────────────────────────────────── -->
         <section id="portfolio" class="page-section">
-            <div class="text-center mb-16 relative">
+            <div class="text-center mb-10 relative">
                 <h2 class="text-4xl font-bold mb-4" data-aos="fade-down" data-lang="sec_projects">معرض المشاريع</h2>
                 <div class="w-20 h-1 bg-primary mx-auto rounded-full"></div>
                 <button onclick="addItem('projects')" class="admin-element absolute top-0 right-0 bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-200 gap-2 transition shadow-lg"><i class="fas fa-plus"></i> مشروع جديد</button>
             </div>
+            <!-- Project filter buttons (generated dynamically from project technologies) -->
+            <div id="project-filters" class="flex flex-wrap justify-center gap-2 mb-10 print-hide"></div>
             <div id="projects-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </section>
 
@@ -350,12 +429,16 @@
                 <p class="text-gray-500 mb-1 text-sm" id="contact-email-display"></p>
                 <p class="text-gray-500 mb-8 text-sm" id="contact-location-display"></p>
                 <form id="contactForm" onsubmit="handleContact(event)" class="space-y-4 text-left" dir="ltr">
+                    <!-- Honeypot anti-spam field (hidden from humans, bots fill it) -->
+                    <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
                     <div class="grid grid-cols-2 gap-4">
-                        <input type="text"  name="name"    class="w-full p-4 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right transition" placeholder="الاسم / Name"  required>
-                        <input type="email" name="email"   class="w-full p-4 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right transition" placeholder="البريد / Email" required>
+                        <input type="text"  name="name"    class="w-full p-4 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right transition" placeholder="الاسم / Name"  required autocomplete="name">
+                        <input type="email" name="email"   class="w-full p-4 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right transition" placeholder="البريد / Email" required autocomplete="email">
                     </div>
                     <textarea name="message" rows="4" class="w-full p-4 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right transition" placeholder="رسالتك / Message" required></textarea>
-                    <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition shadow-lg transform hover:-translate-y-1" data-lang="btn_email">إرسال</button>
+                    <!-- Rate limit counter shown when user approaches limit -->
+                    <p id="contact-rate-info" class="text-xs text-gray-400 text-center hidden"></p>
+                    <button type="submit" id="contact-submit-btn" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition shadow-lg transform hover:-translate-y-1" data-lang="btn_email">إرسال</button>
                 </form>
                 <div class="flex justify-center gap-8 mt-10 border-t border-gray-100 dark:border-gray-700 pt-8">
                     <a id="social-linkedin" href="#" target="_blank" class="text-3xl text-gray-400 hover:text-blue-500 transition transform hover:scale-110"><i class="fab fa-linkedin"></i></a>
