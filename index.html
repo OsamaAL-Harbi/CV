@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" class="scroll-smooth">
 <head>
-    <!-- Open Graph (updated dynamically after data.json loads) -->
-    <meta id="og-title"       property="og:title"       content="أسامة الحربي | Portfolio">
-    <meta id="og-description" property="og:description" content="خريج تقنية المعلومات - الجامعة الإسلامية بالمدينة المنورة">
-    <meta id="og-image"       property="og:image"       content="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-    <meta id="og-url"         property="og:url"         content="https://osamaal-harbi.github.io/portfolio/">
-    <meta                     property="og:type"        content="website">
-    <meta id="og-locale"      property="og:locale"      content="ar_SA">
-    <meta id="tw-card"        name="twitter:card"       content="summary_large_image">
-    <meta id="tw-title"       name="twitter:title"      content="أسامة الحربي | Portfolio">
-    <meta id="tw-description" name="twitter:description" content="خريج تقنية المعلومات">
-    <!-- Schema.org JSON-LD Person markup -->
-    <script type="application/ld+json" id="schema-person">
+    <!-- Dynamic SEO – updated per page via updateMetaTags() -->
+    <meta id="meta-description" name="description" content="الموقع الشخصي لأسامة عبدالعزيز الحربي - خريج تقنية المعلومات، الجامعة الإسلامية بالمدينة المنورة.">
+    <meta id="og-title"         property="og:title"       content="أسامة الحربي | Portfolio">
+    <meta id="og-description"   property="og:description" content="خريج تقنية المعلومات - الجامعة الإسلامية بالمدينة المنورة">
+    <meta id="og-image"         property="og:image"       content="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <meta id="og-url"           property="og:url"         content="">
+    <meta                       property="og:type"        content="website">
+    <meta id="tw-title"         name="twitter:card"       content="summary_large_image">
+    <meta                       name="twitter:title"      content="أسامة الحربي | Portfolio">
+    <link id="canonical"        rel="canonical"           href="">
+    <meta name="robots"         content="index, follow">
+    <meta name="author"         content="Osama Abdulaziz Al-Harbi">
+    <meta name="keywords"       content="أسامة الحربي, IT, تقنية المعلومات, الجامعة الإسلامية, Portfolio">
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Person",
@@ -25,11 +29,12 @@
       "address": { "@type": "PostalAddress", "addressLocality": "Madinah", "addressCountry": "SA" },
       "alumniOf": { "@type": "CollegeOrUniversity", "name": "Islamic University of Madinah" },
       "sameAs": [
-        "www.linkedin.com/in/اسامة-الحربي-368a5a23b",
+        "https://www.linkedin.com/in/osama-al-harbi",
         "https://github.com/OsamaAL-Harbi"
       ]
     }
     </script>
+
     <meta name="apple-mobile-web-app-capable"           content="yes">
     <meta name="apple-mobile-web-app-status-bar-style"  content="black-translucent">
     <meta name="apple-mobile-web-app-title"             content="Osama Portfolio">
@@ -39,11 +44,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>أسامة الحربي | Portfolio</title>
-    <meta name="description" content="الموقع الشخصي لأسامة عبدالعزيز الحربي - خريج تقنية المعلومات، الجامعة الإسلامية بالمدينة المنورة.">
     <link rel="icon"     href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3b82f6">
 
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-KE86NNMX3J"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -51,39 +56,14 @@
         gtag('js', new Date()); gtag('config', 'G-KE86NNMX3J');
     </script>
 
-    <!-- D — Content Security Policy (meta tag, works on GitHub Pages) -->
-    <meta http-equiv="Content-Security-Policy" content="
-      default-src 'self';
-      script-src  'self' 'unsafe-inline'
-                  https://cdn.tailwindcss.com
-                  https://cdnjs.cloudflare.com
-                  https://cdn.jsdelivr.net
-                  https://unpkg.com
-                  https://www.googletagmanager.com
-                  https://www.google-analytics.com
-                  https://identity.netlify.com;
-      style-src   'self' 'unsafe-inline'
-                  https://fonts.googleapis.com
-                  https://cdnjs.cloudflare.com
-                  https://cdn.jsdelivr.net
-                  https://unpkg.com;
-      font-src    'self'
-                  https://fonts.gstatic.com
-                  https://cdnjs.cloudflare.com;
-      img-src     'self' data: blob:
-                  https://cdn-icons-png.flaticon.com
-                  https://ui-avatars.com
-                  https://www.google-analytics.com;
-      connect-src 'self'
-                  https://api.github.com
-                  https://formspree.io
-                  https://www.google-analytics.com;
-      frame-src   'none';
-      object-src  'none';
-      base-uri    'self';
-    ">
-    <!-- Referrer policy -->
-    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <!-- Microsoft Clarity – replace YOUR_CLARITY_ID with your project ID -->
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "YOUR_CLARITY_ID");
+    </script>
 
     <!-- Core Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -96,7 +76,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -114,7 +93,12 @@
 
     <style>
         body { overflow-x: hidden; }
-        #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; pointer-events: none; }
+        #particles-js {
+            position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 0;
+            pointer-events: none;
+            /* hue-rotate used to shift particle color per section */
+            transition: filter 0.8s ease;
+        }
 
         /* Navigation */
         .nav-active { color: #3b82f6; position: relative; }
@@ -141,7 +125,6 @@
 
         /* LTR */
         html[dir="ltr"] { font-family: 'Roboto', sans-serif; }
-        html[dir="ltr"] .admin-controls-group { right:8px; left:auto; }
 
         /* Mobile menu */
         #mobile-menu { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
@@ -153,59 +136,46 @@
         #scrollTopBtn { opacity:0; pointer-events:none; transition:0.3s; }
         #scrollTopBtn.show { opacity:1; pointer-events:all; }
 
-        /* Line clamp utility */
-        .line-clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+        /* Project filter buttons */
+        .filter-btn { transition: all 0.2s; white-space: nowrap; }
+        .filter-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
 
-        /* ─── TIMELINE VISUAL ─────────────────────────── */
-        .timeline-item { position: relative; }
+        /* Contact card press */
+        .contact-card:active { transform: scale(0.97); }
+
+        /* Skeleton */
+        @keyframes skeleton-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+        .skeleton-pulse { animation: skeleton-pulse 1.5s ease-in-out infinite; }
+
+        /* Timeline year badge */
         .timeline-year {
-            position: absolute;
-            top: 0;
-            font-size: 10px;
-            font-weight: 700;
-            color: #3b82f6;
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            padding: 1px 6px;
-            border-radius: 999px;
-            white-space: nowrap;
+            position: absolute; top: 0; font-size: 10px; font-weight: 700;
+            color: #3b82f6; background: #eff6ff; border: 1px solid #bfdbfe;
+            padding: 1px 6px; border-radius: 999px; white-space: nowrap;
         }
         html[dir="rtl"] .timeline-year { left: -52px; }
         html[dir="ltr"] .timeline-year { right: -52px; }
         .dark .timeline-year { background: #1e3a5f; border-color: #3b82f6; color: #93c5fd; }
 
-        /* ─── SKELETON PULSE ───────────────────────────── */
-        @keyframes skeleton-pulse {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0.4; }
-        }
-        .skeleton-pulse { animation: skeleton-pulse 1.5s ease-in-out infinite; }
+        /* 404 animation */
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
+        #not-found .float-icon { animation: float 3s ease-in-out infinite; }
 
-        /* ─── PROJECT FILTER BUTTONS ───────────────────── */
-        .filter-btn { transition: all 0.2s; }
-        .filter-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
-
-        /* ─── PRINT MODE ────────────────────────────────── */
+        /* ─── PRINT MODE ─────────────────────────────────── */
         @media print {
             #particles-js, nav, #mobile-menu, #scrollTopBtn,
-            #admin-toolbar, #admin-modal, #cmd-palette,
-            #project-modal, footer, .admin-element,
-            #home, #portfolio, #contact,
+            #admin-toolbar, #admin-modal, #cmd-palette, #project-modal,
+            footer, .admin-element, .print-hide,
+            #home, #portfolio, #contact, #not-found,
             .page-section:not(#resume) { display: none !important; }
-
             #resume { display: block !important; }
             body { background: white !important; color: black !important; font-size: 11pt; }
             .dark\:bg-darkBg, .dark\:bg-cardBg { background: white !important; }
             .dark\:text-gray-100, .dark\:text-gray-300, .dark\:text-gray-400 { color: #333 !important; }
-            .border, .border-gray-200, .dark\:border-gray-700, .dark\:border-gray-800 { border-color: #ddd !important; }
             .shadow-sm, .shadow-md, .shadow-2xl { box-shadow: none !important; }
-            .bg-white { background: white !important; }
-            a { color: #333 !important; text-decoration: none; }
             .text-primary { color: #1d4ed8 !important; }
-            .text-secondary { color: #6d28d9 !important; }
             .skill-bar-fill { transition: none !important; }
             #print-header { display: block !important; }
-            .print-hide { display: none !important; }
             @page { margin: 1.5cm; }
         }
     </style>
@@ -214,44 +184,37 @@
 
     <!-- Skeleton Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 z-[200] bg-white dark:bg-darkBg flex flex-col items-center justify-center transition-opacity duration-700 px-8">
-        <div class="w-full max-w-sm space-y-4 animate-pulse">
-            <!-- Avatar skeleton -->
+        <div class="w-full max-w-sm space-y-4">
             <div class="flex justify-center mb-6">
-                <div class="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                <div class="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full skeleton-pulse"></div>
             </div>
-            <!-- Name line -->
-            <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 mx-auto"></div>
-            <!-- Subtitle line -->
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/2 mx-auto"></div>
-            <!-- Summary lines -->
+            <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 mx-auto skeleton-pulse"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/2 mx-auto skeleton-pulse"></div>
             <div class="space-y-2 mt-4">
-                <div class="h-3 bg-gray-100 dark:bg-gray-800 rounded w-full"></div>
-                <div class="h-3 bg-gray-100 dark:bg-gray-800 rounded w-5/6"></div>
-                <div class="h-3 bg-gray-100 dark:bg-gray-800 rounded w-4/6"></div>
+                <div class="h-3 bg-gray-100 dark:bg-gray-800 rounded w-full skeleton-pulse"></div>
+                <div class="h-3 bg-gray-100 dark:bg-gray-800 rounded w-5/6 skeleton-pulse"></div>
+                <div class="h-3 bg-gray-100 dark:bg-gray-800 rounded w-4/6 skeleton-pulse"></div>
             </div>
-            <!-- Button skeletons -->
             <div class="flex justify-center gap-3 mt-6">
-                <div class="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
-                <div class="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                <div class="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-xl skeleton-pulse"></div>
+                <div class="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-xl skeleton-pulse"></div>
             </div>
         </div>
     </div>
 
     <input type="file" id="image-upload-input" class="hidden" accept="image/*">
-    <div id="particles-js" class="opacity-30 dark:opacity-20 transition-colors duration-1000"></div>
+    <div id="particles-js" class="opacity-30 dark:opacity-20"></div>
 
     <!-- ═══ NAVBAR ══════════════════════════════════════════ -->
     <nav class="fixed top-0 w-full z-50 bg-white/90 dark:bg-darkBg/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm transition-all">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" onclick="showPage('home')" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary z-50">OSAMA.</a>
-
+            <a href="#home" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary z-50">OSAMA.</a>
             <div class="hidden md:flex gap-8 font-medium text-sm">
-                <button onclick="showPage('home')"      class="nav-link nav-active hover:text-primary transition" id="nav-home"      data-lang="nav_home">الرئيسية</button>
-                <button onclick="showPage('resume')"    class="nav-link hover:text-primary transition"           id="nav-resume"    data-lang="nav_resume">السيرة الذاتية</button>
-                <button onclick="showPage('portfolio')" class="nav-link hover:text-primary transition"           id="nav-portfolio" data-lang="nav_portfolio">الأعمال</button>
-                <button onclick="showPage('contact')"   class="nav-link hover:text-primary transition"           id="nav-contact"   data-lang="nav_contact">تواصل</button>
+                <a href="#home"      class="nav-link nav-active hover:text-primary transition" id="nav-home"      data-lang="nav_home">الرئيسية</a>
+                <a href="#resume"    class="nav-link hover:text-primary transition"           id="nav-resume"    data-lang="nav_resume">السيرة الذاتية</a>
+                <a href="#portfolio" class="nav-link hover:text-primary transition"           id="nav-portfolio" data-lang="nav_portfolio">الأعمال</a>
+                <a href="#contact"   class="nav-link hover:text-primary transition"           id="nav-contact"   data-lang="nav_contact">تواصل</a>
             </div>
-
             <div class="flex items-center gap-3 z-50">
                 <button onclick="toggleLanguage()" id="lang-btn" class="px-3 py-1 text-xs font-bold border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">EN</button>
                 <button id="theme-btn" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition border border-gray-200 dark:border-gray-700">🌓</button>
@@ -263,20 +226,19 @@
     <!-- ═══ MOBILE MENU ════════════════════════════════════ -->
     <div id="mobile-menu" class="closed fixed inset-0 z-40 bg-white dark:bg-darkBg flex flex-col items-center justify-center space-y-8 md:hidden shadow-2xl">
         <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 text-3xl hover:text-red-500 transition"><i class="fas fa-times"></i></button>
-        <button onclick="showPage('home');      toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_home">الرئيسية</button>
-        <button onclick="showPage('resume');    toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_resume">السيرة الذاتية</button>
-        <button onclick="showPage('portfolio'); toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_portfolio">الأعمال</button>
-        <button onclick="showPage('contact');   toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_contact">تواصل</button>
-        <a href="Osama_Alharbi_IT_CV.pdf" download="Osama_Alharbi_IT_CV.pdf" class="px-6 py-2 bg-primary text-white rounded-full font-bold shadow-lg flex items-center gap-2">
-            <i class="fas fa-download"></i>
-            <span data-lang="btn_download_cv">تحميل السيرة الذاتية</span>
+        <a href="#home"      onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_home">الرئيسية</a>
+        <a href="#resume"    onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_resume">السيرة الذاتية</a>
+        <a href="#portfolio" onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_portfolio">الأعمال</a>
+        <a href="#contact"   onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_contact">تواصل</a>
+        <a href="Osama_Alharbi_IT_CV.pdf" download class="px-6 py-2 bg-primary text-white rounded-full font-bold shadow-lg flex items-center gap-2">
+            <i class="fas fa-download"></i> <span data-lang="btn_download_cv">تحميل السيرة الذاتية</span>
         </a>
     </div>
 
     <!-- ═══ MAIN ════════════════════════════════════════════ -->
     <main class="container mx-auto px-4 pt-32 pb-20 flex-grow relative z-10 max-w-5xl">
 
-        <!-- ─── HOME ───────────────────────────────────────── -->
+        <!-- ─── HOME ─────────────────────────────────────── -->
         <section id="home" class="page-section active min-h-[70vh]">
             <div class="flex items-center justify-center text-center" data-aos="zoom-in">
                 <div class="w-full">
@@ -290,13 +252,6 @@
                     </div>
 
                     <p id="smart-greeting" class="text-primary font-bold mb-2 animate-pulse text-lg">مرحباً</p>
-                    <!-- Availability badge (controlled from data.json → profile.available) -->
-                    <div id="availability-badge" class="hidden justify-center mb-4">
-                        <span id="availability-pill" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border transition-all">
-                            <span id="availability-dot" class="w-2 h-2 rounded-full"></span>
-                            <span id="availability-text"></span>
-                        </span>
-                    </div>
                     <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight leading-tight" data-path="profile.name"></h1>
                     <div class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 font-medium mb-6 h-8 flex justify-center gap-2">
                         <span id="typewriter"></span><span class="animate-pulse text-primary">|</span>
@@ -309,45 +264,34 @@
 
                     <!-- CTA Buttons -->
                     <div class="flex justify-center gap-3 flex-wrap mb-16">
-                        <button onclick="showPage('portfolio')" class="px-7 py-3 bg-primary text-white rounded-xl font-bold hover:scale-105 transition shadow-lg shadow-primary/30" data-lang="btn_projects">أعمالي</button>
-                        <a href="Osama_Alharbi_IT_CV.pdf" download="Osama_Alharbi_IT_CV.pdf" class="px-7 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-bold hover:scale-105 transition shadow-lg shadow-red-500/30 flex items-center gap-2">
-                            <i class="fas fa-file-pdf"></i>
-                            <span data-lang="btn_download_cv">تحميل السيرة الذاتية</span>
+                        <a href="#portfolio" class="px-7 py-3 bg-primary text-white rounded-xl font-bold hover:scale-105 transition shadow-lg shadow-primary/30" data-lang="btn_projects">أعمالي</a>
+                        <a href="Osama_Alharbi_IT_CV.pdf" download class="px-7 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-bold hover:scale-105 transition shadow-lg shadow-red-500/30 flex items-center gap-2">
+                            <i class="fas fa-file-pdf"></i><span data-lang="btn_download_cv">تحميل السيرة الذاتية</span>
                         </a>
                         <button onclick="shareProfile()" class="px-7 py-3 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-xl font-bold hover:scale-105 transition flex items-center gap-2">
-                            <i class="fas fa-share-alt text-primary"></i>
-                            <span data-lang="btn_share">مشاركة</span>
+                            <i class="fas fa-share-alt text-primary"></i><span data-lang="btn_share">مشاركة</span>
                         </button>
                         <button onclick="triggerPrint()" class="px-7 py-3 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-xl font-bold hover:scale-105 transition flex items-center gap-2 print-hide">
-                            <i class="fas fa-print text-gray-500"></i>
-                            <span data-lang="btn_print">طباعة</span>
+                            <i class="fas fa-print text-gray-500"></i><span data-lang="btn_print">طباعة</span>
                         </button>
                     </div>
 
-                    <!-- ─── STATS ──────────────────────────────── -->
+                    <!-- Stats -->
                     <div id="stats-section" class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto" data-aos="fade-up">
                         <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
-                            <div class="text-3xl font-extrabold text-primary mb-1">
-                                <span class="stat-number" data-target="3">0</span>
-                            </div>
+                            <div class="text-3xl font-extrabold text-primary mb-1"><span class="stat-number" data-target="3">0</span></div>
                             <p class="text-xs text-gray-500 font-medium" data-lang="stat_certs">شهادات مهنية</p>
                         </div>
                         <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
-                            <div class="text-3xl font-extrabold text-orange-500 mb-1">
-                                <span class="stat-number" data-target="96">0</span>
-                            </div>
+                            <div class="text-3xl font-extrabold text-orange-500 mb-1"><span class="stat-number" data-target="96">0</span></div>
                             <p class="text-xs text-gray-500 font-medium" data-lang="stat_volunteer">ساعة تطوع</p>
                         </div>
                         <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
-                            <div class="text-3xl font-extrabold text-green-500 mb-1">
-                                <span class="stat-number" data-target="1">0</span>
-                            </div>
+                            <div class="text-3xl font-extrabold text-green-500 mb-1"><span class="stat-number" data-target="1">0</span></div>
                             <p class="text-xs text-gray-500 font-medium" data-lang="stat_projects">مشروع تخرج</p>
                         </div>
                         <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
-                            <div class="text-3xl font-extrabold text-secondary mb-1">
-                                <span class="stat-number" data-target="2026">0</span>
-                            </div>
+                            <div class="text-3xl font-extrabold text-secondary mb-1"><span class="stat-number" data-target="2026">0</span></div>
                             <p class="text-xs text-gray-500 font-medium" data-lang="stat_graduation">سنة التخرج</p>
                         </div>
                     </div>
@@ -355,87 +299,70 @@
             </div>
         </section>
 
-        <!-- ─── RESUME ──────────────────────────────────────── -->
+        <!-- ─── RESUME ────────────────────────────────────── -->
         <section id="resume" class="page-section">
-
-            <!-- Hidden print header -->
             <div id="print-header" class="hidden mb-8 text-center border-b pb-4">
                 <h1 class="text-2xl font-bold" id="print-name"></h1>
                 <p id="print-contact" class="text-sm text-gray-600 mt-1"></p>
             </div>
-
             <div class="flex justify-between items-center mb-16" data-aos="fade-down">
                 <h2 class="text-4xl font-bold" data-lang="sec_resume">السيرة الذاتية</h2>
-                <!-- PDF & Print buttons in resume header -->
                 <div class="flex gap-2 print-hide">
-                    <a href="Osama_Alharbi_IT_CV.pdf" download="Osama_Alharbi_IT_CV.pdf" class="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 border border-red-200 dark:border-red-800 rounded-xl text-xs font-bold hover:scale-105 transition">
-                        <i class="fas fa-file-pdf"></i>
-                        <span data-lang="btn_download_cv">تحميل السيرة الذاتية</span>
+                    <a href="Osama_Alharbi_IT_CV.pdf" download class="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 border border-red-200 dark:border-red-800 rounded-xl text-xs font-bold hover:scale-105 transition">
+                        <i class="fas fa-file-pdf"></i><span data-lang="btn_download_cv">تحميل PDF</span>
                     </a>
                     <button onclick="triggerPrint()" class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold hover:scale-105 transition">
-                        <i class="fas fa-print"></i>
-                        <span data-lang="btn_print">طباعة</span>
+                        <i class="fas fa-print"></i><span data-lang="btn_print">طباعة</span>
                     </button>
                 </div>
             </div>
-
             <div class="grid md:grid-cols-2 gap-12">
-
-                <!-- LEFT: Experience + Education + Volunteer -->
+                <!-- LEFT -->
                 <div>
-                    <!-- Experience -->
                     <div class="flex justify-between items-center mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
-                        <h3 class="text-2xl font-bold flex items-center gap-3 text-primary"><i class="fas fa-briefcase"></i> <span data-lang="sec_exp">الخبرات</span></h3>
+                        <h3 class="text-2xl font-bold flex items-center gap-3 text-primary"><i class="fas fa-briefcase"></i><span data-lang="sec_exp">الخبرات</span></h3>
                         <button onclick="addItem('experience')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="experience-container" class="space-y-10 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8 ltr:border-l-2 ltr:border-r-0 ltr:mr-0 ltr:ml-3 ltr:pr-0 ltr:pl-8 mb-12"></div>
 
-                    <!-- Education -->
                     <div class="flex justify-between items-center mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
-                        <h3 class="text-2xl font-bold flex items-center gap-3 text-blue-500"><i class="fas fa-university"></i> <span data-lang="sec_edu">التعليم</span></h3>
+                        <h3 class="text-2xl font-bold flex items-center gap-3 text-blue-500"><i class="fas fa-university"></i><span data-lang="sec_edu">التعليم</span></h3>
                         <button onclick="addItem('education')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="education-container" class="space-y-6 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8 ltr:border-l-2 ltr:border-r-0 ltr:mr-0 ltr:ml-3 ltr:pr-0 ltr:pl-8 mb-12"></div>
 
-                    <!-- Volunteer -->
                     <div class="flex justify-between items-center mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
-                        <h3 class="text-2xl font-bold flex items-center gap-3 text-orange-500"><i class="fas fa-hands-helping"></i> <span data-lang="sec_volunteer">التطوع</span></h3>
+                        <h3 class="text-2xl font-bold flex items-center gap-3 text-orange-500"><i class="fas fa-hands-helping"></i><span data-lang="sec_volunteer">التطوع</span></h3>
                         <button onclick="addItem('volunteer')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="volunteer-container" class="space-y-6 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8 ltr:border-l-2 ltr:border-r-0 ltr:mr-0 ltr:ml-3 ltr:pr-0 ltr:pl-8"></div>
                 </div>
-
-                <!-- RIGHT: Skills + Certs + Workshops + Languages -->
+                <!-- RIGHT -->
                 <div>
-                    <!-- Skills (progress bars) -->
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
-                        <h3 class="text-2xl font-bold flex items-center gap-3 text-green-500"><i class="fas fa-code"></i> <span data-lang="sec_skills">المهارات</span></h3>
+                        <h3 class="text-2xl font-bold flex items-center gap-3 text-green-500"><i class="fas fa-code"></i><span data-lang="sec_skills">المهارات</span></h3>
                         <button onclick="addItem('skills')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
-                    <!-- Tabs: hard / soft -->
                     <div class="flex gap-2 mb-5 print-hide" id="skill-tabs">
                         <button onclick="setSkillTab('hard')" id="tab-hard" class="px-4 py-1.5 text-xs font-bold rounded-full bg-primary text-white transition" data-lang="tab_hard">تقنية</button>
                         <button onclick="setSkillTab('soft')" id="tab-soft" class="px-4 py-1.5 text-xs font-bold rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 transition" data-lang="tab_soft">شخصية</button>
                     </div>
                     <div id="skills-container" class="space-y-3 mb-12"></div>
 
-                    <!-- Certificates -->
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
-                        <h3 class="text-2xl font-bold flex items-center gap-3 text-secondary"><i class="fas fa-certificate"></i> <span data-lang="sec_certs">الشهادات</span></h3>
+                        <h3 class="text-2xl font-bold flex items-center gap-3 text-secondary"><i class="fas fa-certificate"></i><span data-lang="sec_certs">الشهادات</span></h3>
                         <button onclick="addItem('certificates')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="certificates-container" class="space-y-4 mb-12"></div>
 
-                    <!-- Workshops -->
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
-                        <h3 class="text-2xl font-bold flex items-center gap-3 text-yellow-500"><i class="fas fa-chalkboard-teacher"></i> <span data-lang="sec_workshops">ورش العمل</span></h3>
+                        <h3 class="text-2xl font-bold flex items-center gap-3 text-yellow-500"><i class="fas fa-chalkboard-teacher"></i><span data-lang="sec_workshops">ورش العمل</span></h3>
                         <button onclick="addItem('workshops')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="workshops-container" class="space-y-4 mb-12"></div>
 
-                    <!-- Languages -->
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
-                        <h3 class="text-2xl font-bold flex items-center gap-3 text-teal-500"><i class="fas fa-language"></i> <span data-lang="sec_languages">اللغات</span></h3>
+                        <h3 class="text-2xl font-bold flex items-center gap-3 text-teal-500"><i class="fas fa-language"></i><span data-lang="sec_languages">اللغات</span></h3>
                         <button onclick="addItem('languages')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="languages-container" class="space-y-3"></div>
@@ -443,41 +370,90 @@
             </div>
         </section>
 
-        <!-- ─── PORTFOLIO ───────────────────────────────────── -->
+        <!-- ─── PORTFOLIO ─────────────────────────────────── -->
         <section id="portfolio" class="page-section">
             <div class="text-center mb-10 relative">
                 <h2 class="text-4xl font-bold mb-4" data-aos="fade-down" data-lang="sec_projects">معرض المشاريع</h2>
                 <div class="w-20 h-1 bg-primary mx-auto rounded-full"></div>
                 <button onclick="addItem('projects')" class="admin-element absolute top-0 right-0 bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-200 gap-2 transition shadow-lg"><i class="fas fa-plus"></i> مشروع جديد</button>
             </div>
-            <!-- Project filter buttons (generated dynamically from project technologies) -->
+            <!-- Project filters (generated dynamically) -->
             <div id="project-filters" class="flex flex-wrap justify-center gap-2 mb-10 print-hide"></div>
             <div id="projects-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </section>
 
-        <!-- ─── CONTACT ─────────────────────────────────────── -->
+        <!-- ─── CONTACT ───────────────────────────────────── -->
         <section id="contact" class="page-section">
-            <div class="max-w-xl mx-auto bg-white dark:bg-cardBg rounded-3xl p-10 shadow-2xl border border-gray-100 dark:border-gray-800 text-center" data-aos="zoom-in">
-                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 text-primary text-3xl"><i class="fas fa-paper-plane"></i></div>
-                <h2 class="text-3xl font-bold mb-2" data-lang="contact_title">راسلني</h2>
-                <p class="text-gray-500 mb-1 text-sm" id="contact-email-display"></p>
-                <p class="text-gray-500 mb-8 text-sm" id="contact-location-display"></p>
-                <form id="contactForm" onsubmit="handleContact(event)" class="space-y-4 text-left" dir="ltr">
-                    <!-- Honeypot anti-spam field (hidden from humans, bots fill it) -->
-                    <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="text"  name="name"    class="w-full p-4 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right transition" placeholder="الاسم / Name"  required autocomplete="name">
-                        <input type="email" name="email"   class="w-full p-4 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right transition" placeholder="البريد / Email" required autocomplete="email">
-                    </div>
-                    <textarea name="message" rows="4" class="w-full p-4 bg-gray-50 dark:bg-darkBg border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary text-right transition" placeholder="رسالتك / Message" required></textarea>
-                    <!-- Rate limit counter shown when user approaches limit -->
-                    <p id="contact-rate-info" class="text-xs text-gray-400 text-center hidden"></p>
-                    <button type="submit" id="contact-submit-btn" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition shadow-lg transform hover:-translate-y-1" data-lang="btn_email">إرسال</button>
-                </form>
-                <div class="flex justify-center gap-8 mt-10 border-t border-gray-100 dark:border-gray-700 pt-8">
-                    <a id="social-linkedin" href="#" target="_blank" class="text-3xl text-gray-400 hover:text-blue-500 transition transform hover:scale-110"><i class="fab fa-linkedin"></i></a>
-                    <a id="social-github"   href="#" target="_blank" class="text-3xl text-gray-400 hover:text-white  transition transform hover:scale-110"><i class="fab fa-github"></i></a>
+            <div class="max-w-2xl mx-auto" data-aos="fade-up">
+                <div class="text-center mb-10">
+                    <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary text-2xl"><i class="fas fa-envelope-open-text"></i></div>
+                    <h2 class="text-3xl font-bold mb-2" data-lang="contact_title">تواصل معي</h2>
+                    <p class="text-gray-500 text-sm" id="contact-location-display"></p>
                 </div>
+                <!-- Contact cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-primary transition-all cursor-pointer text-center" onclick="contactAction('email')">
+                        <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center mx-auto mb-3 text-primary text-xl group-hover:scale-110 transition-transform"><i class="fas fa-envelope"></i></div>
+                        <p class="text-xs text-gray-400 mb-1" data-lang="contact_email_label">البريد الإلكتروني</p>
+                        <p id="contact-email-display" class="font-bold text-xs dark:text-white truncate"></p>
+                        <span class="inline-block mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity" data-lang="contact_click_copy">انقر للنسخ</span>
+                    </div>
+                    <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-blue-500 transition-all cursor-pointer text-center" onclick="contactAction('linkedin')">
+                        <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center mx-auto mb-3 text-blue-600 text-xl group-hover:scale-110 transition-transform"><i class="fab fa-linkedin"></i></div>
+                        <p class="text-xs text-gray-400 mb-1">LinkedIn</p>
+                        <p class="font-bold text-sm dark:text-white">Osama Al-Harbi</p>
+                        <span class="inline-block mt-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" data-lang="contact_open">فتح الملف</span>
+                    </div>
+                    <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-gray-500 transition-all cursor-pointer text-center" onclick="contactAction('github')">
+                        <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-3 text-gray-700 dark:text-gray-300 text-xl group-hover:scale-110 transition-transform"><i class="fab fa-github"></i></div>
+                        <p class="text-xs text-gray-400 mb-1">GitHub</p>
+                        <p class="font-bold text-sm dark:text-white">OsamaAL-Harbi</p>
+                        <span class="inline-block mt-2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" data-lang="contact_open">فتح الملف</span>
+                    </div>
+                </div>
+                <!-- Message form -->
+                <div class="bg-white dark:bg-cardBg rounded-3xl p-8 border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <h3 class="font-bold text-lg mb-6 flex items-center gap-2 dark:text-white">
+                        <i class="fas fa-pen-nib text-primary text-base"></i>
+                        <span data-lang="contact_compose">اكتب رسالة</span>
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1.5" data-lang="contact_subject_label">الموضوع</label>
+                            <input type="text" id="contact-subject" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-right" placeholder="موضوع الرسالة / Subject" dir="auto">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1.5" data-lang="contact_message_label">الرسالة</label>
+                            <textarea id="contact-message" rows="5" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-right resize-none" placeholder="اكتب رسالتك هنا... / Write your message here..." dir="auto" oninput="updateCharCounter(this)"></textarea>
+                        </div>
+                        <p id="char-counter" class="text-xs text-gray-400 text-left ltr:text-right">0 / 2000</p>
+                        <button onclick="sendMailto()" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 active:scale-95 transition shadow-lg flex items-center justify-center gap-2">
+                            <i class="fas fa-paper-plane"></i><span data-lang="btn_email">فتح تطبيق الإيميل للإرسال</span>
+                        </button>
+                        <p class="text-xs text-gray-400 text-center" data-lang="contact_mailto_note">سيفتح تطبيق الإيميل على جهازك مع الرسالة جاهزة</p>
+                    </div>
+                </div>
+                <!-- CV Download CTA -->
+                <div class="mt-6 bg-gradient-to-r from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 rounded-2xl p-5 flex items-center justify-between border border-primary/10">
+                    <div>
+                        <p class="font-bold text-sm dark:text-white" data-lang="contact_cv_title">هل تريد مراجعة سيرتي الذاتية أولاً؟</p>
+                        <p class="text-xs text-gray-500 mt-0.5" data-lang="contact_cv_sub">تحميل مباشر — PDF جاهز</p>
+                    </div>
+                    <a href="Osama_Alharbi_IT_CV.pdf" download class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-blue-600 hover:scale-105 transition shadow-md flex-shrink-0">
+                        <i class="fas fa-download"></i><span data-lang="btn_download_cv">تحميل PDF</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── 404 ─────────────────────────────────────────── -->
+        <section id="not-found" class="page-section min-h-[60vh] flex items-center justify-center text-center">
+            <div data-aos="zoom-in">
+                <div class="float-icon text-8xl mb-6">🔍</div>
+                <h2 class="text-7xl font-black text-gray-200 dark:text-gray-800 mb-2">404</h2>
+                <h3 class="text-2xl font-bold mb-3 dark:text-white" data-lang="not_found_title">الصفحة غير موجودة</h3>
+                <p class="text-gray-500 mb-8 max-w-sm mx-auto" data-lang="not_found_desc">يبدو أن الرابط الذي طلبته غير موجود في هذا الموقع</p>
+                <a href="#home" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-105 transition shadow-lg" data-lang="not_found_btn">العودة للرئيسية</a>
             </div>
         </section>
 
@@ -495,65 +471,54 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- ═══ PROJECT MODAL ═══════════════════════════════════ -->
+    <!-- ═══ PROJECT MODAL ════════════════════════════════════ -->
     <div id="project-modal" class="hidden fixed inset-0 z-[150] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 print-hide" onclick="closeProjectModal(event)">
-        <div class="bg-white dark:bg-cardBg w-full max-w-2xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transform transition-all" id="modal-box">
-            <!-- Modal Header -->
+        <div class="bg-white dark:bg-cardBg w-full max-w-2xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden" id="modal-box">
             <div class="bg-gradient-to-r from-primary to-secondary p-6 text-white relative">
-                <button onclick="closeProjectModal()" class="absolute top-4 left-4 ltr:right-4 ltr:left-auto w-8 h-8 bg-white/20 rounded-full hover:bg-white/40 transition flex items-center justify-center">
+                <button onclick="_closeProjectModal()" class="absolute top-4 left-4 ltr:right-4 ltr:left-auto w-8 h-8 bg-white/20 rounded-full hover:bg-white/40 transition flex items-center justify-center">
                     <i class="fas fa-times text-sm"></i>
                 </button>
                 <h3 id="modal-title" class="text-xl font-bold pr-8 ltr:pr-0 ltr:pl-8"></h3>
-                <!-- View counter badge -->
-                <span id="modal-views" class="inline-flex items-center gap-1 mt-2 text-xs bg-white/20 px-3 py-1 rounded-full">
-                    <i class="fas fa-eye"></i> <span id="modal-views-count">0</span>
+                <span class="inline-flex items-center gap-1 mt-2 text-xs bg-white/20 px-3 py-1 rounded-full">
+                    <i class="fas fa-eye"></i><span id="modal-views-count">0</span>
                 </span>
             </div>
-
-            <!-- Modal Body -->
             <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
-                <!-- Description -->
                 <p id="modal-desc" class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed"></p>
-
-                <!-- Technologies -->
                 <div id="modal-tech-section">
                     <h4 class="font-bold text-sm mb-3 flex items-center gap-2">
-                        <i class="fas fa-tools text-primary"></i>
-                        <span id="modal-tech-label">التقنيات المستخدمة</span>
+                        <i class="fas fa-tools text-primary"></i><span id="modal-tech-label">التقنيات المستخدمة</span>
                     </h4>
                     <div id="modal-technologies" class="flex flex-wrap gap-2"></div>
                 </div>
-
-                <!-- Challenges -->
                 <div>
                     <h4 class="font-bold text-sm mb-2 flex items-center gap-2">
-                        <i class="fas fa-puzzle-piece text-yellow-500"></i>
-                        <span id="modal-challenges-label">التحديات</span>
+                        <i class="fas fa-puzzle-piece text-yellow-500"></i><span id="modal-challenges-label">التحديات</span>
                     </h4>
                     <p id="modal-challenges" class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed bg-yellow-50 dark:bg-yellow-900/10 p-3 rounded-xl border border-yellow-100 dark:border-yellow-800"></p>
                 </div>
-
-                <!-- Results -->
                 <div>
                     <h4 class="font-bold text-sm mb-2 flex items-center gap-2">
-                        <i class="fas fa-chart-line text-green-500"></i>
-                        <span id="modal-results-label">النتائج والإنجازات</span>
+                        <i class="fas fa-chart-line text-green-500"></i><span id="modal-results-label">النتائج والإنجازات</span>
                     </h4>
                     <p id="modal-results" class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed bg-green-50 dark:bg-green-900/10 p-3 rounded-xl border border-green-100 dark:border-green-800"></p>
                 </div>
-
-                <!-- Footer link -->
-                <div id="modal-link-section" class="pt-2 border-t border-gray-100 dark:border-gray-700">
-                    <a id="modal-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-primary font-bold text-sm hover:underline">
-                        <i class="fas fa-external-link-alt"></i>
-                        <span id="modal-link-label">عرض المشروع</span>
+                <!-- Modal action buttons: GitHub + Live Demo -->
+                <div id="modal-actions" class="flex gap-3 pt-2 border-t border-gray-100 dark:border-gray-700 flex-wrap">
+                    <a id="modal-github-link" href="#" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-gray-700 text-white rounded-xl text-sm font-bold hover:scale-105 transition">
+                        <i class="fab fa-github"></i><span id="modal-link-label">GitHub</span>
+                    </a>
+                    <a id="modal-live-link" href="#" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-bold hover:scale-105 transition">
+                        <i class="fas fa-external-link-alt"></i><span id="modal-live-label">Live Demo</span>
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ═══ COMMAND PALETTE ════════════════════════════════ -->
+    <!-- ═══ COMMAND PALETTE ══════════════════════════════════ -->
     <div id="cmd-palette" class="hidden fixed inset-0 z-[100] bg-black/50 flex items-start justify-center pt-24 backdrop-blur-sm print-hide">
         <div class="bg-white dark:bg-cardBg w-full max-w-lg rounded-xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
@@ -565,12 +530,12 @@
         </div>
     </div>
 
-    <!-- ═══ ADMIN TOOLBAR ═══════════════════════════════════ -->
+    <!-- ═══ ADMIN TOOLBAR ════════════════════════════════════ -->
     <div id="admin-toolbar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] bg-white dark:bg-cardBg shadow-2xl border border-gray-200 dark:border-gray-700 rounded-full px-6 py-2 flex items-center gap-3 print-hide">
         <span class="text-xs font-bold text-green-500 flex items-center gap-1"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Admin</span>
         <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
-        <button onclick="saveToGitHub()" class="text-sm font-bold text-primary hover:text-blue-600 transition flex items-center gap-2"><i class="fas fa-save"></i> <span data-lang="btn_save">حفظ</span></button>
-        <a href="https://analytics.google.com/" target="_blank" class="text-sm font-bold text-purple-500 hover:text-purple-600 transition" title="Analytics"><i class="fas fa-chart-pie"></i></a>
+        <button onclick="saveToGitHub()" class="text-sm font-bold text-primary hover:text-blue-600 transition flex items-center gap-2"><i class="fas fa-save"></i><span data-lang="btn_save">حفظ</span></button>
+        <button onclick="showAnalyticsDashboard()" class="text-sm font-bold text-purple-500 hover:text-purple-600 transition" title="Analytics Dashboard"><i class="fas fa-chart-bar"></i></button>
         <button onclick="restoreBackup()" class="text-sm font-bold text-yellow-500 hover:text-yellow-600 transition" title="Restore Backup"><i class="fas fa-history"></i></button>
         <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
         <button onclick="logout()" class="text-red-500 hover:text-red-700 text-lg" title="Logout"><i class="fas fa-power-off"></i></button>
