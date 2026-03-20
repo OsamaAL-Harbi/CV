@@ -920,10 +920,13 @@ const SCHEMAS = {
         { key: 'description',  label: 'الوصف / Description', type: 'textarea' }
     ],
     projects: [
-        { key: 'title',   label: 'العنوان / Title' },
-        { key: 'desc',    label: 'الوصف / Description', type: 'textarea' },
-        { key: 'link',    label: 'رابط GitHub', simple: true },
-        { key: 'liveUrl', label: 'رابط Live Demo', simple: true }
+        { key: 'title',               label: 'العنوان / Title' },
+        { key: 'desc',                label: 'الوصف / Description', type: 'textarea' },
+        { key: 'technologies',        label: 'التقنيات / Technologies (مفصولة بفاصلة)', simple: true, array: true },
+        { key: 'link',                label: 'رابط GitHub',    simple: true },
+        { key: 'liveUrl',             label: 'رابط Live Demo', simple: true },
+        { key: 'details_challenges',  label: 'التحديات / Challenges', type: 'textarea', nested: 'details', subkey: 'challenges' },
+        { key: 'details_results',     label: 'النتائج / Results',     type: 'textarea', nested: 'details', subkey: 'results'    }
     ],
     certificates: [
         { key: 'name',       label: 'اسم الشهادة / Name' },
@@ -949,22 +952,36 @@ async function manageItem(type, index = null) {
     const schema = SCHEMAS[type];
     if (!schema) return;
 
-    const getVal = (obj, key, lang) => {
-        if (!obj[key]) return '';
-        if (typeof obj[key] === 'object') return obj[key][lang] || '';
-        return String(obj[key]);
+    // Helper: get value supporting nested objects (e.g. details.challenges)
+    const getVal = (obj, f, lang) => {
+        let src = obj;
+        if (f.nested) src = obj[f.nested] || {};
+        const k = f.subkey || f.key;
+        if (!src[k]) return '';
+        if (typeof src[k] === 'object') return src[k][lang] || '';
+        return String(src[k]);
+    };
+    const getSimple = (obj, f) => {
+        let src = obj;
+        if (f.nested) src = obj[f.nested] || {};
+        const k = f.subkey || f.key;
+        const v = src[k];
+        if (Array.isArray(v)) return v.join(', ');
+        return v ?? '';
     };
 
     const html = schema.map(f => {
+        // Simple field (string / array)
         if (f.simple) {
-            const val = isEdit ? (item[f.key] ?? '') : '';
+            const val = isEdit ? getSimple(item, f) : '';
+            const hint = f.array ? ' <span class="text-gray-400 text-xs">(مفصولة بفاصلة)</span>' : '';
             return `<div class="mb-3">
-                <label class="block text-xs mb-1 text-gray-500 text-right">${f.label}</label>
+                <label class="block text-xs mb-1 text-gray-500 text-right">${f.label}${hint}</label>
                 <input id="swal-${f.key}" class="swal2-input m-0 w-full" value="${val}" dir="ltr">
             </div>`;
         }
-        const valAr = getVal(item, f.key, 'ar');
-        const valEn = getVal(item, f.key, 'en');
+        const valAr = getVal(item, f, 'ar');
+        const valEn = getVal(item, f, 'en');
         if (f.type === 'textarea') {
             return `<div class="grid grid-cols-2 gap-2 mb-3">
                 <div><label class="block text-xs mb-1 text-gray-500 text-right">${f.label} (AR)</label>
@@ -990,11 +1007,31 @@ async function manageItem(type, index = null) {
         preConfirm: () => {
             const obj = {};
             schema.forEach(f => {
-                if (f.simple) obj[f.key] = document.getElementById(`swal-${f.key}`)?.value ?? '';
-                else obj[f.key] = {
-                    ar: document.getElementById(`swal-${f.key}-ar`)?.value ?? '',
-                    en: document.getElementById(`swal-${f.key}-en`)?.value ?? ''
-                };
+                const inputId = `swal-${f.key}`;
+                if (f.simple) {
+                    let raw = document.getElementById(inputId)?.value ?? '';
+                    // Array fields: split by comma and trim
+                    const val = f.array
+                        ? raw.split(',').map(x => x.trim()).filter(Boolean)
+                        : raw;
+                    if (f.nested) {
+                        if (!obj[f.nested]) obj[f.nested] = {};
+                        obj[f.nested][f.subkey || f.key] = val;
+                    } else {
+                        obj[f.key] = val;
+                    }
+                } else {
+                    const val = {
+                        ar: document.getElementById(`${inputId}-ar`)?.value ?? '',
+                        en: document.getElementById(`${inputId}-en`)?.value ?? ''
+                    };
+                    if (f.nested) {
+                        if (!obj[f.nested]) obj[f.nested] = {};
+                        obj[f.nested][f.subkey || f.key] = val;
+                    } else {
+                        obj[f.key] = val;
+                    }
+                }
             });
             return obj;
         }
@@ -1010,6 +1047,111 @@ async function manageItem(type, index = null) {
 
 function addItem(type)         { manageItem(type); }
 function editItem(type, index) { manageItem(type, index); }
+
+// ── Profile editor ─────────────────────────────────────────────────────────
+async function manageProfile() {
+    if (!isAdmin) return;
+    const p = appData.profile || {};
+    const v = (k) => p[k] || '';
+    const vb = (k, lang) => (typeof p[k] === 'object' ? p[k][lang] : p[k]) || '';
+
+    const { value } = await Swal.fire({
+        title: currentLang === 'ar' ? 'تعديل الملف الشخصي' : 'Edit Profile',
+        html: `<div class="text-right space-y-3" dir="rtl">
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">الاسم (AR)</label>
+              <input id="pf-name-ar" class="swal2-input m-0 w-full text-right" value="${vb('name','ar')}" dir="rtl">
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Name (EN)</label>
+              <input id="pf-name-en" class="swal2-input m-0 w-full text-left" value="${vb('name','en')}" dir="ltr">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">المسمى الوظيفي (AR)</label>
+              <input id="pf-title-ar" class="swal2-input m-0 w-full text-right" value="${vb('title','ar')}" dir="rtl">
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Title (EN)</label>
+              <input id="pf-title-en" class="swal2-input m-0 w-full text-left" value="${vb('title','en')}" dir="ltr">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">النبذة (AR)</label>
+              <textarea id="pf-summary-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl">${vb('summary','ar')}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Summary (EN)</label>
+              <textarea id="pf-summary-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr">${vb('summary','en')}</textarea>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">الموقع (AR)</label>
+              <input id="pf-location-ar" class="swal2-input m-0 w-full text-right" value="${vb('location','ar')}" dir="rtl">
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Location (EN)</label>
+              <input id="pf-location-en" class="swal2-input m-0 w-full text-left" value="${vb('location','en')}" dir="ltr">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs mb-1 text-gray-500">البريد الإلكتروني / Email</label>
+            <input id="pf-email" class="swal2-input m-0 w-full" value="${v('email')}" dir="ltr" type="email">
+          </div>
+          <div>
+            <label class="block text-xs mb-1 text-gray-500">رقم الجوال / Phone</label>
+            <input id="pf-phone" class="swal2-input m-0 w-full" value="${v('phone')}" dir="ltr">
+          </div>
+          <div>
+            <label class="block text-xs mb-1 text-gray-500">رابط LinkedIn</label>
+            <input id="pf-linkedin" class="swal2-input m-0 w-full" value="${v('linkedin')}" dir="ltr" placeholder="https://linkedin.com/in/...">
+          </div>
+          <div>
+            <label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
+            <input id="pf-github" class="swal2-input m-0 w-full" value="${v('github')}" dir="ltr" placeholder="https://github.com/...">
+          </div>
+          <div>
+            <label class="block text-xs mb-1 text-gray-500">رابط السيرة الذاتية (PDF path)</label>
+            <input id="pf-cv" class="swal2-input m-0 w-full" value="${v('cv')}" dir="ltr" placeholder="Osama_Alharbi_IT_CV.pdf">
+          </div>
+
+        </div>`,
+        width: '740px',
+        confirmButtonText: 'حفظ التغييرات',
+        showCancelButton: true,
+        cancelButtonText: 'إلغاء',
+        focusConfirm: false,
+        preConfirm: () => ({
+            name:     { ar: document.getElementById('pf-name-ar').value,     en: document.getElementById('pf-name-en').value },
+            title:    { ar: document.getElementById('pf-title-ar').value,    en: document.getElementById('pf-title-en').value },
+            summary:  { ar: document.getElementById('pf-summary-ar').value,  en: document.getElementById('pf-summary-en').value },
+            location: { ar: document.getElementById('pf-location-ar').value, en: document.getElementById('pf-location-en').value },
+            email:    document.getElementById('pf-email').value,
+            phone:    document.getElementById('pf-phone').value,
+            linkedin: document.getElementById('pf-linkedin').value,
+            github:   document.getElementById('pf-github').value,
+            cv:       document.getElementById('pf-cv').value,
+            // preserve unchanged fields
+            image:       appData.profile?.image || '',
+            nationality: appData.profile?.nationality || { ar: 'سعودي', en: 'Saudi' }
+        })
+    });
+
+    if (value) {
+        appData.profile = value;
+        renderAll();
+        showToast(currentLang === 'ar' ? 'تم تحديث الملف الشخصي ✅' : 'Profile updated ✅', 'success');
+    }
+}
 
 function deleteItem(type, index) {
     if (!isAdmin) return;
