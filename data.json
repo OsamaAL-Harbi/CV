@@ -208,6 +208,43 @@
         }
       },
       "link": "#"
+    },
+    {
+      "title": {
+        "ar": "الراصد التقني السعودي | منصة ذكاء وتدفق إخباري مؤتمتة",
+        "en": "Saudi Tech Monitor | Automated Tech Intelligence & News Stream"
+      },
+      "desc": {
+        "ar": "منصة سحابية متكاملة تعمل كوكالة أنباء آلية، تهدف إلى رقمنة وتجميع الأخبار التقنية السعودية والعالمية وتصنيفها باستخدام خوارزميات ذكية. يتميز النظام بقدرته على العمل المستمر 24/7 دون تدخل بشري، حيث يجمع البيانات من أكثر من 6 مصادر موثوقة، ويعالجها لمنع التكرار، ثم يعرضها عبر بوابة تفاعلية حية ولوحة تحكم مركزية تدعم التحليلات البيانية المتقدمة.",
+        "en": "A comprehensive cloud platform acting as an autonomous news agency, digitizing and aggregating Saudi and global tech news using smart algorithms. The system operates 24/7 without human intervention, fetching data from 6+ reliable sources, deduplicating content, and presenting it through a live interactive portal and a centralized dashboard with advanced data visualization."
+      },
+      "technologies": [
+        "Python 3.9",
+        "React",
+        "TypeScript",
+        "Tailwind CSS",
+        "PostgreSQL",
+        "GitHub Actions",
+        "Edge Functions",
+        "GNews API",
+        "NewsAPI",
+        "Pandas",
+        "Recharts",
+        "Framer Motion",
+        "HTML5",
+        "CSS3"
+      ],
+      "link": "https://saudi-tech-ai-monitor.lovable.app/",
+      "details": {
+        "challenges": {
+          "ar": "معالجة البيانات الضخمة: صعوبة تصفية \"الضجيج\" الإخباري واستخراج الأخبار التقنية الصرفة فقط.\n\nمنع التكرار: معالجة تشابه الأخبار من مصادر مختلفة بنفس المحتوى وتفادي تكرارها في البوابة.\n\nاستمرارية الخدمة: ضمان جلب الأخبار وتحديث الموقع بشكل تلقائي ودقيق عبر السحابة دون انقطاع.\n\nتوافق البريد: تصميم نشرة بريدية HTML تظهر بشكل سليم في جميع مزودي الخدمة (Outlook, Gmail).",
+          "en": "Data Noise Filtering: Challenges in isolating pure tech news from general media noise.\n\nContent Deduplication: Implementing NLP algorithms to prevent duplicate news from multiple sources.\n\nSystem Reliability: Ensuring seamless 24/7 automated data fetching and deployment via GitHub Actions.\n\nEmail Rendering: Crafting a robust HTML newsletter compatible across various mail clients."
+        },
+        "results": {
+          "ar": "أتمتة كاملة بنسبة 100%: من جلب الخبر حتى نشره في الموقع وإرساله عبر البريد دون أي تدخل يدوي.\n\nتغطية واسعة: ربط أكثر من 6 مصادر محلية وعالمية في منصة واحدة موحدة.\n\nتجربة مستخدم فائقة: واجهة متجاوبة تدعم الوضع الداكن وتوفر إحصائيات حية وتنبيهات ذكية (Smart Popups).\n\nإدارة مركزية: تطوير لوحة تحكم أدمن متكاملة لمراقبة حالة النظام والرد على الرسائل.",
+          "en": "100% Full Automation: Complete hands-off pipeline from news fetching to publishing and mailing.\n\nUnified Coverage: Integrated 6+ local and international tech sources into a single dashboard.\n\nSuperior UX: A high-performance responsive UI with Dark Mode, live stats, and Smart Popups.\n\nCentralized Management: Built an advanced Admin Dashboard for system monitoring and automated responses."
+        }
+      }
     }
   ],
   "certificates": [
