@@ -863,7 +863,7 @@ function checkLinkedInReferrer() {
     if (document.referrer && document.referrer.includes('linkedin.com')) {
         setTimeout(() => showToast(
             currentLang === 'ar' ? 'مرحباً، يبدو أنك قادم من LinkedIn 👋' : 'Welcome from LinkedIn! 👋', 'info'
-        ), 500);
+        ), 250);
     }
 }
 
