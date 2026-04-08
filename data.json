@@ -62,8 +62,8 @@
         "en": "January 2026 – Present"
       },
       "description": {
-        "ar": "تحليل ومراجعة تقارير قياس التحول الرقمي الصادرة عن هيئة الحكومة الرقمية. تطوير وتدقيق الأدلة التقنية لمعايير النضج الرقمي الوطنية. الإشراف على إصدار التقارير الدورية لحوكمة البيانات. إدارة منصة رقمي وتسجيل الخدمات الرقمية.",
-        "en": "Analyzed Digital Transformation Measurement reports from the Digital Government Authority (DGA). Developed and audited technical evidence for national Digital Maturity standards. Oversaw periodic reports for data governance. Managed digital services registration via 'Raqmi' portal."
+        "ar": "تحليل ومراجعة تقارير قياس التحول الرقمي الصادرة عن هيئة الحكومة الرقمية. تطوير وتدقيق الأدلة التقنية لمعايير النضج الرقمي الوطنية. الإشراف على إصدار التقارير الدورية لحوكمة البيانات.",
+        "en": "Analyzed Digital Transformation Measurement reports from the Digital Government Authority (DGA). Developed and audited technical evidence for national Digital Maturity standards. Oversaw periodic reports for data governance."
       }
     },
     {
@@ -110,7 +110,7 @@
     {
       "ar": "تحليل البيانات",
       "en": "Data Analysis",
-      "level": 80,
+      "level": "65",
       "category": "hard"
     },
     {
@@ -214,14 +214,14 @@
   "certificates": [
     {
       "name": {
-        "ar": "أمن الشبكات والاتصالات",
-        "en": "Network and Communications Security"
+        "ar": "مقدمة في أدوات الأمن السيبراني والهجمات الإلكترونية",
+        "en": "Introduction to Cybersecurity Tools & Cyber Attacks"
       },
       "issuer": {
-        "ar": "ISC2",
-        "en": "ISC2"
+        "ar": "IBM",
+        "en": "IBM"
       },
-      "credential": "HPUZITAO56UA",
+      "credential": "DZ93HR2XW4I1",
       "date": "January 2025"
     },
     {
@@ -238,14 +238,14 @@
     },
     {
       "name": {
-        "ar": "مقدمة في أدوات الأمن السيبراني والهجمات الإلكترونية",
-        "en": "Introduction to Cybersecurity Tools & Cyber Attacks"
+        "ar": "أمن الشبكات والاتصالات",
+        "en": "Network and Communications Security"
       },
       "issuer": {
-        "ar": "IBM",
-        "en": "IBM"
+        "ar": "ISC2",
+        "en": "ISC2"
       },
-      "credential": "DZ93HR2XW4I1",
+      "credential": "HPUZITAO56UA",
       "date": "January 2025"
     }
   ],
