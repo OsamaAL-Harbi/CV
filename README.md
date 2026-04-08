@@ -153,11 +153,10 @@ git push origin main
 ```
 
 ### الطريقة الثانية: لوحة التحكم الإدارية
-1. انقر **3 مرات** على حقوق النشر في أسفل الصفحة
-2. أدخل `Username/Repo` بهذا الشكل: `OsamaAL-Harbi/portfolio`
-3. أدخل GitHub Personal Access Token (صلاحية `repo`)
-4. اضغط **Login** — ستظهر أدوات التحكم على الصفحة
-5. عدّل ما تريد ثم اضغط **حفظ** لرفع التغييرات مباشرة
+1. أدخل `Username/Repo` بهذا الشكل: `OsamaAL-Harbi/portfolio`
+2. أدخل GitHub Personal Access Token (صلاحية `repo`)
+3. اضغط **Login** — ستظهر أدوات التحكم على الصفحة
+4. عدّل ما تريد ثم اضغط **حفظ** لرفع التغييرات مباشرة
 
 ### الطريقة الثالثة: Decap CMS (على Netlify)
 افتح `https://your-site.netlify.app/admin/` وسجّل الدخول بحسابك.
