@@ -2078,3 +2078,33 @@ function renderAll() {
     // ... existing code ...
     updateStructuredData();
 }
+// =====================================================
+// ACCESSIBILITY IMPROVEMENTS
+// =====================================================
+function initAccessibility() {
+    // Skip to content link
+    const skipLink = document.createElement('a');
+    skipLink.href = '#main';
+    skipLink.textContent = 'تخطى إلى المحتوى / Skip to content';
+    skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:bg-primary focus:text-white focus:p-4';
+    document.body.prepend(skipLink);
+    
+    // Announce page changes to screen readers
+    const announcer = document.createElement('div');
+    announcer.setAttribute('role', 'status');
+    announcer.setAttribute('aria-live', 'polite');
+    announcer.setAttribute('aria-atomic', 'true');
+    announcer.className = 'sr-only';
+    announcer.id = 'page-announcer';
+    document.body.appendChild(announcer);
+    
+    // Add to showPage function
+    function announcePageChange(pageId) {
+        const announcer = document.getElementById('page-announcer');
+        if (announcer) {
+            announcer.textContent = `Navigated to ${pageId} page`;
+        }
+    }
+}
+
+// Add to CSS
