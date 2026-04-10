@@ -571,9 +571,18 @@
         </button>
         <!-- Add to admin toolbar -->
         <button onclick="toggleBulkMode()" id="bulk-mode-btn" class="text-sm font-bold text-purple-500 hover:text-purple-600 transition">
-            <i class="fas fa-check-square"></i>
-            
-</button>
+            <i class="fas fa-check-square"></i>            
+        </button>
+        <div class="relative group">
+    <button class="text-sm font-bold text-blue-500 hover:text-blue-600 transition">
+        <i class="fas fa-file-export"></i>
+    </button>
+    <div class="hidden group-hover:block absolute bottom-full mb-2 right-0 bg-white dark:bg-cardBg shadow-xl rounded-lg p-2 min-w-[150px]">
+        <button onclick="exportFullData()" class="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Full JSON</button>
+        <button onclick="exportAsCSV('projects')" class="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Projects CSV</button>
+        <button onclick="importData()" class="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-green-600">Import JSON</button>
+    </div>
+</div>
 
 <!-- Bulk actions bar (shows when items selected) -->
 <div id="bulk-actions" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[90] bg-purple-600 text-white shadow-2xl rounded-full px-6 py-3 flex items-center gap-4">
