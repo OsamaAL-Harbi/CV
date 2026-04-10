@@ -1842,3 +1842,107 @@ function bulkExport() {
     a.click();
     URL.revokeObjectURL(url);
 }
+// =====================================================
+// IMPORT/EXPORT SYSTEM
+// =====================================================
+async function exportFullData() {
+    const exportData = {
+        version: '4.0',
+        exported: new Date().toISOString(),
+        data: appData,
+        metadata: {
+            totalProjects: appData.projects?.length || 0,
+            totalSkills: appData.skills?.length || 0,
+            totalCerts: appData.certificates?.length || 0
+        }
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `portfolio-backup-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showToast('تم تصدير البيانات ✅', 'success');
+}
+
+async function importData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        try {
+            const text = await file.text();
+            const imported = JSON.parse(text);
+            
+            // Validate structure
+            if (!imported.data || !imported.version) {
+                throw new Error('ملف غير صالح');
+            }
+            
+            // Confirm before import
+            const { value } = await Swal.fire({
+                title: 'استيراد البيانات؟',
+                html: `
+                    <div class="text-right" dir="rtl">
+                        <p class="text-sm text-gray-600 mb-4">سيتم استبدال جميع البيانات الحالية</p>
+                        <div class="bg-gray-50 p-4 rounded-lg text-xs">
+                            <p>📊 المشاريع: ${imported.metadata?.totalProjects || 0}</p>
+                            <p>🎯 المهارات: ${imported.metadata?.totalSkills || 0}</p>
+                            <p>📜 الشهادات: ${imported.metadata?.totalCerts || 0}</p>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'استيراد',
+                cancelButtonText: 'إلغاء'
+            });
+            
+            if (value) {
+                saveState('استيراد بيانات');
+                appData = imported.data;
+                renderAll();
+                showToast('تم استيراد البيانات ✅', 'success');
+            }
+        } catch (err) {
+            showToast('خطأ: ' + err.message, 'error');
+        }
+    };
+    
+    input.click();
+}
+
+// Export as CSV
+function exportAsCSV(type) {
+    const data = appData[type] || [];
+    if (data.length === 0) {
+        showToast('لا توجد بيانات للتصدير', 'error');
+        return;
+    }
+    
+    // Convert to CSV
+    const headers = Object.keys(data[0]);
+    const rows = data.map(item => 
+        headers.map(h => {
+            const val = item[h];
+            if (typeof val === 'object') return JSON.stringify(val);
+            return `"${String(val).replace(/"/g, '""')}"`;
+        }).join(',')
+    );
+    
+    const csv = [headers.join(','), ...rows].join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${type}-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
