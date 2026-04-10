@@ -16,40 +16,24 @@
     <meta name="keywords"       content="أسامة الحربي, IT, تقنية المعلومات, الجامعة الإسلامية, Portfolio">
 
     <!-- Schema.org JSON-LD -->
-<script type="application/ld+json" id="dynamic-schema">
-{
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Osama Abdulaziz Al-Harbi",
-  "alternateName": "أسامة عبدالعزيز الحربي",
-  "jobTitle": "Information Technology Graduate",
-  "email": "osamafcv214@gmail.com",
-  "telephone": "+966537820694",
-  "nationality": "Saudi",
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "Madinah",
-    "addressCountry": "SA"
-  },
-  "alumniOf": {
-    "@type": "CollegeOrUniversity",
-    "name": "Islamic University of Madinah"
-  },
-  "sameAs": [
-    "https://www.linkedin.com/in/osama-al-harbi",
-    "https://github.com/OsamaAL-Harbi"
-  ],
-  "knowsAbout": ["SQL", "MySQL", "HTML5", "CSS3", "JavaScript", "TCP/IP", "Network Security"],
-  "hasCredential": [
+    <script type="application/ld+json">
     {
-      "@type": "EducationalOccupationalCredential",
-      "name": "Network and Communications Security",
-      "credentialCategory": "certificate",
-      "recognizedBy": { "@type": "Organization", "name": "ISC2" }
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Osama Abdulaziz Al-Harbi",
+      "alternateName": "أسامة عبدالعزيز الحربي",
+      "jobTitle": "Information Technology Graduate",
+      "email": "osamafcv214@gmail.com",
+      "telephone": "+966537820694",
+      "nationality": "Saudi",
+      "address": { "@type": "PostalAddress", "addressLocality": "Madinah", "addressCountry": "SA" },
+      "alumniOf": { "@type": "CollegeOrUniversity", "name": "Islamic University of Madinah" },
+      "sameAs": [
+        "https://www.linkedin.com/in/osama-al-harbi",
+        "https://github.com/OsamaAL-Harbi"
+      ]
     }
-  ]
-}
-</script>
+    </script>
 
     <meta name="apple-mobile-web-app-capable"           content="yes">
     <meta name="apple-mobile-web-app-status-bar-style"  content="black-translucent">
@@ -193,27 +177,8 @@
             .skill-bar-fill { transition: none !important; }
             #print-header { display: block !important; }
             @page { margin: 1.5cm; }
-        }            /* Lazy load images */
-            img[data-src] {
-              filter: blur(10px);
-              transition: filter 0.3s;
-            }
-            img[data-src].loaded {
-              filter: blur(0);
-            }
-            
-            /* Intersection Observer for sections */
-            .lazy-section {
-              opacity: 0;
-              transform: translateY(20px);
-              transition: opacity 0.6s, transform 0.6s;
-            }
-            .lazy-section.visible {
-              opacity: 1;
-              transform: translateY(0);
-            }
+        }
     </style>
-    
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-darkBg dark:text-gray-100 font-sans transition-colors duration-300 min-h-screen flex flex-col">
 
@@ -280,11 +245,7 @@
                     <!-- Profile Image -->
                     <div class="mb-8 relative inline-block group cursor-pointer">
                         <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
-                        <img id="profile-img" 
-                         data-src="" 
-                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect fill='%23f0f0f0' width='200' height='200'/%3E%3C/svg%3E"
-                         alt="Profile" 
-                         class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl transition transform group-hover:scale-105">
+                        <img id="profile-img" src="" alt="Profile" class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl transition transform group-hover:scale-105">
                         <button onclick="editImage('profile.image')" class="admin-element absolute inset-0 bg-black/50 rounded-full items-center justify-center text-white opacity-0 hover:opacity-100 transition">
                             <i class="fas fa-camera text-2xl"></i>
                         </button>
@@ -583,33 +544,6 @@
         <button onclick="restoreBackup()" class="text-sm font-bold text-yellow-500 hover:text-yellow-600 transition" title="Restore Backup"><i class="fas fa-history"></i></button>
         <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
         <button onclick="logout()" class="text-red-500 hover:text-red-700 text-lg" title="Logout"><i class="fas fa-power-off"></i></button>
-        <button onclick="undo()" id="undo-btn" class="text-sm font-bold text-gray-500 hover:text-gray-700 transition disabled:opacity-30" title="Undo (Ctrl+Z)">
-            <i class="fas fa-undo"></i>
-        </button>
-        <button onclick="redo()" id="redo-btn" class="text-sm font-bold text-gray-500 hover:text-gray-700 transition disabled:opacity-30" title="Redo (Ctrl+Y)">
-            <i class="fas fa-redo"></i>
-        </button>
-        <!-- Add to admin toolbar -->
-        <button onclick="toggleBulkMode()" id="bulk-mode-btn" class="text-sm font-bold text-purple-500 hover:text-purple-600 transition">
-            <i class="fas fa-check-square"></i>            
-        </button>
-        <div class="relative group">
-    <button class="text-sm font-bold text-blue-500 hover:text-blue-600 transition">
-        <i class="fas fa-file-export"></i>
-    </button>
-    <div class="hidden group-hover:block absolute bottom-full mb-2 right-0 bg-white dark:bg-cardBg shadow-xl rounded-lg p-2 min-w-[150px]">
-        <button onclick="exportFullData()" class="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Full JSON</button>
-        <button onclick="exportAsCSV('projects')" class="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Projects CSV</button>
-        <button onclick="importData()" class="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-green-600">Import JSON</button>
-    </div>
-</div>
-
-<!-- Bulk actions bar (shows when items selected) -->
-<div id="bulk-actions" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[90] bg-purple-600 text-white shadow-2xl rounded-full px-6 py-3 flex items-center gap-4">
-    <span id="bulk-count" class="font-bold"></span>
-    <button onclick="bulkDelete()" class="px-4 py-1 bg-red-500 rounded-full text-sm font-bold hover:bg-red-600">حذف الكل</button>
-    <button onclick="bulkExport()" class="px-4 py-1 bg-green-500 rounded-full text-sm font-bold hover:bg-green-600">تصدير</button>
-</div>
     </div>
 
     <!-- ═══ ADMIN LOGIN MODAL ════════════════════════════════ -->
