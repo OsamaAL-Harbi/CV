@@ -78,6 +78,47 @@ function registerPWA() {
 }
 
 // =====================================================
+// LAZY LOADING SYSTEM
+// =====================================================
+function initLazyLoading() {
+    // Lazy load images
+    const imgObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                img.classList.add('loaded');
+                imgObserver.unobserve(img);
+            }
+        });
+    }, { rootMargin: '50px' });
+
+    document.querySelectorAll('img[data-src]').forEach(img => imgObserver.observe(img));
+
+    // Lazy load sections
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                sectionObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.lazy-section').forEach(sec => sectionObserver.observe(sec));
+}
+
+// Call in DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    // ... existing code ...
+    loadContent().then(() => {
+        checkSession();
+        handleHash();
+        initLazyLoading(); // ← ADD THIS
+    });
+});
+
+// =====================================================
 // 3. NAVIGATION + HASH ROUTING
 // =====================================================
 
