@@ -726,9 +726,13 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') _closeProjec
 // 12. PAGE VISIT TRACKING (sessionStorage)
 // =====================================================
 function trackPageVisit(pageId) {
+    // Session storage (existing)
     const visits = JSON.parse(sessionStorage.getItem('page_visits') || '{}');
     visits[pageId] = (visits[pageId] || 0) + 1;
     sessionStorage.setItem('page_visits', JSON.stringify(visits));
+    
+    // Persistent storage (new)
+    trackPageVisitPersistent(pageId);
 }
 
 // =====================================================
