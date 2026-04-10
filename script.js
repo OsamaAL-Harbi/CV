@@ -2050,3 +2050,31 @@ function exportAnalyticsCSV() {
     a.click();
     URL.revokeObjectURL(url);
 }
+function updateStructuredData() {
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": t(appData.profile?.name),
+        "jobTitle": t(appData.profile?.title),
+        "email": appData.profile?.email,
+        "telephone": appData.profile?.phone,
+        "knowsAbout": (appData.skills || []).map(s => t(s)),
+        "hasCredential": (appData.certificates || []).map(cert => ({
+            "@type": "EducationalOccupationalCredential",
+            "name": t(cert.name),
+            "credentialCategory": "certificate",
+            "recognizedBy": { "@type": "Organization", "name": t(cert.issuer) }
+        }))
+    };
+    
+    const scriptEl = document.getElementById('dynamic-schema');
+    if (scriptEl) {
+        scriptEl.textContent = JSON.stringify(schema, null, 2);
+    }
+}
+
+// Call after data loads
+function renderAll() {
+    // ... existing code ...
+    updateStructuredData();
+}
