@@ -913,13 +913,23 @@ function checkLinkedInReferrer() {
 // =====================================================
 function renderAdminButtons(type, index) {
     if (!isAdmin) return '';
+    const key = `${type}-${index}`;
+    const isSelected = selectedItems.has(key);
+    
     return `
         <div class="admin-element absolute top-2 right-2 ltr:left-2 ltr:right-auto z-30
                     gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
-            <span class="drag-handle bg-white dark:bg-gray-700 text-gray-500 w-7 h-7 rounded-lg shadow
-                         flex items-center justify-center hover:bg-gray-100 cursor-move border border-gray-200 dark:border-gray-600">
-                <i class="fas fa-grip-vertical" style="font-size:10px"></i>
-            </span>
+            ${bulkMode ? `
+                <input type="checkbox" 
+                       ${isSelected ? 'checked' : ''}
+                       onclick="toggleItemSelection('${type}', ${index})"
+                       class="w-5 h-5 rounded border-2 border-primary cursor-pointer">
+            ` : `
+                <span class="drag-handle bg-white dark:bg-gray-700 text-gray-500 w-7 h-7 rounded-lg shadow
+                             flex items-center justify-center hover:bg-gray-100 cursor-move border border-gray-200 dark:border-gray-600">
+                    <i class="fas fa-grip-vertical" style="font-size:10px"></i>
+                </span>
+            `}
             <button onclick="event.stopPropagation(); editItem('${type}', ${index})"
                     class="bg-blue-500 text-white w-7 h-7 rounded-lg shadow flex items-center justify-center hover:bg-blue-600 hover:scale-110 transition">
                 <i class="fas fa-pen" style="font-size:10px"></i>
