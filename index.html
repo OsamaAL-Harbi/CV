@@ -114,6 +114,12 @@
         .admin-element { display: none !important; }
         .admin-mode .admin-element { display: flex !important; }
         .drag-handle { cursor: move; }
+        <button onclick="undo()" id="undo-btn" class="text-sm font-bold text-gray-500 hover:text-gray-700 transition disabled:opacity-30" title="Undo (Ctrl+Z)">
+            <i class="fas fa-undo"></i>
+        </button>
+        <button onclick="redo()" id="redo-btn" class="text-sm font-bold text-gray-500 hover:text-gray-700 transition disabled:opacity-30" title="Redo (Ctrl+Y)">
+            <i class="fas fa-redo"></i>
+        </button>
 
         /* Skills progress */
         .skill-bar-fill { width: 0; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
