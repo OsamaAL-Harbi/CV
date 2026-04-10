@@ -1623,3 +1623,50 @@ function showToast(msg, type = 'info') {
     const colors = { success: '#10B981', error: '#EF4444', info: '#3b82f6' };
     Toastify({ text: msg, duration: 3500, gravity: 'top', position: 'center', style: { background: colors[type] || colors.info } }).showToast();
 }
+// =====================================================
+// REAL-TIME SEARCH
+// =====================================================
+let searchTimeout = null;
+
+function initSearch() {
+    const searchInput = document.getElementById('global-search');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => performSearch(e.target.value), 300);
+    });
+}
+
+function performSearch(query) {
+    if (!query.trim()) {
+        renderAll();
+        return;
+    }
+
+    const q = query.toLowerCase();
+    const results = {
+        experience: (appData.experience || []).filter(item => 
+            t(item.role).toLowerCase().includes(q) || 
+            t(item.company).toLowerCase().includes(q) ||
+            t(item.description).toLowerCase().includes(q)
+        ),
+        projects: (appData.projects || []).filter(item =>
+            t(item.title).toLowerCase().includes(q) ||
+            t(item.desc).toLowerCase().includes(q) ||
+            (item.technologies || []).some(tech => tech.toLowerCase().includes(q))
+        ),
+        skills: (appData.skills || []).filter(item =>
+            t(item).toLowerCase().includes(q)
+        ),
+        certificates: (appData.certificates || []).filter(item =>
+            t(item.name).toLowerCase().includes(q) ||
+            t(item.issuer).toLowerCase().includes(q)
+        )
+    };
+
+    // Re-render with filtered results
+    renderSection('experience', results.experience, renderExperienceItem, WC.experience);
+    renderFilteredProjectsWithData(results.projects);
+    // ... render other sections
+}
