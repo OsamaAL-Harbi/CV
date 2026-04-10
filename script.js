@@ -1749,3 +1749,86 @@ function editItem(type, index) {
     saveState(`تعديل ${type}`);
     // ... existing edit logic
 }
+// =====================================================
+// BULK OPERATIONS
+// =====================================================
+let bulkMode = false;
+let selectedItems = new Set();
+
+function toggleBulkMode() {
+    bulkMode = !bulkMode;
+    selectedItems.clear();
+    document.body.classList.toggle('bulk-mode', bulkMode);
+    renderAll();
+    
+    const btn = document.getElementById('bulk-mode-btn');
+    if (btn) {
+        btn.innerHTML = bulkMode 
+            ? '<i class="fas fa-times"></i> إلغاء التحديد' 
+            : '<i class="fas fa-check-square"></i> تحديد متعدد';
+    }
+}
+
+function toggleItemSelection(type, index) {
+    const key = `${type}-${index}`;
+    if (selectedItems.has(key)) {
+        selectedItems.delete(key);
+    } else {
+        selectedItems.add(key);
+    }
+    updateBulkUI();
+}
+
+function bulkDelete() {
+    if (selectedItems.size === 0) return;
+    
+    Swal.fire({
+        title: `حذف ${selectedItems.size} عنصر؟`,
+        text: 'لن تتمكن من التراجع!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'نعم، احذف الكل',
+        cancelButtonText: 'إلغاء'
+    }).then(result => {
+        if (result.isConfirmed) {
+            saveState('حذف جماعي');
+            
+            // Group by type
+            const byType = {};
+            selectedItems.forEach(key => {
+                const [type, idx] = key.split('-');
+                if (!byType[type]) byType[type] = [];
+                byType[type].push(parseInt(idx));
+            });
+            
+            // Delete in reverse order to maintain indices
+            Object.entries(byType).forEach(([type, indices]) => {
+                indices.sort((a, b) => b - a).forEach(idx => {
+                    appData[type].splice(idx, 1);
+                });
+            });
+            
+            selectedItems.clear();
+            renderAll();
+            showToast(`تم حذف ${selectedItems.size} عنصر`, 'success');
+        }
+    });
+}
+
+function bulkExport() {
+    const data = {};
+    selectedItems.forEach(key => {
+        const [type, idx] = key.split('-');
+        if (!data[type]) data[type] = [];
+        data[type].push(appData[type][parseInt(idx)]);
+    });
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bulk-export-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
