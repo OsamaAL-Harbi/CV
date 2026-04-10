@@ -1946,3 +1946,103 @@ function exportAsCSV(type) {
     a.click();
     URL.revokeObjectURL(url);
 }
+// =====================================================
+// PERSISTENT ANALYTICS
+// =====================================================
+const ANALYTICS_KEY = 'portfolio_analytics';
+
+function initPersistentAnalytics() {
+    const analytics = JSON.parse(localStorage.getItem(ANALYTICS_KEY) || '{}');
+    
+    // Initialize structure
+    if (!analytics.pageViews) analytics.pageViews = {};
+    if (!analytics.projectViews) analytics.projectViews = {};
+    if (!analytics.visitors) analytics.visitors = [];
+    if (!analytics.referrers) analytics.referrers = {};
+    
+    // Track visitor
+    const visitorId = getOrCreateVisitorId();
+    const now = Date.now();
+    
+    analytics.visitors.push({
+        id: visitorId,
+        timestamp: now,
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        screenSize: `${window.screen.width}x${window.screen.height}`
+    });
+    
+    // Track referrer
+    if (document.referrer) {
+        const refDomain = new URL(document.referrer).hostname;
+        analytics.referrers[refDomain] = (analytics.referrers[refDomain] || 0) + 1;
+    }
+    
+    // Save
+    localStorage.setItem(ANALYTICS_KEY, JSON.stringify(analytics));
+    
+    // Clean old data (keep last 30 days)
+    cleanOldAnalytics(analytics);
+}
+
+function trackPageVisitPersistent(pageId) {
+    const analytics = JSON.parse(localStorage.getItem(ANALYTICS_KEY) || '{}');
+    if (!analytics.pageViews) analytics.pageViews = {};
+    if (!analytics.pageViews[pageId]) analytics.pageViews[pageId] = [];
+    
+    analytics.pageViews[pageId].push({
+        timestamp: Date.now(),
+        visitorId: getOrCreateVisitorId()
+    });
+    
+    localStorage.setItem(ANALYTICS_KEY, JSON.stringify(analytics));
+}
+
+function getOrCreateVisitorId() {
+    let id = localStorage.getItem('visitor_id');
+    if (!id) {
+        id = 'v_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('visitor_id', id);
+    }
+    return id;
+}
+
+function cleanOldAnalytics(analytics) {
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    
+    // Clean visitors
+    if (analytics.visitors) {
+        analytics.visitors = analytics.visitors.filter(v => v.timestamp > thirtyDaysAgo);
+    }
+    
+    // Clean page views
+    Object.keys(analytics.pageViews || {}).forEach(pageId => {
+        analytics.pageViews[pageId] = analytics.pageViews[pageId].filter(
+            v => v.timestamp > thirtyDaysAgo
+        );
+    });
+    
+    localStorage.setItem(ANALYTICS_KEY, JSON.stringify(analytics));
+}
+
+function exportAnalyticsCSV() {
+    const analytics = JSON.parse(localStorage.getItem(ANALYTICS_KEY) || '{}');
+    
+    const rows = [
+        ['Page', 'Total Views', 'Unique Visitors', 'Avg Time on Page'],
+        ...Object.entries(analytics.pageViews || {}).map(([page, views]) => {
+            const uniqueVisitors = new Set(views.map(v => v.visitorId)).size;
+            return [page, views.length, uniqueVisitors, '-'];
+        })
+    ];
+    
+    const csv = rows.map(r => r.join(',')).join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analytics-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
