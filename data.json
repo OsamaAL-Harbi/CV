@@ -288,3 +288,16 @@
     }
   ]
 }
+{
+  "blog": [
+    {
+      "title": {"ar": "...", "en": "..."},
+      "slug": "my-first-post",
+      "excerpt": {"ar": "...", "en": "..."},
+      "content": {"ar": "...", "en": "..."},
+      "date": "2026-04-10",
+      "tags": ["تقنية", "برمجة"],
+      "coverImage": "https://..."
+    }
+  ]
+}
