@@ -1670,3 +1670,82 @@ function performSearch(query) {
     renderFilteredProjectsWithData(results.projects);
     // ... render other sections
 }
+// =====================================================
+// UNDO/REDO SYSTEM
+// =====================================================
+const historyStack = {
+    past: [],
+    future: [],
+    maxSize: 50
+};
+
+function saveState(action = 'edit') {
+    historyStack.past.push({
+        data: JSON.parse(JSON.stringify(appData)),
+        action,
+        timestamp: Date.now()
+    });
+    
+    if (historyStack.past.length > historyStack.maxSize) {
+        historyStack.past.shift();
+    }
+    
+    historyStack.future = []; // Clear redo stack
+    updateUndoRedoUI();
+}
+
+function undo() {
+    if (historyStack.past.length === 0) return;
+    
+    historyStack.future.push({
+        data: JSON.parse(JSON.stringify(appData)),
+        timestamp: Date.now()
+    });
+    
+    const state = historyStack.past.pop();
+    appData = state.data;
+    renderAll();
+    updateUndoRedoUI();
+    showToast(`تراجع عن: ${state.action}`, 'info');
+}
+
+function redo() {
+    if (historyStack.future.length === 0) return;
+    
+    historyStack.past.push({
+        data: JSON.parse(JSON.stringify(appData)),
+        timestamp: Date.now()
+    });
+    
+    const state = historyStack.future.pop();
+    appData = state.data;
+    renderAll();
+    updateUndoRedoUI();
+    showToast('إعادة التنفيذ', 'info');
+}
+
+function updateUndoRedoUI() {
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+    if (undoBtn) undoBtn.disabled = historyStack.past.length === 0;
+    if (redoBtn) redoBtn.disabled = historyStack.future.length === 0;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (!isAdmin) return;
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+    }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        redo();
+    }
+});
+
+// Call saveState before any edit
+function editItem(type, index) {
+    saveState(`تعديل ${type}`);
+    // ... existing edit logic
+}
