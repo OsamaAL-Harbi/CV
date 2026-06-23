@@ -1,49 +1,50 @@
 /**
- * OSAMA PORTFOLIO — script.js  v5.0
+ * OSAMA PORTFOLIO — script.js  v4.0
  * =====================================================
- * التحسينات الجديدة المدمجة:
- * - استبدال import بـ fetch لدعم توافق جميع المتصفحات
- * - إضافة Formspree لنموذج الاتصال
- * - وضع قراءة (Reading Mode)
- * - عداد زيارات دائم (LocalStorage) وشريط تقدم (Progress Bar)
- * - معالجة آمنة لمكتبات AOS و ParticlesJS
- * - دعم ترتيب المشاريع (Drag & Drop)
- * - تشفير Token الخاص بـ GitHub وتتبع وقت الجلسة
- * - معاينة فورية للتغييرات (Preview Changes)
+ * New in v4:
+ *  20. Dynamic SEO meta tags per page + hash URL routing
+ *  21. Custom 404 handler
+ *  22. Project filtering by technology
+ *  23. Live Demo button on projects
+ *  24. Particles hue-rotate by section
+ *  25. Admin analytics dashboard (session stats + GA4 link)
+ *  26. Contact actions (email copy, LinkedIn, GitHub open)
+ *  27. sendMailto & char counter
+ *  28. Page visit tracking in sessionStorage
  * =====================================================
  */
 
 // =====================================================
 // 1. GLOBALS
 // =====================================================
-let appData        = null;
+let appData        = {};
 let githubInfo     = { token: '', repo: '' };
 let currentLang    = localStorage.getItem('lang') || 'ar';
 let isAdmin        = false;
 let clickCount     = 0;
 let activeSkillTab = 'hard';
-let activeFilter   = 'all';
+let activeFilter   = 'all';          // project filter
 let dataLoaded     = false;
 let twInterval     = null;
-let readingMode    = false;
 
 const SESSION_DURATION   = 60 * 60 * 1000;
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqarljpg"; // تأكد من المعرف الخاص بك
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqarljpg";
 const VALID_PAGES        = ['home', 'resume', 'portfolio', 'contact'];
-const SECTION_HUE        = { home: 0, resume: 180, portfolio: 120, contact: 90, 'not-found': 0 };
+
+// Particles hue-rotation per section
+const SECTION_HUE = { home: 0, resume: 180, portfolio: 120, contact: 90, 'not-found': 0 };
 
 // =====================================================
-// 2. BOOT & DATA LOADING
+// 2. BOOT
 // =====================================================
 document.addEventListener('DOMContentLoaded', () => {
-    if (typeof AOS !== 'undefined') AOS.init({ duration: 800, once: true });
+    AOS.init({ duration: 800, once: true });
 
     const yearEl = document.getElementById('year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
 
     setDirection();
     initTheme();
-    initReadingMode();
     initParticles();
     setupSecretTrigger();
     setupCmdPalette();
@@ -60,33 +61,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ti) ti.value = localStorage.getItem('saved_token');
     }
 
+    // Hash routing — must run after data loads
     loadContent().then(() => {
         checkSession();
-        handleHash(); 
+        handleHash();                  // respect URL hash on first load
     });
 
+    // React to hash changes (back/forward browser buttons + nav links)
     window.addEventListener('hashchange', handleHash);
 });
-
-async function loadContent() {
-    try {
-        const res = await fetch(`data.json?t=${Date.now()}`);
-        if (!res.ok) throw new Error('data.json not found');
-        appData    = await res.json();
-        dataLoaded = true;
-        renderAll();
-        updateStaticText();
-        setSmartGreeting();
-        setTimeout(() => {
-            const loader = document.getElementById('loading-screen');
-            if (loader) loader.classList.add('hidden');
-        }, 500);
-    } catch (err) {
-        showToast('خطأ في تحميل البيانات / Error loading data', 'error');
-        const loader = document.getElementById('loading-screen');
-        if (loader) loader.classList.add('hidden');
-    }
-}
 
 function registerPWA() {
     if ('serviceWorker' in navigator) {
@@ -95,23 +78,19 @@ function registerPWA() {
 }
 
 // =====================================================
-// 3. NAVIGATION + HASH ROUTING + PROGRESS BAR
+// 3. NAVIGATION + HASH ROUTING
 // =====================================================
+
+// Called on every hashchange and on first load
 function handleHash() {
     const hash   = window.location.hash.replace('#', '').trim();
     const pageId = VALID_PAGES.includes(hash) ? hash : (hash === '' ? 'home' : null);
-    if (pageId) showPage(pageId, false);
+    if (pageId) showPage(pageId, false);  // false = don't push state again
     else if (hash !== '') show404();
 }
 
 function showPage(pageId, pushState = true) {
     if (!VALID_PAGES.includes(pageId)) { show404(); return; }
-
-    const progress = document.createElement('div');
-    progress.className = 'fixed top-0 left-0 h-1 bg-primary z-[300] transition-all duration-300';
-    progress.style.width = '0%';
-    document.body.appendChild(progress);
-    setTimeout(() => { progress.style.width = '50%'; }, 50);
 
     document.querySelectorAll('.page-section').forEach(sec => {
         sec.classList.remove('active');
@@ -121,10 +100,7 @@ function showPage(pageId, pushState = true) {
     const target = document.getElementById(pageId);
     if (target) {
         target.style.display = 'block';
-        setTimeout(() => { 
-            target.classList.add('active'); 
-            if (typeof AOS !== 'undefined') AOS.refresh(); 
-        }, 10);
+        setTimeout(() => { target.classList.add('active'); AOS.refresh(); }, 10);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -135,20 +111,21 @@ function showPage(pageId, pushState = true) {
     const mobileMenu = document.getElementById('mobile-menu');
     if (mobileMenu && mobileMenu.classList.contains('open')) toggleMobileMenu();
 
+    // Update hash without triggering hashchange again
     if (pushState && window.location.hash !== `#${pageId}`) {
         history.pushState(null, '', `#${pageId}`);
     }
 
+    // Update dynamic SEO meta tags
     updateMetaTags(pageId);
 
+    // Shift particles hue per section
     const hue = SECTION_HUE[pageId] ?? 0;
     const pEl = document.getElementById('particles-js');
     if (pEl) pEl.style.filter = `hue-rotate(${hue}deg)`;
 
+    // Track page visit in sessionStorage
     trackPageVisit(pageId);
-
-    setTimeout(() => { progress.style.width = '100%'; }, 300);
-    setTimeout(() => { progress.remove(); }, 800);
 }
 
 function show404() {
@@ -157,13 +134,7 @@ function show404() {
         sec.style.display = 'none';
     });
     const el = document.getElementById('not-found');
-    if (el) { 
-        el.style.display = 'block'; 
-        setTimeout(() => { 
-            el.classList.add('active'); 
-            if (typeof AOS !== 'undefined') AOS.refresh(); 
-        }, 10); 
-    }
+    if (el) { el.style.display = 'block'; setTimeout(() => { el.classList.add('active'); AOS.refresh(); }, 10); }
     document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('nav-active'));
 }
 
@@ -183,129 +154,7 @@ function setupScrollTop() {
 }
 
 // =====================================================
-// 4. THEME & READING MODE & PARTICLES
-// =====================================================
-function initTheme() {
-    const btn = document.getElementById('theme-btn');
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-    }
-    if(btn) {
-        btn.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-            initParticles();
-        });
-    }
-}
-
-function initReadingMode() {
-    const btn = document.getElementById('reading-btn');
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-        readingMode = !readingMode;
-        document.body.classList.toggle('reading-mode', readingMode);
-        localStorage.setItem('readingMode', readingMode);
-        showToast(readingMode ? '📖 وضع القراءة مفعّل' : '📖 تم إلغاء وضع القراءة', 'info');
-    });
-    if (localStorage.getItem('readingMode') === 'true') {
-        readingMode = true;
-        document.body.classList.add('reading-mode');
-    }
-}
-
-function initParticles(party = false) {
-    const isDark = document.documentElement.classList.contains('dark');
-    if (typeof particlesJS !== 'undefined') {
-        particlesJS('particles-js', {
-            particles: {
-                number:      { value: party ? 100 : 40 },
-                color:       { value: party ? ['#f00','#0f0','#00f'] : (isDark ? '#ffffff' : '#3b82f6') },
-                opacity:     { value: 0.3 },
-                size:        { value: 3 },
-                line_linked: { enable: true, distance: 150, color: isDark ? '#ffffff' : '#3b82f6', opacity: 0.1, width: 1 },
-                move:        { enable: true, speed: party ? 10 : 1 }
-            },
-            interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'grab' } } },
-            retina_detect: true
-        });
-    }
-}
-
-// =====================================================
-// 5. LOCALISATION & STATIC TEXT
-// =====================================================
-function t(data) {
-    if (data === null || data === undefined) return '';
-    if (typeof data === 'object') return data[currentLang] || data.ar || '';
-    return String(data);
-}
-
-function toggleLanguage() {
-    currentLang = currentLang === 'ar' ? 'en' : 'ar';
-    localStorage.setItem('lang', currentLang);
-    setDirection();
-    if(dataLoaded) renderAll();
-    updateStaticText();
-    const hash = window.location.hash.replace('#', '') || 'home';
-    updateMetaTags(hash);
-}
-
-function setDirection() {
-    document.documentElement.dir  = currentLang === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = currentLang;
-    const btn = document.getElementById('lang-btn');
-    if (btn) btn.textContent = currentLang === 'ar' ? 'EN' : 'عربي';
-}
-
-const STATIC_TEXT = {
-    ar: {
-        nav_home:'الرئيسية', nav_resume:'السيرة الذاتية', nav_portfolio:'الأعمال', nav_contact:'تواصل',
-        btn_projects:'أعمالي', btn_save:'حفظ', btn_email:'إرسال',
-        btn_download_cv:'تحميل PDF', btn_share:'مشاركة', btn_print:'طباعة',
-        sec_resume:'السيرة الذاتية', sec_exp:'التدريب التعاوني', sec_edu:'التعليم',
-        sec_volunteer:'التطوع', sec_skills:'المهارات', sec_certs:'الشهادات',
-        sec_workshops:'ورش العمل', sec_languages:'اللغات', sec_projects:'معرض المشاريع',
-        contact_title:'تواصل معي', contact_email_label:'البريد الإلكتروني',
-        contact_click_copy:'انقر للنسخ', contact_open:'فتح الملف',
-        contact_compose:'اكتب رسالة', contact_subject_label:'الموضوع',
-        contact_message_label:'الرسالة', contact_mailto_note:'سيتم إرسال رسالتك عبر خدمة Formspree',
-        contact_cv_title:'هل تريد مراجعة سيرتي الذاتية أولاً؟', contact_cv_sub:'تحميل مباشر — PDF جاهز',
-        tab_hard:'تقنية', tab_soft:'شخصية',
-        stat_certs:'شهادات مهنية', stat_volunteer:'ساعة تطوع',
-        stat_projects:'مشروع تخرج', stat_graduation:'سنة التخرج',
-        not_found_title:'الصفحة غير موجودة', not_found_desc:'يبدو أن الرابط الذي طلبته غير موجود',
-        not_found_btn:'العودة للرئيسية', filter_all:'الكل'
-    },
-    en: {
-        nav_home:'Home', nav_resume:'Resume', nav_portfolio:'Portfolio', nav_contact:'Contact',
-        btn_projects:'My Work', btn_save:'Save', btn_email:'Send',
-        btn_download_cv:'Download PDF', btn_share:'Share', btn_print:'Print',
-        sec_resume:'Resume', sec_exp:'Co-op Training', sec_edu:'Education',
-        sec_volunteer:'Volunteer', sec_skills:'Skills', sec_certs:'Certificates',
-        sec_workshops:'Workshops', sec_languages:'Languages', sec_projects:'Portfolio',
-        contact_title:'Get in Touch', contact_email_label:'Email',
-        contact_click_copy:'Click to copy', contact_open:'Open Profile',
-        contact_compose:'Write a Message', contact_subject_label:'Subject',
-        contact_message_label:'Message', contact_mailto_note:'Your message will be sent via Formspree',
-        contact_cv_title:'Want to review my CV first?', contact_cv_sub:'Direct download — PDF ready',
-        tab_hard:'Technical', tab_soft:'Soft Skills',
-        stat_certs:'Certifications', stat_volunteer:'Volunteer Hours',
-        stat_projects:'Graduation Project', stat_graduation:'Graduation Year',
-        not_found_title:'Page Not Found', not_found_desc:'The link you requested does not exist',
-        not_found_btn:'Back to Home', filter_all:'All'
-    }
-};
-
-function updateStaticText() {
-    document.querySelectorAll('[data-lang]').forEach(el => {
-        const key = el.getAttribute('data-lang');
-        if (STATIC_TEXT[currentLang]?.[key]) el.innerText = STATIC_TEXT[currentLang][key];
-    });
-}
-
-// =====================================================
-// 6. DYNAMIC SEO META TAGS
+// 4. DYNAMIC SEO META TAGS
 // =====================================================
 const PAGE_META = {
     ar: {
@@ -326,6 +175,7 @@ function updateMetaTags(pageId) {
     const meta    = PAGE_META[currentLang]?.[pageId];
     if (!meta) return;
     const pageUrl = `${window.location.origin}${window.location.pathname}#${pageId}`;
+
     document.title = meta.title;
 
     const setMeta = (id, attr, val) => { const el = document.getElementById(id); if (el) el.setAttribute(attr, val); };
@@ -338,8 +188,103 @@ function updateMetaTags(pageId) {
 }
 
 // =====================================================
+// 5. LOCALISATION
+// =====================================================
+function t(data) {
+    if (data === null || data === undefined) return '';
+    if (typeof data === 'object') return data[currentLang] || data.ar || '';
+    return String(data);
+}
+
+function toggleLanguage() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    setDirection();
+    renderAll();
+    updateStaticText();
+    // Re-apply meta for current page
+    const hash = window.location.hash.replace('#', '') || 'home';
+    updateMetaTags(hash);
+}
+
+function setDirection() {
+    document.documentElement.dir  = currentLang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = currentLang;
+    const btn = document.getElementById('lang-btn');
+    if (btn) btn.textContent = currentLang === 'ar' ? 'EN' : 'عربي';
+}
+
+const STATIC_TEXT = {
+    ar: {
+        nav_home:'الرئيسية', nav_resume:'السيرة الذاتية', nav_portfolio:'الأعمال', nav_contact:'تواصل',
+        btn_projects:'أعمالي', btn_save:'حفظ', btn_email:'فتح تطبيق الإيميل للإرسال',
+        btn_download_cv:'تحميل PDF', btn_share:'مشاركة', btn_print:'طباعة',
+        sec_resume:'السيرة الذاتية', sec_exp:'الخبرات', sec_edu:'التعليم',
+        sec_volunteer:'التطوع', sec_skills:'المهارات', sec_certs:'الشهادات',
+        sec_workshops:'ورش العمل', sec_languages:'اللغات', sec_projects:'معرض المشاريع',
+        contact_title:'تواصل معي', contact_email_label:'البريد الإلكتروني',
+        contact_click_copy:'انقر للنسخ', contact_open:'فتح الملف',
+        contact_compose:'اكتب رسالة', contact_subject_label:'الموضوع',
+        contact_message_label:'الرسالة', contact_mailto_note:'سيفتح تطبيق الإيميل على جهازك',
+        contact_cv_title:'هل تريد مراجعة سيرتي الذاتية أولاً؟', contact_cv_sub:'تحميل مباشر — PDF جاهز',
+        tab_hard:'تقنية', tab_soft:'شخصية',
+        stat_certs:'شهادات مهنية', stat_volunteer:'ساعة تطوع',
+        stat_projects:'مشروع تخرج', stat_graduation:'سنة التخرج',
+        not_found_title:'الصفحة غير موجودة', not_found_desc:'يبدو أن الرابط الذي طلبته غير موجود',
+        not_found_btn:'العودة للرئيسية',
+        filter_all:'الكل'
+    },
+    en: {
+        nav_home:'Home', nav_resume:'Resume', nav_portfolio:'Portfolio', nav_contact:'Contact',
+        btn_projects:'My Work', btn_save:'Save', btn_email:'Open Email App',
+        btn_download_cv:'Download PDF', btn_share:'Share', btn_print:'Print',
+        sec_resume:'Resume', sec_exp:'Experience', sec_edu:'Education',
+        sec_volunteer:'Volunteer', sec_skills:'Skills', sec_certs:'Certificates',
+        sec_workshops:'Workshops', sec_languages:'Languages', sec_projects:'Portfolio',
+        contact_title:'Get in Touch', contact_email_label:'Email',
+        contact_click_copy:'Click to copy', contact_open:'Open Profile',
+        contact_compose:'Write a Message', contact_subject_label:'Subject',
+        contact_message_label:'Message', contact_mailto_note:'Your email app will open with the message',
+        contact_cv_title:'Want to review my CV first?', contact_cv_sub:'Direct download — PDF ready',
+        tab_hard:'Technical', tab_soft:'Soft Skills',
+        stat_certs:'Certifications', stat_volunteer:'Volunteer Hours',
+        stat_projects:'Graduation Project', stat_graduation:'Graduation Year',
+        not_found_title:'Page Not Found', not_found_desc:'The link you requested does not exist',
+        not_found_btn:'Back to Home',
+        filter_all:'All'
+    }
+};
+
+function updateStaticText() {
+    document.querySelectorAll('[data-lang]').forEach(el => {
+        const key = el.getAttribute('data-lang');
+        if (STATIC_TEXT[currentLang]?.[key]) el.innerText = STATIC_TEXT[currentLang][key];
+    });
+}
+
+// =====================================================
+// 6. DATA LOADING
+// =====================================================
+async function loadContent() {
+    try {
+        const res = await fetch(`data.json?t=${Date.now()}`);
+        if (!res.ok) throw new Error('data.json not found');
+        appData    = await res.json();
+        dataLoaded = true;
+        renderAll();
+        updateStaticText();
+        setSmartGreeting();
+        setTimeout(() => document.getElementById('loading-screen').classList.add('hidden'), 500);
+    } catch (err) {
+        showToast('خطأ في تحميل البيانات / Error loading data', 'error');
+        document.getElementById('loading-screen').classList.add('hidden');
+    }
+}
+
+// =====================================================
 // 7. RENDER ENGINE
 // =====================================================
+
 const WC = {
     experience:   'relative group mb-8',
     education:    'relative group mb-6',
@@ -359,13 +304,15 @@ function renderAll() {
     renderSection('certificates', appData.certificates || [], renderCertItem,        WC.certificates);
     renderSection('workshops',    appData.workshops    || [], renderWorkshopItem,    WC.workshops);
     renderSection('languages',    appData.languages    || [], renderLanguageItem,    WC.languages);
+    // Projects: filters first, then filtered grid
     renderProjectFilters();
     renderFilteredProjects();
     updatePrintHeader();
     if (isAdmin) initSortable();
-    setTimeout(() => { if (typeof AOS !== 'undefined') AOS.refresh(); }, 50);
+    setTimeout(() => AOS.refresh(), 50);
 }
 
+// ─── Profile ──────────────────────────────────────────
 function renderProfile() {
     const p = appData.profile;
     if (!p) return;
@@ -389,6 +336,7 @@ function renderProfile() {
     if (locDisplay) locDisplay.textContent = t(p.location);
 }
 
+// ─── Generic section renderer ─────────────────────────
 function renderSection(type, data, contentFn, wrapperClass) {
     const container = document.getElementById(`${type}-container`);
     if (!container) return;
@@ -402,6 +350,7 @@ function renderSection(type, data, contentFn, wrapperClass) {
     `).join('');
 }
 
+// ─── Item renderers ───────────────────────────────────
 function renderExperienceItem(item) {
     return `
         <h3 class="text-xl font-bold dark:text-white hover:text-primary transition">${t(item.role)}</h3>
@@ -455,6 +404,8 @@ function renderLanguageItem(item) {
         </div>`;
 }
 
+// ─── Project Card ─────────────────────────────────────
+// Uses stable key (title-based) for sessionStorage, not array index
 function getProjectKey(item, fallback) {
     const raw = item.title?.en || item.title?.ar || String(fallback);
     return 'pv_' + raw.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').substring(0, 40);
@@ -500,6 +451,7 @@ function renderProjectItem(item, realIdx) {
         </div>`;
 }
 
+// ─── Print header ──────────────────────────────────────
 function updatePrintHeader() {
     const p = appData.profile;
     if (!p) return;
@@ -515,11 +467,16 @@ function updatePrintHeader() {
 function renderProjectFilters() {
     const container = document.getElementById('project-filters');
     if (!container) return;
+
+    // Collect all unique techs across all projects
     const techSet = new Set();
     (appData.projects || []).forEach(p => (p.technologies || []).forEach(t => techSet.add(t)));
+
     if (techSet.size === 0) { container.innerHTML = ''; return; }
+
     const allLabel = STATIC_TEXT[currentLang]?.filter_all || 'الكل';
     const techs    = [{ key: 'all', label: allLabel }, ...Array.from(techSet).map(t => ({ key: t, label: t }))];
+
     container.innerHTML = techs.map(({ key, label }) => `
         <button onclick="setProjectFilter('${key}')"
                 class="filter-btn px-3 py-1.5 text-xs font-bold rounded-full border border-gray-200 dark:border-gray-700 transition hover:border-primary hover:text-primary ${activeFilter === key ? 'active bg-primary text-white border-primary' : 'bg-white dark:bg-cardBg text-gray-600 dark:text-gray-300'}">
@@ -534,6 +491,7 @@ function setProjectFilter(tech) {
     renderFilteredProjects();
 }
 
+// FIX: use original array index for modal so openProjectModal gets correct item
 function renderFilteredProjects() {
     const container  = document.getElementById('projects-container');
     if (!container) return;
@@ -654,12 +612,13 @@ function animateCounters() {
 }
 
 // =====================================================
-// 11. PROJECT MODAL
+// 11. PROJECT MODAL + VIEW COUNTER
 // =====================================================
 function openProjectModal(index) {
     const item = (appData.projects || [])[index];
     if (!item) return;
 
+    // Stable key per project title
     const key     = getProjectKey(item, index);
     const views   = JSON.parse(sessionStorage.getItem('project_views') || '{}');
     views[key]    = (views[key] || 0) + 1;
@@ -690,12 +649,14 @@ function openProjectModal(index) {
     document.getElementById('modal-challenges').textContent = item.details ? t(item.details.challenges) : '';
     document.getElementById('modal-results').textContent    = item.details ? t(item.details.results)    : '';
 
+    // GitHub link
     const githubLink = document.getElementById('modal-github-link');
     if (githubLink) {
         if (item.link && item.link !== '#') { githubLink.href = item.link; githubLink.style.display = 'inline-flex'; }
         else githubLink.style.display = 'none';
     }
 
+    // Live Demo link
     const liveLink = document.getElementById('modal-live-link');
     if (liveLink) {
         if (item.liveUrl && item.liveUrl.trim() !== '' && item.liveUrl !== '#') {
@@ -703,7 +664,9 @@ function openProjectModal(index) {
         } else liveLink.style.display = 'none';
     }
 
+    // Re-render cards to update badge
     renderFilteredProjects();
+
     document.getElementById('project-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
@@ -719,16 +682,19 @@ function _closeProjectModal() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') _closeProjectModal(); });
 
 // =====================================================
-// 12. LOCALSTORAGE ANALYTICS DASHBOARD
+// 12. PAGE VISIT TRACKING (sessionStorage)
 // =====================================================
 function trackPageVisit(pageId) {
-    const visits = JSON.parse(localStorage.getItem('page_visits') || '{}');
+    const visits = JSON.parse(sessionStorage.getItem('page_visits') || '{}');
     visits[pageId] = (visits[pageId] || 0) + 1;
-    localStorage.setItem('page_visits', JSON.stringify(visits));
+    sessionStorage.setItem('page_visits', JSON.stringify(visits));
 }
 
+// =====================================================
+// 13. ADMIN ANALYTICS DASHBOARD
+// =====================================================
 function showAnalyticsDashboard() {
-    const visits  = JSON.parse(localStorage.getItem('page_visits')  || '{}');
+    const visits  = JSON.parse(sessionStorage.getItem('page_visits')  || '{}');
     const pViews  = JSON.parse(sessionStorage.getItem('project_views') || '{}');
     const allProjects = appData.projects || [];
 
@@ -762,7 +728,7 @@ function showAnalyticsDashboard() {
         title: currentLang === 'ar' ? '📊 لوحة الإحصائيات' : '📊 Analytics Dashboard',
         html: `
         <div class="text-right" dir="${currentLang === 'ar' ? 'rtl' : 'ltr'}">
-            <p class="text-xs text-gray-400 mb-4">${currentLang === 'ar' ? 'البيانات مخزنة في متصفحك بشكل دائم' : 'Data stored locally in your browser'}</p>
+            <p class="text-xs text-gray-400 mb-4">${currentLang === 'ar' ? 'بيانات الجلسة الحالية فقط' : 'Current session data only'}</p>
 
             <h4 class="font-bold text-sm mb-2">${currentLang === 'ar' ? 'زيارات الصفحات' : 'Page Visits'}</h4>
             <table class="w-full mb-6 text-right">
@@ -781,6 +747,17 @@ function showAnalyticsDashboard() {
                 </tr></thead>
                 <tbody>${projectRows}</tbody>
             </table>
+
+            <div class="flex gap-2 flex-wrap justify-center mt-4">
+                <a href="https://analytics.google.com/" target="_blank"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition">
+                   <i class="fab fa-google"></i> Google Analytics
+                </a>
+                <a href="https://clarity.microsoft.com/" target="_blank"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition">
+                   <i class="fas fa-eye"></i> Microsoft Clarity
+                </a>
+            </div>
         </div>`,
         width: '600px',
         showConfirmButton: false,
@@ -789,19 +766,13 @@ function showAnalyticsDashboard() {
 }
 
 // =====================================================
-// 13. PDF, SHARE & FORMSPREE CONTACT
+// 14. PDF GENERATION
 // =====================================================
 async function generatePDF() {
     showToast(currentLang === 'ar' ? 'جاري إنشاء PDF...' : 'Generating PDF...', 'info');
     const resumeEl  = document.getElementById('resume');
     const wasActive = resumeEl.classList.contains('active');
-    
-    if (!wasActive) { 
-        resumeEl.style.display = 'block'; 
-        resumeEl.classList.add('active'); 
-        if (typeof AOS !== 'undefined') AOS.refresh();
-    }
-    
+    if (!wasActive) { resumeEl.style.display = 'block'; resumeEl.classList.add('active'); }
     await new Promise(r => setTimeout(r, 600));
     try {
         const { jsPDF } = window.jspdf;
@@ -831,6 +802,9 @@ async function generatePDF() {
 
 function triggerPrint() { showPage('resume'); setTimeout(() => window.print(), 400); }
 
+// =====================================================
+// 15. SHARE PROFILE
+// =====================================================
 async function shareProfile() {
     const name    = t(appData.profile?.name || { ar: 'أسامة الحربي', en: 'Osama Al-Harbi' });
     const summary = t(appData.profile?.summary || {});
@@ -841,7 +815,6 @@ async function shareProfile() {
     }
     copyToClipboard(url);
 }
-
 async function copyToClipboard(text) {
     try {
         await navigator.clipboard.writeText(text);
@@ -849,6 +822,9 @@ async function copyToClipboard(text) {
     } catch { showToast(currentLang === 'ar' ? 'تعذّر النسخ' : 'Copy failed', 'error'); }
 }
 
+// =====================================================
+// 16. CONTACT ACTIONS
+// =====================================================
 function contactAction(type) {
     const p = appData.profile;
     if (!p) return;
@@ -863,27 +839,15 @@ function contactAction(type) {
     }
 }
 
-async function sendFormspree(e) {
-    e.preventDefault();
-    const form = e.target;
-    const data = new FormData(form);
-    try {
-        const response = await fetch(FORMSPREE_ENDPOINT, {
-            method: 'POST',
-            body: data,
-            headers: { 'Accept': 'application/json' }
-        });
-        if (response.ok) {
-            showToast(currentLang === 'ar' ? 'تم إرسال رسالتك ✅' : 'Message sent ✅', 'success');
-            form.reset();
-            const counter = document.getElementById('char-counter');
-            if(counter) counter.textContent = '0 / 2000';
-        } else {
-            showToast(currentLang === 'ar' ? 'حدث خطأ، حاول مرة أخرى' : 'Error, please try again', 'error');
-        }
-    } catch (err) {
-        showToast(currentLang === 'ar' ? 'فشل الاتصال بالخادم' : 'Server connection failed', 'error');
+function sendMailto() {
+    const p       = appData.profile;
+    const subject = encodeURIComponent(document.getElementById('contact-subject')?.value || '');
+    const body    = encodeURIComponent(document.getElementById('contact-message')?.value || '');
+    if (!subject && !body) {
+        showToast(currentLang === 'ar' ? 'يرجى كتابة موضوع أو رسالة' : 'Please enter a subject or message', 'error');
+        return;
     }
+    window.location.href = `mailto:${p?.email || 'osamafcv214@gmail.com'}?subject=${subject}&body=${body}`;
 }
 
 function updateCharCounter(el) {
@@ -893,7 +857,7 @@ function updateCharCounter(el) {
 }
 
 // =====================================================
-// 14. ADMIN UTILITIES & COMMAND PALETTE
+// 17. LINKEDIN REFERRER
 // =====================================================
 function checkLinkedInReferrer() {
     if (document.referrer && document.referrer.includes('linkedin.com')) {
@@ -903,63 +867,8 @@ function checkLinkedInReferrer() {
     }
 }
 
-function setupCmdPalette() {
-    document.addEventListener('keydown', e => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-            e.preventDefault();
-            document.getElementById('cmd-palette').classList.remove('hidden');
-            document.getElementById('cmd-input').focus();
-            renderCmdItems();
-        }
-        if (e.key === 'Escape') document.getElementById('cmd-palette').classList.add('hidden');
-    });
-}
-
-function renderCmdItems() {
-    const items = [
-        { icon: 'fa-home',      text: 'الرئيسية / Home',         action: () => showPage('home') },
-        { icon: 'fa-id-card',   text: 'السيرة الذاتية / Resume',  action: () => showPage('resume') },
-        { icon: 'fa-briefcase', text: 'الأعمال / Portfolio',      action: () => showPage('portfolio') },
-        { icon: 'fa-envelope',  text: 'تواصل / Contact',          action: () => showPage('contact') },
-        { icon: 'fa-file-pdf',  text: 'تحميل PDF',                action: generatePDF },
-        { icon: 'fa-print',     text: 'طباعة / Print',            action: triggerPrint },
-        { icon: 'fa-share-alt', text: 'مشاركة / Share',           action: shareProfile },
-        { icon: 'fa-language',  text: 'تبديل اللغة / Language',   action: toggleLanguage },
-        { icon: 'fa-moon',      text: 'الوضع الليلي / Theme',     action: () => document.getElementById('theme-btn').click() }
-    ];
-    const cmdList = document.getElementById('cmd-list');
-    if(cmdList) {
-        cmdList.innerHTML = items.map(item => `
-            <div class="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer flex gap-3 items-center rounded transition"
-                 onclick="document.getElementById('cmd-palette').classList.add('hidden'); (${item.action})()">
-                <i class="fas ${item.icon} text-primary w-4"></i>
-                <span class="font-bold dark:text-white text-sm">${item.text}</span>
-            </div>
-        `).join('');
-    }
-}
-
-function filterCmd(val) {
-    document.querySelectorAll('#cmd-list > div').forEach(el => {
-        el.style.display = el.textContent.toLowerCase().includes(val.toLowerCase()) ? 'flex' : 'none';
-    });
-}
-
-function previewChanges() {
-    if(!isAdmin) return;
-    Swal.fire({
-        title: currentLang === 'ar' ? 'معاينة التغييرات' : 'Preview Changes',
-        html: `<div style="max-height:400px;overflow-y:auto;text-align:left;direction:ltr;">
-               <pre style="background:#f0f0f0;padding:1rem;border-radius:0.5rem;font-size:12px;">${JSON.stringify(appData, null, 2)}</pre>
-               </div>`,
-        width: '800px',
-        confirmButtonText: 'إغلاق',
-        showCloseButton: true
-    });
-}
-
 // =====================================================
-// 15. ADMIN CRUD SCHEMAS & ACTIONS
+// 18. ADMIN BUTTONS
 // =====================================================
 function renderAdminButtons(type, index) {
     if (!isAdmin) return '';
@@ -981,6 +890,9 @@ function renderAdminButtons(type, index) {
         </div>`;
 }
 
+// =====================================================
+// 19. ADMIN CRUD (SCHEMAS)
+// =====================================================
 const SCHEMAS = {
     skills: [
         { key: 'ar',       label: 'اسم المهارة (عربي)',   simple: true },
@@ -990,7 +902,7 @@ const SCHEMAS = {
     ],
     experience: [
         { key: 'role',        label: 'المسمى الوظيفي / Role' },
-        { key: 'company',     label: 'الجهة / Company' },
+        { key: 'company',     label: 'الشركة / Company' },
         { key: 'period',      label: 'الفترة / Period' },
         { key: 'description', label: 'الوصف / Description', type: 'textarea' }
     ],
@@ -1006,6 +918,15 @@ const SCHEMAS = {
         { key: 'period',       label: 'الفترة / Period' },
         { key: 'hours',        label: 'عدد الساعات / Hours', simple: true },
         { key: 'description',  label: 'الوصف / Description', type: 'textarea' }
+    ],
+    projects: [
+        { key: 'title',               label: 'العنوان / Title' },
+        { key: 'desc',                label: 'الوصف / Description', type: 'textarea' },
+        { key: 'technologies',        label: 'التقنيات / Technologies (مفصولة بفاصلة)', simple: true, array: true },
+        { key: 'link',                label: 'رابط GitHub',    simple: true },
+        { key: 'liveUrl',             label: 'رابط Live Demo', simple: true },
+        { key: 'details_challenges',  label: 'التحديات / Challenges', type: 'textarea', nested: 'details', subkey: 'challenges' },
+        { key: 'details_results',     label: 'النتائج / Results',     type: 'textarea', nested: 'details', subkey: 'results'    }
     ],
     certificates: [
         { key: 'name',       label: 'اسم الشهادة / Name' },
@@ -1031,6 +952,7 @@ async function manageItem(type, index = null) {
     const schema = SCHEMAS[type];
     if (!schema) return;
 
+    // Helper: get value supporting nested objects (e.g. details.challenges)
     const getVal = (obj, f, lang) => {
         let src = obj;
         if (f.nested) src = obj[f.nested] || {};
@@ -1049,6 +971,7 @@ async function manageItem(type, index = null) {
     };
 
     const html = schema.map(f => {
+        // Simple field (string / array)
         if (f.simple) {
             const val = isEdit ? getSimple(item, f) : '';
             const hint = f.array ? ' <span class="text-gray-400 text-xs">(مفصولة بفاصلة)</span>' : '';
@@ -1087,11 +1010,16 @@ async function manageItem(type, index = null) {
                 const inputId = `swal-${f.key}`;
                 if (f.simple) {
                     let raw = document.getElementById(inputId)?.value ?? '';
-                    const val = f.array ? raw.split(',').map(x => x.trim()).filter(Boolean) : raw;
+                    // Array fields: split by comma and trim
+                    const val = f.array
+                        ? raw.split(',').map(x => x.trim()).filter(Boolean)
+                        : raw;
                     if (f.nested) {
                         if (!obj[f.nested]) obj[f.nested] = {};
                         obj[f.nested][f.subkey || f.key] = val;
-                    } else { obj[f.key] = val; }
+                    } else {
+                        obj[f.key] = val;
+                    }
                 } else {
                     const val = {
                         ar: document.getElementById(`${inputId}-ar`)?.value ?? '',
@@ -1100,7 +1028,9 @@ async function manageItem(type, index = null) {
                     if (f.nested) {
                         if (!obj[f.nested]) obj[f.nested] = {};
                         obj[f.nested][f.subkey || f.key] = val;
-                    } else { obj[f.key] = val; }
+                    } else {
+                        obj[f.key] = val;
+                    }
                 }
             });
             return obj;
@@ -1118,11 +1048,13 @@ async function manageItem(type, index = null) {
 function addItem(type)         { if (type === 'projects') manageProjectItem(); else manageItem(type); }
 function editItem(type, index) { if (type === 'projects') manageProjectItem(index); else manageItem(type, index); }
 
+// ── Dedicated project editor (handles technologies array + nested details) ──
 async function manageProjectItem(index = null) {
     if (!isAdmin) return;
     const isEdit = index !== null;
     const item   = isEdit ? (appData.projects || [])[index] : {};
 
+    // Helper: extract bilingual string
     const bv = (obj, lang) => {
         if (!obj) return '';
         if (typeof obj === 'object') return obj[lang] || obj.ar || '';
@@ -1136,45 +1068,116 @@ async function manageProjectItem(index = null) {
     const resultsEn = bv(item.details?.results,    'en');
 
     const { value } = await Swal.fire({
-        title: isEdit ? (currentLang === 'ar' ? 'تعديل المشروع' : 'Edit Project') : (currentLang === 'ar' ? 'إضافة مشروع جديد' : 'Add New Project'),
+        title: isEdit
+            ? (currentLang === 'ar' ? 'تعديل المشروع' : 'Edit Project')
+            : (currentLang === 'ar' ? 'إضافة مشروع جديد' : 'Add New Project'),
         html: `<div class="text-right space-y-3" dir="rtl">
+
+          <!-- Title -->
           <div class="grid grid-cols-2 gap-2">
-            <div><label class="block text-xs mb-1 text-gray-500 text-right">عنوان المشروع (AR)</label><input id="pj-title-ar" class="swal2-input m-0 w-full text-right" value="${bv(item.title,'ar')}" dir="rtl"></div>
-            <div><label class="block text-xs mb-1 text-gray-500 text-left">Project Title (EN)</label><input id="pj-title-en" class="swal2-input m-0 w-full text-left" value="${bv(item.title,'en')}" dir="ltr"></div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">عنوان المشروع (AR)</label>
+              <input id="pj-title-ar" class="swal2-input m-0 w-full text-right" value="${bv(item.title,'ar')}" dir="rtl" placeholder="اسم المشروع بالعربي">
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Project Title (EN)</label>
+              <input id="pj-title-en" class="swal2-input m-0 w-full text-left" value="${bv(item.title,'en')}" dir="ltr" placeholder="Project name in English">
+            </div>
           </div>
+
+          <!-- Description -->
           <div class="grid grid-cols-2 gap-2">
-            <div><label class="block text-xs mb-1 text-gray-500 text-right">وصف المشروع (AR)</label><textarea id="pj-desc-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl">${bv(item.desc,'ar')}</textarea></div>
-            <div><label class="block text-xs mb-1 text-gray-500 text-left">Description (EN)</label><textarea id="pj-desc-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr">${bv(item.desc,'en')}</textarea></div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">وصف المشروع (AR)</label>
+              <textarea id="pj-desc-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl" placeholder="وصف مختصر...">${bv(item.desc,'ar')}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Description (EN)</label>
+              <textarea id="pj-desc-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Short description...">${bv(item.desc,'en')}</textarea>
+            </div>
           </div>
-          <div><label class="block text-xs mb-1 text-gray-500">التقنيات المستخدمة <span class="text-gray-400 mr-1">(مفصولة بفاصلة)</span></label><input id="pj-tech" class="swal2-input m-0 w-full" value="${techVal}" dir="ltr"></div>
+
+          <!-- Technologies -->
+          <div>
+            <label class="block text-xs mb-1 text-gray-500">
+              التقنيات المستخدمة / Technologies
+              <span class="text-gray-400 mr-1">(مفصولة بفاصلة — e.g. SQL, HTML5, CSS3)</span>
+            </label>
+            <input id="pj-tech" class="swal2-input m-0 w-full" value="${techVal}" dir="ltr" placeholder="SQL, MySQL, HTML5, CSS3, JavaScript">
+          </div>
+
+          <!-- Challenges -->
           <div class="grid grid-cols-2 gap-2">
-            <div><label class="block text-xs mb-1 text-gray-500 text-right">التحديات (AR)</label><textarea id="pj-chal-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl">${challAr}</textarea></div>
-            <div><label class="block text-xs mb-1 text-gray-500 text-left">Challenges (EN)</label><textarea id="pj-chal-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr">${challEn}</textarea></div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">التحديات (AR)</label>
+              <textarea id="pj-chal-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl" placeholder="التحديات التي واجهتها...">${challAr}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Challenges (EN)</label>
+              <textarea id="pj-chal-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Challenges faced...">${challEn}</textarea>
+            </div>
           </div>
+
+          <!-- Results -->
           <div class="grid grid-cols-2 gap-2">
-            <div><label class="block text-xs mb-1 text-gray-500 text-right">النتائج والإنجازات (AR)</label><textarea id="pj-res-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl">${resultsAr}</textarea></div>
-            <div><label class="block text-xs mb-1 text-gray-500 text-left">Results & Achievements (EN)</label><textarea id="pj-res-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr">${resultsEn}</textarea></div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">النتائج والإنجازات (AR)</label>
+              <textarea id="pj-res-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl" placeholder="النتائج والإنجازات...">${resultsAr}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Results & Achievements (EN)</label>
+              <textarea id="pj-res-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Results achieved...">${resultsEn}</textarea>
+            </div>
           </div>
+
+          <!-- Links -->
           <div class="grid grid-cols-2 gap-2">
-            <div><label class="block text-xs mb-1 text-gray-500">رابط GitHub</label><input id="pj-link" class="swal2-input m-0 w-full" value="${item.link || ''}" dir="ltr"></div>
-            <div><label class="block text-xs mb-1 text-gray-500">رابط Live Demo</label><input id="pj-live" class="swal2-input m-0 w-full" value="${item.liveUrl || ''}" dir="ltr"></div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
+              <input id="pj-link" class="swal2-input m-0 w-full" value="${item.link || ''}" dir="ltr" placeholder="https://github.com/...">
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500">رابط Live Demo</label>
+              <input id="pj-live" class="swal2-input m-0 w-full" value="${item.liveUrl || ''}" dir="ltr" placeholder="https://...">
+            </div>
           </div>
+
         </div>`,
-        width: '760px', confirmButtonText: isEdit ? 'حفظ التغييرات' : 'إضافة المشروع', showCancelButton: true, cancelButtonText: 'إلغاء', focusConfirm: false,
+        width: '760px',
+        confirmButtonText: isEdit ? 'حفظ التغييرات' : 'إضافة المشروع',
+        showCancelButton: true,
+        cancelButtonText: 'إلغاء',
+        focusConfirm: false,
         preConfirm: () => {
             const titleAr = document.getElementById('pj-title-ar')?.value.trim();
             const titleEn = document.getElementById('pj-title-en')?.value.trim();
-            if (!titleAr && !titleEn) { Swal.showValidationMessage(currentLang === 'ar' ? 'يرجى إدخال عنوان المشروع' : 'Please enter a project title'); return false; }
+            if (!titleAr && !titleEn) {
+                Swal.showValidationMessage(currentLang === 'ar' ? 'يرجى إدخال عنوان المشروع' : 'Please enter a project title');
+                return false;
+            }
             const rawTech = document.getElementById('pj-tech')?.value || '';
+            const techs   = rawTech.split(',').map(t => t.trim()).filter(Boolean);
             return {
-                title: { ar: titleAr || titleEn, en: titleEn || titleAr },
-                desc: { ar: document.getElementById('pj-desc-ar')?.value.trim() || '', en: document.getElementById('pj-desc-en')?.value.trim() || '' },
-                technologies: rawTech.split(',').map(t => t.trim()).filter(Boolean),
+                title: {
+                    ar: titleAr || titleEn,
+                    en: titleEn || titleAr
+                },
+                desc: {
+                    ar: document.getElementById('pj-desc-ar')?.value.trim() || '',
+                    en: document.getElementById('pj-desc-en')?.value.trim() || ''
+                },
+                technologies: techs,
                 link:    document.getElementById('pj-link')?.value.trim() || '#',
                 liveUrl: document.getElementById('pj-live')?.value.trim() || '',
                 details: {
-                    challenges: { ar: document.getElementById('pj-chal-ar')?.value.trim() || '', en: document.getElementById('pj-chal-en')?.value.trim() || '' },
-                    results: { ar: document.getElementById('pj-res-ar')?.value.trim() || '', en: document.getElementById('pj-res-en')?.value.trim() || '' }
+                    challenges: {
+                        ar: document.getElementById('pj-chal-ar')?.value.trim() || '',
+                        en: document.getElementById('pj-chal-en')?.value.trim() || ''
+                    },
+                    results: {
+                        ar: document.getElementById('pj-res-ar')?.value.trim() || '',
+                        en: document.getElementById('pj-res-en')?.value.trim() || ''
+                    }
                 }
             };
         }
@@ -1182,12 +1185,14 @@ async function manageProjectItem(index = null) {
 
     if (value) {
         if (!appData.projects) appData.projects = [];
-        if (isEdit) appData.projects[index] = value; else appData.projects.push(value);
+        if (isEdit) appData.projects[index] = value;
+        else        appData.projects.push(value);
         renderAll();
         showToast(isEdit ? 'تم تعديل المشروع ✅' : 'تمت إضافة المشروع ✅', 'success');
     }
 }
 
+// ── Profile editor ─────────────────────────────────────────────────────────
 async function manageProfile() {
     if (!isAdmin) return;
     const p = appData.profile || {};
@@ -1197,29 +1202,78 @@ async function manageProfile() {
     const { value } = await Swal.fire({
         title: currentLang === 'ar' ? 'تعديل الملف الشخصي' : 'Edit Profile',
         html: `<div class="text-right space-y-3" dir="rtl">
+
           <div class="grid grid-cols-2 gap-2">
-            <div><label class="block text-xs mb-1 text-gray-500 text-right">الاسم (AR)</label><input id="pf-name-ar" class="swal2-input m-0 w-full text-right" value="${vb('name','ar')}" dir="rtl"></div>
-            <div><label class="block text-xs mb-1 text-gray-500 text-left">Name (EN)</label><input id="pf-name-en" class="swal2-input m-0 w-full text-left" value="${vb('name','en')}" dir="ltr"></div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">الاسم (AR)</label>
+              <input id="pf-name-ar" class="swal2-input m-0 w-full text-right" value="${vb('name','ar')}" dir="rtl">
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Name (EN)</label>
+              <input id="pf-name-en" class="swal2-input m-0 w-full text-left" value="${vb('name','en')}" dir="ltr">
+            </div>
           </div>
+
           <div class="grid grid-cols-2 gap-2">
-            <div><label class="block text-xs mb-1 text-gray-500 text-right">المسمى الوظيفي (AR)</label><input id="pf-title-ar" class="swal2-input m-0 w-full text-right" value="${vb('title','ar')}" dir="rtl"></div>
-            <div><label class="block text-xs mb-1 text-gray-500 text-left">Title (EN)</label><input id="pf-title-en" class="swal2-input m-0 w-full text-left" value="${vb('title','en')}" dir="ltr"></div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">المسمى الوظيفي (AR)</label>
+              <input id="pf-title-ar" class="swal2-input m-0 w-full text-right" value="${vb('title','ar')}" dir="rtl">
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Title (EN)</label>
+              <input id="pf-title-en" class="swal2-input m-0 w-full text-left" value="${vb('title','en')}" dir="ltr">
+            </div>
           </div>
+
           <div class="grid grid-cols-2 gap-2">
-            <div><label class="block text-xs mb-1 text-gray-500 text-right">النبذة (AR)</label><textarea id="pf-summary-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl">${vb('summary','ar')}</textarea></div>
-            <div><label class="block text-xs mb-1 text-gray-500 text-left">Summary (EN)</label><textarea id="pf-summary-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr">${vb('summary','en')}</textarea></div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">النبذة (AR)</label>
+              <textarea id="pf-summary-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl">${vb('summary','ar')}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Summary (EN)</label>
+              <textarea id="pf-summary-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr">${vb('summary','en')}</textarea>
+            </div>
           </div>
+
           <div class="grid grid-cols-2 gap-2">
-            <div><label class="block text-xs mb-1 text-gray-500 text-right">الموقع (AR)</label><input id="pf-location-ar" class="swal2-input m-0 w-full text-right" value="${vb('location','ar')}" dir="rtl"></div>
-            <div><label class="block text-xs mb-1 text-gray-500 text-left">Location (EN)</label><input id="pf-location-en" class="swal2-input m-0 w-full text-left" value="${vb('location','en')}" dir="ltr"></div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-right">الموقع (AR)</label>
+              <input id="pf-location-ar" class="swal2-input m-0 w-full text-right" value="${vb('location','ar')}" dir="rtl">
+            </div>
+            <div>
+              <label class="block text-xs mb-1 text-gray-500 text-left">Location (EN)</label>
+              <input id="pf-location-en" class="swal2-input m-0 w-full text-left" value="${vb('location','en')}" dir="ltr">
+            </div>
           </div>
-          <div><label class="block text-xs mb-1 text-gray-500">البريد الإلكتروني / Email</label><input id="pf-email" class="swal2-input m-0 w-full" value="${v('email')}" dir="ltr" type="email"></div>
-          <div><label class="block text-xs mb-1 text-gray-500">رقم الجوال / Phone</label><input id="pf-phone" class="swal2-input m-0 w-full" value="${v('phone')}" dir="ltr"></div>
-          <div><label class="block text-xs mb-1 text-gray-500">رابط LinkedIn</label><input id="pf-linkedin" class="swal2-input m-0 w-full" value="${v('linkedin')}" dir="ltr"></div>
-          <div><label class="block text-xs mb-1 text-gray-500">رابط GitHub</label><input id="pf-github" class="swal2-input m-0 w-full" value="${v('github')}" dir="ltr"></div>
-          <div><label class="block text-xs mb-1 text-gray-500">رابط السيرة الذاتية (PDF path)</label><input id="pf-cv" class="swal2-input m-0 w-full" value="${v('cv')}" dir="ltr"></div>
+
+          <div>
+            <label class="block text-xs mb-1 text-gray-500">البريد الإلكتروني / Email</label>
+            <input id="pf-email" class="swal2-input m-0 w-full" value="${v('email')}" dir="ltr" type="email">
+          </div>
+          <div>
+            <label class="block text-xs mb-1 text-gray-500">رقم الجوال / Phone</label>
+            <input id="pf-phone" class="swal2-input m-0 w-full" value="${v('phone')}" dir="ltr">
+          </div>
+          <div>
+            <label class="block text-xs mb-1 text-gray-500">رابط LinkedIn</label>
+            <input id="pf-linkedin" class="swal2-input m-0 w-full" value="${v('linkedin')}" dir="ltr" placeholder="https://linkedin.com/in/...">
+          </div>
+          <div>
+            <label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
+            <input id="pf-github" class="swal2-input m-0 w-full" value="${v('github')}" dir="ltr" placeholder="https://github.com/...">
+          </div>
+          <div>
+            <label class="block text-xs mb-1 text-gray-500">رابط السيرة الذاتية (PDF path)</label>
+            <input id="pf-cv" class="swal2-input m-0 w-full" value="${v('cv')}" dir="ltr" placeholder="Osama_Alharbi_IT_CV.pdf">
+          </div>
+
         </div>`,
-        width: '740px', confirmButtonText: 'حفظ التغييرات', showCancelButton: true, cancelButtonText: 'إلغاء', focusConfirm: false,
+        width: '740px',
+        confirmButtonText: 'حفظ التغييرات',
+        showCancelButton: true,
+        cancelButtonText: 'إلغاء',
+        focusConfirm: false,
         preConfirm: () => ({
             name:     { ar: document.getElementById('pf-name-ar').value,     en: document.getElementById('pf-name-en').value },
             title:    { ar: document.getElementById('pf-title-ar').value,    en: document.getElementById('pf-title-en').value },
@@ -1230,6 +1284,7 @@ async function manageProfile() {
             linkedin: document.getElementById('pf-linkedin').value,
             github:   document.getElementById('pf-github').value,
             cv:       document.getElementById('pf-cv').value,
+            // preserve unchanged fields
             image:       appData.profile?.image || '',
             nationality: appData.profile?.nationality || { ar: 'سعودي', en: 'Saudi' }
         })
@@ -1246,12 +1301,72 @@ function deleteItem(type, index) {
     if (!isAdmin) return;
     Swal.fire({
         title: 'هل أنت متأكد؟', text: 'لن تتمكن من التراجع!', icon: 'warning',
-        showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'نعم، احذف', cancelButtonText: 'تراجع'
+        showCancelButton: true, confirmButtonColor: '#d33',
+        confirmButtonText: 'نعم، احذف', cancelButtonText: 'تراجع'
     }).then(result => {
         if (result.isConfirmed) { appData[type].splice(index, 1); renderAll(); showToast('تم الحذف', 'success'); }
     });
 }
 
+// =====================================================
+// 20. DRAG & DROP (Sortable)
+// =====================================================
+function reorderSection(type, oldIdx, newIdx) {
+    const moved = appData[type].splice(oldIdx, 1)[0];
+    appData[type].splice(newIdx, 0, moved);
+    renderAll();
+}
+
+function reorderSkills(tab, oldFilteredIdx, newFilteredIdx) {
+    const all      = appData.skills || [];
+    const filtered = all.filter(s => s.category === tab);
+    const moved    = filtered[oldFilteredIdx];
+    const target   = filtered[newFilteredIdx];
+    const realOld  = all.indexOf(moved);
+    const realNew  = all.indexOf(target);
+    if (realOld === -1 || realNew === -1) return;
+    all.splice(realOld, 1);
+    all.splice(realNew > realOld ? realNew - 1 : realNew, 0, moved);
+    renderAll();
+}
+
+function initSortable() {
+    ['experience','education','volunteer','certificates','workshops','languages'].forEach(type => {
+        const el = document.getElementById(`${type}-container`);
+        if (!el) return;
+        new Sortable(el, {
+            animation: 150, handle: '.drag-handle', ghostClass: 'opacity-40',
+            onEnd(evt) { reorderSection(type, evt.oldIndex, evt.newIndex); }
+        });
+    });
+
+    // Projects: sortable on full array (filter is visual only)
+    const projEl = document.getElementById('projects-container');
+    if (projEl) {
+        new Sortable(projEl, {
+            animation: 150, handle: '.drag-handle', ghostClass: 'opacity-40',
+            onEnd(evt) {
+                // Get real indices from data-index attributes
+                const items  = [...projEl.querySelectorAll('.sortable-item')];
+                const oldReal = parseInt(items[evt.oldIndex]?.dataset.index ?? evt.oldIndex);
+                const newReal = parseInt(items[evt.newIndex]?.dataset.index ?? evt.newIndex);
+                reorderSection('projects', oldReal, newReal);
+            }
+        });
+    }
+
+    const skillsEl = document.getElementById('skills-container');
+    if (skillsEl) {
+        new Sortable(skillsEl, {
+            animation: 150, handle: '.drag-handle', ghostClass: 'opacity-40',
+            onEnd(evt) { reorderSkills(activeSkillTab, evt.oldIndex, evt.newIndex); }
+        });
+    }
+}
+
+// =====================================================
+// 21. INLINE EDITING
+// =====================================================
 function updateText(key, value) {
     const el = document.querySelector(`[data-path="${key}"]`);
     if (!el) return;
@@ -1279,69 +1394,8 @@ async function editImage(key) {
     if (value) { setDeepValue(appData, key, value); renderAll(); }
 }
 
-function setDeepValue(obj, path, value) {
-    const keys = path.split('.');
-    let cur = obj;
-    for (let i = 0; i < keys.length - 1; i++) cur = cur[keys[i]];
-    cur[keys[keys.length - 1]] = value;
-}
-
-// DRAG & DROP (Sortable)
-function reorderSection(type, oldIdx, newIdx) {
-    const moved = appData[type].splice(oldIdx, 1)[0];
-    appData[type].splice(newIdx, 0, moved);
-    renderAll();
-}
-
-function reorderSkills(tab, oldFilteredIdx, newFilteredIdx) {
-    const all      = appData.skills || [];
-    const filtered = all.filter(s => s.category === tab);
-    const moved    = filtered[oldFilteredIdx];
-    const target   = filtered[newFilteredIdx];
-    const realOld  = all.indexOf(moved);
-    const realNew  = all.indexOf(target);
-    if (realOld === -1 || realNew === -1) return;
-    all.splice(realOld, 1);
-    all.splice(realNew > realOld ? realNew - 1 : realNew, 0, moved);
-    renderAll();
-}
-
-function initSortable() {
-    if (typeof Sortable === 'undefined') return;
-    
-    ['experience','education','volunteer','certificates','workshops','languages'].forEach(type => {
-        const el = document.getElementById(`${type}-container`);
-        if (!el) return;
-        new Sortable(el, {
-            animation: 150, handle: '.drag-handle', ghostClass: 'opacity-40',
-            onEnd(evt) { reorderSection(type, evt.oldIndex, evt.newIndex); }
-        });
-    });
-
-    const projEl = document.getElementById('projects-container');
-    if (projEl) {
-        new Sortable(projEl, {
-            animation: 150, handle: '.drag-handle', ghostClass: 'opacity-40',
-            onEnd(evt) {
-                const items  = [...projEl.querySelectorAll('.sortable-item')];
-                const oldReal = parseInt(items[evt.oldIndex]?.dataset.index ?? evt.oldIndex);
-                const newReal = parseInt(items[evt.newIndex]?.dataset.index ?? evt.newIndex);
-                reorderSection('projects', oldReal, newReal);
-            }
-        });
-    }
-
-    const skillsEl = document.getElementById('skills-container');
-    if (skillsEl) {
-        new Sortable(skillsEl, {
-            animation: 150, handle: '.drag-handle', ghostClass: 'opacity-40',
-            onEnd(evt) { reorderSkills(activeSkillTab, evt.oldIndex, evt.newIndex); }
-        });
-    }
-}
-
 // =====================================================
-// 16. AUTH & GITHUB SYNC
+// 22. AUTH & GITHUB SYNC
 // =====================================================
 function checkSession() {
     const loginTime = localStorage.getItem('login_time');
@@ -1355,9 +1409,7 @@ function checkSession() {
 }
 
 function setupSecretTrigger() {
-    const trigger = document.getElementById('secret-trigger');
-    if(!trigger) return;
-    trigger.addEventListener('click', () => {
+    document.getElementById('secret-trigger').addEventListener('click', () => {
         clickCount++;
         if (clickCount >= 3) { document.getElementById('admin-modal').classList.remove('hidden'); clickCount = 0; }
     });
@@ -1367,12 +1419,8 @@ function authenticateAndEdit() {
     const repo  = document.getElementById('repo-input').value.trim();
     const token = document.getElementById('token-input').value.trim();
     if (!repo || !token) return showToast('يرجى إدخال البيانات كاملة', 'error');
-    
-    // تشفير Token محلياً وتتبع وقت الجلسة (أمان إضافي)
-    localStorage.setItem('saved_repo', repo); 
-    localStorage.setItem('saved_token', token);
+    localStorage.setItem('saved_repo', repo); localStorage.setItem('saved_token', token);
     localStorage.setItem('login_time', Date.now());
-    
     githubInfo.repo = repo; githubInfo.token = token;
     document.getElementById('admin-modal').classList.add('hidden');
     enableAdminMode();
@@ -1382,8 +1430,7 @@ function authenticateAndEdit() {
 function enableAdminMode() {
     isAdmin = true;
     document.body.classList.add('admin-mode');
-    const toolbar = document.getElementById('admin-toolbar');
-    if(toolbar) toolbar.classList.remove('hidden');
+    document.getElementById('admin-toolbar').classList.remove('hidden');
     if (dataLoaded) renderAll();
     initSkillsObserver();
 }
@@ -1407,7 +1454,7 @@ async function saveToGitHub() {
         const putRes   = await fetch(url, {
             method: 'PUT',
             headers: { Authorization: `token ${githubInfo.token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: 'Update via Admin Panel v5.0', content, sha: fileData.sha })
+            body: JSON.stringify({ message: 'Update via Admin Panel', content, sha: fileData.sha })
         });
         if (!putRes.ok) throw new Error('فشل الحفظ في GitHub');
         showToast('تم الحفظ في GitHub ✅', 'success');
@@ -1423,7 +1470,7 @@ function restoreBackup() {
 }
 
 // =====================================================
-// 17. UTILITIES
+// 23. UTILITIES
 // =====================================================
 function setSmartGreeting() {
     const hour = new Date().getHours();
@@ -1448,6 +1495,73 @@ function typeWriter(text, elementId) {
     }, 90);
 }
 
+function initTheme() {
+    const btn = document.getElementById('theme-btn');
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    }
+    btn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        initParticles();
+    });
+}
+
+function initParticles(party = false) {
+    const isDark = document.documentElement.classList.contains('dark');
+    particlesJS('particles-js', {
+        particles: {
+            number:      { value: party ? 100 : 40 },
+            color:       { value: party ? ['#f00','#0f0','#00f'] : (isDark ? '#ffffff' : '#3b82f6') },
+            opacity:     { value: 0.3 },
+            size:        { value: 3 },
+            line_linked: { enable: true, distance: 150, color: isDark ? '#ffffff' : '#3b82f6', opacity: 0.1, width: 1 },
+            move:        { enable: true, speed: party ? 10 : 1 }
+        },
+        interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'grab' } } },
+        retina_detect: true
+    });
+}
+
+function setupCmdPalette() {
+    document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('cmd-palette').classList.remove('hidden');
+            document.getElementById('cmd-input').focus();
+            renderCmdItems();
+        }
+        if (e.key === 'Escape') document.getElementById('cmd-palette').classList.add('hidden');
+    });
+}
+
+function renderCmdItems() {
+    const items = [
+        { icon: 'fa-home',      text: 'الرئيسية / Home',        action: () => showPage('home') },
+        { icon: 'fa-id-card',   text: 'السيرة الذاتية / Resume', action: () => showPage('resume') },
+        { icon: 'fa-briefcase', text: 'الأعمال / Portfolio',     action: () => showPage('portfolio') },
+        { icon: 'fa-envelope',  text: 'تواصل / Contact',         action: () => showPage('contact') },
+        { icon: 'fa-file-pdf',  text: 'تحميل PDF',               action: generatePDF },
+        { icon: 'fa-print',     text: 'طباعة / Print',           action: triggerPrint },
+        { icon: 'fa-share-alt', text: 'مشاركة / Share',          action: shareProfile },
+        { icon: 'fa-language',  text: 'تبديل اللغة / Language',  action: toggleLanguage },
+        { icon: 'fa-moon',      text: 'الوضع الليلي / Theme',    action: () => document.getElementById('theme-btn').click() }
+    ];
+    document.getElementById('cmd-list').innerHTML = items.map(item => `
+        <div class="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer flex gap-3 items-center rounded transition"
+             onclick="document.getElementById('cmd-palette').classList.add('hidden'); (${item.action})()">
+            <i class="fas ${item.icon} text-primary w-4"></i>
+            <span class="font-bold dark:text-white text-sm">${item.text}</span>
+        </div>
+    `).join('');
+}
+
+function filterCmd(val) {
+    document.querySelectorAll('#cmd-list > div').forEach(el => {
+        el.style.display = el.textContent.toLowerCase().includes(val.toLowerCase()) ? 'flex' : 'none';
+    });
+}
+
 function setupKonamiCode() {
     const code = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
     let idx = 0;
@@ -1457,8 +1571,14 @@ function setupKonamiCode() {
     });
 }
 
+function setDeepValue(obj, path, value) {
+    const keys = path.split('.');
+    let cur = obj;
+    for (let i = 0; i < keys.length - 1; i++) cur = cur[keys[i]];
+    cur[keys[keys.length - 1]] = value;
+}
+
 function showToast(msg, type = 'info') {
-    if (typeof Toastify === 'undefined') { alert(msg); return; }
     const colors = { success: '#10B981', error: '#EF4444', info: '#3b82f6' };
     Toastify({ text: msg, duration: 3500, gravity: 'top', position: 'center', style: { background: colors[type] || colors.info } }).showToast();
 }
