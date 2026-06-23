@@ -11,10 +11,12 @@ collections:
   - name: "content"
     label: "المحتوى"
     files:
+
       - name: "cv_data"
         label: "بيانات السيرة الذاتية"
         file: "data.json"
         fields:
+
           # ─── الملف الشخصي ───────────────────────────────
           - label: "الملف الشخصي"
             name: "profile"
@@ -61,22 +63,6 @@ collections:
                 fields:
                   - { label: "عربي",    name: "ar", widget: "string" }
                   - { label: "English", name: "en", widget: "string" }
-
-          # ─── روابط التواصل الاجتماعي ─────────────────────
-          - label: "روابط التواصل الاجتماعي"
-            name: "social"
-            widget: "object"
-            fields:
-              - { label: "Twitter", name: "twitter", widget: "string", required: false }
-              - { label: "YouTube", name: "youtube", widget: "string", required: false }
-
-          # ─── الإعدادات ────────────────────────────────────
-          - label: "الإعدادات"
-            name: "settings"
-            widget: "object"
-            fields:
-              - { label: "حجم الخط", name: "fontSize", widget: "select", options: ["small", "medium", "large"], default: "medium" }
-              - { label: "الوضع الافتراضي", name: "defaultTheme", widget: "select", options: ["light", "dark", "system"], default: "system" }
 
           # ─── التعليم ────────────────────────────────────
           - label: "التعليم"
@@ -176,8 +162,6 @@ collections:
             fields:
               - { label: "عربي",    name: "ar", widget: "string" }
               - { label: "English", name: "en", widget: "string" }
-              - { label: "المستوى (%)", name: "level", widget: "number", default: 80 }
-              - { label: "النوع", name: "category", widget: "select", options: ["hard", "soft"], default: "hard" }
 
           # ─── المشاريع ────────────────────────────────────
           - label: "المشاريع"
@@ -196,25 +180,7 @@ collections:
                 fields:
                   - { label: "عربي",    name: "ar", widget: "text" }
                   - { label: "English", name: "en", widget: "text" }
-              - { label: "التقنيات", name: "technologies", widget: "list", field: { label: "تقنية", name: "tech", widget: "string" } }
-              - label: "التفاصيل"
-                name: "details"
-                widget: "object"
-                fields:
-                  - label: "التحديات"
-                    name: "challenges"
-                    widget: "object"
-                    fields:
-                      - { label: "عربي",    name: "ar", widget: "text" }
-                      - { label: "English", name: "en", widget: "text" }
-                  - label: "النتائج"
-                    name: "results"
-                    widget: "object"
-                    fields:
-                      - { label: "عربي",    name: "ar", widget: "text" }
-                      - { label: "English", name: "en", widget: "text" }
-              - { label: "رابط GitHub", name: "link", widget: "string", required: false }
-              - { label: "رابط Live Demo", name: "liveUrl", widget: "string", required: false }
+              - { label: "رابط المشروع", name: "link", widget: "string", required: false }
 
           # ─── الشهادات ────────────────────────────────────
           - label: "الشهادات المهنية"
