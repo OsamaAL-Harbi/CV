@@ -50,6 +50,24 @@
   "experience": [
     {
       "role": {
+        "ar": "أخصائي تحول رقمي",
+        "en": ""
+      },
+      "company": {
+        "ar": "",
+        "en": ""
+      },
+      "period": {
+        "ar": "يناير 2026 - حاضر",
+        "en": "January 2026 – Present"
+      },
+      "description": {
+        "ar": "",
+        "en": ""
+      }
+    },
+    {
+      "role": {
         "ar": "متدرب تحول رقمي",
         "en": "Digital Transformation Trainee"
       },
@@ -212,6 +230,18 @@
     }
   ],
   "certificates": [
+    {
+      "name": {
+        "ar": "التحول الرقمي والهوية الرقمية",
+        "en": "Digital Transformation and Digital Identity"
+      },
+      "issuer": {
+        "ar": "أكاديمية طويق",
+        "en": "Tuwaiq Academy "
+      },
+      "credential": "",
+      "date": "April 2026"
+    },
     {
       "name": {
         "ar": "أمن الشبكات والاتصالات",
