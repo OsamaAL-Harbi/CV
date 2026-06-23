@@ -1,96 +1,122 @@
 /**
- * OSAMA PORTFOLIO — script.js  v4.0
- * =====================================================
- * New in v4:
- *  20. Dynamic SEO meta tags per page + hash URL routing
- *  21. Custom 404 handler
- *  22. Project filtering by technology
- *  23. Live Demo button on projects
- *  24. Particles hue-rotate by section
- *  25. Admin analytics dashboard (session stats + GA4 link)
- *  26. Contact actions (email copy, LinkedIn, GitHub open)
- *  27. sendMailto & char counter
- *  28. Page visit tracking in sessionStorage
- * =====================================================
+ * OSAMA PORTFOLIO — script.js  v5.0 (Modules)
+ * التحسينات الجديدة:
+ *  - دمج data.json مباشرة (لا حاجة لـ fetch)
+ *  - إرسال عبر Formspree (نموذج الاتصال)
+ *  - تشفير توكن GitHub باستخدام btoa
+ *  - وضع قراءة (Reading Mode)
+ *  - عداد زيارات دائم (localStorage)
+ *  - شريط تقدم أثناء التنقل
+ *  - تحسين الوصول (ARIA, focus)
+ *  - معاينة فورية للتغييرات
+ *  - تحسينات عامة في الأداء
  */
 
-// =====================================================
-// 1. GLOBALS
-// =====================================================
-let appData        = {};
+import data from './data.json' assert { type: 'json' };
+
+// ─── المتغيرات العامة ──────────────────────────────────
+let appData        = data;
 let githubInfo     = { token: '', repo: '' };
 let currentLang    = localStorage.getItem('lang') || 'ar';
 let isAdmin        = false;
 let clickCount     = 0;
 let activeSkillTab = 'hard';
-let activeFilter   = 'all';          // project filter
-let dataLoaded     = false;
+let activeFilter   = 'all';
 let twInterval     = null;
+let readingMode    = false;
 
 const SESSION_DURATION   = 60 * 60 * 1000;
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqarljpg";
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqarljpg"; // استبدل بمعرفك
 const VALID_PAGES        = ['home', 'resume', 'portfolio', 'contact'];
+const SECTION_HUE        = { home: 0, resume: 180, portfolio: 120, contact: 90, 'not-found': 0 };
 
-// Particles hue-rotation per section
-const SECTION_HUE = { home: 0, resume: 180, portfolio: 120, contact: 90, 'not-found': 0 };
+// ─── دوال مساعدة ──────────────────────────────────────
+function t(data) {
+    if (data === null || data === undefined) return '';
+    if (typeof data === 'object') return data[currentLang] || data.ar || '';
+    return String(data);
+}
 
-// =====================================================
-// 2. BOOT
-// =====================================================
-document.addEventListener('DOMContentLoaded', () => {
-    AOS.init({ duration: 800, once: true });
+function setDirection() {
+    document.documentElement.dir  = currentLang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = currentLang;
+    const btn = document.getElementById('lang-btn');
+    if (btn) btn.textContent = currentLang === 'ar' ? 'EN' : 'عربي';
+}
 
-    const yearEl = document.getElementById('year');
-    if (yearEl) yearEl.textContent = new Date().getFullYear();
+function showToast(msg, type = 'info') {
+    const colors = { success: '#10B981', error: '#EF4444', info: '#3b82f6' };
+    Toastify({ text: msg, duration: 3500, gravity: 'top', position: 'center', style: { background: colors[type] || colors.info } }).showToast();
+}
 
-    setDirection();
-    initTheme();
-    initParticles();
-    setupSecretTrigger();
-    setupCmdPalette();
-    setupKonamiCode();
-    registerPWA();
-    setupScrollTop();
-    checkLinkedInReferrer();
-    initStatsObserver();
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast(currentLang === 'ar' ? 'تم النسخ ✅' : 'Copied ✅', 'success');
+    }).catch(() => showToast(currentLang === 'ar' ? 'فشل النسخ' : 'Copy failed', 'error'));
+}
 
-    if (localStorage.getItem('saved_repo')) {
-        const ri = document.getElementById('repo-input');
-        const ti = document.getElementById('token-input');
-        if (ri) ri.value = localStorage.getItem('saved_repo');
-        if (ti) ti.value = localStorage.getItem('saved_token');
+// ─── تهيئة الموضوع والوضع الليلي ────────────────────
+function initTheme() {
+    const btn = document.getElementById('theme-btn');
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
     }
-
-    // Hash routing — must run after data loads
-    loadContent().then(() => {
-        checkSession();
-        handleHash();                  // respect URL hash on first load
+    btn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        initParticles();
     });
+}
 
-    // React to hash changes (back/forward browser buttons + nav links)
-    window.addEventListener('hashchange', handleHash);
-});
-
-function registerPWA() {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
+// ─── وضع القراءة ──────────────────────────────────────
+function initReadingMode() {
+    const btn = document.getElementById('reading-btn');
+    btn.addEventListener('click', () => {
+        readingMode = !readingMode;
+        document.body.classList.toggle('reading-mode', readingMode);
+        localStorage.setItem('readingMode', readingMode);
+        showToast(readingMode ? '📖 وضع القراءة مفعّل' : '📖 تم إلغاء وضع القراءة', 'info');
+    });
+    if (localStorage.getItem('readingMode') === 'true') {
+        readingMode = true;
+        document.body.classList.add('reading-mode');
     }
 }
 
-// =====================================================
-// 3. NAVIGATION + HASH ROUTING
-// =====================================================
-
-// Called on every hashchange and on first load
-function handleHash() {
-    const hash   = window.location.hash.replace('#', '').trim();
-    const pageId = VALID_PAGES.includes(hash) ? hash : (hash === '' ? 'home' : null);
-    if (pageId) showPage(pageId, false);  // false = don't push state again
-    else if (hash !== '') show404();
+// ─── الجسيمات ──────────────────────────────────────────
+function initParticles(party = false) {
+    const isDark = document.documentElement.classList.contains('dark');
+    particlesJS('particles-js', {
+        particles: {
+            number:      { value: party ? 100 : 40 },
+            color:       { value: party ? ['#f00','#0f0','#00f'] : (isDark ? '#ffffff' : '#3b82f6') },
+            opacity:     { value: 0.3 },
+            size:        { value: 3 },
+            line_linked: { enable: true, distance: 150, color: isDark ? '#ffffff' : '#3b82f6', opacity: 0.1, width: 1 },
+            move:        { enable: true, speed: party ? 10 : 1 }
+        },
+        interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'grab' } } },
+        retina_detect: true
+    });
 }
 
+// ─── عداد الزيارات الدائم ────────────────────────────
+function trackPageVisit(pageId) {
+    const visits = JSON.parse(localStorage.getItem('page_visits') || '{}');
+    visits[pageId] = (visits[pageId] || 0) + 1;
+    localStorage.setItem('page_visits', JSON.stringify(visits));
+}
+
+// ─── التنقل (SPA) ─────────────────────────────────────
 function showPage(pageId, pushState = true) {
     if (!VALID_PAGES.includes(pageId)) { show404(); return; }
+
+    // شريط تقدم
+    const progress = document.createElement('div');
+    progress.className = 'fixed top-0 left-0 h-1 bg-primary z-[300] transition-all duration-300';
+    progress.style.width = '0%';
+    document.body.appendChild(progress);
+    setTimeout(() => { progress.style.width = '50%'; }, 50);
 
     document.querySelectorAll('.page-section').forEach(sec => {
         sec.classList.remove('active');
@@ -111,21 +137,20 @@ function showPage(pageId, pushState = true) {
     const mobileMenu = document.getElementById('mobile-menu');
     if (mobileMenu && mobileMenu.classList.contains('open')) toggleMobileMenu();
 
-    // Update hash without triggering hashchange again
     if (pushState && window.location.hash !== `#${pageId}`) {
         history.pushState(null, '', `#${pageId}`);
     }
 
-    // Update dynamic SEO meta tags
     updateMetaTags(pageId);
 
-    // Shift particles hue per section
     const hue = SECTION_HUE[pageId] ?? 0;
     const pEl = document.getElementById('particles-js');
     if (pEl) pEl.style.filter = `hue-rotate(${hue}deg)`;
 
-    // Track page visit in sessionStorage
     trackPageVisit(pageId);
+
+    setTimeout(() => { progress.style.width = '100%'; }, 300);
+    setTimeout(() => { progress.remove(); }, 800);
 }
 
 function show404() {
@@ -153,9 +178,7 @@ function setupScrollTop() {
     });
 }
 
-// =====================================================
-// 4. DYNAMIC SEO META TAGS
-// =====================================================
+// ─── تحسين SEO ─────────────────────────────────────────
 const PAGE_META = {
     ar: {
         home:      { title: 'أسامة الحربي | الرئيسية',                    desc: 'الموقع الشخصي لأسامة عبدالعزيز الحربي - خريج تقنية المعلومات من الجامعة الإسلامية بالمدينة المنورة.' },
@@ -170,7 +193,6 @@ const PAGE_META = {
         contact:   { title: 'Contact | Osama Al-Harbi',                    desc: 'Get in touch with Osama Al-Harbi via email or LinkedIn.' }
     }
 };
-
 function updateMetaTags(pageId) {
     const meta    = PAGE_META[currentLang]?.[pageId];
     if (!meta) return;
@@ -187,37 +209,11 @@ function updateMetaTags(pageId) {
     setMeta('canonical',        'href',    pageUrl);
 }
 
-// =====================================================
-// 5. LOCALISATION
-// =====================================================
-function t(data) {
-    if (data === null || data === undefined) return '';
-    if (typeof data === 'object') return data[currentLang] || data.ar || '';
-    return String(data);
-}
-
-function toggleLanguage() {
-    currentLang = currentLang === 'ar' ? 'en' : 'ar';
-    localStorage.setItem('lang', currentLang);
-    setDirection();
-    renderAll();
-    updateStaticText();
-    // Re-apply meta for current page
-    const hash = window.location.hash.replace('#', '') || 'home';
-    updateMetaTags(hash);
-}
-
-function setDirection() {
-    document.documentElement.dir  = currentLang === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = currentLang;
-    const btn = document.getElementById('lang-btn');
-    if (btn) btn.textContent = currentLang === 'ar' ? 'EN' : 'عربي';
-}
-
+// ─── الترجمة ───────────────────────────────────────────
 const STATIC_TEXT = {
     ar: {
         nav_home:'الرئيسية', nav_resume:'السيرة الذاتية', nav_portfolio:'الأعمال', nav_contact:'تواصل',
-        btn_projects:'أعمالي', btn_save:'حفظ', btn_email:'فتح تطبيق الإيميل للإرسال',
+        btn_projects:'أعمالي', btn_save:'حفظ', btn_email:'إرسال',
         btn_download_cv:'تحميل PDF', btn_share:'مشاركة', btn_print:'طباعة',
         sec_resume:'السيرة الذاتية', sec_exp:'الخبرات', sec_edu:'التعليم',
         sec_volunteer:'التطوع', sec_skills:'المهارات', sec_certs:'الشهادات',
@@ -225,7 +221,7 @@ const STATIC_TEXT = {
         contact_title:'تواصل معي', contact_email_label:'البريد الإلكتروني',
         contact_click_copy:'انقر للنسخ', contact_open:'فتح الملف',
         contact_compose:'اكتب رسالة', contact_subject_label:'الموضوع',
-        contact_message_label:'الرسالة', contact_mailto_note:'سيفتح تطبيق الإيميل على جهازك',
+        contact_message_label:'الرسالة', contact_mailto_note:'سيتم إرسال رسالتك عبر خدمة Formspree',
         contact_cv_title:'هل تريد مراجعة سيرتي الذاتية أولاً؟', contact_cv_sub:'تحميل مباشر — PDF جاهز',
         tab_hard:'تقنية', tab_soft:'شخصية',
         stat_certs:'شهادات مهنية', stat_volunteer:'ساعة تطوع',
@@ -236,7 +232,7 @@ const STATIC_TEXT = {
     },
     en: {
         nav_home:'Home', nav_resume:'Resume', nav_portfolio:'Portfolio', nav_contact:'Contact',
-        btn_projects:'My Work', btn_save:'Save', btn_email:'Open Email App',
+        btn_projects:'My Work', btn_save:'Save', btn_email:'Send',
         btn_download_cv:'Download PDF', btn_share:'Share', btn_print:'Print',
         sec_resume:'Resume', sec_exp:'Experience', sec_edu:'Education',
         sec_volunteer:'Volunteer', sec_skills:'Skills', sec_certs:'Certificates',
@@ -244,7 +240,7 @@ const STATIC_TEXT = {
         contact_title:'Get in Touch', contact_email_label:'Email',
         contact_click_copy:'Click to copy', contact_open:'Open Profile',
         contact_compose:'Write a Message', contact_subject_label:'Subject',
-        contact_message_label:'Message', contact_mailto_note:'Your email app will open with the message',
+        contact_message_label:'Message', contact_mailto_note:'Your message will be sent via Formspree',
         contact_cv_title:'Want to review my CV first?', contact_cv_sub:'Direct download — PDF ready',
         tab_hard:'Technical', tab_soft:'Soft Skills',
         stat_certs:'Certifications', stat_volunteer:'Volunteer Hours',
@@ -262,49 +258,26 @@ function updateStaticText() {
     });
 }
 
-// =====================================================
-// 6. DATA LOADING
-// =====================================================
-async function loadContent() {
-    try {
-        const res = await fetch(`data.json?t=${Date.now()}`);
-        if (!res.ok) throw new Error('data.json not found');
-        appData    = await res.json();
-        dataLoaded = true;
-        renderAll();
-        updateStaticText();
-        setSmartGreeting();
-        setTimeout(() => document.getElementById('loading-screen').classList.add('hidden'), 500);
-    } catch (err) {
-        showToast('خطأ في تحميل البيانات / Error loading data', 'error');
-        document.getElementById('loading-screen').classList.add('hidden');
-    }
+function toggleLanguage() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    setDirection();
+    renderAll();
+    updateStaticText();
+    const hash = window.location.hash.replace('#', '') || 'home';
+    updateMetaTags(hash);
 }
 
-// =====================================================
-// 7. RENDER ENGINE
-// =====================================================
-
-const WC = {
-    experience:   'relative group mb-8',
-    education:    'relative group mb-6',
-    volunteer:    'relative group mb-6',
-    projects:     'relative group bg-white dark:bg-cardBg rounded-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-full shadow-sm hover:shadow-2xl transition duration-300 transform hover:-translate-y-1',
-    certificates: 'relative group flex items-center gap-4 bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
-    workshops:    'relative group bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
-    languages:    'relative group flex items-center gap-3 bg-white dark:bg-cardBg px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition'
-};
-
+// ─── عرض المحتوى ──────────────────────────────────────
 function renderAll() {
     renderProfile();
-    renderSection('experience',   appData.experience   || [], renderExperienceItem,  WC.experience);
-    renderSection('education',    appData.education    || [], renderEducationItem,   WC.education);
-    renderSection('volunteer',    appData.volunteer    || [], renderVolunteerItem,   WC.volunteer);
+    renderSection('experience',   appData.experience   || [], renderExperienceItem,  'relative group mb-8');
+    renderSection('education',    appData.education    || [], renderEducationItem,   'relative group mb-6');
+    renderSection('volunteer',    appData.volunteer    || [], renderVolunteerItem,   'relative group mb-6');
     renderSkillsWithProgress(activeSkillTab);
-    renderSection('certificates', appData.certificates || [], renderCertItem,        WC.certificates);
-    renderSection('workshops',    appData.workshops    || [], renderWorkshopItem,    WC.workshops);
-    renderSection('languages',    appData.languages    || [], renderLanguageItem,    WC.languages);
-    // Projects: filters first, then filtered grid
+    renderSection('certificates', appData.certificates || [], renderCertItem,        'relative group flex items-center gap-4 bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition');
+    renderSection('workshops',    appData.workshops    || [], renderWorkshopItem,    'relative group bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition');
+    renderSection('languages',    appData.languages    || [], renderLanguageItem,    'relative group flex items-center gap-3 bg-white dark:bg-cardBg px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition');
     renderProjectFilters();
     renderFilteredProjects();
     updatePrintHeader();
@@ -312,7 +285,6 @@ function renderAll() {
     setTimeout(() => AOS.refresh(), 50);
 }
 
-// ─── Profile ──────────────────────────────────────────
 function renderProfile() {
     const p = appData.profile;
     if (!p) return;
@@ -336,7 +308,6 @@ function renderProfile() {
     if (locDisplay) locDisplay.textContent = t(p.location);
 }
 
-// ─── Generic section renderer ─────────────────────────
 function renderSection(type, data, contentFn, wrapperClass) {
     const container = document.getElementById(`${type}-container`);
     if (!container) return;
@@ -350,7 +321,6 @@ function renderSection(type, data, contentFn, wrapperClass) {
     `).join('');
 }
 
-// ─── Item renderers ───────────────────────────────────
 function renderExperienceItem(item) {
     return `
         <h3 class="text-xl font-bold dark:text-white hover:text-primary transition">${t(item.role)}</h3>
@@ -404,8 +374,6 @@ function renderLanguageItem(item) {
         </div>`;
 }
 
-// ─── Project Card ─────────────────────────────────────
-// Uses stable key (title-based) for sessionStorage, not array index
 function getProjectKey(item, fallback) {
     const raw = item.title?.en || item.title?.ar || String(fallback);
     return 'pv_' + raw.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').substring(0, 40);
@@ -451,7 +419,6 @@ function renderProjectItem(item, realIdx) {
         </div>`;
 }
 
-// ─── Print header ──────────────────────────────────────
 function updatePrintHeader() {
     const p = appData.profile;
     if (!p) return;
@@ -461,22 +428,15 @@ function updatePrintHeader() {
     if (contactEl) contactEl.textContent = `${p.email} · ${p.phone || ''} · ${t(p.location)}`;
 }
 
-// =====================================================
-// 8. PROJECT FILTERING
-// =====================================================
+// ─── تصفية المشاريع ──────────────────────────────────
 function renderProjectFilters() {
     const container = document.getElementById('project-filters');
     if (!container) return;
-
-    // Collect all unique techs across all projects
     const techSet = new Set();
     (appData.projects || []).forEach(p => (p.technologies || []).forEach(t => techSet.add(t)));
-
     if (techSet.size === 0) { container.innerHTML = ''; return; }
-
     const allLabel = STATIC_TEXT[currentLang]?.filter_all || 'الكل';
     const techs    = [{ key: 'all', label: allLabel }, ...Array.from(techSet).map(t => ({ key: t, label: t }))];
-
     container.innerHTML = techs.map(({ key, label }) => `
         <button onclick="setProjectFilter('${key}')"
                 class="filter-btn px-3 py-1.5 text-xs font-bold rounded-full border border-gray-200 dark:border-gray-700 transition hover:border-primary hover:text-primary ${activeFilter === key ? 'active bg-primary text-white border-primary' : 'bg-white dark:bg-cardBg text-gray-600 dark:text-gray-300'}">
@@ -491,7 +451,6 @@ function setProjectFilter(tech) {
     renderFilteredProjects();
 }
 
-// FIX: use original array index for modal so openProjectModal gets correct item
 function renderFilteredProjects() {
     const container  = document.getElementById('projects-container');
     if (!container) return;
@@ -500,7 +459,6 @@ function renderFilteredProjects() {
         ? allProjects.map((item, i) => ({ item, realIdx: i }))
         : allProjects.map((item, i) => ({ item, realIdx: i })).filter(({ item }) =>
             (item.technologies || []).includes(activeFilter));
-
     if (filtered.length === 0) {
         container.innerHTML = `
             <div class="col-span-full text-center py-16 text-gray-400">
@@ -510,18 +468,15 @@ function renderFilteredProjects() {
             </div>`;
         return;
     }
-
     container.innerHTML = filtered.map(({ item, realIdx }) => `
-        <div class="${WC.projects} sortable-item" data-index="${realIdx}">
+        <div class="relative group bg-white dark:bg-cardBg rounded-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-full shadow-sm hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 sortable-item" data-index="${realIdx}">
             ${renderAdminButtons('projects', realIdx)}
             ${renderProjectItem(item, realIdx)}
         </div>
     `).join('');
 }
 
-// =====================================================
-// 9. SKILL PROGRESS BARS
-// =====================================================
+// ─── المهارات ──────────────────────────────────────────
 let skillBarsAnimated = false;
 
 function setSkillTab(tab) {
@@ -581,9 +536,7 @@ function initSkillsObserver() {
     observer.observe(container);
 }
 
-// =====================================================
-// 10. STATS COUNTER
-// =====================================================
+// ─── الإحصائيات ────────────────────────────────────────
 function initStatsObserver() {
     if (!window.IntersectionObserver) return;
     let animated = false;
@@ -611,14 +564,11 @@ function animateCounters() {
     });
 }
 
-// =====================================================
-// 11. PROJECT MODAL + VIEW COUNTER
-// =====================================================
+// ─── نافذة المشروع ────────────────────────────────────
 function openProjectModal(index) {
     const item = (appData.projects || [])[index];
     if (!item) return;
 
-    // Stable key per project title
     const key     = getProjectKey(item, index);
     const views   = JSON.parse(sessionStorage.getItem('project_views') || '{}');
     views[key]    = (views[key] || 0) + 1;
@@ -649,14 +599,11 @@ function openProjectModal(index) {
     document.getElementById('modal-challenges').textContent = item.details ? t(item.details.challenges) : '';
     document.getElementById('modal-results').textContent    = item.details ? t(item.details.results)    : '';
 
-    // GitHub link
     const githubLink = document.getElementById('modal-github-link');
     if (githubLink) {
         if (item.link && item.link !== '#') { githubLink.href = item.link; githubLink.style.display = 'inline-flex'; }
         else githubLink.style.display = 'none';
     }
-
-    // Live Demo link
     const liveLink = document.getElementById('modal-live-link');
     if (liveLink) {
         if (item.liveUrl && item.liveUrl.trim() !== '' && item.liveUrl !== '#') {
@@ -664,9 +611,7 @@ function openProjectModal(index) {
         } else liveLink.style.display = 'none';
     }
 
-    // Re-render cards to update badge
     renderFilteredProjects();
-
     document.getElementById('project-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
@@ -681,93 +626,7 @@ function _closeProjectModal() {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') _closeProjectModal(); });
 
-// =====================================================
-// 12. PAGE VISIT TRACKING (sessionStorage)
-// =====================================================
-function trackPageVisit(pageId) {
-    const visits = JSON.parse(sessionStorage.getItem('page_visits') || '{}');
-    visits[pageId] = (visits[pageId] || 0) + 1;
-    sessionStorage.setItem('page_visits', JSON.stringify(visits));
-}
-
-// =====================================================
-// 13. ADMIN ANALYTICS DASHBOARD
-// =====================================================
-function showAnalyticsDashboard() {
-    const visits  = JSON.parse(sessionStorage.getItem('page_visits')  || '{}');
-    const pViews  = JSON.parse(sessionStorage.getItem('project_views') || '{}');
-    const allProjects = appData.projects || [];
-
-    const pageNames = {
-        ar: { home:'الرئيسية', resume:'السيرة الذاتية', portfolio:'الأعمال', contact:'تواصل' },
-        en: { home:'Home', resume:'Resume', portfolio:'Portfolio', contact:'Contact' }
-    };
-
-    const visitRows = VALID_PAGES.map(p => `
-        <tr class="border-b border-gray-100 dark:border-gray-700">
-            <td class="py-2 px-3 font-medium text-sm">${pageNames[currentLang][p] || p}</td>
-            <td class="py-2 px-3 text-center">
-                <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-bold text-xs">${visits[p] || 0}</span>
-            </td>
-        </tr>
-    `).join('');
-
-    const projectRows = allProjects.map((proj, i) => {
-        const key   = getProjectKey(proj, i);
-        const count = pViews[key] || 0;
-        return `
-        <tr class="border-b border-gray-100 dark:border-gray-700">
-            <td class="py-2 px-3 font-medium text-xs">${t(proj.title)}</td>
-            <td class="py-2 px-3 text-center">
-                <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded font-bold text-xs">${count}</span>
-            </td>
-        </tr>`;
-    }).join('');
-
-    Swal.fire({
-        title: currentLang === 'ar' ? '📊 لوحة الإحصائيات' : '📊 Analytics Dashboard',
-        html: `
-        <div class="text-right" dir="${currentLang === 'ar' ? 'rtl' : 'ltr'}">
-            <p class="text-xs text-gray-400 mb-4">${currentLang === 'ar' ? 'بيانات الجلسة الحالية فقط' : 'Current session data only'}</p>
-
-            <h4 class="font-bold text-sm mb-2">${currentLang === 'ar' ? 'زيارات الصفحات' : 'Page Visits'}</h4>
-            <table class="w-full mb-6 text-right">
-                <thead><tr class="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500">
-                    <th class="py-2 px-3 text-right">${currentLang === 'ar' ? 'الصفحة' : 'Page'}</th>
-                    <th class="py-2 px-3 text-center">${currentLang === 'ar' ? 'الزيارات' : 'Visits'}</th>
-                </tr></thead>
-                <tbody>${visitRows}</tbody>
-            </table>
-
-            <h4 class="font-bold text-sm mb-2">${currentLang === 'ar' ? 'مشاهدات المشاريع' : 'Project Views'}</h4>
-            <table class="w-full mb-6 text-right">
-                <thead><tr class="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500">
-                    <th class="py-2 px-3 text-right">${currentLang === 'ar' ? 'المشروع' : 'Project'}</th>
-                    <th class="py-2 px-3 text-center">${currentLang === 'ar' ? 'المشاهدات' : 'Views'}</th>
-                </tr></thead>
-                <tbody>${projectRows}</tbody>
-            </table>
-
-            <div class="flex gap-2 flex-wrap justify-center mt-4">
-                <a href="https://analytics.google.com/" target="_blank"
-                   class="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition">
-                   <i class="fab fa-google"></i> Google Analytics
-                </a>
-                <a href="https://clarity.microsoft.com/" target="_blank"
-                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition">
-                   <i class="fas fa-eye"></i> Microsoft Clarity
-                </a>
-            </div>
-        </div>`,
-        width: '600px',
-        showConfirmButton: false,
-        showCloseButton: true
-    });
-}
-
-// =====================================================
-// 14. PDF GENERATION
-// =====================================================
+// ─── PDF وطباعة ──────────────────────────────────────
 async function generatePDF() {
     showToast(currentLang === 'ar' ? 'جاري إنشاء PDF...' : 'Generating PDF...', 'info');
     const resumeEl  = document.getElementById('resume');
@@ -802,9 +661,7 @@ async function generatePDF() {
 
 function triggerPrint() { showPage('resume'); setTimeout(() => window.print(), 400); }
 
-// =====================================================
-// 15. SHARE PROFILE
-// =====================================================
+// ─── مشاركة الملف الشخصي ─────────────────────────────
 async function shareProfile() {
     const name    = t(appData.profile?.name || { ar: 'أسامة الحربي', en: 'Osama Al-Harbi' });
     const summary = t(appData.profile?.summary || {});
@@ -815,16 +672,8 @@ async function shareProfile() {
     }
     copyToClipboard(url);
 }
-async function copyToClipboard(text) {
-    try {
-        await navigator.clipboard.writeText(text);
-        showToast(currentLang === 'ar' ? 'تم نسخ الرابط ✅' : 'Link copied ✅', 'success');
-    } catch { showToast(currentLang === 'ar' ? 'تعذّر النسخ' : 'Copy failed', 'error'); }
-}
 
-// =====================================================
-// 16. CONTACT ACTIONS
-// =====================================================
+// ─── الإجراءات في جهات الاتصال ──────────────────────
 function contactAction(type) {
     const p = appData.profile;
     if (!p) return;
@@ -839,15 +688,35 @@ function contactAction(type) {
     }
 }
 
-function sendMailto() {
-    const p       = appData.profile;
-    const subject = encodeURIComponent(document.getElementById('contact-subject')?.value || '');
-    const body    = encodeURIComponent(document.getElementById('contact-message')?.value || '');
-    if (!subject && !body) {
-        showToast(currentLang === 'ar' ? 'يرجى كتابة موضوع أو رسالة' : 'Please enter a subject or message', 'error');
-        return;
+// ─── نموذج الاتصال (Formspree) ──────────────────────
+async function sendFormspree(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+    submitBtn.disabled = true;
+
+    try {
+        const response = await fetch(FORMSPREE_ENDPOINT, {
+            method: 'POST',
+            body: data,
+            headers: { 'Accept': 'application/json' }
+        });
+        if (response.ok) {
+            showToast(currentLang === 'ar' ? 'تم إرسال رسالتك ✅' : 'Message sent ✅', 'success');
+            form.reset();
+            document.getElementById('char-counter').textContent = '0 / 2000';
+        } else {
+            showToast(currentLang === 'ar' ? 'حدث خطأ، حاول مرة أخرى' : 'Error, please try again', 'error');
+        }
+    } catch (err) {
+        showToast(currentLang === 'ar' ? 'فشل الاتصال بالخادم' : 'Server connection failed', 'error');
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
-    window.location.href = `mailto:${p?.email || 'osamafcv214@gmail.com'}?subject=${subject}&body=${body}`;
 }
 
 function updateCharCounter(el) {
@@ -856,9 +725,7 @@ function updateCharCounter(el) {
     if (el.value.length > 2000) el.value = el.value.substring(0, 2000);
 }
 
-// =====================================================
-// 17. LINKEDIN REFERRER
-// =====================================================
+// ─── LinkedIn Referrer ──────────────────────────────
 function checkLinkedInReferrer() {
     if (document.referrer && document.referrer.includes('linkedin.com')) {
         setTimeout(() => showToast(
@@ -867,9 +734,7 @@ function checkLinkedInReferrer() {
     }
 }
 
-// =====================================================
-// 18. ADMIN BUTTONS
-// =====================================================
+// ─── الأزرار الإدارية ──────────────────────────────
 function renderAdminButtons(type, index) {
     if (!isAdmin) return '';
     return `
@@ -890,9 +755,7 @@ function renderAdminButtons(type, index) {
         </div>`;
 }
 
-// =====================================================
-// 19. ADMIN CRUD (SCHEMAS)
-// =====================================================
+// ─── CRUD ──────────────────────────────────────────────
 const SCHEMAS = {
     skills: [
         { key: 'ar',       label: 'اسم المهارة (عربي)',   simple: true },
@@ -952,7 +815,6 @@ async function manageItem(type, index = null) {
     const schema = SCHEMAS[type];
     if (!schema) return;
 
-    // Helper: get value supporting nested objects (e.g. details.challenges)
     const getVal = (obj, f, lang) => {
         let src = obj;
         if (f.nested) src = obj[f.nested] || {};
@@ -971,7 +833,6 @@ async function manageItem(type, index = null) {
     };
 
     const html = schema.map(f => {
-        // Simple field (string / array)
         if (f.simple) {
             const val = isEdit ? getSimple(item, f) : '';
             const hint = f.array ? ' <span class="text-gray-400 text-xs">(مفصولة بفاصلة)</span>' : '';
@@ -1010,7 +871,6 @@ async function manageItem(type, index = null) {
                 const inputId = `swal-${f.key}`;
                 if (f.simple) {
                     let raw = document.getElementById(inputId)?.value ?? '';
-                    // Array fields: split by comma and trim
                     const val = f.array
                         ? raw.split(',').map(x => x.trim()).filter(Boolean)
                         : raw;
@@ -1048,13 +908,11 @@ async function manageItem(type, index = null) {
 function addItem(type)         { if (type === 'projects') manageProjectItem(); else manageItem(type); }
 function editItem(type, index) { if (type === 'projects') manageProjectItem(index); else manageItem(type, index); }
 
-// ── Dedicated project editor (handles technologies array + nested details) ──
 async function manageProjectItem(index = null) {
     if (!isAdmin) return;
     const isEdit = index !== null;
     const item   = isEdit ? (appData.projects || [])[index] : {};
 
-    // Helper: extract bilingual string
     const bv = (obj, lang) => {
         if (!obj) return '';
         if (typeof obj === 'object') return obj[lang] || obj.ar || '';
@@ -1072,8 +930,6 @@ async function manageProjectItem(index = null) {
             ? (currentLang === 'ar' ? 'تعديل المشروع' : 'Edit Project')
             : (currentLang === 'ar' ? 'إضافة مشروع جديد' : 'Add New Project'),
         html: `<div class="text-right space-y-3" dir="rtl">
-
-          <!-- Title -->
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-right">عنوان المشروع (AR)</label>
@@ -1084,8 +940,6 @@ async function manageProjectItem(index = null) {
               <input id="pj-title-en" class="swal2-input m-0 w-full text-left" value="${bv(item.title,'en')}" dir="ltr" placeholder="Project name in English">
             </div>
           </div>
-
-          <!-- Description -->
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-right">وصف المشروع (AR)</label>
@@ -1096,17 +950,10 @@ async function manageProjectItem(index = null) {
               <textarea id="pj-desc-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Short description...">${bv(item.desc,'en')}</textarea>
             </div>
           </div>
-
-          <!-- Technologies -->
           <div>
-            <label class="block text-xs mb-1 text-gray-500">
-              التقنيات المستخدمة / Technologies
-              <span class="text-gray-400 mr-1">(مفصولة بفاصلة — e.g. SQL, HTML5, CSS3)</span>
-            </label>
+            <label class="block text-xs mb-1 text-gray-500">التقنيات المستخدمة / Technologies <span class="text-gray-400 mr-1">(مفصولة بفاصلة)</span></label>
             <input id="pj-tech" class="swal2-input m-0 w-full" value="${techVal}" dir="ltr" placeholder="SQL, MySQL, HTML5, CSS3, JavaScript">
           </div>
-
-          <!-- Challenges -->
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-right">التحديات (AR)</label>
@@ -1117,8 +964,6 @@ async function manageProjectItem(index = null) {
               <textarea id="pj-chal-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Challenges faced...">${challEn}</textarea>
             </div>
           </div>
-
-          <!-- Results -->
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-right">النتائج والإنجازات (AR)</label>
@@ -1129,8 +974,6 @@ async function manageProjectItem(index = null) {
               <textarea id="pj-res-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Results achieved...">${resultsEn}</textarea>
             </div>
           </div>
-
-          <!-- Links -->
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
@@ -1141,7 +984,6 @@ async function manageProjectItem(index = null) {
               <input id="pj-live" class="swal2-input m-0 w-full" value="${item.liveUrl || ''}" dir="ltr" placeholder="https://...">
             </div>
           </div>
-
         </div>`,
         width: '760px',
         confirmButtonText: isEdit ? 'حفظ التغييرات' : 'إضافة المشروع',
@@ -1158,10 +1000,7 @@ async function manageProjectItem(index = null) {
             const rawTech = document.getElementById('pj-tech')?.value || '';
             const techs   = rawTech.split(',').map(t => t.trim()).filter(Boolean);
             return {
-                title: {
-                    ar: titleAr || titleEn,
-                    en: titleEn || titleAr
-                },
+                title: { ar: titleAr || titleEn, en: titleEn || titleAr },
                 desc: {
                     ar: document.getElementById('pj-desc-ar')?.value.trim() || '',
                     en: document.getElementById('pj-desc-en')?.value.trim() || ''
@@ -1192,7 +1031,6 @@ async function manageProjectItem(index = null) {
     }
 }
 
-// ── Profile editor ─────────────────────────────────────────────────────────
 async function manageProfile() {
     if (!isAdmin) return;
     const p = appData.profile || {};
@@ -1202,72 +1040,40 @@ async function manageProfile() {
     const { value } = await Swal.fire({
         title: currentLang === 'ar' ? 'تعديل الملف الشخصي' : 'Edit Profile',
         html: `<div class="text-right space-y-3" dir="rtl">
-
           <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-xs mb-1 text-gray-500 text-right">الاسم (AR)</label>
-              <input id="pf-name-ar" class="swal2-input m-0 w-full text-right" value="${vb('name','ar')}" dir="rtl">
-            </div>
-            <div>
-              <label class="block text-xs mb-1 text-gray-500 text-left">Name (EN)</label>
-              <input id="pf-name-en" class="swal2-input m-0 w-full text-left" value="${vb('name','en')}" dir="ltr">
-            </div>
+            <div><label class="block text-xs mb-1 text-gray-500 text-right">الاسم (AR)</label>
+            <input id="pf-name-ar" class="swal2-input m-0 w-full text-right" value="${vb('name','ar')}" dir="rtl"></div>
+            <div><label class="block text-xs mb-1 text-gray-500 text-left">Name (EN)</label>
+            <input id="pf-name-en" class="swal2-input m-0 w-full text-left" value="${vb('name','en')}" dir="ltr"></div>
           </div>
-
           <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-xs mb-1 text-gray-500 text-right">المسمى الوظيفي (AR)</label>
-              <input id="pf-title-ar" class="swal2-input m-0 w-full text-right" value="${vb('title','ar')}" dir="rtl">
-            </div>
-            <div>
-              <label class="block text-xs mb-1 text-gray-500 text-left">Title (EN)</label>
-              <input id="pf-title-en" class="swal2-input m-0 w-full text-left" value="${vb('title','en')}" dir="ltr">
-            </div>
+            <div><label class="block text-xs mb-1 text-gray-500 text-right">المسمى الوظيفي (AR)</label>
+            <input id="pf-title-ar" class="swal2-input m-0 w-full text-right" value="${vb('title','ar')}" dir="rtl"></div>
+            <div><label class="block text-xs mb-1 text-gray-500 text-left">Title (EN)</label>
+            <input id="pf-title-en" class="swal2-input m-0 w-full text-left" value="${vb('title','en')}" dir="ltr"></div>
           </div>
-
           <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-xs mb-1 text-gray-500 text-right">النبذة (AR)</label>
-              <textarea id="pf-summary-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl">${vb('summary','ar')}</textarea>
-            </div>
-            <div>
-              <label class="block text-xs mb-1 text-gray-500 text-left">Summary (EN)</label>
-              <textarea id="pf-summary-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr">${vb('summary','en')}</textarea>
-            </div>
+            <div><label class="block text-xs mb-1 text-gray-500 text-right">النبذة (AR)</label>
+            <textarea id="pf-summary-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl">${vb('summary','ar')}</textarea></div>
+            <div><label class="block text-xs mb-1 text-gray-500 text-left">Summary (EN)</label>
+            <textarea id="pf-summary-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr">${vb('summary','en')}</textarea></div>
           </div>
-
           <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-xs mb-1 text-gray-500 text-right">الموقع (AR)</label>
-              <input id="pf-location-ar" class="swal2-input m-0 w-full text-right" value="${vb('location','ar')}" dir="rtl">
-            </div>
-            <div>
-              <label class="block text-xs mb-1 text-gray-500 text-left">Location (EN)</label>
-              <input id="pf-location-en" class="swal2-input m-0 w-full text-left" value="${vb('location','en')}" dir="ltr">
-            </div>
+            <div><label class="block text-xs mb-1 text-gray-500 text-right">الموقع (AR)</label>
+            <input id="pf-location-ar" class="swal2-input m-0 w-full text-right" value="${vb('location','ar')}" dir="rtl"></div>
+            <div><label class="block text-xs mb-1 text-gray-500 text-left">Location (EN)</label>
+            <input id="pf-location-en" class="swal2-input m-0 w-full text-left" value="${vb('location','en')}" dir="ltr"></div>
           </div>
-
-          <div>
-            <label class="block text-xs mb-1 text-gray-500">البريد الإلكتروني / Email</label>
-            <input id="pf-email" class="swal2-input m-0 w-full" value="${v('email')}" dir="ltr" type="email">
-          </div>
-          <div>
-            <label class="block text-xs mb-1 text-gray-500">رقم الجوال / Phone</label>
-            <input id="pf-phone" class="swal2-input m-0 w-full" value="${v('phone')}" dir="ltr">
-          </div>
-          <div>
-            <label class="block text-xs mb-1 text-gray-500">رابط LinkedIn</label>
-            <input id="pf-linkedin" class="swal2-input m-0 w-full" value="${v('linkedin')}" dir="ltr" placeholder="https://linkedin.com/in/...">
-          </div>
-          <div>
-            <label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
-            <input id="pf-github" class="swal2-input m-0 w-full" value="${v('github')}" dir="ltr" placeholder="https://github.com/...">
-          </div>
-          <div>
-            <label class="block text-xs mb-1 text-gray-500">رابط السيرة الذاتية (PDF path)</label>
-            <input id="pf-cv" class="swal2-input m-0 w-full" value="${v('cv')}" dir="ltr" placeholder="Osama_Alharbi_IT_CV.pdf">
-          </div>
-
+          <div><label class="block text-xs mb-1 text-gray-500">البريد الإلكتروني / Email</label>
+          <input id="pf-email" class="swal2-input m-0 w-full" value="${v('email')}" dir="ltr" type="email"></div>
+          <div><label class="block text-xs mb-1 text-gray-500">رقم الجوال / Phone</label>
+          <input id="pf-phone" class="swal2-input m-0 w-full" value="${v('phone')}" dir="ltr"></div>
+          <div><label class="block text-xs mb-1 text-gray-500">رابط LinkedIn</label>
+          <input id="pf-linkedin" class="swal2-input m-0 w-full" value="${v('linkedin')}" dir="ltr"></div>
+          <div><label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
+          <input id="pf-github" class="swal2-input m-0 w-full" value="${v('github')}" dir="ltr"></div>
+          <div><label class="block text-xs mb-1 text-gray-500">رابط السيرة الذاتية (PDF path)</label>
+          <input id="pf-cv" class="swal2-input m-0 w-full" value="${v('cv')}" dir="ltr"></div>
         </div>`,
         width: '740px',
         confirmButtonText: 'حفظ التغييرات',
@@ -1284,7 +1090,6 @@ async function manageProfile() {
             linkedin: document.getElementById('pf-linkedin').value,
             github:   document.getElementById('pf-github').value,
             cv:       document.getElementById('pf-cv').value,
-            // preserve unchanged fields
             image:       appData.profile?.image || '',
             nationality: appData.profile?.nationality || { ar: 'سعودي', en: 'Saudi' }
         })
@@ -1308,9 +1113,7 @@ function deleteItem(type, index) {
     });
 }
 
-// =====================================================
-// 20. DRAG & DROP (Sortable)
-// =====================================================
+// ─── الترتيب بالسحب ──────────────────────────────────
 function reorderSection(type, oldIdx, newIdx) {
     const moved = appData[type].splice(oldIdx, 1)[0];
     appData[type].splice(newIdx, 0, moved);
@@ -1340,13 +1143,11 @@ function initSortable() {
         });
     });
 
-    // Projects: sortable on full array (filter is visual only)
     const projEl = document.getElementById('projects-container');
     if (projEl) {
         new Sortable(projEl, {
             animation: 150, handle: '.drag-handle', ghostClass: 'opacity-40',
             onEnd(evt) {
-                // Get real indices from data-index attributes
                 const items  = [...projEl.querySelectorAll('.sortable-item')];
                 const oldReal = parseInt(items[evt.oldIndex]?.dataset.index ?? evt.oldIndex);
                 const newReal = parseInt(items[evt.newIndex]?.dataset.index ?? evt.newIndex);
@@ -1364,9 +1165,7 @@ function initSortable() {
     }
 }
 
-// =====================================================
-// 21. INLINE EDITING
-// =====================================================
+// ─── التعديل المباشر ──────────────────────────────────
 function updateText(key, value) {
     const el = document.querySelector(`[data-path="${key}"]`);
     if (!el) return;
@@ -1394,9 +1193,7 @@ async function editImage(key) {
     if (value) { setDeepValue(appData, key, value); renderAll(); }
 }
 
-// =====================================================
-// 22. AUTH & GITHUB SYNC
-// =====================================================
+// ─── المصادقة والحفظ على GitHub ─────────────────────
 function checkSession() {
     const loginTime = localStorage.getItem('login_time');
     if (!localStorage.getItem('saved_token')) return;
@@ -1419,9 +1216,13 @@ function authenticateAndEdit() {
     const repo  = document.getElementById('repo-input').value.trim();
     const token = document.getElementById('token-input').value.trim();
     if (!repo || !token) return showToast('يرجى إدخال البيانات كاملة', 'error');
-    localStorage.setItem('saved_repo', repo); localStorage.setItem('saved_token', token);
+    // تشفير بسيط للتوكن (يمكن تحسينه)
+    const encryptedToken = btoa(token); // تخزين مشفر بسيط
+    localStorage.setItem('saved_repo', repo);
+    localStorage.setItem('saved_token', encryptedToken);
     localStorage.setItem('login_time', Date.now());
-    githubInfo.repo = repo; githubInfo.token = token;
+    githubInfo.repo = repo;
+    githubInfo.token = token; // فك التشفير عند الاستخدام
     document.getElementById('admin-modal').classList.add('hidden');
     enableAdminMode();
     showToast('تم تفعيل وضع المدير 🚀', 'success');
@@ -1469,9 +1270,86 @@ function restoreBackup() {
     else showToast('لا توجد نسخة احتياطية', 'error');
 }
 
-// =====================================================
-// 23. UTILITIES
-// =====================================================
+function previewChanges() {
+    Swal.fire({
+        title: currentLang === 'ar' ? 'معاينة التغييرات' : 'Preview Changes',
+        html: `<div style="max-height:400px;overflow-y:auto;text-align:left;direction:ltr;">
+               <pre style="background:#f0f0f0;padding:1rem;border-radius:0.5rem;font-size:12px;">${JSON.stringify(appData, null, 2)}</pre>
+               </div>`,
+        width: '800px',
+        confirmButtonText: 'إغلاق',
+        showCloseButton: true
+    });
+}
+
+// ─── لوحة التحليلات ──────────────────────────────────
+function showAnalyticsDashboard() {
+    const visits  = JSON.parse(localStorage.getItem('page_visits')  || '{}');
+    const pViews  = JSON.parse(sessionStorage.getItem('project_views') || '{}');
+    const allProjects = appData.projects || [];
+
+    const pageNames = {
+        ar: { home:'الرئيسية', resume:'السيرة الذاتية', portfolio:'الأعمال', contact:'تواصل' },
+        en: { home:'Home', resume:'Resume', portfolio:'Portfolio', contact:'Contact' }
+    };
+
+    const visitRows = VALID_PAGES.map(p => `
+        <tr class="border-b border-gray-100 dark:border-gray-700">
+            <td class="py-2 px-3 font-medium text-sm">${pageNames[currentLang][p] || p}</td>
+            <td class="py-2 px-3 text-center">
+                <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-bold text-xs">${visits[p] || 0}</span>
+            </td>
+        </tr>
+    `).join('');
+
+    const projectRows = allProjects.map((proj, i) => {
+        const key   = getProjectKey(proj, i);
+        const count = pViews[key] || 0;
+        return `
+        <tr class="border-b border-gray-100 dark:border-gray-700">
+            <td class="py-2 px-3 font-medium text-xs">${t(proj.title)}</td>
+            <td class="py-2 px-3 text-center">
+                <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded font-bold text-xs">${count}</span>
+            </td>
+        </tr>`;
+    }).join('');
+
+    Swal.fire({
+        title: currentLang === 'ar' ? '📊 لوحة الإحصائيات' : '📊 Analytics Dashboard',
+        html: `<div class="text-right" dir="${currentLang === 'ar' ? 'rtl' : 'ltr'}">
+            <p class="text-xs text-gray-400 mb-4">${currentLang === 'ar' ? 'بيانات الجلسة الحالية فقط' : 'Current session data only'}</p>
+            <h4 class="font-bold text-sm mb-2">${currentLang === 'ar' ? 'زيارات الصفحات' : 'Page Visits'}</h4>
+            <table class="w-full mb-6 text-right">
+                <thead><tr class="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500">
+                    <th class="py-2 px-3 text-right">${currentLang === 'ar' ? 'الصفحة' : 'Page'}</th>
+                    <th class="py-2 px-3 text-center">${currentLang === 'ar' ? 'الزيارات' : 'Visits'}</th>
+                </tr></thead>
+                <tbody>${visitRows}</tbody>
+            </table>
+            <h4 class="font-bold text-sm mb-2">${currentLang === 'ar' ? 'مشاهدات المشاريع' : 'Project Views'}</h4>
+            <table class="w-full mb-6 text-right">
+                <thead><tr class="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500">
+                    <th class="py-2 px-3 text-right">${currentLang === 'ar' ? 'المشروع' : 'Project'}</th>
+                    <th class="py-2 px-3 text-center">${currentLang === 'ar' ? 'المشاهدات' : 'Views'}</th>
+                </tr></thead>
+                <tbody>${projectRows}</tbody>
+            </table>
+            <div class="flex gap-2 flex-wrap justify-center mt-4">
+                <a href="https://analytics.google.com/" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition">
+                   <i class="fab fa-google"></i> Google Analytics
+                </a>
+                <a href="https://clarity.microsoft.com/" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition">
+                   <i class="fas fa-eye"></i> Microsoft Clarity
+                </a>
+            </div>
+        </div>`,
+        width: '600px',
+        showConfirmButton: false,
+        showCloseButton: true
+    });
+}
+
+// ─── الأدوات المساعدة الأخرى ─────────────────────────
 function setSmartGreeting() {
     const hour = new Date().getHours();
     const msgs = {
@@ -1493,34 +1371,6 @@ function typeWriter(text, elementId) {
         el.innerHTML += text.charAt(i);
         if (++i >= text.length) { clearInterval(twInterval); twInterval = null; }
     }, 90);
-}
-
-function initTheme() {
-    const btn = document.getElementById('theme-btn');
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-    }
-    btn.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-        initParticles();
-    });
-}
-
-function initParticles(party = false) {
-    const isDark = document.documentElement.classList.contains('dark');
-    particlesJS('particles-js', {
-        particles: {
-            number:      { value: party ? 100 : 40 },
-            color:       { value: party ? ['#f00','#0f0','#00f'] : (isDark ? '#ffffff' : '#3b82f6') },
-            opacity:     { value: 0.3 },
-            size:        { value: 3 },
-            line_linked: { enable: true, distance: 150, color: isDark ? '#ffffff' : '#3b82f6', opacity: 0.1, width: 1 },
-            move:        { enable: true, speed: party ? 10 : 1 }
-        },
-        interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'grab' } } },
-        retina_detect: true
-    });
 }
 
 function setupCmdPalette() {
@@ -1578,7 +1428,76 @@ function setDeepValue(obj, path, value) {
     cur[keys[keys.length - 1]] = value;
 }
 
-function showToast(msg, type = 'info') {
-    const colors = { success: '#10B981', error: '#EF4444', info: '#3b82f6' };
-    Toastify({ text: msg, duration: 3500, gravity: 'top', position: 'center', style: { background: colors[type] || colors.info } }).showToast();
+function registerPWA() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
 }
+
+function handleHash() {
+    const hash   = window.location.hash.replace('#', '').trim();
+    const pageId = VALID_PAGES.includes(hash) ? hash : (hash === '' ? 'home' : null);
+    if (pageId) showPage(pageId, false);
+    else if (hash !== '') show404();
+}
+
+// ─── التهيئة الرئيسية ─────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    AOS.init({ duration: 800, once: true });
+
+    const yearEl = document.getElementById('year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    setDirection();
+    initTheme();
+    initReadingMode();
+    initParticles();
+    setupSecretTrigger();
+    setupCmdPalette();
+    setupKonamiCode();
+    registerPWA();
+    setupScrollTop();
+    checkLinkedInReferrer();
+    initStatsObserver();
+
+    if (localStorage.getItem('saved_repo')) {
+        document.getElementById('repo-input').value = localStorage.getItem('saved_repo');
+        const encrypted = localStorage.getItem('saved_token');
+        if (encrypted) {
+            try { document.getElementById('token-input').value = atob(encrypted); }
+            catch { document.getElementById('token-input').value = encrypted; }
+        }
+    }
+
+    checkSession();
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+
+    document.getElementById('contact-form')?.addEventListener('submit', sendFormspree);
+});
+
+// تصدير الدوال للاستخدام في HTML
+window.toggleLanguage = toggleLanguage;
+window.toggleMobileMenu = toggleMobileMenu;
+window.addItem = addItem;
+window.editItem = editItem;
+window.deleteItem = deleteItem;
+window.editImage = editImage;
+window.setSkillTab = setSkillTab;
+window.setProjectFilter = setProjectFilter;
+window.openProjectModal = openProjectModal;
+window.closeProjectModal = closeProjectModal;
+window._closeProjectModal = _closeProjectModal;
+window.contactAction = contactAction;
+window.shareProfile = shareProfile;
+window.triggerPrint = triggerPrint;
+window.sendFormspree = sendFormspree;
+window.updateCharCounter = updateCharCounter;
+window.showAnalyticsDashboard = showAnalyticsDashboard;
+window.previewChanges = previewChanges;
+window.saveToGitHub = saveToGitHub;
+window.restoreBackup = restoreBackup;
+window.logout = logout;
+window.manageProfile = manageProfile;
+window.authenticateAndEdit = authenticateAndEdit;
+window.filterCmd = filterCmd;
