@@ -1,24 +1,21 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>أسامة الحربي | Portfolio</title>
+    <!-- Dynamic SEO – updated per page via updateMetaTags() -->
+    <meta id="meta-description" name="description" content="الموقع الشخصي لأسامة عبدالعزيز الحربي - خريج تقنية المعلومات، الجامعة الإسلامية بالمدينة المنورة.">
+    <meta id="og-title"         property="og:title"       content="أسامة الحربي | Portfolio">
+    <meta id="og-description"   property="og:description" content="خريج تقنية المعلومات - الجامعة الإسلامية بالمدينة المنورة">
+    <meta id="og-image"         property="og:image"       content="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <meta id="og-url"           property="og:url"         content="">
+    <meta                       property="og:type"        content="website">
+    <meta id="tw-title"         name="twitter:card"       content="summary_large_image">
+    <meta                       name="twitter:title"      content="أسامة الحربي | Portfolio">
+    <link id="canonical"        rel="canonical"           href="">
+    <meta name="robots"         content="index, follow">
+    <meta name="author"         content="Osama Abdulaziz Al-Harbi">
+    <meta name="keywords"       content="أسامة الحربي, IT, تقنية المعلومات, الجامعة الإسلامية, Portfolio">
 
-    <!-- SEO Dynamic -->
-    <meta id="meta-description" name="description" content="الموقع الشخصي لأسامة عبدالعزيز الحربي - خريج تقنية المعلومات." />
-    <meta id="og-title" property="og:title" content="أسامة الحربي | Portfolio" />
-    <meta id="og-description" property="og:description" content="خريج تقنية المعلومات - الجامعة الإسلامية بالمدينة المنورة" />
-    <meta id="og-image" property="og:image" content="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" />
-    <meta id="og-url" property="og:url" content="" />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="أسامة الحربي | Portfolio" />
-    <link id="canonical" rel="canonical" href="" />
-    <meta name="robots" content="index, follow" />
-    <meta name="author" content="Osama Abdulaziz Al-Harbi" />
-
-    <!-- Schema.org -->
+    <!-- Schema.org JSON-LD -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -38,23 +35,28 @@
     }
     </script>
 
-    <!-- PWA -->
-    <link rel="apple-touch-icon" href="./assets/icon-192.png" />
-    <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#3b82f6" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-capable"           content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style"  content="black-translucent">
+    <meta name="apple-mobile-web-app-title"             content="Osama Portfolio">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أسامة الحربي | Portfolio</title>
+    <link rel="icon"     href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
 
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-KE86NNMX3J"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){ dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-KE86NNMX3J');
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date()); gtag('config', 'G-KE86NNMX3J');
     </script>
 
-    <!-- Microsoft Clarity -->
+    <!-- Microsoft Clarity – replace YOUR_CLARITY_ID with your project ID -->
     <script type="text/javascript">
         (function(c,l,a,r,i,t,y){
             c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -65,10 +67,10 @@
 
     <!-- Core Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+    <link  href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link  href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link  rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
     <!-- Feature Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -77,7 +79,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- Tailwind Custom Config -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -91,61 +92,76 @@
     </script>
 
     <style>
-        /* تحسينات الوصول */
-        :focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
         body { overflow-x: hidden; }
-        #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; pointer-events: none; transition: filter 0.8s ease; }
+        #particles-js {
+            position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 0;
+            pointer-events: none;
+            /* hue-rotate used to shift particle color per section */
+            transition: filter 0.8s ease;
+        }
+
+        /* Navigation */
         .nav-active { color: #3b82f6; position: relative; }
         .nav-active::after { content:''; position:absolute; bottom:-5px; left:0; width:100%; height:2px; background:#3b82f6; border-radius:2px; }
+
+        /* SPA Transitions */
         .page-section { display: none; animation: fadeIn 0.5s cubic-bezier(0.4,0,0.2,1); }
         .page-section.active { display: block; }
         @keyframes fadeIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+        /* Admin UI */
         .editable-active { border:2px dashed #f59e0b !important; background:rgba(253,230,138,.1); outline:none; padding:4px; border-radius:4px; cursor:text; }
         .admin-element { display: none !important; }
         .admin-mode .admin-element { display: flex !important; }
         .drag-handle { cursor: move; }
+
+        /* Skills progress */
         .skill-bar-fill { width: 0; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
         .skill-bar-fill.animate { width: var(--target-width); }
+
+        /* Stats counter */
         .stat-card { transition: transform 0.3s, box-shadow 0.3s; }
         .stat-card:hover { transform: translateY(-4px); }
+
+        /* LTR */
+        html[dir="ltr"] { font-family: 'Roboto', sans-serif; }
+
+        /* Mobile menu */
         #mobile-menu { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
         #mobile-menu.closed { transform: translateX(100%); }
-        #mobile-menu.open { transform: translateX(0); }
+        #mobile-menu.open   { transform: translateX(0); }
         html[dir="ltr"] #mobile-menu.closed { transform: translateX(-100%); }
+
+        /* Scroll top */
         #scrollTopBtn { opacity:0; pointer-events:none; transition:0.3s; }
         #scrollTopBtn.show { opacity:1; pointer-events:all; }
+
+        /* Project filter buttons */
         .filter-btn { transition: all 0.2s; white-space: nowrap; }
         .filter-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+
+        /* Contact card press */
         .contact-card:active { transform: scale(0.97); }
-        .skeleton-pulse { animation: skeleton-pulse 1.5s ease-in-out infinite; }
+
+        /* Skeleton */
         @keyframes skeleton-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-        .timeline-year { position: absolute; top: 0; font-size: 10px; font-weight: 700; color: #3b82f6; background: #eff6ff; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 999px; white-space: nowrap; }
+        .skeleton-pulse { animation: skeleton-pulse 1.5s ease-in-out infinite; }
+
+        /* Timeline year badge */
+        .timeline-year {
+            position: absolute; top: 0; font-size: 10px; font-weight: 700;
+            color: #3b82f6; background: #eff6ff; border: 1px solid #bfdbfe;
+            padding: 1px 6px; border-radius: 999px; white-space: nowrap;
+        }
         html[dir="rtl"] .timeline-year { left: -52px; }
         html[dir="ltr"] .timeline-year { right: -52px; }
         .dark .timeline-year { background: #1e3a5f; border-color: #3b82f6; color: #93c5fd; }
+
+        /* 404 animation */
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
         #not-found .float-icon { animation: float 3s ease-in-out infinite; }
 
-        /* وضع القراءة */
-        .reading-mode .page-section p,
-        .reading-mode .page-section h1,
-        .reading-mode .page-section h2,
-        .reading-mode .page-section h3,
-        .reading-mode .page-section h4 {
-            max-width: 70ch;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .reading-mode .page-section .container {
-            background: #f8fafc;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-        .dark.reading-mode .page-section .container {
-            background: #1e293b;
-        }
-
+        /* ─── PRINT MODE ─────────────────────────────────── */
         @media print {
             #particles-js, nav, #mobile-menu, #scrollTopBtn,
             #admin-toolbar, #admin-modal, #cmd-palette, #project-modal,
@@ -166,7 +182,7 @@
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-darkBg dark:text-gray-100 font-sans transition-colors duration-300 min-h-screen flex flex-col">
 
-    <!-- Skeleton Loading -->
+    <!-- Skeleton Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 z-[200] bg-white dark:bg-darkBg flex flex-col items-center justify-center transition-opacity duration-700 px-8">
         <div class="w-full max-w-sm space-y-4">
             <div class="flex justify-center mb-6">
@@ -186,35 +202,34 @@
         </div>
     </div>
 
-    <input type="file" id="image-upload-input" class="hidden" accept="image/*" />
+    <input type="file" id="image-upload-input" class="hidden" accept="image/*">
     <div id="particles-js" class="opacity-30 dark:opacity-20"></div>
 
     <!-- ═══ NAVBAR ══════════════════════════════════════════ -->
-    <nav class="fixed top-0 w-full z-50 bg-white/90 dark:bg-darkBg/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm transition-all" role="navigation" aria-label="القائمة الرئيسية">
+    <nav class="fixed top-0 w-full z-50 bg-white/90 dark:bg-darkBg/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm transition-all">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#home" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary z-50" aria-label="الرئيسية">OSAMA.</a>
+            <a href="#home" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary z-50">OSAMA.</a>
             <div class="hidden md:flex gap-8 font-medium text-sm">
-                <a href="#home"      class="nav-link nav-active hover:text-primary transition" id="nav-home"      data-lang="nav_home" role="menuitem">الرئيسية</a>
-                <a href="#resume"    class="nav-link hover:text-primary transition"           id="nav-resume"    data-lang="nav_resume" role="menuitem">السيرة الذاتية</a>
-                <a href="#portfolio" class="nav-link hover:text-primary transition"           id="nav-portfolio" data-lang="nav_portfolio" role="menuitem">الأعمال</a>
-                <a href="#contact"   class="nav-link hover:text-primary transition"           id="nav-contact"   data-lang="nav_contact" role="menuitem">تواصل</a>
+                <a href="#home"      class="nav-link nav-active hover:text-primary transition" id="nav-home"      data-lang="nav_home">الرئيسية</a>
+                <a href="#resume"    class="nav-link hover:text-primary transition"           id="nav-resume"    data-lang="nav_resume">السيرة الذاتية</a>
+                <a href="#portfolio" class="nav-link hover:text-primary transition"           id="nav-portfolio" data-lang="nav_portfolio">الأعمال</a>
+                <a href="#contact"   class="nav-link hover:text-primary transition"           id="nav-contact"   data-lang="nav_contact">تواصل</a>
             </div>
             <div class="flex items-center gap-3 z-50">
-                <button onclick="toggleLanguage()" id="lang-btn" class="px-3 py-1 text-xs font-bold border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition" aria-label="تبديل اللغة">EN</button>
-                <button id="theme-btn" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition border border-gray-200 dark:border-gray-700" aria-label="تبديل الوضع الليلي">🌓</button>
-                <button id="reading-btn" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition border border-gray-200 dark:border-gray-700" aria-label="وضع القراءة">📖</button>
-                <button onclick="toggleMobileMenu()" class="md:hidden text-xl focus:outline-none" aria-label="فتح القائمة"><i class="fas fa-bars"></i></button>
+                <button onclick="toggleLanguage()" id="lang-btn" class="px-3 py-1 text-xs font-bold border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">EN</button>
+                <button id="theme-btn" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition border border-gray-200 dark:border-gray-700">🌓</button>
+                <button onclick="toggleMobileMenu()" class="md:hidden text-xl focus:outline-none"><i class="fas fa-bars"></i></button>
             </div>
         </div>
     </nav>
 
     <!-- ═══ MOBILE MENU ════════════════════════════════════ -->
-    <div id="mobile-menu" class="closed fixed inset-0 z-40 bg-white dark:bg-darkBg flex flex-col items-center justify-center space-y-8 md:hidden shadow-2xl" role="dialog" aria-label="القائمة الجانبية">
-        <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 text-3xl hover:text-red-500 transition" aria-label="إغلاق القائمة"><i class="fas fa-times"></i></button>
-        <a href="#home"      onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_home" role="menuitem">الرئيسية</a>
-        <a href="#resume"    onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_resume" role="menuitem">السيرة الذاتية</a>
-        <a href="#portfolio" onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_portfolio" role="menuitem">الأعمال</a>
-        <a href="#contact"   onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_contact" role="menuitem">تواصل</a>
+    <div id="mobile-menu" class="closed fixed inset-0 z-40 bg-white dark:bg-darkBg flex flex-col items-center justify-center space-y-8 md:hidden shadow-2xl">
+        <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 text-3xl hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+        <a href="#home"      onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_home">الرئيسية</a>
+        <a href="#resume"    onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_resume">السيرة الذاتية</a>
+        <a href="#portfolio" onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_portfolio">الأعمال</a>
+        <a href="#contact"   onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_contact">تواصل</a>
         <a href="Osama_Alharbi_IT_CV.pdf" download class="px-6 py-2 bg-primary text-white rounded-full font-bold shadow-lg flex items-center gap-2">
             <i class="fas fa-download"></i> <span data-lang="btn_download_cv">تحميل السيرة الذاتية</span>
         </a>
@@ -224,18 +239,19 @@
     <main class="container mx-auto px-4 pt-32 pb-20 flex-grow relative z-10 max-w-5xl">
 
         <!-- ─── HOME ─────────────────────────────────────── -->
-        <section id="home" class="page-section active min-h-[70vh]" role="region" aria-label="الرئيسية">
+        <section id="home" class="page-section active min-h-[70vh]">
             <div class="flex items-center justify-center text-center" data-aos="zoom-in">
                 <div class="w-full">
                     <!-- Profile Image -->
                     <div class="mb-8 relative inline-block group cursor-pointer">
                         <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
-                        <img id="profile-img" src="" alt="صورة شخصية لأسامة الحربي" class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl transition transform group-hover:scale-105">
+                        <img id="profile-img" src="" alt="Profile" class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl transition transform group-hover:scale-105">
                         <button onclick="editImage('profile.image')" class="admin-element absolute inset-0 bg-black/50 rounded-full items-center justify-center text-white opacity-0 hover:opacity-100 transition">
                             <i class="fas fa-camera text-2xl"></i>
                         </button>
                     </div>
 
+                    <!-- Admin: edit profile button below image -->
                     <button onclick="manageProfile()" class="admin-element mt-2 mb-4 mx-auto items-center gap-2 px-4 py-1.5 bg-teal-500 text-white rounded-full text-xs font-bold hover:bg-teal-600 transition">
                         <i class="fas fa-user-edit"></i> تعديل الملف الشخصي
                     </button>
@@ -288,7 +304,7 @@
         </section>
 
         <!-- ─── RESUME ────────────────────────────────────── -->
-        <section id="resume" class="page-section" role="region" aria-label="السيرة الذاتية">
+        <section id="resume" class="page-section">
             <div id="print-header" class="hidden mb-8 text-center border-b pb-4">
                 <h1 class="text-2xl font-bold" id="print-name"></h1>
                 <p id="print-contact" class="text-sm text-gray-600 mt-1"></p>
@@ -359,18 +375,19 @@
         </section>
 
         <!-- ─── PORTFOLIO ─────────────────────────────────── -->
-        <section id="portfolio" class="page-section" role="region" aria-label="معرض الأعمال">
+        <section id="portfolio" class="page-section">
             <div class="text-center mb-10 relative">
                 <h2 class="text-4xl font-bold mb-4" data-aos="fade-down" data-lang="sec_projects">معرض المشاريع</h2>
                 <div class="w-20 h-1 bg-primary mx-auto rounded-full"></div>
                 <button onclick="addItem('projects')" class="admin-element absolute top-0 right-0 bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-200 gap-2 transition shadow-lg"><i class="fas fa-plus"></i> مشروع جديد</button>
             </div>
+            <!-- Project filters (generated dynamically) -->
             <div id="project-filters" class="flex flex-wrap justify-center gap-2 mb-10 print-hide"></div>
             <div id="projects-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </section>
 
         <!-- ─── CONTACT ───────────────────────────────────── -->
-        <section id="contact" class="page-section" role="region" aria-label="تواصل">
+        <section id="contact" class="page-section">
             <div class="max-w-2xl mx-auto" data-aos="fade-up">
                 <div class="text-center mb-10">
                     <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary text-2xl"><i class="fas fa-envelope-open-text"></i></div>
@@ -398,29 +415,27 @@
                         <span class="inline-block mt-2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" data-lang="contact_open">فتح الملف</span>
                     </div>
                 </div>
-                <!-- Message form (Formspree) -->
+                <!-- Message form -->
                 <div class="bg-white dark:bg-cardBg rounded-3xl p-8 border border-gray-100 dark:border-gray-700 shadow-sm">
                     <h3 class="font-bold text-lg mb-6 flex items-center gap-2 dark:text-white">
                         <i class="fas fa-pen-nib text-primary text-base"></i>
                         <span data-lang="contact_compose">اكتب رسالة</span>
                     </h3>
-                    <form id="contact-form" onsubmit="sendFormspree(event)">
-                        <div class="space-y-4">
-                            <div>
-                                <label for="contact-subject" class="block text-xs font-bold text-gray-500 mb-1.5" data-lang="contact_subject_label">الموضوع</label>
-                                <input type="text" id="contact-subject" name="subject" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-right" placeholder="موضوع الرسالة / Subject" dir="auto" required>
-                            </div>
-                            <div>
-                                <label for="contact-message" class="block text-xs font-bold text-gray-500 mb-1.5" data-lang="contact_message_label">الرسالة</label>
-                                <textarea id="contact-message" name="message" rows="5" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-right resize-none" placeholder="اكتب رسالتك هنا... / Write your message here..." dir="auto" oninput="updateCharCounter(this)" required></textarea>
-                            </div>
-                            <p id="char-counter" class="text-xs text-gray-400 text-left ltr:text-right">0 / 2000</p>
-                            <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 active:scale-95 transition shadow-lg flex items-center justify-center gap-2">
-                                <i class="fas fa-paper-plane"></i><span>إرسال الرسالة</span>
-                            </button>
-                            <p class="text-xs text-gray-400 text-center">سيتم إرسال رسالتك عبر خدمة Formspree</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1.5" data-lang="contact_subject_label">الموضوع</label>
+                            <input type="text" id="contact-subject" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-right" placeholder="موضوع الرسالة / Subject" dir="auto">
                         </div>
-                    </form>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1.5" data-lang="contact_message_label">الرسالة</label>
+                            <textarea id="contact-message" rows="5" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-right resize-none" placeholder="اكتب رسالتك هنا... / Write your message here..." dir="auto" oninput="updateCharCounter(this)"></textarea>
+                        </div>
+                        <p id="char-counter" class="text-xs text-gray-400 text-left ltr:text-right">0 / 2000</p>
+                        <button onclick="sendMailto()" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 active:scale-95 transition shadow-lg flex items-center justify-center gap-2">
+                            <i class="fas fa-paper-plane"></i><span data-lang="btn_email">فتح تطبيق الإيميل للإرسال</span>
+                        </button>
+                        <p class="text-xs text-gray-400 text-center" data-lang="contact_mailto_note">سيفتح تطبيق الإيميل على جهازك مع الرسالة جاهزة</p>
+                    </div>
                 </div>
                 <!-- CV Download CTA -->
                 <div class="mt-6 bg-gradient-to-r from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 rounded-2xl p-5 flex items-center justify-between border border-primary/10">
@@ -436,7 +451,7 @@
         </section>
 
         <!-- ─── 404 ─────────────────────────────────────────── -->
-        <section id="not-found" class="page-section min-h-[60vh] flex items-center justify-center text-center" role="region" aria-label="صفحة غير موجودة">
+        <section id="not-found" class="page-section min-h-[60vh] flex items-center justify-center text-center">
             <div data-aos="zoom-in">
                 <div class="float-icon text-8xl mb-6">🔍</div>
                 <h2 class="text-7xl font-black text-gray-200 dark:text-gray-800 mb-2">404</h2>
@@ -450,21 +465,21 @@
 
     <!-- Footer -->
     <footer class="text-center py-8 text-xs text-gray-500 border-t border-gray-200 dark:border-gray-800 print-hide">
-        <p id="secret-trigger" class="cursor-pointer select-none hover:text-primary transition inline-block px-4 py-2" title="Admin Login (Triple Click)" role="button">
+        <p id="secret-trigger" class="cursor-pointer select-none hover:text-primary transition inline-block px-4 py-2" title="Admin Login (Triple Click)">
             &copy; <span id="year"></span> Osama Al-Harbi. Built with ❤️ & Code.
         </p>
     </footer>
 
     <!-- Scroll Top -->
-    <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" class="fixed bottom-6 left-6 z-40 bg-primary text-white w-12 h-12 rounded-full shadow-xl hover:bg-blue-600 transition flex items-center justify-center transform translate-y-10 print-hide" aria-label="العودة للأعلى">
+    <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" class="fixed bottom-6 left-6 z-40 bg-primary text-white w-12 h-12 rounded-full shadow-xl hover:bg-blue-600 transition flex items-center justify-center transform translate-y-10 print-hide">
         <i class="fas fa-arrow-up"></i>
     </button>
 
     <!-- ═══ PROJECT MODAL ════════════════════════════════════ -->
-    <div id="project-modal" class="hidden fixed inset-0 z-[150] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 print-hide" onclick="closeProjectModal(event)" role="dialog" aria-modal="true" aria-label="تفاصيل المشروع">
+    <div id="project-modal" class="hidden fixed inset-0 z-[150] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 print-hide" onclick="closeProjectModal(event)">
         <div class="bg-white dark:bg-cardBg w-full max-w-2xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden" id="modal-box">
             <div class="bg-gradient-to-r from-primary to-secondary p-6 text-white relative">
-                <button onclick="_closeProjectModal()" class="absolute top-4 left-4 ltr:right-4 ltr:left-auto w-8 h-8 bg-white/20 rounded-full hover:bg-white/40 transition flex items-center justify-center" aria-label="إغلاق التفاصيل">
+                <button onclick="_closeProjectModal()" class="absolute top-4 left-4 ltr:right-4 ltr:left-auto w-8 h-8 bg-white/20 rounded-full hover:bg-white/40 transition flex items-center justify-center">
                     <i class="fas fa-times text-sm"></i>
                 </button>
                 <h3 id="modal-title" class="text-xl font-bold pr-8 ltr:pr-0 ltr:pl-8"></h3>
@@ -492,6 +507,7 @@
                     </h4>
                     <p id="modal-results" class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed bg-green-50 dark:bg-green-900/10 p-3 rounded-xl border border-green-100 dark:border-green-800"></p>
                 </div>
+                <!-- Modal action buttons: GitHub + Live Demo -->
                 <div id="modal-actions" class="flex gap-3 pt-2 border-t border-gray-100 dark:border-gray-700 flex-wrap">
                     <a id="modal-github-link" href="#" target="_blank" rel="noopener noreferrer"
                        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-gray-700 text-white rounded-xl text-sm font-bold hover:scale-105 transition">
@@ -507,11 +523,11 @@
     </div>
 
     <!-- ═══ COMMAND PALETTE ══════════════════════════════════ -->
-    <div id="cmd-palette" class="hidden fixed inset-0 z-[100] bg-black/50 flex items-start justify-center pt-24 backdrop-blur-sm print-hide" role="dialog" aria-label="لوحة الأوامر">
+    <div id="cmd-palette" class="hidden fixed inset-0 z-[100] bg-black/50 flex items-start justify-center pt-24 backdrop-blur-sm print-hide">
         <div class="bg-white dark:bg-cardBg w-full max-w-lg rounded-xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
                 <i class="fas fa-search text-gray-400"></i>
-                <input type="text" id="cmd-input" class="w-full bg-transparent outline-none text-lg dark:text-white" placeholder="Type a command..." onkeyup="filterCmd(this.value)" aria-label="بحث الأوامر">
+                <input type="text" id="cmd-input" class="w-full bg-transparent outline-none text-lg dark:text-white" placeholder="Type a command..." onkeyup="filterCmd(this.value)">
                 <span class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-gray-500">ESC</span>
             </div>
             <div id="cmd-list" class="max-h-60 overflow-y-auto p-2"></div>
@@ -522,17 +538,16 @@
     <div id="admin-toolbar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] bg-white dark:bg-cardBg shadow-2xl border border-gray-200 dark:border-gray-700 rounded-full px-6 py-2 flex items-center gap-3 print-hide">
         <span class="text-xs font-bold text-green-500 flex items-center gap-1"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Admin</span>
         <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
-        <button onclick="saveToGitHub()" class="text-sm font-bold text-primary hover:text-blue-600 transition flex items-center gap-2" aria-label="حفظ التغييرات"><i class="fas fa-save"></i><span data-lang="btn_save">حفظ</span></button>
-        <button onclick="manageProfile()" class="text-sm font-bold text-teal-500 hover:text-teal-600 transition flex items-center gap-2" aria-label="تعديل الملف الشخصي"><i class="fas fa-user-edit"></i></button>
-        <button onclick="showAnalyticsDashboard()" class="text-sm font-bold text-purple-500 hover:text-purple-600 transition" aria-label="لوحة التحليلات"><i class="fas fa-chart-bar"></i></button>
-        <button onclick="restoreBackup()" class="text-sm font-bold text-yellow-500 hover:text-yellow-600 transition" aria-label="استعادة النسخة الاحتياطية"><i class="fas fa-history"></i></button>
-        <button onclick="previewChanges()" class="text-sm font-bold text-indigo-500 hover:text-indigo-600 transition" aria-label="معاينة التغييرات"><i class="fas fa-eye"></i></button>
+        <button onclick="saveToGitHub()" class="text-sm font-bold text-primary hover:text-blue-600 transition flex items-center gap-2"><i class="fas fa-save"></i><span data-lang="btn_save">حفظ</span></button>
+        <button onclick="manageProfile()" class="text-sm font-bold text-teal-500 hover:text-teal-600 transition flex items-center gap-2" title="تعديل الملف الشخصي"><i class="fas fa-user-edit"></i></button>
+        <button onclick="showAnalyticsDashboard()" class="text-sm font-bold text-purple-500 hover:text-purple-600 transition" title="Analytics Dashboard"><i class="fas fa-chart-bar"></i></button>
+        <button onclick="restoreBackup()" class="text-sm font-bold text-yellow-500 hover:text-yellow-600 transition" title="Restore Backup"><i class="fas fa-history"></i></button>
         <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
-        <button onclick="logout()" class="text-red-500 hover:text-red-700 text-lg" aria-label="تسجيل الخروج"><i class="fas fa-power-off"></i></button>
+        <button onclick="logout()" class="text-red-500 hover:text-red-700 text-lg" title="Logout"><i class="fas fa-power-off"></i></button>
     </div>
 
     <!-- ═══ ADMIN LOGIN MODAL ════════════════════════════════ -->
-    <div id="admin-modal" class="hidden fixed inset-0 bg-black/90 z-[110] flex items-center justify-center p-4 backdrop-blur-sm print-hide" role="dialog" aria-modal="true" aria-label="تسجيل الدخول">
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/90 z-[110] flex items-center justify-center p-4 backdrop-blur-sm print-hide">
         <div class="bg-white dark:bg-cardBg w-full max-w-sm rounded-2xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
             <div class="text-center mb-6">
                 <div class="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-user-lock"></i></div>
@@ -547,10 +562,8 @@
         </div>
     </div>
 
-    <!-- Libraries -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <!-- Main Script (معاد هيكلته) -->
-    <script type="module" src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
