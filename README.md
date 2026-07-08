@@ -10,7 +10,7 @@
 
 **موقع شخصي متكامل ثنائي اللغة (عربي / إنجليزي) مع لوحة تحكم إدارية**
 
-[🔗 عرض الموقع](#) • [📄 تحميل السيرة الذاتية](./Osama_Alharbi_IT_CV.pdf) • [📬 تواصل](mailto:osamafcv214@gmail.com)
+[🔗 عرض الموقع](https://osamaal-harbi.github.io/CV/#home) • [📄 تحميل السيرة الذاتية](./Osama_Alharbi_IT_CV.pdf) • [📬 تواصل](mailto:osamafcv214@gmail.com)
 
 </div>
 
