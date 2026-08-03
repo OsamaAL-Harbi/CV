@@ -36,8 +36,8 @@
         "en": "Hello,\n\nI am {name}, I contacted you via your portfolio.\n\n"
       },
       "bodySuffix": {
-        "ar": "مع خالص التحية،\n{name}\n{email}",
-        "en": "Best regards,\n{name}\n{email}"
+        "ar": "\nمع خالص التحية،\n{name}\n{email}",
+        "en": "\nBest regards,\n{name}\n{email}"
       }
     },
     "emailService": {
@@ -52,13 +52,13 @@
         "templateId": "template_dxgj7w9"
       },
       "toEmail": "osamafcv214@gmail.com",
-      "fallbackToMailto": true
+      "fallbackToMailto": false
     },
     "projectsSource": {
       "source": "github",
       "githubUsername": "OsamaAL-Harbi",
       "excludeForks": true,
-      "excludeArchived": false,
+      "excludeArchived": true,
       "cacheDuration": 3600
     }
   },
