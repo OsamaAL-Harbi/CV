@@ -12,20 +12,55 @@
       "ar": "خريج تقنية معلومات طموح أسعى للعمل في مجال الدعم الفني وإدارة شبكات TCP/IP لضمان كفاءة البنية التحتية واستمرارية الخدمات. أمتلك معرفة متينة في قواعد بيانات SQL وتطوير الأنظمة، مدعومة بشهادات مهنية في الأمن السيبراني من ISC2 وIBM.",
       "en": "An ambitious IT graduate seeking to utilize skills in technical support and TCP/IP network administration to ensure infrastructure efficiency and service continuity. Possesses strong knowledge of SQL databases and systems development, enhanced by professional cybersecurity certifications from ISC2 and IBM."
     },
-    "email": "osamafcv214@gmail.com",
-    "phone": "+966537820694",
     "location": {
       "ar": "المدينة المنورة، المملكة العربية السعودية",
       "en": "Madinah, Saudi Arabia"
     },
+    "email": "osamafcv214@gmail.com",
+    "phone": "+966537820694",
+    "linkedin": "https://www.linkedin.com/in/osama-al-harbi",
+    "github": "https://github.com/OsamaAL-Harbi",
+    "cv": "Osama_Alharbi_IT_CV.pdf",
+    "image": "",
     "nationality": {
       "ar": "سعودي",
       "en": "Saudi"
     },
-    "image": "",
-    "linkedin": "https://www.linkedin.com/in/osama-al-harbi",
-    "github": "https://github.com/OsamaAL-Harbi",
-    "cv": "Osama_Alharbi_IT_CV.pdf"
+    "emailTemplate": {
+      "subject": {
+        "ar": "رسالة من {name} عبر موقعك الشخصي",
+        "en": "Message from {name} via your portfolio"
+      },
+      "bodyPrefix": {
+        "ar": "السلام عليكم،\n\nأنا {name}، تواصلت معك عبر موقعك الشخصي.\n\n",
+        "en": "Hello,\n\nI am {name}, I contacted you via your portfolio.\n\n"
+      },
+      "bodySuffix": {
+        "ar": "مع خالص التحية،\n{name}\n{email}",
+        "en": "Best regards,\n{name}\n{email}"
+      }
+    },
+    "emailService": {
+      "enabled": true,
+      "provider": "emailjs",
+      "formspree": {
+        "endpoint": "https://formspree.io/f/xqarljpg"
+      },
+      "emailjs": {
+        "publicKey": "4PCPUGc7pFLXc34Q6",
+        "serviceId": "service_fl7p05w",
+        "templateId": "template_dxgj7w9"
+      },
+      "toEmail": "osamafcv214@gmail.com",
+      "fallbackToMailto": true
+    },
+    "projectsSource": {
+      "source": "github",
+      "githubUsername": "OsamaAL-Harbi",
+      "excludeForks": true,
+      "excludeArchived": false,
+      "cacheDuration": 3600
+    }
   },
   "education": [
     {
@@ -48,24 +83,6 @@
     }
   ],
   "experience": [
-    {
-      "role": {
-        "ar": "أخصائي تحول رقمي",
-        "en": ""
-      },
-      "company": {
-        "ar": "",
-        "en": ""
-      },
-      "period": {
-        "ar": "يناير 2026 - حاضر",
-        "en": "January 2026 – Present"
-      },
-      "description": {
-        "ar": "• المساهمة في مبادرات التحول الرقمي وبرامج التميز المؤسسي.\n• دعم أنشطة الحوكمة والامتثال والنضج الرقمي.\n• المشاركة في تحليل عمليات الأعمال وتحسين سير العمل.\n• المساعدة في مراجعة متطلبات الأعمال ووثائق المشاريع.\n• دعم إدارة البيانات ومبادرات الابتكار وتحسين الخدمات الرقمية.\n• التنسيق مع أصحاب المصلحة لضمان التوافق مع الأهداف الاستراتيجية.\n• المشاركة في تقييم العمليات ومبادرات التحسين المستمر.",
-        "en": ""
-      }
-    },
     {
       "role": {
         "ar": "متدرب تحول رقمي",
@@ -237,7 +254,7 @@
       },
       "issuer": {
         "ar": "أكاديمية طويق",
-        "en": "Tuwaiq Academy "
+        "en": "Tuwaiq Academy"
       },
       "credential": "",
       "date": "April 2026"
