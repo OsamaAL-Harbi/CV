@@ -863,7 +863,7 @@ function checkLinkedInReferrer() {
     if (document.referrer && document.referrer.includes('linkedin.com')) {
         setTimeout(() => showToast(
             currentLang === 'ar' ? 'مرحباً، يبدو أنك قادم من LinkedIn 👋' : 'Welcome from LinkedIn! 👋', 'info'
-        ), 1000);
+        ), 700);
     }
 }
 
@@ -1257,7 +1257,7 @@ async function manageProfile() {
           </div>
           <div>
             <label class="block text-xs mb-1 text-gray-500">رابط LinkedIn</label>
-            <input id="pf-linkedin" class="swal2-input m-0 w-full" value="${v('linkedin')}" dir="ltr" placeholder="www.linkedin.com/in/اسامة-الحربي-368a5a23b">
+            <input id="pf-linkedin" class="swal2-input m-0 w-full" value="${v('linkedin')}" dir="ltr" placeholder="https://www.linkedin.com/in/osama-alharbi-it/">
           </div>
           <div>
             <label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
