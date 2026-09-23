@@ -83,6 +83,24 @@
         "ar": "تقديم الدعم الفني والتشغيلي في بيئة تقنية المعلومات الجامعية. مراجعة إجراءات التشغيل وتوثيق الأنظمة. المساعدة في تحديد مشكلات الأنظمة وفجوات الخدمة. دعم قياس الأداء وحساب مؤشرات KPI. استخدام Microsoft Visio لتحليل سير العمل.",
         "en": "Provided technical and operational support in a university IT environment. Reviewed IT procedures and system documentation. Assisted in identifying system issues and service gaps. Supported KPI calculation for service uptime. Utilized Microsoft Visio to analyse workflows."
       }
+    },
+    {
+      "role": {
+        "ar": "متدرب شبكات",
+        "en": "Networking Trainee"
+      },
+      "company": {
+        "ar": "قسم الشبكات - عمادة تقنية المعلومات والتعليم الإلكتروني - الجامعة الإسلامية بالمدينة المنورة",
+        "en": "Networks Department - Deanship of Information Technology and E-Learning - Islamic University of Madinah"
+      },
+      "period": {
+        "ar": "",
+        "en": ""
+      },
+      "description": {
+        "ar": "تكوين والتحقق من 4 شبكات محلية افتراضية (VLANs)، عنونة IP، وتقسيم الشبكات الفرعية (/26 subnet segmentation).\n\nإعداد وترميز ربط 802.1Q (802.1Q trunking) وتوجيه البيانات بين شبكات VLANs باستخدام تقنية (Router-on-a-Stick).\n\nتنفيذ عمليات التحقق من إعدادات سيسكو (Cisco configuration verification)، اختبار الاتصال، واستكشاف الأخطاء وإصلاحها باستخدام أوامر (Ping و show).\n\nتكوين واستخدام نظام مراقبة الشبكات (PRTG Network Monitor) مع مستشعرات Ping، WMI، وSNMP لمراقبة استهلاك المعالج، الذاكرة، الأقراص، أوقات الاستجابة، وفقدان الحزم لـ 11 مستشعراً.\n\nتطبيق مفاهيم إدارة خدمات تقنية المعلومات (ITSM) باستخدام ManageEngine ServiceDesk Plus، بما في ذلك إدارة الحوادث، تتبع دورة حياة التذاكر، الأولويات، ومستويات جودة الخدمة (SLA).",
+        "en": "Configured and verified four Virtual Local Area Networks (VLANs), IP addressing, and /26 subnet segmentation.\n\nSet up and configured 802.1Q trunking and inter-VLAN routing using the \"Router-on-a-Stick\" technique.\n\nPerformed Cisco configuration verification, connectivity testing, and troubleshooting using Ping and \"show\" commands.\n\nConfigured and utilized PRTG Network Monitor with Ping, WMI, and SNMP sensors to monitor CPU, memory, and disk usage, as well as response times and packet loss across 11 sensors.\n\nApplied IT Service Management (ITSM) concepts using ManageEngine ServiceDesk Plus, including incident management, ticket lifecycle tracking, prioritization, and Service Level Agreements (SLAs)."
+      }
     }
   ],
   "volunteer": [
@@ -107,12 +125,6 @@
     }
   ],
   "skills": [
-    {
-      "ar": "تحليل البيانات",
-      "en": "Data Analysis",
-      "level": 80,
-      "category": "hard"
-    },
     {
       "ar": "بروتوكولات الشبكات (TCP/IP)",
       "en": "Network Protocols (TCP/IP)",
@@ -178,6 +190,36 @@
       "en": "Proactivity & Initiative",
       "level": 85,
       "category": "soft"
+    },
+    {
+      "ar": "Cisco Networking & Switching",
+      "en": "Cisco Networking & Switching",
+      "level": "65",
+      "category": "hard"
+    },
+    {
+      "ar": "إعداد وتوجيه شبكات VLAN",
+      "en": "VLANs & Inter-VLAN Routing",
+      "level": "60",
+      "category": "hard"
+    },
+    {
+      "ar": "مراقبة الشبكات والأنظمة (PRTG)",
+      "en": "Network Monitoring (PRTG & SNMP)",
+      "level": "40",
+      "category": "hard"
+    },
+    {
+      "ar": "استكشاف أخطاء الشبكات وإصلاحها",
+      "en": "Network Troubleshooting",
+      "level": "30",
+      "category": "hard"
+    },
+    {
+      "ar": "إدارة خدمات تقنية المعلومات (ITSM)",
+      "en": "IT Service Management (ITSM)",
+      "level": "20",
+      "category": "hard"
     }
   ],
   "projects": [
@@ -259,6 +301,18 @@
       },
       "credential": "DZ93HR2XW4I1",
       "date": "January 2025"
+    },
+    {
+      "name": {
+        "ar": "AWS Certified Cloud Practitioner (SDA)",
+        "en": "AWS Certified Cloud Practitioner (SDA)"
+      },
+      "issuer": {
+        "ar": "Amazon Web Services (AWS)",
+        "en": "Amazon Web Services (AWS)"
+      },
+      "credential": "",
+      "date": ""
     }
   ],
   "workshops": [
