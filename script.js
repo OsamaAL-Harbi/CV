@@ -1562,15 +1562,6 @@ function filterCmd(val) {
     });
 }
 
-function setupKonamiCode() {
-    const code = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
-    let idx = 0;
-    document.addEventListener('keydown', e => {
-        idx = (e.key === code[idx]) ? idx + 1 : 0;
-        if (idx === code.length) { showToast('Party Mode! 🎉', 'success'); initParticles(true); idx = 0; }
-    });
-}
-
 function setDeepValue(obj, path, value) {
     const keys = path.split('.');
     let cur = obj;
