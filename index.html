@@ -216,20 +216,20 @@
                 <a href="#contact"   class="nav-link hover:text-primary transition"           id="nav-contact"   data-lang="nav_contact">تواصل</a>
             </div>
             <div class="flex items-center gap-3 z-50">
-                <button onclick="toggleLanguage()" id="lang-btn" class="px-3 py-1 text-xs font-bold border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">EN</button>
+                <button data-action="toggle-language" id="lang-btn" class="px-3 py-1 text-xs font-bold border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">EN</button>
                 <button id="theme-btn" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition border border-gray-200 dark:border-gray-700">🌓</button>
-                <button onclick="toggleMobileMenu()" class="md:hidden text-xl focus:outline-none"><i class="fas fa-bars"></i></button>
+                <button data-action="toggle-menu" class="md:hidden text-xl focus:outline-none"><i class="fas fa-bars"></i></button>
             </div>
         </div>
     </nav>
 
     <!-- ═══ MOBILE MENU ════════════════════════════════════ -->
     <div id="mobile-menu" class="closed fixed inset-0 z-40 bg-white dark:bg-darkBg flex flex-col items-center justify-center space-y-8 md:hidden shadow-2xl">
-        <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 text-3xl hover:text-red-500 transition"><i class="fas fa-times"></i></button>
-        <a href="#home"      onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_home">الرئيسية</a>
-        <a href="#resume"    onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_resume">السيرة الذاتية</a>
-        <a href="#portfolio" onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_portfolio">الأعمال</a>
-        <a href="#contact"   onclick="toggleMobileMenu()" class="text-xl font-bold hover:text-primary transition" data-lang="nav_contact">تواصل</a>
+        <button data-action="toggle-menu" class="absolute top-6 right-6 text-3xl hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+        <a href="#home"      data-action="toggle-menu" class="text-xl font-bold hover:text-primary transition" data-lang="nav_home">الرئيسية</a>
+        <a href="#resume"    data-action="toggle-menu" class="text-xl font-bold hover:text-primary transition" data-lang="nav_resume">السيرة الذاتية</a>
+        <a href="#portfolio" data-action="toggle-menu" class="text-xl font-bold hover:text-primary transition" data-lang="nav_portfolio">الأعمال</a>
+        <a href="#contact"   data-action="toggle-menu" class="text-xl font-bold hover:text-primary transition" data-lang="nav_contact">تواصل</a>
         <a href="Osama_Alharbi_IT_CV.pdf" download class="px-6 py-2 bg-primary text-white rounded-full font-bold shadow-lg flex items-center gap-2">
             <i class="fas fa-download"></i> <span data-lang="btn_download_cv">تحميل السيرة الذاتية</span>
         </a>
@@ -246,13 +246,13 @@
                     <div class="mb-8 relative inline-block group cursor-pointer">
                         <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
                         <img id="profile-img" src="" alt="Profile" class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl transition transform group-hover:scale-105">
-                        <button onclick="editImage('profile.image')" class="admin-element absolute inset-0 bg-black/50 rounded-full items-center justify-center text-white opacity-0 hover:opacity-100 transition">
+                        <button data-action="edit-image" data-path="profile.image" class="admin-element absolute inset-0 bg-black/50 rounded-full items-center justify-center text-white opacity-0 hover:opacity-100 transition">
                             <i class="fas fa-camera text-2xl"></i>
                         </button>
                     </div>
 
                     <!-- Admin: edit profile button below image -->
-                    <button onclick="manageProfile()" class="admin-element mt-2 mb-4 mx-auto items-center gap-2 px-4 py-1.5 bg-teal-500 text-white rounded-full text-xs font-bold hover:bg-teal-600 transition">
+                    <button data-action="manage-profile" class="admin-element mt-2 mb-4 mx-auto items-center gap-2 px-4 py-1.5 bg-teal-500 text-white rounded-full text-xs font-bold hover:bg-teal-600 transition">
                         <i class="fas fa-user-edit"></i> تعديل الملف الشخصي
                     </button>
                     <p id="smart-greeting" class="text-primary font-bold mb-2 animate-pulse text-lg">مرحباً</p>
@@ -272,10 +272,10 @@
                         <a href="Osama_Alharbi.pdf" download class="px-7 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-bold hover:scale-105 transition shadow-lg shadow-red-500/30 flex items-center gap-2">
                             <i class="fas fa-file-pdf"></i><span data-lang="btn_download_cv">تحميل السيرة الذاتية</span>
                         </a>
-                        <button onclick="shareProfile()" class="px-7 py-3 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-xl font-bold hover:scale-105 transition flex items-center gap-2">
+                        <button data-action="share" class="px-7 py-3 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-xl font-bold hover:scale-105 transition flex items-center gap-2">
                             <i class="fas fa-share-alt text-primary"></i><span data-lang="btn_share">مشاركة</span>
                         </button>
-                        <button onclick="triggerPrint()" class="px-7 py-3 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-xl font-bold hover:scale-105 transition flex items-center gap-2 print-hide">
+                        <button data-action="print" class="px-7 py-3 bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 rounded-xl font-bold hover:scale-105 transition flex items-center gap-2 print-hide">
                             <i class="fas fa-print text-gray-500"></i><span data-lang="btn_print">طباعة</span>
                         </button>
                     </div>
@@ -315,7 +315,7 @@
                     <a href="Osama_Alharbi_IT_CV.pdf" download class="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 border border-red-200 dark:border-red-800 rounded-xl text-xs font-bold hover:scale-105 transition">
                         <i class="fas fa-file-pdf"></i><span data-lang="btn_download_cv">تحميل PDF</span>
                     </a>
-                    <button onclick="triggerPrint()" class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold hover:scale-105 transition">
+                    <button data-action="print" class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold hover:scale-105 transition">
                         <i class="fas fa-print"></i><span data-lang="btn_print">طباعة</span>
                     </button>
                 </div>
@@ -325,19 +325,19 @@
                 <div>
                     <div class="flex justify-between items-center mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-primary"><i class="fas fa-briefcase"></i><span data-lang="sec_exp">الخبرات</span></h3>
-                        <button onclick="addItem('experience')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
+                        <button data-action="add-item" data-type="experience" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="experience-container" class="space-y-10 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8 ltr:border-l-2 ltr:border-r-0 ltr:mr-0 ltr:ml-3 ltr:pr-0 ltr:pl-8 mb-12"></div>
 
                     <div class="flex justify-between items-center mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-blue-500"><i class="fas fa-university"></i><span data-lang="sec_edu">التعليم</span></h3>
-                        <button onclick="addItem('education')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
+                        <button data-action="add-item" data-type="education" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="education-container" class="space-y-6 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8 ltr:border-l-2 ltr:border-r-0 ltr:mr-0 ltr:ml-3 ltr:pr-0 ltr:pl-8 mb-12"></div>
 
                     <div class="flex justify-between items-center mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-orange-500"><i class="fas fa-hands-helping"></i><span data-lang="sec_volunteer">التطوع</span></h3>
-                        <button onclick="addItem('volunteer')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
+                        <button data-action="add-item" data-type="volunteer" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="volunteer-container" class="space-y-6 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8 ltr:border-l-2 ltr:border-r-0 ltr:mr-0 ltr:ml-3 ltr:pr-0 ltr:pl-8"></div>
                 </div>
@@ -345,29 +345,29 @@
                 <div>
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-green-500"><i class="fas fa-code"></i><span data-lang="sec_skills">المهارات</span></h3>
-                        <button onclick="addItem('skills')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
+                        <button data-action="add-item" data-type="skills" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div class="flex gap-2 mb-5 print-hide" id="skill-tabs">
-                        <button onclick="setSkillTab('hard')" id="tab-hard" class="px-4 py-1.5 text-xs font-bold rounded-full bg-primary text-white transition" data-lang="tab_hard">تقنية</button>
-                        <button onclick="setSkillTab('soft')" id="tab-soft" class="px-4 py-1.5 text-xs font-bold rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 transition" data-lang="tab_soft">شخصية</button>
+                        <button data-action="set-skill-tab" data-tab="hard" id="tab-hard" class="px-4 py-1.5 text-xs font-bold rounded-full bg-primary text-white transition" data-lang="tab_hard">تقنية</button>
+                        <button data-action="set-skill-tab" data-tab="soft" id="tab-soft" class="px-4 py-1.5 text-xs font-bold rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 transition" data-lang="tab_soft">شخصية</button>
                     </div>
                     <div id="skills-container" class="space-y-3 mb-12"></div>
 
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-secondary"><i class="fas fa-certificate"></i><span data-lang="sec_certs">الشهادات</span></h3>
-                        <button onclick="addItem('certificates')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
+                        <button data-action="add-item" data-type="certificates" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="certificates-container" class="space-y-4 mb-12"></div>
 
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-yellow-500"><i class="fas fa-chalkboard-teacher"></i><span data-lang="sec_workshops">ورش العمل</span></h3>
-                        <button onclick="addItem('workshops')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
+                        <button data-action="add-item" data-type="workshops" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="workshops-container" class="space-y-4 mb-12"></div>
 
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-teal-500"><i class="fas fa-language"></i><span data-lang="sec_languages">اللغات</span></h3>
-                        <button onclick="addItem('languages')" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
+                        <button data-action="add-item" data-type="languages" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="languages-container" class="space-y-3"></div>
                 </div>
@@ -379,7 +379,7 @@
             <div class="text-center mb-10 relative">
                 <h2 class="text-4xl font-bold mb-4" data-aos="fade-down" data-lang="sec_projects">معرض المشاريع</h2>
                 <div class="w-20 h-1 bg-primary mx-auto rounded-full"></div>
-                <button onclick="addItem('projects')" class="admin-element absolute top-0 right-0 bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-200 gap-2 transition shadow-lg"><i class="fas fa-plus"></i> مشروع جديد</button>
+                <button data-action="add-item" data-type="projects" class="admin-element absolute top-0 right-0 bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-200 gap-2 transition shadow-lg"><i class="fas fa-plus"></i> مشروع جديد</button>
             </div>
             <!-- Project filters (generated dynamically) -->
             <div id="project-filters" class="flex flex-wrap justify-center gap-2 mb-10 print-hide"></div>
@@ -396,19 +396,19 @@
                 </div>
                 <!-- Contact cards -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-primary transition-all cursor-pointer text-center" onclick="contactAction('email')">
+                    <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-primary transition-all cursor-pointer text-center" data-action="contact" data-contact="email" role="button" tabindex="0">
                         <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center mx-auto mb-3 text-primary text-xl group-hover:scale-110 transition-transform"><i class="fas fa-envelope"></i></div>
                         <p class="text-xs text-gray-400 mb-1" data-lang="contact_email_label">البريد الإلكتروني</p>
                         <p id="contact-email-display" class="font-bold text-xs dark:text-white truncate"></p>
                         <span class="inline-block mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity" data-lang="contact_click_copy">انقر للنسخ</span>
                     </div>
-                    <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-blue-500 transition-all cursor-pointer text-center" onclick="contactAction('linkedin')">
+                    <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-blue-500 transition-all cursor-pointer text-center" data-action="contact" data-contact="linkedin" role="button" tabindex="0">
                         <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center mx-auto mb-3 text-blue-600 text-xl group-hover:scale-110 transition-transform"><i class="fab fa-linkedin"></i></div>
                         <p class="text-xs text-gray-400 mb-1">LinkedIn</p>
                         <p class="font-bold text-sm dark:text-white">Osama Al-Harbi</p>
                         <span class="inline-block mt-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" data-lang="contact_open">فتح الملف</span>
                     </div>
-                    <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-gray-500 transition-all cursor-pointer text-center" onclick="contactAction('github')">
+                    <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-gray-500 transition-all cursor-pointer text-center" data-action="contact" data-contact="github" role="button" tabindex="0">
                         <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-3 text-gray-700 dark:text-gray-300 text-xl group-hover:scale-110 transition-transform"><i class="fab fa-github"></i></div>
                         <p class="text-xs text-gray-400 mb-1">GitHub</p>
                         <p class="font-bold text-sm dark:text-white">OsamaAL-Harbi</p>
@@ -428,10 +428,10 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1.5" data-lang="contact_message_label">الرسالة</label>
-                            <textarea id="contact-message" rows="5" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-right resize-none" placeholder="اكتب رسالتك هنا... / Write your message here..." dir="auto" oninput="updateCharCounter(this)"></textarea>
+                            <textarea id="contact-message" rows="5" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-right resize-none" placeholder="اكتب رسالتك هنا... / Write your message here..." dir="auto"></textarea>
                         </div>
                         <p id="char-counter" class="text-xs text-gray-400 text-left ltr:text-right">0 / 2000</p>
-                        <button onclick="sendMailto()" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 active:scale-95 transition shadow-lg flex items-center justify-center gap-2">
+                        <button data-action="send-mail" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 active:scale-95 transition shadow-lg flex items-center justify-center gap-2">
                             <i class="fas fa-paper-plane"></i><span data-lang="btn_email">فتح تطبيق الإيميل للإرسال</span>
                         </button>
                         <p class="text-xs text-gray-400 text-center" data-lang="contact_mailto_note">سيفتح تطبيق الإيميل على جهازك مع الرسالة جاهزة</p>
@@ -471,15 +471,15 @@
     </footer>
 
     <!-- Scroll Top -->
-    <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" class="fixed bottom-6 left-6 z-40 bg-primary text-white w-12 h-12 rounded-full shadow-xl hover:bg-blue-600 transition flex items-center justify-center transform translate-y-10 print-hide">
+    <button id="scrollTopBtn" data-action="scroll-top" class="fixed bottom-6 left-6 z-40 bg-primary text-white w-12 h-12 rounded-full shadow-xl hover:bg-blue-600 transition flex items-center justify-center transform translate-y-10 print-hide">
         <i class="fas fa-arrow-up"></i>
     </button>
 
     <!-- ═══ PROJECT MODAL ════════════════════════════════════ -->
-    <div id="project-modal" class="hidden fixed inset-0 z-[150] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 print-hide" onclick="closeProjectModal(event)">
+    <div id="project-modal" class="hidden fixed inset-0 z-[150] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 print-hide" data-action="project-modal-backdrop">
         <div class="bg-white dark:bg-cardBg w-full max-w-2xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden" id="modal-box">
             <div class="bg-gradient-to-r from-primary to-secondary p-6 text-white relative">
-                <button onclick="_closeProjectModal()" class="absolute top-4 left-4 ltr:right-4 ltr:left-auto w-8 h-8 bg-white/20 rounded-full hover:bg-white/40 transition flex items-center justify-center">
+                <button data-action="close-project-modal" class="absolute top-4 left-4 ltr:right-4 ltr:left-auto w-8 h-8 bg-white/20 rounded-full hover:bg-white/40 transition flex items-center justify-center">
                     <i class="fas fa-times text-sm"></i>
                 </button>
                 <h3 id="modal-title" class="text-xl font-bold pr-8 ltr:pr-0 ltr:pl-8"></h3>
@@ -527,7 +527,7 @@
         <div class="bg-white dark:bg-cardBg w-full max-w-lg rounded-xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
                 <i class="fas fa-search text-gray-400"></i>
-                <input type="text" id="cmd-input" class="w-full bg-transparent outline-none text-lg dark:text-white" placeholder="Type a command..." onkeyup="filterCmd(this.value)">
+                <input type="text" id="cmd-input" class="w-full bg-transparent outline-none text-lg dark:text-white" placeholder="Type a command..." aria-label="Command palette">
                 <span class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-gray-500">ESC</span>
             </div>
             <div id="cmd-list" class="max-h-60 overflow-y-auto p-2"></div>
@@ -538,12 +538,12 @@
     <div id="admin-toolbar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] bg-white dark:bg-cardBg shadow-2xl border border-gray-200 dark:border-gray-700 rounded-full px-6 py-2 flex items-center gap-3 print-hide">
         <span class="text-xs font-bold text-green-500 flex items-center gap-1"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Admin</span>
         <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
-        <button onclick="saveToGitHub()" class="text-sm font-bold text-primary hover:text-blue-600 transition flex items-center gap-2"><i class="fas fa-save"></i><span data-lang="btn_save">حفظ</span></button>
-        <button onclick="manageProfile()" class="text-sm font-bold text-teal-500 hover:text-teal-600 transition flex items-center gap-2" title="تعديل الملف الشخصي"><i class="fas fa-user-edit"></i></button>
-        <button onclick="showAnalyticsDashboard()" class="text-sm font-bold text-purple-500 hover:text-purple-600 transition" title="Analytics Dashboard"><i class="fas fa-chart-bar"></i></button>
-        <button onclick="restoreBackup()" class="text-sm font-bold text-yellow-500 hover:text-yellow-600 transition" title="Restore Backup"><i class="fas fa-history"></i></button>
+        <button data-action="save" class="text-sm font-bold text-primary hover:text-blue-600 transition flex items-center gap-2"><i class="fas fa-save"></i><span data-lang="btn_save">حفظ</span></button>
+        <button data-action="manage-profile" class="text-sm font-bold text-teal-500 hover:text-teal-600 transition flex items-center gap-2" title="تعديل الملف الشخصي"><i class="fas fa-user-edit"></i></button>
+        <button data-action="analytics" class="text-sm font-bold text-purple-500 hover:text-purple-600 transition" title="Analytics Dashboard"><i class="fas fa-chart-bar"></i></button>
+        <button data-action="restore-backup" class="text-sm font-bold text-yellow-500 hover:text-yellow-600 transition" title="Restore Backup"><i class="fas fa-history"></i></button>
         <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
-        <button onclick="logout()" class="text-red-500 hover:text-red-700 text-lg" title="Logout"><i class="fas fa-power-off"></i></button>
+        <button data-action="logout" class="text-red-500 hover:text-red-700 text-lg" title="Logout"><i class="fas fa-power-off"></i></button>
     </div>
 
     <!-- ═══ ADMIN LOGIN MODAL ════════════════════════════════ -->
@@ -563,8 +563,8 @@
                 <p class="mt-1" lang="en" dir="ltr">Use a fine-grained PAT scoped to this repository only, with <b>Contents: Read and write</b> and a short expiry. It is kept for this tab session only.</p>
             </div>
             <div class="flex gap-3">
-                <button onclick="document.getElementById('admin-modal').classList.add('hidden')" class="flex-1 py-3 text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 transition">Cancel</button>
-                <button onclick="authenticateAndEdit()" class="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition shadow-lg">Login</button>
+                <button data-action="close-admin-modal" class="flex-1 py-3 text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 transition">Cancel</button>
+                <button data-action="login" class="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition shadow-lg">Login</button>
             </div>
         </div>
     </div>

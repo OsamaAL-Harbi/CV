@@ -69,10 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         handleHash();                  // respect URL hash on first load
     });
 
-    document.getElementById('project-filters')?.addEventListener('click', e => {
-        const btn = e.target.closest('[data-filter]');
-        if (btn) setProjectFilter(btn.dataset.filter);
-    });
+    setupActions();
 
     // React to hash changes (back/forward browser buttons + nav links)
     window.addEventListener('hashchange', handleHash);
@@ -436,13 +433,13 @@ function renderProjectItem(item, realIdx) {
     return `
         <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900
                     flex items-center justify-center relative overflow-hidden rounded-t-2xl cursor-pointer"
-             onclick="openProjectModal(${realIdx})">
+             data-action="open-project" data-index="${realIdx}">
             <i class="fas fa-laptop-code text-5xl text-gray-300 dark:text-gray-700 group-hover:scale-110 transition duration-500"></i>
             <div class="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition duration-300 backdrop-blur-sm">
                 <span class="px-4 py-2 bg-white text-gray-900 rounded-full font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition duration-300 shadow-xl">
                     ${currentLang === 'ar' ? 'التفاصيل' : 'Details'}
                 </span>
-                ${hasLive ? `<a href="${escapeHTML(liveUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"
+                ${hasLive ? `<a href="${escapeHTML(liveUrl)}" target="_blank" rel="noopener noreferrer"
                     class="px-4 py-2 bg-green-500 text-white rounded-full font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition duration-500 shadow-xl">
                     Live Demo</a>` : ''}
             </div>
@@ -491,7 +488,7 @@ function renderProjectFilters() {
     const techs    = [{ key: 'all', label: allLabel }, ...Array.from(techSet).map(t => ({ key: t, label: t }))];
 
     container.innerHTML = techs.map(({ key, label }) => `
-        <button data-filter="${escapeHTML(key)}"
+        <button data-action="set-filter" data-filter="${escapeHTML(key)}"
                 class="filter-btn px-3 py-1.5 text-xs font-bold rounded-full border border-gray-200 dark:border-gray-700 transition hover:border-primary hover:text-primary ${activeFilter === key ? 'active bg-primary text-white border-primary' : 'bg-white dark:bg-cardBg text-gray-600 dark:text-gray-300'}">
             ${escapeHTML(label)}
         </button>
@@ -519,7 +516,7 @@ function renderFilteredProjects() {
             <div class="col-span-full text-center py-16 text-gray-400">
                 <i class="fas fa-search text-4xl mb-4 block opacity-30"></i>
                 <p class="font-medium">${currentLang === 'ar' ? 'لا توجد مشاريع بهذه التقنية' : 'No projects found for this technology'}</p>
-                <button onclick="setProjectFilter('all')" class="mt-4 text-primary text-sm font-bold hover:underline">${STATIC_TEXT[currentLang]?.filter_all}</button>
+                <button data-action="set-filter" data-filter="all" class="mt-4 text-primary text-sm font-bold hover:underline">${STATIC_TEXT[currentLang]?.filter_all}</button>
             </div>`;
         return;
     }
@@ -892,11 +889,11 @@ function renderAdminButtons(type, index) {
                          flex items-center justify-center hover:bg-gray-100 cursor-move border border-gray-200 dark:border-gray-600">
                 <i class="fas fa-grip-vertical" style="font-size:10px"></i>
             </span>
-            <button onclick="event.stopPropagation(); editItem('${type}', ${index})"
+            <button data-action="edit-item" data-type="${type}" data-index="${index}" aria-label="Edit"
                     class="bg-blue-500 text-white w-7 h-7 rounded-lg shadow flex items-center justify-center hover:bg-blue-600 hover:scale-110 transition">
                 <i class="fas fa-pen" style="font-size:10px"></i>
             </button>
-            <button onclick="event.stopPropagation(); deleteItem('${type}', ${index})"
+            <button data-action="delete-item" data-type="${type}" data-index="${index}" aria-label="Delete"
                     class="bg-red-500 text-white w-7 h-7 rounded-lg shadow flex items-center justify-center hover:bg-red-600 hover:scale-110 transition">
                 <i class="fas fa-trash" style="font-size:10px"></i>
             </button>
@@ -1552,6 +1549,62 @@ function restoreBackup() {
 }
 
 // =====================================================
+// 22b. UI ACTIONS (event delegation, no inline handlers)
+// =====================================================
+const ACTIONS = {
+    'toggle-language':       () => toggleLanguage(),
+    'toggle-menu':           () => toggleMobileMenu(),
+    'share':                 () => shareProfile(),
+    'print':                 () => triggerPrint(),
+    'scroll-top':            () => window.scrollTo({ top: 0, behavior: 'smooth' }),
+    'send-mail':             () => sendMailto(),
+    'contact':               el => contactAction(el.dataset.contact),
+    'set-skill-tab':         el => setSkillTab(el.dataset.tab),
+    'set-filter':            el => setProjectFilter(el.dataset.filter),
+    'open-project':          el => openProjectModal(Number(el.dataset.index)),
+    'close-project-modal':   () => _closeProjectModal(),
+    'project-modal-backdrop': (el, e) => { if (e.target === el) _closeProjectModal(); },
+    'run-command':           el => {
+        document.getElementById('cmd-palette').classList.add('hidden');
+        cmdItems[Number(el.dataset.index)]?.action();
+    },
+    'close-admin-modal':     () => document.getElementById('admin-modal').classList.add('hidden'),
+    'login':                 () => authenticateAndEdit(),
+    'logout':                () => logout(),
+    'save':                  () => saveToGitHub(),
+    'analytics':             () => showAnalyticsDashboard(),
+    'restore-backup':        () => restoreBackup(),
+    'manage-profile':        () => manageProfile(),
+    'edit-image':            el => editImage(el.dataset.path),
+    'add-item':              el => addItem(el.dataset.type),
+    'edit-item':             el => editItem(el.dataset.type, Number(el.dataset.index)),
+    'delete-item':           el => deleteItem(el.dataset.type, Number(el.dataset.index))
+};
+
+function runAction(e) {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    // A real link inside an action area (e.g. "Live Demo" on a project card) keeps its own behaviour.
+    const link = e.target.closest('a[href]');
+    if (link && link !== el && el.contains(link)) return;
+    ACTIONS[el.dataset.action]?.(el, e);
+}
+
+function setupActions() {
+    document.addEventListener('click', runAction);
+    // Keyboard support for non-button elements acting as buttons
+    document.addEventListener('keydown', e => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const el = e.target.closest('[data-action][role="button"]');
+        if (!el || el !== e.target) return;
+        e.preventDefault();
+        runAction(e);
+    });
+    document.getElementById('contact-message')?.addEventListener('input', e => updateCharCounter(e.target));
+    document.getElementById('cmd-input')?.addEventListener('input', e => filterCmd(e.target.value));
+}
+
+// =====================================================
 // 23. UTILITIES
 // =====================================================
 const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -1643,8 +1696,10 @@ function setupCmdPalette() {
     });
 }
 
+let cmdItems = [];
+
 function renderCmdItems() {
-    const items = [
+    cmdItems = [
         { icon: 'fa-home',      text: 'الرئيسية / Home',        action: () => showPage('home') },
         { icon: 'fa-id-card',   text: 'السيرة الذاتية / Resume', action: () => showPage('resume') },
         { icon: 'fa-briefcase', text: 'الأعمال / Portfolio',     action: () => showPage('portfolio') },
@@ -1655,9 +1710,9 @@ function renderCmdItems() {
         { icon: 'fa-language',  text: 'تبديل اللغة / Language',  action: toggleLanguage },
         { icon: 'fa-moon',      text: 'الوضع الليلي / Theme',    action: () => document.getElementById('theme-btn').click() }
     ];
-    document.getElementById('cmd-list').innerHTML = items.map(item => `
+    document.getElementById('cmd-list').innerHTML = cmdItems.map((item, i) => `
         <div class="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer flex gap-3 items-center rounded transition"
-             onclick="document.getElementById('cmd-palette').classList.add('hidden'); (${item.action})()">
+             data-action="run-command" data-index="${i}" role="button" tabindex="0">
             <i class="fas ${item.icon} text-primary w-4"></i>
             <span class="font-bold dark:text-white text-sm">${item.text}</span>
         </div>
