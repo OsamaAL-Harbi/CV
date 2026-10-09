@@ -69,6 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
         handleHash();                  // respect URL hash on first load
     });
 
+    document.getElementById('project-filters')?.addEventListener('click', e => {
+        const btn = e.target.closest('[data-filter]');
+        if (btn) setProjectFilter(btn.dataset.filter);
+    });
+
     // React to hash changes (back/forward browser buttons + nav links)
     window.addEventListener('hashchange', handleHash);
 });
@@ -323,9 +328,13 @@ function renderProfile() {
     updateText('profile.name',    t(p.name));
     updateText('profile.summary', t(p.summary));
 
-    const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(t(p.name))}&background=0D8ABC&color=fff&size=200`;
+    const fallback = 'assets/img/avatar.svg';
     const imgEl = document.getElementById('profile-img');
-    if (imgEl) { imgEl.src = p.image || fallback; imgEl.onerror = () => { imgEl.src = fallback; }; }
+    if (imgEl) {
+        imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = fallback; };
+        imgEl.src = safeAssetUrl(p.image) || fallback;
+        imgEl.alt = t(p.name);
+    }
 
     if (twInterval) clearInterval(twInterval);
     typeWriter(t(p.title), 'typewriter');
@@ -356,35 +365,35 @@ function renderSection(type, data, contentFn, wrapperClass) {
 // ─── Item renderers ───────────────────────────────────
 function renderExperienceItem(item) {
     return `
-        <h3 class="text-xl font-bold dark:text-white hover:text-primary transition">${t(item.role)}</h3>
-        <p class="text-primary font-medium text-sm">${t(item.company)}</p>
-        <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs mb-3 font-bold">${t(item.period)}</span>
-        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${t(item.description)}</p>`;
+        <h3 class="text-xl font-bold dark:text-white hover:text-primary transition">${escapeHTML(t(item.role))}</h3>
+        <p class="text-primary font-medium text-sm">${escapeHTML(t(item.company))}</p>
+        <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs mb-3 font-bold">${escapeHTML(t(item.period))}</span>
+        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${escapeHTML(t(item.description))}</p>`;
 }
 function renderEducationItem(item) {
     return `
-        <h3 class="text-xl font-bold dark:text-white hover:text-blue-500 transition">${t(item.degree)}</h3>
-        <p class="text-blue-500 font-medium text-sm">${t(item.institution)}</p>
-        <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs mb-3 font-bold">${t(item.period)}</span>
-        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${t(item.description)}</p>`;
+        <h3 class="text-xl font-bold dark:text-white hover:text-blue-500 transition">${escapeHTML(t(item.degree))}</h3>
+        <p class="text-blue-500 font-medium text-sm">${escapeHTML(t(item.institution))}</p>
+        <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs mb-3 font-bold">${escapeHTML(t(item.period))}</span>
+        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${escapeHTML(t(item.description))}</p>`;
 }
 function renderVolunteerItem(item) {
     return `
-        <h3 class="text-xl font-bold dark:text-white hover:text-orange-500 transition">${t(item.role)}</h3>
-        <p class="text-orange-500 font-medium text-sm">${t(item.organization)}</p>
+        <h3 class="text-xl font-bold dark:text-white hover:text-orange-500 transition">${escapeHTML(t(item.role))}</h3>
+        <p class="text-orange-500 font-medium text-sm">${escapeHTML(t(item.organization))}</p>
         <div class="flex flex-wrap gap-2 mb-3">
-            <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs font-bold">${t(item.period)}</span>
-            ${item.hours ? `<span class="inline-block bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-3 py-1 rounded text-xs font-bold">${item.hours} ${currentLang === 'ar' ? 'ساعة' : 'hrs'}</span>` : ''}
+            <span class="inline-block bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs font-bold">${escapeHTML(t(item.period))}</span>
+            ${item.hours ? `<span class="inline-block bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-3 py-1 rounded text-xs font-bold">${escapeHTML(item.hours)} ${currentLang === 'ar' ? 'ساعة' : 'hrs'}</span>` : ''}
         </div>
-        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${t(item.description)}</p>`;
+        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">${escapeHTML(t(item.description))}</p>`;
 }
 function renderCertItem(item) {
     return `
         <div class="text-2xl text-secondary flex-shrink-0"><i class="fas fa-certificate"></i></div>
         <div class="flex-1 min-w-0">
-            <h4 class="font-bold text-sm dark:text-white">${t(item.name)}</h4>
-            <p class="text-xs text-gray-500 mt-1">${t(item.issuer)}${item.credential ? ` · ${item.credential}` : ''}</p>
-            ${item.date ? `<p class="text-xs text-gray-400 mt-0.5">${item.date}</p>` : ''}
+            <h4 class="font-bold text-sm dark:text-white">${escapeHTML(t(item.name))}</h4>
+            <p class="text-xs text-gray-500 mt-1">${escapeHTML(t(item.issuer))}${item.credential ? ` · ${escapeHTML(item.credential)}` : ''}</p>
+            ${item.date ? `<p class="text-xs text-gray-400 mt-0.5">${escapeHTML(item.date)}</p>` : ''}
         </div>`;
 }
 function renderWorkshopItem(item) {
@@ -392,9 +401,9 @@ function renderWorkshopItem(item) {
         <div class="flex items-start gap-3">
             <div class="text-yellow-500 mt-1 flex-shrink-0"><i class="fas fa-chalkboard-teacher"></i></div>
             <div>
-                <h4 class="font-bold text-sm dark:text-white">${t(item.name)}</h4>
-                <p class="text-xs text-gray-500 mt-1">${t(item.organizer)}</p>
-                <p class="text-xs text-gray-400 mt-0.5">${t(item.date)}</p>
+                <h4 class="font-bold text-sm dark:text-white">${escapeHTML(t(item.name))}</h4>
+                <p class="text-xs text-gray-500 mt-1">${escapeHTML(t(item.organizer))}</p>
+                <p class="text-xs text-gray-400 mt-0.5">${escapeHTML(t(item.date))}</p>
             </div>
         </div>`;
 }
@@ -402,8 +411,8 @@ function renderLanguageItem(item) {
     return `
         <i class="fas fa-language text-teal-500 text-lg flex-shrink-0"></i>
         <div>
-            <p class="font-bold text-sm dark:text-white">${t(item.name)}</p>
-            <p class="text-xs text-gray-500">${t(item.level)}</p>
+            <p class="font-bold text-sm dark:text-white">${escapeHTML(t(item.name))}</p>
+            <p class="text-xs text-gray-500">${escapeHTML(t(item.level))}</p>
         </div>`;
 }
 
@@ -421,7 +430,8 @@ function renderProjectItem(item, realIdx) {
     const viewLabel = count === 1
         ? (currentLang === 'ar' ? 'مشاهدة' : 'view')
         : (currentLang === 'ar' ? 'مشاهدة' : 'views');
-    const hasLive   = item.liveUrl && item.liveUrl.trim() !== '' && item.liveUrl !== '#';
+    const liveUrl   = safeUrl(item.liveUrl);
+    const hasLive   = liveUrl !== '';
 
     return `
         <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900
@@ -432,7 +442,7 @@ function renderProjectItem(item, realIdx) {
                 <span class="px-4 py-2 bg-white text-gray-900 rounded-full font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition duration-300 shadow-xl">
                     ${currentLang === 'ar' ? 'التفاصيل' : 'Details'}
                 </span>
-                ${hasLive ? `<a href="${item.liveUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"
+                ${hasLive ? `<a href="${escapeHTML(liveUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"
                     class="px-4 py-2 bg-green-500 text-white rounded-full font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition duration-500 shadow-xl">
                     Live Demo</a>` : ''}
             </div>
@@ -443,12 +453,12 @@ function renderProjectItem(item, realIdx) {
             ${hasLive ? `<span class="absolute top-3 left-3 ltr:right-3 ltr:left-auto bg-green-500/90 text-white text-xs px-2 py-1 rounded-full font-bold pointer-events-none">Live</span>` : ''}
         </div>
         <div class="p-5 flex-grow flex flex-col">
-            <h3 class="text-base font-bold mb-2 dark:text-white">${t(item.title)}</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed flex-grow">${t(item.desc)}</p>
+            <h3 class="text-base font-bold mb-2 dark:text-white">${escapeHTML(t(item.title))}</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed flex-grow">${escapeHTML(t(item.desc))}</p>
             ${item.technologies?.length ? `
                 <div class="flex flex-wrap gap-1.5 mt-3">
                     ${item.technologies.map(tech =>
-                        `<span class="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded font-bold">${tech}</span>`
+                        `<span class="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded font-bold">${escapeHTML(tech)}</span>`
                     ).join('')}
                 </div>` : ''}
         </div>`;
@@ -481,9 +491,9 @@ function renderProjectFilters() {
     const techs    = [{ key: 'all', label: allLabel }, ...Array.from(techSet).map(t => ({ key: t, label: t }))];
 
     container.innerHTML = techs.map(({ key, label }) => `
-        <button onclick="setProjectFilter('${key}')"
+        <button data-filter="${escapeHTML(key)}"
                 class="filter-btn px-3 py-1.5 text-xs font-bold rounded-full border border-gray-200 dark:border-gray-700 transition hover:border-primary hover:text-primary ${activeFilter === key ? 'active bg-primary text-white border-primary' : 'bg-white dark:bg-cardBg text-gray-600 dark:text-gray-300'}">
-            ${label}
+            ${escapeHTML(label)}
         </button>
     `).join('');
 }
@@ -558,11 +568,11 @@ function renderSkillsWithProgress(tab = 'hard') {
         <div class="skill-item relative group sortable-item" data-real-index="${realIdx}">
             ${renderAdminButtons('skills', realIdx)}
             <div class="flex justify-between items-center mb-1">
-                <span class="text-sm font-bold dark:text-white">${t(skill)}</span>
-                <span class="text-xs font-bold text-gray-400">${skill.level || 0}%</span>
+                <span class="text-sm font-bold dark:text-white">${escapeHTML(t(skill))}</span>
+                <span class="text-xs font-bold text-gray-400">${skillLevel(skill)}%</span>
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
-                <div class="skill-bar-fill h-2.5 rounded-full ${barColor}" style="--target-width: ${skill.level || 0}%"></div>
+                <div class="skill-bar-fill h-2.5 rounded-full ${barColor}" style="--target-width: ${skillLevel(skill)}%"></div>
             </div>
         </div>`;
     }).join('');
@@ -638,7 +648,7 @@ function openProjectModal(index) {
     const techSection   = document.getElementById('modal-tech-section');
     if (techContainer) {
         techContainer.innerHTML = (item.technologies || []).map(tech =>
-            `<span class="text-xs px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full font-bold">${tech}</span>`
+            `<span class="text-xs px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full font-bold">${escapeHTML(tech)}</span>`
         ).join('');
     }
     if (techSection) techSection.style.display = item.technologies?.length ? 'block' : 'none';
@@ -655,16 +665,17 @@ function openProjectModal(index) {
     // GitHub link
     const githubLink = document.getElementById('modal-github-link');
     if (githubLink) {
-        if (item.link && item.link !== '#') { githubLink.href = item.link; githubLink.style.display = 'inline-flex'; }
+        const link = safeUrl(item.link);
+        if (link) { githubLink.href = link; githubLink.style.display = 'inline-flex'; }
         else githubLink.style.display = 'none';
     }
 
     // Live Demo link
     const liveLink = document.getElementById('modal-live-link');
     if (liveLink) {
-        if (item.liveUrl && item.liveUrl.trim() !== '' && item.liveUrl !== '#') {
-            liveLink.href = item.liveUrl; liveLink.style.display = 'inline-flex';
-        } else liveLink.style.display = 'none';
+        const live = safeUrl(item.liveUrl);
+        if (live) { liveLink.href = live; liveLink.style.display = 'inline-flex'; }
+        else liveLink.style.display = 'none';
     }
 
     // Re-render cards to update badge
@@ -720,7 +731,7 @@ function showAnalyticsDashboard() {
         const count = pViews[key] || 0;
         return `
         <tr class="border-b border-gray-100 dark:border-gray-700">
-            <td class="py-2 px-3 font-medium text-xs">${t(proj.title)}</td>
+            <td class="py-2 px-3 font-medium text-xs">${escapeHTML(t(proj.title))}</td>
             <td class="py-2 px-3 text-center">
                 <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded font-bold text-xs">${count}</span>
             </td>
@@ -835,10 +846,9 @@ function contactAction(type) {
         navigator.clipboard.writeText(p.email).then(() => {
             showToast(currentLang === 'ar' ? 'تم نسخ البريد ✅' : 'Email copied ✅', 'success');
         }).catch(() => showToast(p.email, 'info'));
-    } else if (type === 'linkedin') {
-        window.open(p.linkedin, '_blank', 'noopener');
-    } else if (type === 'github') {
-        window.open(p.github, '_blank', 'noopener');
+    } else if (type === 'linkedin' || type === 'github') {
+        const url = safeUrl(p[type]);
+        if (url) window.open(url, '_blank', 'noopener');
     }
 }
 
@@ -980,7 +990,7 @@ async function manageItem(type, index = null) {
             const hint = f.array ? ' <span class="text-gray-400 text-xs">(مفصولة بفاصلة)</span>' : '';
             return `<div class="mb-3">
                 <label class="block text-xs mb-1 text-gray-500 text-right">${f.label}${hint}</label>
-                <input id="swal-${f.key}" class="swal2-input m-0 w-full" value="${val}" dir="ltr">
+                <input id="swal-${f.key}" class="swal2-input m-0 w-full" value="${escapeHTML(val)}" dir="ltr">
             </div>`;
         }
         const valAr = getVal(item, f, 'ar');
@@ -988,16 +998,16 @@ async function manageItem(type, index = null) {
         if (f.type === 'textarea') {
             return `<div class="grid grid-cols-2 gap-2 mb-3">
                 <div><label class="block text-xs mb-1 text-gray-500 text-right">${f.label} (AR)</label>
-                <textarea id="swal-${f.key}-ar" class="swal2-textarea m-0 w-full h-24 text-right" dir="rtl">${valAr}</textarea></div>
+                <textarea id="swal-${f.key}-ar" class="swal2-textarea m-0 w-full h-24 text-right" dir="rtl">${escapeHTML(valAr)}</textarea></div>
                 <div><label class="block text-xs mb-1 text-gray-500 text-left">${f.label} (EN)</label>
-                <textarea id="swal-${f.key}-en" class="swal2-textarea m-0 w-full h-24 text-left" dir="ltr">${valEn}</textarea></div>
+                <textarea id="swal-${f.key}-en" class="swal2-textarea m-0 w-full h-24 text-left" dir="ltr">${escapeHTML(valEn)}</textarea></div>
             </div>`;
         }
         return `<div class="grid grid-cols-2 gap-2 mb-3">
             <div><label class="block text-xs mb-1 text-gray-500 text-right">${f.label} (AR)</label>
-            <input id="swal-${f.key}-ar" class="swal2-input m-0 w-full text-right" value="${valAr}" dir="rtl"></div>
+            <input id="swal-${f.key}-ar" class="swal2-input m-0 w-full text-right" value="${escapeHTML(valAr)}" dir="rtl"></div>
             <div><label class="block text-xs mb-1 text-gray-500 text-left">${f.label} (EN)</label>
-            <input id="swal-${f.key}-en" class="swal2-input m-0 w-full text-left" value="${valEn}" dir="ltr"></div>
+            <input id="swal-${f.key}-en" class="swal2-input m-0 w-full text-left" value="${escapeHTML(valEn)}" dir="ltr"></div>
         </div>`;
     }).join('');
 
@@ -1080,11 +1090,11 @@ async function manageProjectItem(index = null) {
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-right">عنوان المشروع (AR)</label>
-              <input id="pj-title-ar" class="swal2-input m-0 w-full text-right" value="${bv(item.title,'ar')}" dir="rtl" placeholder="اسم المشروع بالعربي">
+              <input id="pj-title-ar" class="swal2-input m-0 w-full text-right" value="${escapeHTML(bv(item.title,'ar'))}" dir="rtl" placeholder="اسم المشروع بالعربي">
             </div>
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-left">Project Title (EN)</label>
-              <input id="pj-title-en" class="swal2-input m-0 w-full text-left" value="${bv(item.title,'en')}" dir="ltr" placeholder="Project name in English">
+              <input id="pj-title-en" class="swal2-input m-0 w-full text-left" value="${escapeHTML(bv(item.title,'en'))}" dir="ltr" placeholder="Project name in English">
             </div>
           </div>
 
@@ -1092,11 +1102,11 @@ async function manageProjectItem(index = null) {
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-right">وصف المشروع (AR)</label>
-              <textarea id="pj-desc-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl" placeholder="وصف مختصر...">${bv(item.desc,'ar')}</textarea>
+              <textarea id="pj-desc-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl" placeholder="وصف مختصر...">${escapeHTML(bv(item.desc,'ar'))}</textarea>
             </div>
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-left">Description (EN)</label>
-              <textarea id="pj-desc-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Short description...">${bv(item.desc,'en')}</textarea>
+              <textarea id="pj-desc-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Short description...">${escapeHTML(bv(item.desc,'en'))}</textarea>
             </div>
           </div>
 
@@ -1106,18 +1116,18 @@ async function manageProjectItem(index = null) {
               التقنيات المستخدمة / Technologies
               <span class="text-gray-400 mr-1">(مفصولة بفاصلة — e.g. SQL, HTML5, CSS3)</span>
             </label>
-            <input id="pj-tech" class="swal2-input m-0 w-full" value="${techVal}" dir="ltr" placeholder="SQL, MySQL, HTML5, CSS3, JavaScript">
+            <input id="pj-tech" class="swal2-input m-0 w-full" value="${escapeHTML(techVal)}" dir="ltr" placeholder="SQL, MySQL, HTML5, CSS3, JavaScript">
           </div>
 
           <!-- Challenges -->
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-right">التحديات (AR)</label>
-              <textarea id="pj-chal-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl" placeholder="التحديات التي واجهتها...">${challAr}</textarea>
+              <textarea id="pj-chal-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl" placeholder="التحديات التي واجهتها...">${escapeHTML(challAr)}</textarea>
             </div>
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-left">Challenges (EN)</label>
-              <textarea id="pj-chal-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Challenges faced...">${challEn}</textarea>
+              <textarea id="pj-chal-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Challenges faced...">${escapeHTML(challEn)}</textarea>
             </div>
           </div>
 
@@ -1125,11 +1135,11 @@ async function manageProjectItem(index = null) {
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-right">النتائج والإنجازات (AR)</label>
-              <textarea id="pj-res-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl" placeholder="النتائج والإنجازات...">${resultsAr}</textarea>
+              <textarea id="pj-res-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl" placeholder="النتائج والإنجازات...">${escapeHTML(resultsAr)}</textarea>
             </div>
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-left">Results & Achievements (EN)</label>
-              <textarea id="pj-res-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Results achieved...">${resultsEn}</textarea>
+              <textarea id="pj-res-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr" placeholder="Results achieved...">${escapeHTML(resultsEn)}</textarea>
             </div>
           </div>
 
@@ -1137,11 +1147,11 @@ async function manageProjectItem(index = null) {
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
-              <input id="pj-link" class="swal2-input m-0 w-full" value="${item.link || ''}" dir="ltr" placeholder="https://github.com/...">
+              <input id="pj-link" class="swal2-input m-0 w-full" value="${escapeHTML(item.link || '')}" dir="ltr" placeholder="https://github.com/...">
             </div>
             <div>
               <label class="block text-xs mb-1 text-gray-500">رابط Live Demo</label>
-              <input id="pj-live" class="swal2-input m-0 w-full" value="${item.liveUrl || ''}" dir="ltr" placeholder="https://...">
+              <input id="pj-live" class="swal2-input m-0 w-full" value="${escapeHTML(item.liveUrl || '')}" dir="ltr" placeholder="https://...">
             </div>
           </div>
 
@@ -1209,66 +1219,66 @@ async function manageProfile() {
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-right">الاسم (AR)</label>
-              <input id="pf-name-ar" class="swal2-input m-0 w-full text-right" value="${vb('name','ar')}" dir="rtl">
+              <input id="pf-name-ar" class="swal2-input m-0 w-full text-right" value="${escapeHTML(vb('name','ar'))}" dir="rtl">
             </div>
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-left">Name (EN)</label>
-              <input id="pf-name-en" class="swal2-input m-0 w-full text-left" value="${vb('name','en')}" dir="ltr">
+              <input id="pf-name-en" class="swal2-input m-0 w-full text-left" value="${escapeHTML(vb('name','en'))}" dir="ltr">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-right">المسمى الوظيفي (AR)</label>
-              <input id="pf-title-ar" class="swal2-input m-0 w-full text-right" value="${vb('title','ar')}" dir="rtl">
+              <input id="pf-title-ar" class="swal2-input m-0 w-full text-right" value="${escapeHTML(vb('title','ar'))}" dir="rtl">
             </div>
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-left">Title (EN)</label>
-              <input id="pf-title-en" class="swal2-input m-0 w-full text-left" value="${vb('title','en')}" dir="ltr">
+              <input id="pf-title-en" class="swal2-input m-0 w-full text-left" value="${escapeHTML(vb('title','en'))}" dir="ltr">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-right">النبذة (AR)</label>
-              <textarea id="pf-summary-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl">${vb('summary','ar')}</textarea>
+              <textarea id="pf-summary-ar" class="swal2-textarea m-0 w-full h-20 text-right" dir="rtl">${escapeHTML(vb('summary','ar'))}</textarea>
             </div>
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-left">Summary (EN)</label>
-              <textarea id="pf-summary-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr">${vb('summary','en')}</textarea>
+              <textarea id="pf-summary-en" class="swal2-textarea m-0 w-full h-20 text-left" dir="ltr">${escapeHTML(vb('summary','en'))}</textarea>
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-right">الموقع (AR)</label>
-              <input id="pf-location-ar" class="swal2-input m-0 w-full text-right" value="${vb('location','ar')}" dir="rtl">
+              <input id="pf-location-ar" class="swal2-input m-0 w-full text-right" value="${escapeHTML(vb('location','ar'))}" dir="rtl">
             </div>
             <div>
               <label class="block text-xs mb-1 text-gray-500 text-left">Location (EN)</label>
-              <input id="pf-location-en" class="swal2-input m-0 w-full text-left" value="${vb('location','en')}" dir="ltr">
+              <input id="pf-location-en" class="swal2-input m-0 w-full text-left" value="${escapeHTML(vb('location','en'))}" dir="ltr">
             </div>
           </div>
 
           <div>
             <label class="block text-xs mb-1 text-gray-500">البريد الإلكتروني / Email</label>
-            <input id="pf-email" class="swal2-input m-0 w-full" value="${v('email')}" dir="ltr" type="email">
+            <input id="pf-email" class="swal2-input m-0 w-full" value="${escapeHTML(v('email'))}" dir="ltr" type="email">
           </div>
           <div>
             <label class="block text-xs mb-1 text-gray-500">رقم الجوال / Phone</label>
-            <input id="pf-phone" class="swal2-input m-0 w-full" value="${v('phone')}" dir="ltr">
+            <input id="pf-phone" class="swal2-input m-0 w-full" value="${escapeHTML(v('phone'))}" dir="ltr">
           </div>
           <div>
             <label class="block text-xs mb-1 text-gray-500">رابط LinkedIn</label>
-            <input id="pf-linkedin" class="swal2-input m-0 w-full" value="${v('linkedin')}" dir="ltr" placeholder="https://www.linkedin.com/in/osama-alharbi-it/">
+            <input id="pf-linkedin" class="swal2-input m-0 w-full" value="${escapeHTML(v('linkedin'))}" dir="ltr" placeholder="https://www.linkedin.com/in/osama-alharbi-it/">
           </div>
           <div>
             <label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
-            <input id="pf-github" class="swal2-input m-0 w-full" value="${v('github')}" dir="ltr" placeholder="https://github.com/...">
+            <input id="pf-github" class="swal2-input m-0 w-full" value="${escapeHTML(v('github'))}" dir="ltr" placeholder="https://github.com/...">
           </div>
           <div>
             <label class="block text-xs mb-1 text-gray-500">رابط السيرة الذاتية (PDF path)</label>
-            <input id="pf-cv" class="swal2-input m-0 w-full" value="${v('cv')}" dir="ltr" placeholder="Osama_Alharbi.pdf">
+            <input id="pf-cv" class="swal2-input m-0 w-full" value="${escapeHTML(v('cv'))}" dir="ltr" placeholder="Osama_Alharbi.pdf">
           </div>
 
         </div>`,
@@ -1544,6 +1554,32 @@ function restoreBackup() {
 // =====================================================
 // 23. UTILITIES
 // =====================================================
+const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+// Every value from data.json that goes into an HTML string must pass through this.
+function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => HTML_ESCAPES[ch]);
+}
+
+// External links are accepted only when they are absolute https:// URLs.
+function safeUrl(value) {
+    const raw = String(value ?? '').trim();
+    if (!/^https:\/\//i.test(raw)) return '';
+    try { return new URL(raw).href; } catch { return ''; }
+}
+
+// Images/files may also be relative paths inside this site (e.g. images/me.jpg).
+function safeAssetUrl(value) {
+    const raw = String(value ?? '').trim();
+    if (/^[\w\-./]+$/.test(raw) && !raw.startsWith('//') && !raw.includes('..')) return raw;
+    return safeUrl(raw);
+}
+
+function skillLevel(skill) {
+    const n = Number(skill?.level);
+    return Number.isFinite(n) ? Math.min(100, Math.max(0, Math.round(n))) : 0;
+}
+
 function setSmartGreeting() {
     const hour = new Date().getHours();
     const msgs = {
@@ -1559,10 +1595,10 @@ function typeWriter(text, elementId) {
     const el = document.getElementById(elementId);
     if (!el) return;
     if (twInterval) clearInterval(twInterval);
-    el.innerHTML = '';
+    el.textContent = '';
     let i = 0;
     twInterval = setInterval(() => {
-        el.innerHTML += text.charAt(i);
+        el.textContent += text.charAt(i);
         if (++i >= text.length) { clearInterval(twInterval); twInterval = null; }
     }, 90);
 }
