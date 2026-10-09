@@ -58,9 +58,9 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   if (url.origin === self.location.origin) {
-    event.respondWith(request.mode === 'navigate' ? handleNavigation(request) : networkFirst(request));
+    event.respondWith(request.mode === 'navigate' ? handleNavigation(event) : networkFirst(event));
   } else if (CACHE_FIRST_HOSTS.includes(url.hostname)) {
-    event.respondWith(cacheFirst(request));
+    event.respondWith(cacheFirst(event));
   }
   // Everything else (analytics, GitHub API, external images) goes straight to the network.
   // Fonts under ./assets/fonts/ are same-origin and cached at runtime by networkFirst().
@@ -69,6 +69,18 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.action === 'skipWaiting') self.skipWaiting();
 });
+
+// Keeps the worker alive until the copy is written (otherwise it can be stopped mid-write).
+function saveCopy(event, response) {
+  if (response.ok) event.waitUntil(putInCache(event.request, response.clone()));
+}
+
+// The runtime cache holds the latest network copies, so it is checked before the install-time
+// precache (caches.match() alone would always prefer the older precached copy).
+async function matchFreshest(request) {
+  const options = { ignoreSearch: true };
+  return (await (await caches.open(DYNAMIC_CACHE)).match(request, options)) || caches.match(request, options);
+}
 
 async function putInCache(request, response) {
   const cache = await caches.open(DYNAMIC_CACHE);
@@ -80,13 +92,14 @@ async function putInCache(request, response) {
 }
 
 // Online: always fresh from the network (so deploys show up immediately). Offline: cached copy.
-async function networkFirst(request) {
+async function networkFirst(event) {
+  const { request } = event;
   try {
     const response = await fetch(request);
-    if (response.ok) putInCache(request, response.clone());
+    saveCopy(event, response);
     return response;
   } catch {
-    const cached = await caches.match(request, { ignoreSearch: true });
+    const cached = await matchFreshest(request);
     if (cached) return cached;
     if (request.destination === 'image') {
       return new Response(
@@ -99,28 +112,29 @@ async function networkFirst(request) {
 }
 
 // Pages: network first; offline, the app itself for its own URLs and offline.html for anything else.
-async function handleNavigation(request) {
+async function handleNavigation(event) {
+  const { request } = event;
   try {
     const response = await fetch(request);
-    if (response.ok) putInCache(request, response.clone());
+    saveCopy(event, response);
     return response;
   } catch {
-    const cached = await caches.match(request, { ignoreSearch: true });
+    const cached = await matchFreshest(request);
     if (cached) return cached;
     const scope = new URL(self.registration.scope);
     const path = new URL(request.url).pathname;
     if (path === scope.pathname || path === `${scope.pathname}index.html`) {
-      const shell = await caches.match('./index.html');
+      const shell = await matchFreshest(new Request('./index.html'));
       if (shell) return shell;
     }
     return (await caches.match(OFFLINE_PAGE)) || Response.error();
   }
 }
 
-async function cacheFirst(request) {
-  const cached = await caches.match(request);
+async function cacheFirst(event) {
+  const cached = await caches.match(event.request);
   if (cached) return cached;
-  const response = await fetch(request);
-  if (response.ok) putInCache(request, response.clone());
+  const response = await fetch(event.request);
+  saveCopy(event, response);
   return response;
 }
