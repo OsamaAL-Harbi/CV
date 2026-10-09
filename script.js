@@ -28,6 +28,12 @@ let dataLoaded     = false;
 let twInterval     = null;
 
 const SESSION_DURATION   = 60 * 60 * 1000;
+const DEFAULT_REPO       = 'OsamaAL-Harbi/CV';
+const REPO_PATTERN       = /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/;
+// The GitHub token lives in sessionStorage only: it disappears when the tab closes.
+const SESSION_KEYS       = { token: 'gh_token', repo: 'gh_repo', loginTime: 'gh_login_time' };
+let sessionTimer         = null;
+let lastSavedSnapshot    = null;     // in-memory copy of the last loaded/saved data
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqarljpg";
 const VALID_PAGES        = ['home', 'resume', 'portfolio', 'contact'];
 
@@ -53,12 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
     checkLinkedInReferrer();
     initStatsObserver();
 
-    if (localStorage.getItem('saved_repo')) {
-        const ri = document.getElementById('repo-input');
-        const ti = document.getElementById('token-input');
-        if (ri) ri.value = localStorage.getItem('saved_repo');
-        if (ti) ti.value = localStorage.getItem('saved_token');
-    }
+    purgeLegacyAdminStorage();
+    const ri = document.getElementById('repo-input');
+    if (ri) ri.value = localStorage.getItem('saved_repo') || DEFAULT_REPO;
 
     // Hash routing — must run after data loads
     loadContent().then(() => {
@@ -270,6 +273,7 @@ async function loadContent() {
         if (!res.ok) throw new Error('data.json not found');
         appData    = await res.json();
         dataLoaded = true;
+        lastSavedSnapshot = JSON.stringify(appData);
         renderAll();
         updateStaticText();
         setSmartGreeting();
@@ -1396,14 +1400,47 @@ async function editImage(key) {
 // =====================================================
 // 22. AUTH & GITHUB SYNC
 // =====================================================
+function readSession() {
+    return {
+        token:     sessionStorage.getItem(SESSION_KEYS.token),
+        repo:      sessionStorage.getItem(SESSION_KEYS.repo),
+        loginTime: Number(sessionStorage.getItem(SESSION_KEYS.loginTime)) || 0
+    };
+}
+
+function isSessionExpired(loginTime) {
+    return !loginTime || Date.now() - loginTime > SESSION_DURATION;
+}
+
+function clearSession() {
+    Object.values(SESSION_KEYS).forEach(k => sessionStorage.removeItem(k));
+    githubInfo = { token: '', repo: '' };
+    if (sessionTimer) { clearTimeout(sessionTimer); sessionTimer = null; }
+}
+
+// Older versions kept the token (and a data backup) in localStorage forever.
+function purgeLegacyAdminStorage() {
+    ['saved_token', 'login_time', 'backup_data'].forEach(k => localStorage.removeItem(k));
+}
+
+function scheduleSessionExpiry(loginTime) {
+    if (sessionTimer) clearTimeout(sessionTimer);
+    sessionTimer = setTimeout(expireSession, Math.max(0, loginTime + SESSION_DURATION - Date.now()));
+}
+
+function expireSession() {
+    clearSession();
+    showToast('انتهت الجلسة، يرجى تسجيل الدخول مجدداً / Session expired', 'error');
+    setTimeout(() => location.reload(), 1500);
+}
+
 function checkSession() {
-    const loginTime = localStorage.getItem('login_time');
-    if (!localStorage.getItem('saved_token')) return;
-    if (loginTime && (Date.now() - Number(loginTime) > SESSION_DURATION)) {
-        logout(); showToast('انتهت الجلسة، يرجى تسجيل الدخول مجدداً', 'error'); return;
-    }
-    githubInfo.repo  = localStorage.getItem('saved_repo');
-    githubInfo.token = localStorage.getItem('saved_token');
+    const { token, repo, loginTime } = readSession();
+    if (!token) return;
+    if (isSessionExpired(loginTime)) { expireSession(); return; }
+    githubInfo.repo  = repo;
+    githubInfo.token = token;
+    scheduleSessionExpiry(loginTime);
     enableAdminMode();
 }
 
@@ -1414,16 +1451,44 @@ function setupSecretTrigger() {
     });
 }
 
-function authenticateAndEdit() {
-    const repo  = document.getElementById('repo-input').value.trim();
-    const token = document.getElementById('token-input').value.trim();
+function githubHeaders(token) {
+    return {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${token}`,
+        'X-GitHub-Api-Version': '2022-11-28'
+    };
+}
+
+async function authenticateAndEdit() {
+    const repoInput  = document.getElementById('repo-input');
+    const tokenInput = document.getElementById('token-input');
+    const repo  = repoInput.value.trim();
+    const token = tokenInput.value.trim();
     if (!repo || !token) return showToast('يرجى إدخال البيانات كاملة', 'error');
-    localStorage.setItem('saved_repo', repo); localStorage.setItem('saved_token', token);
-    localStorage.setItem('login_time', Date.now());
+    if (!REPO_PATTERN.test(repo)) return showToast('صيغة المستودع غير صحيحة (owner/repo)', 'error');
+
+    // Verify access before enabling admin mode, so a bad token fails here and not on save.
+    try {
+        const res = await fetch(`https://api.github.com/repos/${repo}`, { headers: githubHeaders(token) });
+        if (!res.ok) throw new Error(String(res.status));
+    } catch {
+        return showToast('تعذّر الوصول للمستودع. تحقق من الـ Token / Could not access the repository', 'error');
+    }
+
+    tokenInput.value = '';
+    const loginTime = Date.now();
+    sessionStorage.setItem(SESSION_KEYS.token, token);
+    sessionStorage.setItem(SESSION_KEYS.repo, repo);
+    sessionStorage.setItem(SESSION_KEYS.loginTime, String(loginTime));
+    localStorage.setItem('saved_repo', repo);   // repo name only, not secret
     githubInfo.repo = repo; githubInfo.token = token;
+    scheduleSessionExpiry(loginTime);
     document.getElementById('admin-modal').classList.add('hidden');
     enableAdminMode();
     showToast('تم تفعيل وضع المدير 🚀', 'success');
+    if (!token.startsWith('github_pat_')) {
+        setTimeout(() => showToast('⚠️ يُفضّل Fine-grained PAT مقيّد بهذا المستودع / Prefer a fine-grained PAT', 'info'), 800);
+    }
 }
 
 function enableAdminMode() {
@@ -1435,36 +1500,44 @@ function enableAdminMode() {
 }
 
 function logout() {
-    ['saved_repo','saved_token','login_time'].forEach(k => localStorage.removeItem(k));
+    clearSession();
     location.reload();
 }
 
+// btoa() only accepts Latin-1, so encode the UTF-8 bytes first.
+function toBase64Utf8(text) {
+    let binary = '';
+    new TextEncoder().encode(text).forEach(byte => { binary += String.fromCharCode(byte); });
+    return btoa(binary);
+}
+
 async function saveToGitHub() {
+    if (isSessionExpired(readSession().loginTime)) { expireSession(); return; }
     const btn      = document.querySelector('#admin-toolbar button');
     const origHTML = btn.innerHTML;
     btn.innerHTML  = '<i class="fas fa-spinner fa-spin"></i>';
-    localStorage.setItem('backup_data', JSON.stringify(appData));
     try {
         const url    = `https://api.github.com/repos/${githubInfo.repo}/contents/data.json`;
-        const getRes = await fetch(url, { headers: { Authorization: `token ${githubInfo.token}` } });
+        const getRes = await fetch(url, { headers: githubHeaders(githubInfo.token) });
         if (!getRes.ok) throw new Error('فشل الاتصال. تحقق من الـ Token.');
         const fileData = await getRes.json();
-        const content  = btoa(unescape(encodeURIComponent(JSON.stringify(appData, null, 2))));
+        const json     = JSON.stringify(appData, null, 2);
         const putRes   = await fetch(url, {
             method: 'PUT',
-            headers: { Authorization: `token ${githubInfo.token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: 'Update via Admin Panel', content, sha: fileData.sha })
+            headers: { ...githubHeaders(githubInfo.token), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'Update via Admin Panel', content: toBase64Utf8(json), sha: fileData.sha })
         });
         if (!putRes.ok) throw new Error('فشل الحفظ في GitHub');
+        lastSavedSnapshot = json;
         showToast('تم الحفظ في GitHub ✅', 'success');
     } catch (e) {
         showToast('خطأ: ' + e.message, 'error');
     } finally { btn.innerHTML = origHTML; }
 }
 
+// Reverts unsaved edits to the last version loaded from or saved to GitHub (memory only).
 function restoreBackup() {
-    const data = localStorage.getItem('backup_data');
-    if (data) { appData = JSON.parse(data); renderAll(); showToast('تم استعادة النسخة الاحتياطية ✅', 'success'); }
+    if (lastSavedSnapshot) { appData = JSON.parse(lastSavedSnapshot); renderAll(); showToast('تم التراجع إلى آخر نسخة محفوظة ✅', 'success'); }
     else showToast('لا توجد نسخة احتياطية', 'error');
 }
 
