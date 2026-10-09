@@ -58,16 +58,6 @@ html[dir="ltr"] #mobile-menu.closed { transform: translateX(-100%); }
 @keyframes skeleton-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 .skeleton-pulse { animation: skeleton-pulse 1.5s ease-in-out infinite; }
 
-/* Timeline year badge */
-.timeline-year {
-    position: absolute; top: 0; font-size: 10px; font-weight: 700;
-    color: #3b82f6; background: #eff6ff; border: 1px solid #bfdbfe;
-    padding: 1px 6px; border-radius: 999px; white-space: nowrap;
-}
-html[dir="rtl"] .timeline-year { left: -52px; }
-html[dir="ltr"] .timeline-year { right: -52px; }
-.dark .timeline-year { background: #1e3a5f; border-color: #3b82f6; color: #93c5fd; }
-
 /* 404 animation */
 @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
 #not-found .float-icon { animation: float 3s ease-in-out infinite; }

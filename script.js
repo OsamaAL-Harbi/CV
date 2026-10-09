@@ -34,7 +34,6 @@ const REPO_PATTERN       = /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/;
 const SESSION_KEYS       = { token: 'gh_token', repo: 'gh_repo', loginTime: 'gh_login_time' };
 let sessionTimer         = null;
 let lastSavedSnapshot    = null;     // in-memory copy of the last loaded/saved data
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqarljpg";
 const VALID_PAGES        = ['home', 'resume', 'portfolio', 'contact'];
 
 // Particles hue-rotation per section
@@ -343,6 +342,10 @@ function renderProfile() {
     if (emailDisplay) emailDisplay.textContent = p.email;
     const locDisplay = document.getElementById('contact-location-display');
     if (locDisplay) locDisplay.textContent = t(p.location);
+
+    // CV download buttons follow profile.cv (the static href is the fallback)
+    const cv = safeAssetUrl(p.cv);
+    if (cv) document.querySelectorAll('[data-cv-link]').forEach(a => { a.href = cv; });
 }
 
 // ─── Generic section renderer ─────────────────────────
@@ -532,11 +535,8 @@ function renderFilteredProjects() {
 // =====================================================
 // 9. SKILL PROGRESS BARS
 // =====================================================
-let skillBarsAnimated = false;
-
 function setSkillTab(tab) {
     activeSkillTab    = tab;
-    skillBarsAnimated = false;
     const tabHard = document.getElementById('tab-hard');
     const tabSoft = document.getElementById('tab-soft');
     if (!tabHard || !tabSoft) return;
@@ -582,16 +582,6 @@ function animateSkillBars() {
         bar.style.setProperty('--target-width', `${bar.dataset.level || 0}%`);
         bar.classList.add('animate');
     });
-    skillBarsAnimated = true;
-}
-
-function initSkillsObserver() {
-    const container = document.getElementById('skills-container');
-    if (!container || !window.IntersectionObserver) return;
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => { if (entry.isIntersecting && !skillBarsAnimated) animateSkillBars(); });
-    }, { threshold: 0.2 });
-    observer.observe(container);
 }
 
 // =====================================================
@@ -685,10 +675,6 @@ function openProjectModal(index) {
     document.body.style.overflow = 'hidden';
 }
 
-function closeProjectModal(event) {
-    if (event && event.target !== document.getElementById('project-modal')) return;
-    _closeProjectModal();
-}
 function _closeProjectModal() {
     document.getElementById('project-modal').classList.add('hidden');
     document.body.style.overflow = '';
@@ -1494,7 +1480,6 @@ function enableAdminMode() {
     document.body.classList.add('admin-mode');
     document.getElementById('admin-toolbar').classList.remove('hidden');
     if (dataLoaded) renderAll();
-    initSkillsObserver();
 }
 
 function logout() {
