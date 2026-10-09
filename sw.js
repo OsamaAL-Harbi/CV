@@ -1,24 +1,16 @@
-const CACHE_NAME = 'portfolio-v3';
+const CACHE_NAME = 'portfolio-v4';
 const ASSETS = [
   './',
   './index.html',
+  './offline.html',
   './script.js',
   './data.json',
-  './manifest.json',
-  './assets/icon-192.png',
-  './assets/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Roboto:wght@400;500;700&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+  './manifest.json'
 ];
 
 // تقليل عمر الكاش للبيانات الديناميكية
-const DYNAMIC_CACHE = 'portfolio-dynamic-v1';
-
-// إعدادات الكاش الاستراتيجية
-const CACHE_CONFIG = {
-  offlinePage: '/offline.html',
-  maxEntries: 50
-};
+const DYNAMIC_CACHE = 'portfolio-dynamic-v4';
+const OFFLINE_PAGE = './offline.html';
 
 self.addEventListener('install', (e) => {
   console.log('[Service Worker] Installing...');
@@ -80,10 +72,12 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     fetch(e.request)
       .then(response => {
-        // تحديث الكاش
-        const clone = response.clone();
-        caches.open(DYNAMIC_CACHE)
-          .then(cache => cache.put(e.request, clone));
+        // تحديث الكاش (الردود الناجحة فقط)
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(DYNAMIC_CACHE)
+            .then(cache => cache.put(e.request, clone));
+        }
         return response;
       })
       .catch(() => {
@@ -94,7 +88,8 @@ self.addEventListener('fetch', (e) => {
             
             // للصفحات الرئيسية
             if (e.request.mode === 'navigate') {
-              return caches.match('./index.html');
+              return caches.match('./index.html')
+                .then(page => page || caches.match(OFFLINE_PAGE));
             }
             
             // رد افتراضي للصور
