@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     setupSecretTrigger();
     setupCmdPalette();
-    setupKonamiCode();
     registerPWA();
     setupScrollTop();
     checkLinkedInReferrer();
