@@ -194,31 +194,31 @@
     {
       "ar": "Cisco Networking & Switching",
       "en": "Cisco Networking & Switching",
-      "level": "65",
+      "level": 65,
       "category": "hard"
     },
     {
       "ar": "إعداد وتوجيه شبكات VLAN",
       "en": "VLANs & Inter-VLAN Routing",
-      "level": "60",
+      "level": 60,
       "category": "hard"
     },
     {
       "ar": "مراقبة الشبكات والأنظمة (PRTG)",
       "en": "Network Monitoring (PRTG & SNMP)",
-      "level": "40",
+      "level": 40,
       "category": "hard"
     },
     {
       "ar": "استكشاف أخطاء الشبكات وإصلاحها",
       "en": "Network Troubleshooting",
-      "level": "30",
+      "level": 30,
       "category": "hard"
     },
     {
       "ar": "إدارة خدمات تقنية المعلومات (ITSM)",
       "en": "IT Service Management (ITSM)",
-      "level": "20",
+      "level": 20,
       "category": "hard"
     }
   ],

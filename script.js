@@ -897,7 +897,7 @@ const SCHEMAS = {
     skills: [
         { key: 'ar',       label: 'اسم المهارة (عربي)',   simple: true },
         { key: 'en',       label: 'Skill Name (English)', simple: true },
-        { key: 'level',    label: 'المستوى % (0-100)',    simple: true },
+        { key: 'level',    label: 'المستوى % (0-100)',    simple: true, number: true },
         { key: 'category', label: 'النوع (hard / soft)',  simple: true }
     ],
     experience: [
@@ -1014,7 +1014,7 @@ async function manageItem(type, index = null) {
                     // Array fields: split by comma and trim
                     const val = f.array
                         ? raw.split(',').map(x => x.trim()).filter(Boolean)
-                        : raw;
+                        : (f.number ? skillLevel({ level: raw }) : raw);
                     if (f.nested) {
                         if (!obj[f.nested]) obj[f.nested] = {};
                         obj[f.nested][f.subkey || f.key] = val;
