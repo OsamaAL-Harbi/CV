@@ -37,10 +37,11 @@ function scheduleSessionExpiry(loginTime) {
     sessionTimer = setTimeout(expireSession, Math.max(0, loginTime + SESSION_DURATION - Date.now()));
 }
 
+// Drops the token but keeps unsaved edits on the page: logging in again resumes where you were.
 function expireSession() {
     clearSession();
-    showToast('انتهت الجلسة، يرجى تسجيل الدخول مجدداً / Session expired', 'error');
-    setTimeout(() => location.reload(), 1500);
+    showToast('انتهت الجلسة — سجّل الدخول مجدداً للحفظ، تعديلاتك باقية / Session expired — log in again to save', 'error');
+    if (state.isAdmin) document.getElementById('admin-modal').classList.remove('hidden');
 }
 
 export function checkSession() {
@@ -295,9 +296,9 @@ async function manageItem(type, index = null) {
     }
 }
 
-export function addItem(type)         { if (type === 'projects') manageProjectItem(); else manageItem(type); }
+export function addItem(type)         { return type === 'projects' ? manageProjectItem() : manageItem(type); }
 
-export function editItem(type, index) { if (type === 'projects') manageProjectItem(index); else manageItem(type, index); }
+export function editItem(type, index) { return type === 'projects' ? manageProjectItem(index) : manageItem(type, index); }
 
 // ── Dedicated project editor (handles technologies array + nested details) ──
 async function manageProjectItem(index = null) {

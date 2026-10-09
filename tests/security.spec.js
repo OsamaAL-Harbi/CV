@@ -82,6 +82,24 @@ test.describe('admin session', () => {
         expect(await page.evaluate(() => sessionStorage.getItem('gh_token'))).toBeNull();
     });
 
+    test('when the session expires, unsaved edits stay and the login dialog reopens', async ({ page }) => {
+        await page.clock.install();
+        await login(page);
+        const name = page.locator('[data-path="profile.name"]');
+        await name.click();
+        await page.keyboard.press('End');
+        await page.keyboard.type(' (edited)');
+        await page.locator('#year').click();          // blur → saved into the in-memory data
+        await page.clock.fastForward('01:01:00');
+        await expect(page.locator('#admin-modal')).toBeVisible();
+        await expect(name).toContainText('(edited)');
+        expect(await page.evaluate(() => sessionStorage.getItem('gh_token'))).toBeNull();
+        await page.locator('#token-input').fill(TOKEN);   // logging in again resumes the session
+        await page.locator('[data-action="login"]').click();
+        await expect(page.locator('#admin-modal')).toBeHidden();
+        await expect(name).toContainText('(edited)');
+    });
+
     test('loads SweetAlert2 on demand for the editors', async ({ page }) => {
         await login(page);
         await page.locator('#admin-toolbar [data-action="manage-profile"]').click();

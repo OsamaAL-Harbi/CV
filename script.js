@@ -60,7 +60,10 @@ function boot() {
 
     // Hash routing — must run after data loads
     loadContent().then(() => {
-        if (sessionStorage.getItem(SESSION_KEYS.token)) import('./js/admin.js').then(m => m.checkSession());
+        if (sessionStorage.getItem(SESSION_KEYS.token)) {
+            import('./js/admin.js').then(m => m.checkSession())
+                .catch(() => showToast('تعذّر تحميل لوحة الإدارة / Could not load the admin panel', 'error'));
+        }
         handleHash();                  // respect URL hash on first load
     });
 
