@@ -1,10 +1,11 @@
 # robots.txt — Osama Al-Harbi Portfolio
-# https://osamaal-harbi.github.io/portfolio/
+# https://osamaal-harbi.github.io/CV/
+#
+# Note: crawlers only read robots.txt from the host root
+# (https://osamaal-harbi.github.io/robots.txt, i.e. the OsamaAL-Harbi.github.io repository).
+# This copy documents the intended rules; submit the sitemap in Google Search Console as well.
 
 User-agent: *
 Allow: /
 
-# Keep admin panel out of search indexes
-Disallow: /admin/
-
-Sitemap: https://osamaal-harbi.github.io/portfolio/sitemap.xml
+Sitemap: https://osamaal-harbi.github.io/CV/sitemap.xml

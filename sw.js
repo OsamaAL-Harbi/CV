@@ -1,147 +1,140 @@
-const CACHE_NAME = 'portfolio-v3';
-const ASSETS = [
+// Service worker: offline support for the portfolio.
+// Bump VERSION whenever SHELL changes so visitors drop the old caches on activate.
+const VERSION = 'v4';
+const CACHE_NAME = `portfolio-${VERSION}`;
+const DYNAMIC_CACHE = `portfolio-dynamic-${VERSION}`;
+const DYNAMIC_MAX_ENTRIES = 60;
+const OFFLINE_PAGE = './offline.html';
+
+// App shell, precached on install (relative to the worker scope, so it works under /CV/).
+const SHELL = [
   './',
   './index.html',
+  './offline.html',
   './script.js',
   './data.json',
   './manifest.json',
-  './assets/icon-192.png',
-  './assets/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Roboto:wght@400;500;700&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+  './assets/css/tailwind.css',
+  './assets/img/avatar.svg',
+  './assets/vendor/aos.js',
+  './assets/icons/favicon.svg',
+  './assets/icons/icon-192.png',
+  './js/early.js',
+  './js/analytics.js',
+  './js/state.js',
+  './js/utils.js',
+  './js/i18n.js',
+  './js/router.js',
+  './js/render.js',
+  './js/modal.js',
+  './js/ui.js',
+  './js/actions.js'
 ];
 
-// تقليل عمر الكاش للبيانات الديناميكية
-const DYNAMIC_CACHE = 'portfolio-dynamic-v1';
+// Third-party host whose files are versioned/immutable: cache first.
+const CACHE_FIRST_HOSTS = ['cdn.jsdelivr.net'];
 
-// إعدادات الكاش الاستراتيجية
-const CACHE_CONFIG = {
-  offlinePage: '/offline.html',
-  maxEntries: 50
-};
-
-self.addEventListener('install', (e) => {
-  console.log('[Service Worker] Installing...');
-  e.waitUntil(
+self.addEventListener('install', (event) => {
+  event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[Service Worker] Caching app shell');
-        return cache.addAll(ASSETS);
-      })
+      .then((cache) => cache.addAll(SHELL))
       .then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('activate', (e) => {
-  console.log('[Service Worker] Activating...');
-  e.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME && key !== DYNAMIC_CACHE) {
-            console.log('[Service Worker] Removing old cache:', key);
-            return caches.delete(key);
-          }
-        })
-      );
-    })
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((key) => key !== CACHE_NAME && key !== DYNAMIC_CACHE).map((key) => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
   );
-  return self.clients.claim();
 });
 
-self.addEventListener('fetch', (e) => {
-  // تجاهل الطلبات غير GET
-  if (e.request.method !== 'GET') return;
-  
-  // استثناء الطلبات الخارجية المحددة
-  const isExternal = !e.request.url.startsWith(self.location.origin);
-  const url = new URL(e.request.url);
-  
-  // استراتيجيات مختلفة لأنواع الملفات
-  if (isExternal) {
-    // للخطوط وأيقونات font-awesome - Cache First
-    if (url.href.includes('fonts.googleapis.com') || url.href.includes('font-awesome')) {
-      e.respondWith(
-        caches.match(e.request)
-          .then(cached => cached || fetch(e.request)
-            .then(response => {
-              const clone = response.clone();
-              caches.open(DYNAMIC_CACHE)
-                .then(cache => cache.put(e.request, clone));
-              return response;
-            })
-          )
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+
+  if (url.origin === self.location.origin) {
+    event.respondWith(request.mode === 'navigate' ? handleNavigation(event) : networkFirst(event));
+  } else if (CACHE_FIRST_HOSTS.includes(url.hostname)) {
+    event.respondWith(cacheFirst(event));
+  }
+  // Everything else (analytics, GitHub API, external images) goes straight to the network.
+  // Fonts under ./assets/fonts/ are same-origin and cached at runtime by networkFirst().
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'skipWaiting') self.skipWaiting();
+});
+
+// Keeps the worker alive until the copy is written (otherwise it can be stopped mid-write).
+function saveCopy(event, response) {
+  if (response.ok) event.waitUntil(putInCache(event.request, response.clone()));
+}
+
+// The runtime cache holds the latest network copies, so it is checked before the install-time
+// precache (caches.match() alone would always prefer the older precached copy).
+async function matchFreshest(request) {
+  const options = { ignoreSearch: true };
+  return (await (await caches.open(DYNAMIC_CACHE)).match(request, options)) || caches.match(request, options);
+}
+
+async function putInCache(request, response) {
+  const cache = await caches.open(DYNAMIC_CACHE);
+  await cache.put(request, response);
+  const keys = await cache.keys();
+  if (keys.length > DYNAMIC_MAX_ENTRIES) {
+    await Promise.all(keys.slice(0, keys.length - DYNAMIC_MAX_ENTRIES).map((key) => cache.delete(key)));
+  }
+}
+
+// Online: always fresh from the network (so deploys show up immediately). Offline: cached copy.
+async function networkFirst(event) {
+  const { request } = event;
+  try {
+    const response = await fetch(request);
+    saveCopy(event, response);
+    return response;
+  } catch {
+    const cached = await matchFreshest(request);
+    if (cached) return cached;
+    if (request.destination === 'image') {
+      return new Response(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="#f0f0f0"/><text x="100" y="100" text-anchor="middle" fill="#666" font-family="sans-serif">Image</text></svg>',
+        { headers: { 'Content-Type': 'image/svg+xml' } }
       );
-      return;
     }
+    return new Response('Not available offline', { status: 503, statusText: 'Service Unavailable', headers: { 'Content-Type': 'text/plain' } });
   }
-  
-  // للملفات المحلية - Network First مع fallback
-  e.respondWith(
-    fetch(e.request)
-      .then(response => {
-        // تحديث الكاش
-        const clone = response.clone();
-        caches.open(DYNAMIC_CACHE)
-          .then(cache => cache.put(e.request, clone));
-        return response;
-      })
-      .catch(() => {
-        // البحث في الكاش
-        return caches.match(e.request)
-          .then(cached => {
-            if (cached) return cached;
-            
-            // للصفحات الرئيسية
-            if (e.request.mode === 'navigate') {
-              return caches.match('./index.html');
-            }
-            
-            // رد افتراضي للصور
-            if (e.request.destination === 'image') {
-              return new Response(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="#f0f0f0"/><text x="100" y="100" text-anchor="middle" fill="#666" font-family="sans-serif">Image</text></svg>',
-                { headers: { 'Content-Type': 'image/svg+xml' } }
-              );
-            }
-            
-            return new Response('Not available offline', {
-              status: 503,
-              statusText: 'Service Unavailable',
-              headers: new Headers({ 'Content-Type': 'text/plain' })
-            });
-          });
-      })
-  );
-});
+}
 
-// إضافة حدث للرسائل من الصفحة
-self.addEventListener('message', (e) => {
-  if (e.data.action === 'skipWaiting') {
-    self.skipWaiting();
+// Pages: network first; offline, the app itself for its own URLs and offline.html for anything else.
+async function handleNavigation(event) {
+  const { request } = event;
+  try {
+    const response = await fetch(request);
+    saveCopy(event, response);
+    return response;
+  } catch {
+    const cached = await matchFreshest(request);
+    if (cached) return cached;
+    const scope = new URL(self.registration.scope);
+    const path = new URL(request.url).pathname;
+    if (path === scope.pathname || path === `${scope.pathname}index.html`) {
+      const shell = await matchFreshest(new Request('./index.html'));
+      if (shell) return shell;
+    }
+    return (await caches.match(OFFLINE_PAGE)) || Response.error();
   }
-});
+}
 
-// تحديث التطبيق في الخلفية
-self.addEventListener('periodicsync', (e) => {
-  if (e.tag === 'update-content') {
-    console.log('[Service Worker] Periodic sync for updates');
-    e.waitUntil(updateCache());
-  }
-});
-
-async function updateCache() {
-  const cache = await caches.open(CACHE_NAME);
-  return Promise.all(
-    ASSETS.map(async (url) => {
-      try {
-        const response = await fetch(url);
-        if (response.ok) {
-          await cache.put(url, response);
-        }
-      } catch (err) {
-        console.log(`Failed to update ${url}:`, err);
-      }
-    })
-  );
+async function cacheFirst(event) {
+  const cached = await caches.match(event.request);
+  if (cached) return cached;
+  const response = await fetch(event.request);
+  saveCopy(event, response);
+  return response;
 }

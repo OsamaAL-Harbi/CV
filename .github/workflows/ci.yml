@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Committed CSS, fonts and vendor files match the sources
+        run: |
+          npm run build:css
+          git diff --exit-code -- assets/css assets/fonts assets/vendor
+
+      - name: CDN files are pinned and match their SRI hashes
+        run: npm run check:sri
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright tests
+        run: npm test
+
+      - name: Lighthouse CI (mobile, median of 3 runs, every category >= 90)
+        run: npx lhci autorun
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            playwright-report/
+            lhci-reports/
+          retention-days: 14
+          if-no-files-found: ignore

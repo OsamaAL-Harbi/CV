@@ -20,7 +20,7 @@
     "phone": "+966537820694",
     "linkedin": "https://www.linkedin.com/in/osama-alharbi-it/",
     "github": "https://github.com/OsamaAL-Harbi",
-    "cv": "Osama_Alharbi_IT_CV.pdf",
+    "cv": "Osama_Alharbi.pdf",
     "image": "",
     "nationality": {
       "ar": "سعودي",
@@ -194,31 +194,31 @@
     {
       "ar": "Cisco Networking & Switching",
       "en": "Cisco Networking & Switching",
-      "level": "65",
+      "level": 65,
       "category": "hard"
     },
     {
       "ar": "إعداد وتوجيه شبكات VLAN",
       "en": "VLANs & Inter-VLAN Routing",
-      "level": "60",
+      "level": 60,
       "category": "hard"
     },
     {
       "ar": "مراقبة الشبكات والأنظمة (PRTG)",
       "en": "Network Monitoring (PRTG & SNMP)",
-      "level": "40",
+      "level": 40,
       "category": "hard"
     },
     {
       "ar": "استكشاف أخطاء الشبكات وإصلاحها",
       "en": "Network Troubleshooting",
-      "level": "30",
+      "level": 30,
       "category": "hard"
     },
     {
       "ar": "إدارة خدمات تقنية المعلومات (ITSM)",
       "en": "IT Service Management (ITSM)",
-      "level": "20",
+      "level": 20,
       "category": "hard"
     }
   ],

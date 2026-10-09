@@ -2,15 +2,15 @@
 
 <div align="center">
 
-![Portfolio](https://img.shields.io/badge/Portfolio-Live-3b82f6?style=for-the-badge&logo=github-pages)
+![Portfolio](https://img.shields.io/badge/Portfolio-Live-2563eb?style=for-the-badge&logo=github-pages)
 ![HTML](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![PWA](https://img.shields.io/badge/PWA-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)
 
-**موقع شخصي متكامل ثنائي اللغة (عربي / إنجليزي) مع لوحة تحكم إدارية**
+**موقع شخصي ثنائي اللغة (عربي / إنجليزي) مع لوحة تحرير مدمجة — ثابت بالكامل على GitHub Pages**
 
-[🔗 عرض الموقع](https://osamaal-harbi.github.io/CV/#home) • [📄 تحميل السيرة الذاتية](./Osama_Alharbi_IT_CV.pdf) • [📬 تواصل](mailto:osamafcv214@gmail.com)
+[🔗 عرض الموقع](https://osamaal-harbi.github.io/CV/) • [📄 تحميل السيرة الذاتية](./Osama_Alharbi.pdf) • [📬 تواصل](mailto:osamafcv214@gmail.com)
 
 </div>
 
@@ -18,291 +18,201 @@
 
 ## 📋 نظرة عامة
 
-موقع Portfolio احترافي مبني بتقنية **Single Page Application (SPA)** خالص بدون أي إطار عمل. جميع البيانات محفوظة في ملف `data.json` مركزي مما يجعل التحديث فورياً على كل أقسام الموقع. يدعم الوضع الليلي، وتغيير اللغة، وتحميل السيرة الذاتية مباشرة، ولوحة تحكم إدارية متكاملة.
+موقع Portfolio مبني كـ **Single Page Application** بـ JavaScript خالص (ES modules) بلا إطار عمل ولا خادم.
+كل المحتوى في ملف واحد هو `data.json`، والموقع يقرأه ويعرضه باللغتين. يدعم الوضع الليلي، والعمل دون اتصال (PWA)،
+ولوحة تحرير تحفظ التعديلات مباشرة في المستودع عبر GitHub API.
 
 ---
 
 ## 🗂️ هيكل المشروع
 
 ```
-portfolio/
-├── index.html                  # الصفحة الرئيسية (SPA)
-├── script.js                   # المنطق البرمجي الكامل
-├── data.json                   # مصدر بيانات الموقع
-├── Osama_Alharbi_IT_CV.pdf     # السيرة الذاتية للتحميل
-├── sw.js                       # Service Worker (PWA)
-├── manifest.json               # إعدادات تطبيق PWA
-├── admin/
-│   ├── index.html              # واجهة Decap CMS
-│   └── config.yml              # مخطط حقول لوحة التحكم
-├── images/
-│   └── .gitkeep                # مجلد الصور
-└── assets/                     # أيقونات PWA (اختياري)
-    ├── icon-192.png
-    └── icon-512.png
+CV/
+├── index.html                # الصفحة الوحيدة (SPA) + سياسة CSP
+├── script.js                 # نقطة الدخول (type="module"): تشغيل الصفحة وتحميل data.json
+├── data.json                 # مصدر كل المحتوى
+├── Osama_Alharbi.pdf         # السيرة الذاتية للتحميل
+├── sw.js                     # Service Worker (الكاش والعمل دون اتصال)
+├── offline.html              # صفحة "أنت غير متصل"
+├── manifest.json             # إعدادات PWA (أيقونات، اختصارات، لقطات شاشة)
+├── robots.txt · sitemap.xml
+├── js/
+│   ├── state.js              # الحالة المشتركة (البيانات، اللغة، وضع المدير…)
+│   ├── utils.js              # escapeHTML / safeUrl / الإشعارات / تحميل المكتبات عند الحاجة مع SRI
+│   ├── i18n.js               # النصوص الثابتة والتبديل بين RTL و LTR
+│   ├── router.js             # التنقل بالـ hash ووسوم SEO لكل قسم
+│   ├── render.js             # عرض الأقسام من data.json
+│   ├── modal.js              # نافذة تفاصيل المشروع
+│   ├── ui.js                 # الوضع الليلي، الخلفية، لوحة الأوامر، المشاركة، التواصل، PDF
+│   ├── actions.js            # معالج واحد لكل أزرار data-action (بلا onclick داخل HTML)
+│   ├── admin.js              # لوحة الإدارة — تُحمَّل فقط بعد تسجيل الدخول
+│   ├── early.js              # يطبّق الوضع الليلي واتجاه اللغة قبل أول رسم
+│   └── analytics.js          # Google Analytics 4 + Microsoft Clarity بعد اكتمال التحميل
+├── assets/
+│   ├── css/tailwind.css      # ملف مولَّد — لا تعدّله يدوياً (انظر "الأنماط")
+│   ├── fonts/                # خط Tajawal (OFL) مستضاف محلياً
+│   ├── icons/                # favicon وأيقونات PWA (any + maskable)
+│   ├── img/                  # الصورة الافتراضية، صورة المشاركة og-image، لقطات الشاشة
+│   └── vendor/aos.js         # منسوخ من حزمة aos@2.3.1 عند البناء
+├── images/                   # صورك الخاصة (مثل الصورة الشخصية)
+├── src/tailwind.css          # مصدر الأنماط (Tailwind + الأنماط المخصصة)
+├── tailwind.config.js
+├── scripts/
+│   ├── serve.mjs             # خادم محلي يحاكي GitHub Pages تحت /CV/
+│   ├── build-vendor.mjs      # يولّد الأيقونات والخطوط وينسخ aos.js
+│   ├── check-sri.mjs         # يتحقق أن كل ملف CDN مثبّت الإصدار ومطابق لبصمة SRI
+│   ├── mirror-cdn.mjs        # نسخة محلية من ملفات CDN لتشغيل الاختبارات دون إنترنت
+│   └── cdn-assets.mjs        # قائمة ملفات CDN (مشتركة بين السكربتين السابقين)
+├── tests/                    # اختبارات Playwright
+├── lighthouserc.json         # حدود Lighthouse CI (≥ 90 في الأقسام الأربعة)
+├── .github/workflows/ci.yml  # الاختبارات + Lighthouse على كل Pull Request
+└── package.json              # أدوات التطوير فقط — الموقع نفسه لا يحتاج build ليعمل
 ```
+
+> الملفات المنشورة جاهزة كما هي: GitHub Pages يخدم المستودع مباشرةً، و`package.json` مخصص لأدوات التطوير فقط.
 
 ---
 
 ## ✨ المزايا
 
-### الموقع العام
 | الميزة | الوصف |
 |--------|-------|
-| 🌐 **ثنائي اللغة** | دعم كامل للعربية (RTL) والإنجليزية (LTR) مع حفظ التفضيل |
-| 🌙 **الوضع الليلي** | Dark / Light mode مع اكتشاف تفضيل النظام تلقائياً |
-| 📱 **PWA** | قابل للتثبيت كتطبيق على الجوال مع دعم offline |
-| 📄 **تحميل PDF** | تحميل مباشر للسيرة الذاتية بنقرة واحدة |
-| 🖨️ **وضع الطباعة** | CSS مخصص يُظهر السيرة الذاتية بتنسيق احترافي عند الطباعة |
-| 🔗 **مشاركة الملف الشخصي** | Web Share API + نسخ الرابط للحافظة تلقائياً |
-| 🎯 **إحصائيات متحركة** | Counter animation لأرقام الإنجازات عند الظهور |
-| 📊 **أشرطة المهارات** | Progress bars بنسب مئوية مع تصنيف تقنية / شخصية |
-| 🗂️ **تفاصيل المشاريع** | Modal window بالتحديات والنتائج والتقنيات المستخدمة |
-| 👁️ **عداد المشاهدات** | تتبع مشاهدات المشاريع في الجلسة الحالية |
-| 💼 **رسالة LinkedIn** | ترحيب مخصص للزائر القادم من LinkedIn |
-| ⌨️ **Command Palette** | بحث وتنقل سريع بـ Ctrl+K |
-
-### لوحة التحكم الإدارية
-| الميزة | الوصف |
-|--------|-------|
-| ✏️ **تعديل مباشر** | تعديل النصوص inline بالضغط المباشر عليها |
-| ➕ **إضافة / حذف** | CRUD كامل لكل الأقسام عبر نوافذ SweetAlert2 |
-| ↕️ **ترتيب بالسحب** | Drag & Drop لإعادة ترتيب العناصر عبر SortableJS |
-| 💾 **حفظ على GitHub** | رفع التغييرات مباشرة إلى `data.json` في الريبو |
-| 🔄 **نسخة احتياطية** | حفظ واسترجاع النسخة الأخيرة في localStorage |
-| ⏱️ **جلسة آمنة** | انتهاء الجلسة تلقائياً بعد ساعة واحدة |
-| 📷 **تغيير الصورة** | تحديث الصورة الشخصية برابط خارجي |
+| 🌐 **ثنائي اللغة** | عربي (RTL) وإنجليزي (LTR) مع حفظ التفضيل |
+| 🌙 **الوضع الليلي** | يتبع إعداد النظام تلقائياً ويُحفظ اختيارك |
+| 📱 **PWA** | قابل للتثبيت، ويعمل دون اتصال بعد الزيارة الأولى |
+| 📄 **السيرة الذاتية** | تحميل PDF مباشر، أو توليد PDF من صفحة السيرة (Ctrl+K) |
+| 🖨️ **الطباعة** | تنسيق طباعة مخصص لصفحة السيرة |
+| 🗂️ **المشاريع** | تصفية حسب التقنية ونافذة تفاصيل (التحديات والنتائج) |
+| ⌨️ **لوحة الأوامر** | Ctrl+K للتنقل والأوامر السريعة |
+| ♿ **سهولة الوصول** | أسماء للأزرار، تباين ألوان AA، احترام إعداد "تقليل الحركة" |
+| 🔒 **الأمان** | CSP صارمة، SRI لكل ملف CDN، تهريب كل بيانات data.json |
 
 ---
 
-## 🛠️ التقنيات المستخدمة
+## 🚀 التشغيل محلياً
 
+الموقع يعمل تحت المسار الفرعي `/CV/` كما على GitHub Pages، فاختبره بالطريقة نفسها:
+
+```bash
+git clone https://github.com/OsamaAL-Harbi/CV.git
+cd CV
+npm ci          # أدوات التطوير (مرة واحدة)
+npm start       # http://localhost:4173/CV/
 ```
-Frontend         → HTML5 · Vanilla JavaScript · Tailwind CSS (CDN)
-Fonts            → Google Fonts: Tajawal (AR) + Roboto (EN)
-Animations       → AOS.js · Particles.js · CSS Keyframes
-UI Components    → SweetAlert2 · Toastify.js
-Drag & Drop      → SortableJS
-PDF Generation   → jsPDF · html2canvas
-PWA              → Service Worker · Web App Manifest
-CMS              → Decap CMS (Netlify) + Git Gateway
-Analytics        → Google Analytics 4
-Hosting          → GitHub Pages / Netlify
+
+بدون Node.js: شغّل خادماً من المجلد **الأب** حتى يظهر المسار `/CV/`:
+
+```bash
+cd ..                       # المجلد الذي يحتوي مجلد CV
+python3 -m http.server 8000 # ثم افتح http://localhost:8000/CV/
 ```
+
+> ⚠️ لا تفتح `index.html` مباشرة (`file://`): المتصفح يمنع تحميل `data.json` والـ modules والـ Service Worker.
+
+### الأنماط (Tailwind)
+
+`assets/css/tailwind.css` ملف مولَّد. بعد تعديل أي class في `index.html` أو `js/`، أو أي شيء في `src/tailwind.css`:
+
+```bash
+npm run build:css    # أو npm run watch:css أثناء التطوير
+```
+
+السكربت يولّد أيضاً الأيقونات المستخدمة (Font Awesome كـ SVG داخل CSS) وملفات خط Tajawal و`assets/vendor/aos.js`.
+إذا أضفت أيقونة جديدة `fa-…` فسيلتقطها البناء تلقائياً. الـ CI يفشل إذا نسيت إعادة البناء.
+
+### الاختبارات
+
+```bash
+npx playwright install chromium   # مرة واحدة
+npm test                          # Playwright: سطح المكتب + الجوال
+npm run check:sri                 # كل ملف CDN مثبّت الإصدار ومطابق لبصمة SRI
+npm run lhci                      # Lighthouse CI (Chrome مطلوب)
+```
+
+بيئة بلا إنترنت أو تحجب الـ CDN؟ `npm run mirror:cdn` ثم `CDN_MIRROR_DIR=.cdn-mirror npm test`.
 
 ---
 
-## 🚀 التشغيل والنشر
+## 📝 تحديث المحتوى
 
-### محلياً
-```bash
-# 1. استنساخ الريبو
-git clone https://github.com/OsamaAL-Harbi/portfolio.git
-cd portfolio
-
-# 2. فتح الموقع (لا يحتاج npm أو build)
-# استخدم Live Server في VS Code أو أي خادم محلي
-npx serve .
-# ثم افتح http://localhost:3000
-```
-
-> ⚠️ **ملاحظة:** Service Worker يعمل فقط على `https://` أو `localhost`. على `file://` لن يتفعل.
-
-### على GitHub Pages
-```bash
-# 1. ارفع جميع الملفات إلى الريبو
-git add .
-git commit -m "Initial portfolio deploy"
-git push origin main
-
-# 2. في إعدادات الريبو:
-#    Settings → Pages → Branch: main → / (root) → Save
-```
-
-### على Netlify (مع لوحة التحكم)
-```bash
-# 1. ربط الريبو بـ Netlify عبر واجهة الموقع
-# 2. تفعيل Netlify Identity:
-#    Site settings → Identity → Enable Identity
-#    Registration → Invite only
-# 3. تفعيل Git Gateway:
-#    Identity → Services → Git Gateway → Enable
-# 4. دعوة نفسك عبر البريد الإلكتروني
-```
-
----
-
-## 📝 تحديث البيانات
-
-### الطريقة الأولى: تعديل مباشر في الكود
-افتح `data.json` وعدّل أي حقل. البنية:
+### 1) تعديل `data.json` مباشرة
 
 ```json
 {
-  "profile": { "name": {"ar": "...", "en": "..."}, ... },
-  "experience": [ { "role": {"ar": "...", "en": "..."}, ... } ],
-  "skills": [ { "ar": "...", "en": "...", "level": 85, "category": "hard" } ],
-  "projects": [ { "title": {...}, "technologies": [...], "details": {...} } ],
-  "certificates": [...],
-  "education": [...],
-  "volunteer": [...],
-  "workshops": [...],
-  "languages": [...]
+  "profile": { "name": {"ar": "...", "en": "..."}, "cv": "Osama_Alharbi.pdf", "linkedin": "https://...", ... },
+  "experience":   [ { "role": {"ar": "...", "en": "..."}, "company": {...}, "period": {...}, "description": {...} } ],
+  "skills":       [ { "ar": "...", "en": "...", "level": 85, "category": "hard" } ],
+  "projects":     [ { "title": {...}, "desc": {...}, "technologies": ["SQL"], "link": "https://github.com/...", "liveUrl": "" } ],
+  "certificates": [...], "education": [...], "volunteer": [...], "workshops": [...], "languages": [...]
 }
 ```
 
-### الطريقة الثانية: لوحة التحكم الإدارية
-1. أدخل `Username/Repo` بهذا الشكل: `OsamaAL-Harbi/portfolio`
-2. أدخل GitHub Personal Access Token (صلاحية `repo`)
-3. اضغط **Login** — ستظهر أدوات التحكم على الصفحة
-4. عدّل ما تريد ثم اضغط **حفظ** لرفع التغييرات مباشرة
+- الروابط (`link`, `liveUrl`, `linkedin`, `github`) تُعرض **فقط** إذا بدأت بـ `https://`.
+- `level` رقم من `0` إلى `100`، و`category` إما `"hard"` (تقنية) أو `"soft"` (شخصية).
+- `profile.image` رابط `https://` أو مسار داخل الموقع مثل `images/me.jpg`؛ إن كان فارغاً تظهر صورة افتراضية.
+- `profile.cv` اسم ملف الـ PDF الذي تشير إليه كل أزرار التحميل.
+- النصوص تُعرض كنص عادي (لا يُفسَّر HTML داخلها).
 
-### الطريقة الثالثة: Decap CMS (على Netlify)
-افتح `https://your-site.netlify.app/admin/` وسجّل الدخول بحسابك.
+### 2) لوحة الإدارة (داخل الموقع)
 
----
-
-## 🔑 إنشاء GitHub Token
-
-1. اذهب إلى [github.com/settings/tokens](https://github.com/settings/tokens)
-2. **Generate new token (classic)**
-3. حدّد صلاحية `repo` فقط
-4. انسخ التوكن واحفظه — لن يظهر مرة أخرى
+1. انقر **ثلاث مرات** على نص الحقوق أسفل الصفحة.
+2. أدخل المستودع `OsamaAL-Harbi/CV` و **Fine-grained token** (انظر القسم التالي).
+3. عدّل مباشرة (النصوص، الإضافة، الحذف، السحب لإعادة الترتيب)، ثم **حفظ** لرفع `data.json` إلى الفرع الافتراضي.
+4. التغيير يظهر للزوار بعد إعادة بناء GitHub Pages (عادة دقيقة إلى بضع دقائق).
+5. "استرجاع" يتراجع عن التعديلات غير المحفوظة إلى آخر نسخة محمّلة/محفوظة.
 
 ---
 
-## 📐 إضافة مشروع جديد
+## 🔑 استخدام لوحة الإدارة بأمان
 
-في `data.json` داخل مصفوفة `projects`:
+**أنشئ Fine-grained Personal Access Token (وليس Classic):**
 
-```json
-{
-  "title": {
-    "ar": "اسم المشروع بالعربية",
-    "en": "Project Name in English"
-  },
-  "desc": {
-    "ar": "وصف مختصر بالعربية",
-    "en": "Short description in English"
-  },
-  "technologies": ["SQL", "Python", "HTML5"],
-  "details": {
-    "challenges": {
-      "ar": "التحديات التي واجهتها...",
-      "en": "Challenges faced..."
-    },
-    "results": {
-      "ar": "النتائج والإنجازات...",
-      "en": "Results and achievements..."
-    }
-  },
-  "link": "https://github.com/your-repo"
-}
-```
+1. GitHub → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**
+2. **Expiration**: مدة قصيرة (7 أيام مثلاً).
+3. **Repository access**: *Only select repositories* ← `OsamaAL-Harbi/CV` فقط.
+4. **Permissions → Repository permissions → Contents: Read and write** (و *Metadata: Read* تُضاف تلقائياً). لا شيء غير ذلك.
+5. انسخ التوكن والصقه في نافذة الدخول.
+
+**كيف يُحفظ التوكن؟**
+- في `sessionStorage` لهذا التبويب فقط — يُمسح عند إغلاق التبويب، أو تسجيل الخروج، أو بعد **ساعة** تلقائياً.
+- لا يُكتب في `localStorage` ولا في الكود ولا يُرسل لأي جهة غير `api.github.com`.
+- عند فتح الموقع تُحذف أي بقايا قديمة (`saved_token`, `backup_data`) من `localStorage`.
+
+**نصائح:** استخدم اللوحة من جهازك الشخصي فقط، وألغِ التوكن (Revoke) من إعدادات GitHub بعد الانتهاء إن لم تعد تحتاجه.
 
 ---
 
-## 📐 إضافة مهارة جديدة
+## 🔒 ملاحظات أمنية للمطوّر
 
-```json
-{
-  "ar": "اسم المهارة",
-  "en": "Skill Name",
-  "level": 80,
-  "category": "hard"
-}
-```
-
-- `level`: من `0` إلى `100`
-- `category`: `"hard"` للمهارات التقنية · `"soft"` للمهارات الشخصية
+- **CSP** موجودة في `<meta>` داخل `index.html` وتسمح فقط بـ: الموقع نفسه، `cdn.jsdelivr.net` (مكتبات تُحمّل عند الحاجة)،
+  `api.github.com`، وخدمات GA4/Clarity. لا يوجد `'unsafe-inline'` للسكربتات أو الأنماط (البصمة الوحيدة المسموحة هي
+  أنماط html2canvas الثابتة عند توليد PDF).
+- لا تضف `onclick="…"` أو `<script>` داخل HTML: استخدم `data-action="…"` وأضف الدالة في `js/actions.js`.
+- أي قيمة من `data.json` تُدرج في HTML يجب أن تمر عبر `escapeHTML()`، وأي رابط عبر `safeUrl()`.
+- **إضافة مكتبة من CDN**: ثبّت الإصدار الكامل (`name@1.2.3/path`)، أضفها إلى `VENDOR` في `js/utils.js` مع `integrity`،
+  ثم شغّل `npm run check:sri` (يحسب البصمة الصحيحة ويرفض أي ملف غير مثبّت).
+- GitHub Pages لا يسمح بترويسات HTTP مخصصة، لذلك `frame-ancestors` و`X-Content-Type-Options` غير ممكنة هنا.
 
 ---
 
-## 🎨 التخصيص
+## 🌍 النشر على GitHub Pages
 
-### تغيير الألوان الرئيسية
-في `index.html` داخل `tailwind.config`:
-```javascript
-colors: {
-  primary:   '#3b82f6',  // الأزرق الرئيسي
-  secondary: '#8b5cf6',  // البنفسجي الثانوي
-  darkBg:    '#0b1120',  // خلفية الوضع الليلي
-  cardBg:    '#1e293b'   // خلفية البطاقات
-}
-```
+**Settings → Pages → Source: Deploy from a branch → `main` / `(root)`**. ملف `.nojekyll` موجود لتقديم الملفات كما هي.
 
-### تغيير رابط Formspree (نموذج التواصل)
-في `script.js`:
-```javascript
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID";
-```
-
----
-
-## 📦 الملفات المطلوبة للنشر
-
-| الملف | مطلوب؟ | الوصف |
-|-------|---------|-------|
-| `index.html` | ✅ | |
-| `script.js` | ✅ | |
-| `data.json` | ✅ | |
-| `Osama_Alharbi_IT_CV.pdf` | ✅ | |
-| `sw.js` | ✅ | لدعم PWA |
-| `manifest.json` | ✅ | لدعم PWA |
-| `admin/` | ⚡ | فقط إذا تستخدم Netlify CMS |
-| `assets/` | ⚡ | اختياري — للأيقونات |
+> `robots.txt` لا تقرؤه محركات البحث إلا من جذر النطاق (`osamaal-harbi.github.io/robots.txt`)؛ لذلك أضف
+> `https://osamaal-harbi.github.io/CV/sitemap.xml` يدوياً في Google Search Console.
 
 ---
 
 ## 🐛 حل المشكلات الشائعة
 
-**data.json لا يُحمَّل:**
-```
-→ تأكد أن الملف في نفس مجلد index.html
-→ على file:// المتصفح يحجب fetch() — استخدم خادماً محلياً
-```
-
-**Service Worker لا يعمل:**
-```
-→ يتطلب https:// أو localhost فقط
-→ لمسح الكاش: DevTools → Application → Storage → Clear site data
-```
-
-**زر الحفظ في Admin لا يعمل:**
-```
-→ تأكد من صلاحية repo في GitHub Token
-→ تأكد من صحة Username/Repo (حساسية الحروف)
-→ تأكد أن الفرع main وليس master
-```
-
-**الـ PDF لا يظهر بشكل صحيح:**
-```
-→ الملف يجب أن يكون في نفس مجلد index.html تماماً
-→ اسم الملف: Osama_Alharbi_IT_CV.pdf (حساسية الحروف)
-```
-
----
-
-## 📊 بنية script.js
-
-| القسم | الوظيفة |
-|-------|---------|
-| `GLOBALS` | المتغيرات العامة والإعدادات |
-| `BOOT` | تهيئة الموقع عند التحميل |
-| `NAVIGATION` | نظام التنقل بين الصفحات SPA |
-| `LOCALISATION` | نظام اللغات AR/EN |
-| `DATA LOADING` | تحميل data.json |
-| `RENDER ENGINE` | رسم جميع الأقسام |
-| `SKILL PROGRESS BARS` | أشرطة المهارات المتحركة |
-| `STATS COUNTER` | عداد الإحصائيات |
-| `PROJECT MODAL` | نافذة تفاصيل المشروع |
-| `PDF GENERATION` | توليد PDF |
-| `PRINT MODE` | وضع الطباعة |
-| `SHARE PROFILE` | مشاركة الموقع |
-| `LINKEDIN REFERRER` | رسالة LinkedIn |
-| `ADMIN CRUD` | نظام الإضافة والتعديل والحذف |
-| `DRAG & DROP` | ترتيب العناصر |
-| `AUTH & GITHUB SYNC` | المصادقة والحفظ على GitHub |
+| المشكلة | الحل |
+|---------|------|
+| الصفحة لا تُحمّل البيانات | شغّل خادماً محلياً (لا `file://`) وتحقق من صحة `data.json` (JSON صالح). |
+| الأنماط لا تظهر لـ class جديد | `npm run build:css` |
+| لا أرى آخر تعديل بعد النشر | انتظر انتهاء بناء Pages، ثم أعد التحميل (الـ Service Worker يجلب النسخة الأحدث عند الاتصال). |
+| مسح كاش الـ Service Worker | DevTools → Application → Storage → Clear site data |
+| الحفظ من لوحة الإدارة يفشل | تحقق من صلاحية **Contents: Read and write** ومن أن التوكن لم تنتهِ مدته وأنه مقيّد بالمستودع الصحيح. |
 
 ---
 
@@ -320,5 +230,6 @@ const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID";
 <div align="center">
 
 بُني بـ ❤️ وكود — &copy; 2026 Osama Al-Harbi
+<br><sub>الأيقونات: Font Awesome Free (CC BY 4.0) · الخط: Tajawal (SIL OFL 1.1)</sub>
 
 </div>
