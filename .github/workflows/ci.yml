@@ -50,6 +50,6 @@ jobs:
           name: test-reports
           path: |
             playwright-report/
-            .lighthouseci/
+            lhci-reports/
           retention-days: 14
           if-no-files-found: ignore

@@ -30,7 +30,11 @@ All notable changes to this site. Format: [Keep a Changelog](https://keepachange
   token with Contents read/write only and a short expiry.
 - The persistent `localStorage` data backup became an in-memory "restore last saved version".
 - Every CDN file is version-pinned (two were floating: `sweetalert2@11`, `toastify-js`) and loaded with
-  `integrity` + `crossorigin`; `scripts/check-sri.mjs` verifies the hashes in CI.
+  `integrity` + `crossorigin`. The CSP allows jsDelivr only for those exact package paths (not the whole host,
+  which serves any npm/GitHub file) and Google Tag Manager only under `/gtag/`; `scripts/check-sri.mjs`
+  verifies the hashes and that each file is permitted by the CSP.
+- When the admin session expires, the token is dropped but unsaved edits stay on the page and the login
+  dialog reopens; admin load/editor failures now show an error instead of failing silently.
 - Decap CMS admin (`admin/`) removed: it could not work on GitHub Pages and its schema would have deleted fields.
 
 ### Changed
@@ -45,7 +49,10 @@ All notable changes to this site. Format: [Keep a Changelog](https://keepachange
   bilingual accessible names; animations respect `prefers-reduced-motion`.
 - Service worker rewritten: network-first for the site (fresh after deploys), cache-first for pinned CDN
   files, offline page for unknown URLs, no caching of analytics or GitHub API calls, bounded runtime cache,
-  caches renamed to `portfolio-v4`.
+  caches renamed to `portfolio-v4`. Offline, the newest copy seen is served (runtime cache before the
+  install-time precache) and cache writes are kept alive with `waitUntil`.
+- Icons are inlined as SVG images in the copy html2canvas renders, so they appear in the generated PDF, and are
+  marked `print-color-adjust: exact` so they print without "background graphics".
 - SEO: charset first, static canonical/`og:url`, Open Graph image, `og:locale`, JSON-LD LinkedIn URL fixed.
 - `data.json`: `profile.cv` points to the kept PDF; five skill levels stored as numbers instead of strings.
 - Lighthouse (mobile, measured locally with gzip; jsDelivr files served from a byte-identical mirror):
