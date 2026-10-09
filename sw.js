@@ -5,7 +5,11 @@ const ASSETS = [
   './offline.html',
   './script.js',
   './data.json',
-  './manifest.json'
+  './manifest.json',
+  './assets/css/tailwind.css',
+  './assets/img/avatar.svg',
+  './js/early.js',
+  './js/analytics.js'
 ];
 
 // تقليل عمر الكاش للبيانات الديناميكية

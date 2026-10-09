@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" class="scroll-smooth">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.clarity.ms https://*.clarity.ms; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com https://*.clarity.ms https://c.bing.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>أسامة الحربي | Portfolio</title>
+    <!-- Applies saved theme/language before first paint (no inline script: CSP) -->
+    <script src="js/early.js"></script>
+
     <!-- Dynamic SEO – updated per page via updateMetaTags() -->
     <meta id="meta-description" name="description" content="الموقع الشخصي لأسامة عبدالعزيز الحربي - خريج تقنية المعلومات، الجامعة الإسلامية بالمدينة المنورة.">
     <meta id="og-title"         property="og:title"       content="أسامة الحربي | Portfolio">
@@ -39,146 +47,28 @@
     <meta name="apple-mobile-web-app-status-bar-style"  content="black-translucent">
     <meta name="apple-mobile-web-app-title"             content="Osama Portfolio">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أسامة الحربي | Portfolio</title>
     <link rel="icon"     href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3b82f6">
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KE86NNMX3J"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date()); gtag('config', 'G-KE86NNMX3J');
-    </script>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Microsoft Clarity – replace YOUR_CLARITY_ID with your project ID -->
-    <script type="text/javascript">
-        (function(c,l,a,r,i,t,y){
-            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-        })(window, document, "clarity", "script", "vyu7dpoiy5");
-    </script>
+    <!-- Styles (CDN files pinned + Subresource Integrity) -->
+    <link rel="stylesheet" href="assets/css/tailwind.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Roboto:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.css" integrity="sha384-/rJKQnzOkEo+daG0jMjU1IwwY9unxt1NBw3Ef2fmOJ3PW/TfAg2KXVoWwMZQZtw9" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.css" integrity="sha384-TO4IUm4upNqQuSHA3xAk5ixibmqyKUAvTD3UIJdx9KctftYoctvBVGeH6nzXTOO2" crossorigin="anonymous">
 
-    <!-- Core Libraries -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link  href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link  href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <link  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link  rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-
-    <!-- Feature Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Tajawal', 'Roboto', 'sans-serif'] },
-                    colors: { primary: '#3b82f6', secondary: '#8b5cf6', darkBg: '#0b1120', cardBg: '#1e293b' }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        body { overflow-x: hidden; }
-        #particles-js {
-            position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 0;
-            pointer-events: none;
-            /* hue-rotate used to shift particle color per section */
-            transition: filter 0.8s ease;
-        }
-
-        /* Navigation */
-        .nav-active { color: #3b82f6; position: relative; }
-        .nav-active::after { content:''; position:absolute; bottom:-5px; left:0; width:100%; height:2px; background:#3b82f6; border-radius:2px; }
-
-        /* SPA Transitions */
-        .page-section { display: none; animation: fadeIn 0.5s cubic-bezier(0.4,0,0.2,1); }
-        .page-section.active { display: block; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-
-        /* Admin UI */
-        .editable-active { border:2px dashed #f59e0b !important; background:rgba(253,230,138,.1); outline:none; padding:4px; border-radius:4px; cursor:text; }
-        .admin-element { display: none !important; }
-        .admin-mode .admin-element { display: flex !important; }
-        .drag-handle { cursor: move; }
-
-        /* Skills progress */
-        .skill-bar-fill { width: 0; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
-        .skill-bar-fill.animate { width: var(--target-width); }
-
-        /* Stats counter */
-        .stat-card { transition: transform 0.3s, box-shadow 0.3s; }
-        .stat-card:hover { transform: translateY(-4px); }
-
-        /* LTR */
-        html[dir="ltr"] { font-family: 'Roboto', sans-serif; }
-
-        /* Mobile menu */
-        #mobile-menu { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
-        #mobile-menu.closed { transform: translateX(100%); }
-        #mobile-menu.open   { transform: translateX(0); }
-        html[dir="ltr"] #mobile-menu.closed { transform: translateX(-100%); }
-
-        /* Scroll top */
-        #scrollTopBtn { opacity:0; pointer-events:none; transition:0.3s; }
-        #scrollTopBtn.show { opacity:1; pointer-events:all; }
-
-        /* Project filter buttons */
-        .filter-btn { transition: all 0.2s; white-space: nowrap; }
-        .filter-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
-
-        /* Contact card press */
-        .contact-card:active { transform: scale(0.97); }
-
-        /* Skeleton */
-        @keyframes skeleton-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-        .skeleton-pulse { animation: skeleton-pulse 1.5s ease-in-out infinite; }
-
-        /* Timeline year badge */
-        .timeline-year {
-            position: absolute; top: 0; font-size: 10px; font-weight: 700;
-            color: #3b82f6; background: #eff6ff; border: 1px solid #bfdbfe;
-            padding: 1px 6px; border-radius: 999px; white-space: nowrap;
-        }
-        html[dir="rtl"] .timeline-year { left: -52px; }
-        html[dir="ltr"] .timeline-year { right: -52px; }
-        .dark .timeline-year { background: #1e3a5f; border-color: #3b82f6; color: #93c5fd; }
-
-        /* 404 animation */
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
-        #not-found .float-icon { animation: float 3s ease-in-out infinite; }
-
-        /* ─── PRINT MODE ─────────────────────────────────── */
-        @media print {
-            #particles-js, nav, #mobile-menu, #scrollTopBtn,
-            #admin-toolbar, #admin-modal, #cmd-palette, #project-modal,
-            footer, .admin-element, .print-hide,
-            #home, #portfolio, #contact, #not-found,
-            .page-section:not(#resume) { display: none !important; }
-            #resume { display: block !important; }
-            body { background: white !important; color: black !important; font-size: 11pt; }
-            .dark\:bg-darkBg, .dark\:bg-cardBg { background: white !important; }
-            .dark\:text-gray-100, .dark\:text-gray-300, .dark\:text-gray-400 { color: #333 !important; }
-            .shadow-sm, .shadow-md, .shadow-2xl { box-shadow: none !important; }
-            .text-primary { color: #1d4ed8 !important; }
-            .skill-bar-fill { transition: none !important; }
-            #print-header { display: block !important; }
-            @page { margin: 1.5cm; }
-        }
-    </style>
+    <!-- Scripts: deferred, run in order after parsing. SweetAlert2, Sortable, jsPDF and
+         html2canvas are loaded on demand by script.js (admin / PDF only). -->
+    <script defer src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.js" integrity="sha384-AWFROZ10DoeXcNjhoQe0agryexFsipZEA17Cde6/tknpOUacvUGk27vXQ2a6ljSt" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.js" integrity="sha384-wziAfh6b/qT+3LrqebF9WeK4+J5sehS6FA10J1t3a866kJ/fvU5UwofWnQyzLtwu" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.js" integrity="sha384-VwoO4KYHycI5E2Vzjf4m+IY3C8JKnLhRzzVeR7n4Qdx+Qkq0YUC3aiJ6vY0XVlVT" crossorigin="anonymous"></script>
+    <script defer src="js/analytics.js"></script>
+    <script defer src="script.js"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-darkBg dark:text-gray-100 font-sans transition-colors duration-300 min-h-screen flex flex-col">
 
@@ -451,13 +341,15 @@
         </section>
 
         <!-- ─── 404 ─────────────────────────────────────────── -->
-        <section id="not-found" class="page-section min-h-[60vh] flex items-center justify-center text-center">
+        <section id="not-found" class="page-section">
+            <div class="min-h-[60vh] flex items-center justify-center text-center">
             <div data-aos="zoom-in">
                 <div class="float-icon text-8xl mb-6">🔍</div>
                 <h2 class="text-7xl font-black text-gray-200 dark:text-gray-800 mb-2">404</h2>
                 <h3 class="text-2xl font-bold mb-3 dark:text-white" data-lang="not_found_title">الصفحة غير موجودة</h3>
                 <p class="text-gray-500 mb-8 max-w-sm mx-auto" data-lang="not_found_desc">يبدو أن الرابط الذي طلبته غير موجود في هذا الموقع</p>
                 <a href="#home" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-105 transition shadow-lg" data-lang="not_found_btn">العودة للرئيسية</a>
+            </div>
             </div>
         </section>
 
@@ -569,8 +461,5 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script src="script.js"></script>
 </body>
 </html>

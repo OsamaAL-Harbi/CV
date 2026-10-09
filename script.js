@@ -313,7 +313,7 @@ function renderAll() {
     renderProjectFilters();
     renderFilteredProjects();
     updatePrintHeader();
-    if (isAdmin) initSortable();
+    if (isAdmin) loadVendor('sortable').then(initSortable).catch(() => showToast('تعذّر تحميل أداة الترتيب', 'error'));
     setTimeout(() => AOS.refresh(), 50);
 }
 
@@ -445,7 +445,7 @@ function renderProjectItem(item, realIdx) {
             </div>
             ${count > 0 ? `
                 <span class="absolute top-3 right-3 ltr:left-3 ltr:right-auto bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 pointer-events-none">
-                    <i class="fas fa-eye" style="font-size:10px"></i>&nbsp;${count} ${viewLabel}
+                    <i class="fas fa-eye text-[10px]"></i>&nbsp;${count} ${viewLabel}
                 </span>` : ''}
             ${hasLive ? `<span class="absolute top-3 left-3 ltr:right-3 ltr:left-auto bg-green-500/90 text-white text-xs px-2 py-1 rounded-full font-bold pointer-events-none">Live</span>` : ''}
         </div>
@@ -569,7 +569,7 @@ function renderSkillsWithProgress(tab = 'hard') {
                 <span class="text-xs font-bold text-gray-400">${skillLevel(skill)}%</span>
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
-                <div class="skill-bar-fill h-2.5 rounded-full ${barColor}" style="--target-width: ${skillLevel(skill)}%"></div>
+                <div class="skill-bar-fill h-2.5 rounded-full ${barColor}" data-level="${skillLevel(skill)}"></div>
             </div>
         </div>`;
     }).join('');
@@ -578,7 +578,10 @@ function renderSkillsWithProgress(tab = 'hard') {
 }
 
 function animateSkillBars() {
-    document.querySelectorAll('.skill-bar-fill').forEach(bar => bar.classList.add('animate'));
+    document.querySelectorAll('.skill-bar-fill').forEach(bar => {
+        bar.style.setProperty('--target-width', `${bar.dataset.level || 0}%`);
+        bar.classList.add('animate');
+    });
     skillBarsAnimated = true;
 }
 
@@ -704,7 +707,8 @@ function trackPageVisit(pageId) {
 // =====================================================
 // 13. ADMIN ANALYTICS DASHBOARD
 // =====================================================
-function showAnalyticsDashboard() {
+async function showAnalyticsDashboard() {
+    await loadVendor('swal');
     const visits  = JSON.parse(sessionStorage.getItem('page_visits')  || '{}');
     const pViews  = JSON.parse(sessionStorage.getItem('project_views') || '{}');
     const allProjects = appData.projects || [];
@@ -784,8 +788,8 @@ async function generatePDF() {
     const resumeEl  = document.getElementById('resume');
     const wasActive = resumeEl.classList.contains('active');
     if (!wasActive) { resumeEl.style.display = 'block'; resumeEl.classList.add('active'); }
-    await new Promise(r => setTimeout(r, 600));
     try {
+        await Promise.all([loadVendor('pdf'), new Promise(r => setTimeout(r, 600))]);
         const { jsPDF } = window.jspdf;
         const canvas = await html2canvas(resumeEl, {
             scale: 2, useCORS: true, allowTaint: true,
@@ -887,15 +891,15 @@ function renderAdminButtons(type, index) {
                     gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
             <span class="drag-handle bg-white dark:bg-gray-700 text-gray-500 w-7 h-7 rounded-lg shadow
                          flex items-center justify-center hover:bg-gray-100 cursor-move border border-gray-200 dark:border-gray-600">
-                <i class="fas fa-grip-vertical" style="font-size:10px"></i>
+                <i class="fas fa-grip-vertical text-[10px]"></i>
             </span>
             <button data-action="edit-item" data-type="${type}" data-index="${index}" aria-label="Edit"
                     class="bg-blue-500 text-white w-7 h-7 rounded-lg shadow flex items-center justify-center hover:bg-blue-600 hover:scale-110 transition">
-                <i class="fas fa-pen" style="font-size:10px"></i>
+                <i class="fas fa-pen text-[10px]"></i>
             </button>
             <button data-action="delete-item" data-type="${type}" data-index="${index}" aria-label="Delete"
                     class="bg-red-500 text-white w-7 h-7 rounded-lg shadow flex items-center justify-center hover:bg-red-600 hover:scale-110 transition">
-                <i class="fas fa-trash" style="font-size:10px"></i>
+                <i class="fas fa-trash text-[10px]"></i>
             </button>
         </div>`;
 }
@@ -961,6 +965,7 @@ async function manageItem(type, index = null) {
     const item   = isEdit ? (appData[type] || [])[index] : {};
     const schema = SCHEMAS[type];
     if (!schema) return;
+    await loadVendor('swal');
 
     // Helper: get value supporting nested objects (e.g. details.challenges)
     const getVal = (obj, f, lang) => {
@@ -1061,6 +1066,7 @@ function editItem(type, index) { if (type === 'projects') manageProjectItem(inde
 // ── Dedicated project editor (handles technologies array + nested details) ──
 async function manageProjectItem(index = null) {
     if (!isAdmin) return;
+    await loadVendor('swal');
     const isEdit = index !== null;
     const item   = isEdit ? (appData.projects || [])[index] : {};
 
@@ -1205,6 +1211,7 @@ async function manageProjectItem(index = null) {
 // ── Profile editor ─────────────────────────────────────────────────────────
 async function manageProfile() {
     if (!isAdmin) return;
+    await loadVendor('swal');
     const p = appData.profile || {};
     const v = (k) => p[k] || '';
     const vb = (k, lang) => (typeof p[k] === 'object' ? p[k][lang] : p[k]) || '';
@@ -1307,15 +1314,15 @@ async function manageProfile() {
     }
 }
 
-function deleteItem(type, index) {
+async function deleteItem(type, index) {
     if (!isAdmin) return;
-    Swal.fire({
+    await loadVendor('swal');
+    const result = await Swal.fire({
         title: 'هل أنت متأكد؟', text: 'لن تتمكن من التراجع!', icon: 'warning',
         showCancelButton: true, confirmButtonColor: '#d33',
         confirmButtonText: 'نعم، احذف', cancelButtonText: 'تراجع'
-    }).then(result => {
-        if (result.isConfirmed) { appData[type].splice(index, 1); renderAll(); showToast('تم الحذف', 'success'); }
     });
+    if (result.isConfirmed) { appData[type].splice(index, 1); renderAll(); showToast('تم الحذف', 'success'); }
 }
 
 // =====================================================
@@ -1327,51 +1334,34 @@ function reorderSection(type, oldIdx, newIdx) {
     renderAll();
 }
 
-function reorderSkills(tab, oldFilteredIdx, newFilteredIdx) {
-    const all      = appData.skills || [];
-    const filtered = all.filter(s => s.category === tab);
-    const moved    = filtered[oldFilteredIdx];
-    const target   = filtered[newFilteredIdx];
-    const realOld  = all.indexOf(moved);
-    const realNew  = all.indexOf(target);
-    if (realOld === -1 || realNew === -1) return;
-    all.splice(realOld, 1);
-    all.splice(realNew > realOld ? realNew - 1 : realNew, 0, moved);
+// Writes the visible items (identified by their real indices, in their new on-screen
+// order) back into the same array slots they occupied. Works for filtered views.
+function applyVisualOrder(type, newOrder) {
+    const arr   = appData[type] || [];
+    const slots = [...newOrder].sort((x, y) => x - y);
+    const items = newOrder.map(i => arr[i]);
+    slots.forEach((slot, k) => { arr[slot] = items[k]; });
     renderAll();
+}
+
+function makeSortable(el, onEnd) {
+    if (!el || Sortable.get(el)) return;   // renderAll() runs often; never stack instances
+    new Sortable(el, { animation: 150, handle: '.drag-handle', ghostClass: 'opacity-40', onEnd });
 }
 
 function initSortable() {
     ['experience','education','volunteer','certificates','workshops','languages'].forEach(type => {
-        const el = document.getElementById(`${type}-container`);
-        if (!el) return;
-        new Sortable(el, {
-            animation: 150, handle: '.drag-handle', ghostClass: 'opacity-40',
-            onEnd(evt) { reorderSection(type, evt.oldIndex, evt.newIndex); }
-        });
+        makeSortable(document.getElementById(`${type}-container`), evt => reorderSection(type, evt.oldIndex, evt.newIndex));
     });
 
-    // Projects: sortable on full array (filter is visual only)
+    // Projects and skills can be filtered, so read the real indices from the DOM after the move
     const projEl = document.getElementById('projects-container');
-    if (projEl) {
-        new Sortable(projEl, {
-            animation: 150, handle: '.drag-handle', ghostClass: 'opacity-40',
-            onEnd(evt) {
-                // Get real indices from data-index attributes
-                const items  = [...projEl.querySelectorAll('.sortable-item')];
-                const oldReal = parseInt(items[evt.oldIndex]?.dataset.index ?? evt.oldIndex);
-                const newReal = parseInt(items[evt.newIndex]?.dataset.index ?? evt.newIndex);
-                reorderSection('projects', oldReal, newReal);
-            }
-        });
-    }
+    makeSortable(projEl, () => applyVisualOrder('projects',
+        [...projEl.querySelectorAll('.sortable-item')].map(item => Number(item.dataset.index))));
 
     const skillsEl = document.getElementById('skills-container');
-    if (skillsEl) {
-        new Sortable(skillsEl, {
-            animation: 150, handle: '.drag-handle', ghostClass: 'opacity-40',
-            onEnd(evt) { reorderSkills(activeSkillTab, evt.oldIndex, evt.newIndex); }
-        });
-    }
+    makeSortable(skillsEl, () => applyVisualOrder('skills',
+        [...skillsEl.querySelectorAll('.sortable-item')].map(item => Number(item.dataset.realIndex))));
 }
 
 // =====================================================
@@ -1397,6 +1387,7 @@ function updateText(key, value) {
 
 async function editImage(key) {
     if (!isAdmin) return;
+    await loadVendor('swal');
     const { value } = await Swal.fire({
         title: 'تغيير الصورة الشخصية', input: 'url',
         inputLabel: 'رابط الصورة (Imgur, GitHub, Drive)', inputPlaceholder: 'https://...'
@@ -1587,7 +1578,11 @@ function runAction(e) {
     // A real link inside an action area (e.g. "Live Demo" on a project card) keeps its own behaviour.
     const link = e.target.closest('a[href]');
     if (link && link !== el && el.contains(link)) return;
-    ACTIONS[el.dataset.action]?.(el, e);
+    const action = ACTIONS[el.dataset.action];
+    if (!action) return;
+    Promise.resolve()
+        .then(() => action(el, e))
+        .catch(() => showToast(currentLang === 'ar' ? 'حدث خطأ، حاول مجدداً' : 'Something went wrong, please retry', 'error'));
 }
 
 function setupActions() {
@@ -1607,6 +1602,48 @@ function setupActions() {
 // =====================================================
 // 23. UTILITIES
 // =====================================================
+// Heavy libraries are fetched only when a feature needs them, pinned and with SRI.
+const CDN = 'https://cdn.jsdelivr.net/npm/';
+const VENDOR = {
+    swal: {
+        styles:  [{ href: 'sweetalert2@11.26.25/dist/sweetalert2.min.css', integrity: 'sha384-dCW5imOdApH6OwpFau8cZNKjqVbJYnCA5q+8YsMYP3XwXKsV6Jfz1u6MZLnXaBsS' }],
+        scripts: [{ src: 'sweetalert2@11.26.25/dist/sweetalert2.min.js', integrity: 'sha384-hW8ZCQHtRH+nVOAkHZ4amZvYsAtKn1ZOvMV6dNag1Rb1thWmLZMBKTRxFV0cOxiK' }]
+    },
+    sortable: {
+        scripts: [{ src: 'sortablejs@1.15.0/Sortable.min.js', integrity: 'sha384-eeLEhtwdMwD3X9y+8P3Cn7Idl/M+w8H4uZqkgD/2eJVkWIN1yKzEj6XegJ9dL3q0' }]
+    },
+    pdf: {
+        scripts: [
+            { src: 'jspdf@2.5.1/dist/jspdf.umd.min.js',       integrity: 'sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk' },
+            { src: 'html2canvas@1.4.1/dist/html2canvas.min.js', integrity: 'sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H' }
+        ]
+    }
+};
+const vendorLoads = {};
+
+function injectAsset(tag, url, integrity) {
+    return new Promise((resolve, reject) => {
+        const el = document.createElement(tag);
+        if (tag === 'link') { el.rel = 'stylesheet'; el.href = url; } else { el.src = url; }
+        el.integrity   = integrity;
+        el.crossOrigin = 'anonymous';
+        el.onload  = resolve;
+        el.onerror = () => { el.remove(); reject(new Error(`Failed to load ${url}`)); };
+        document.head.appendChild(el);
+    });
+}
+
+function loadVendor(name) {
+    if (!vendorLoads[name]) {
+        const { styles = [], scripts = [] } = VENDOR[name];
+        vendorLoads[name] = Promise.all([
+            ...styles.map(f => injectAsset('link', CDN + f.href, f.integrity)),
+            ...scripts.map(f => injectAsset('script', CDN + f.src, f.integrity))
+        ]).catch(err => { delete vendorLoads[name]; throw err; });
+    }
+    return vendorLoads[name];
+}
+
 const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
 // Every value from data.json that goes into an HTML string must pass through this.
