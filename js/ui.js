@@ -157,20 +157,29 @@ export function initTheme() {
     });
 }
 
-export function initParticles(party = false) {
-    const isDark = document.documentElement.classList.contains('dark');
-    particlesJS('particles-js', {
-        particles: {
-            number:      { value: party ? 100 : 40 },
-            color:       { value: party ? ['#f00','#0f0','#00f'] : (isDark ? '#ffffff' : '#3b82f6') },
-            opacity:     { value: 0.3 },
-            size:        { value: 3 },
-            line_linked: { enable: true, distance: 150, color: isDark ? '#ffffff' : '#3b82f6', opacity: 0.1, width: 1 },
-            move:        { enable: true, speed: party ? 10 : 1 }
-        },
-        interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'grab' } } },
-        retina_detect: true
-    });
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Decorative background: fetched after start-up (SRI-checked) and skipped for reduced motion.
+export function initParticles() {
+    if (prefersReducedMotion()) return;
+    loadVendor('particles').then(() => {
+        // particlesJS() adds a new instance each call; stop the previous one before redrawing.
+        (window.pJSDom || []).forEach(p => cancelAnimationFrame(p.pJS.fn.drawAnimFrame));
+        window.pJSDom = [];
+        const isDark = document.documentElement.classList.contains('dark');
+        particlesJS('particles-js', {
+            particles: {
+                number:      { value: 40 },
+                color:       { value: isDark ? '#ffffff' : '#3b82f6' },
+                opacity:     { value: 0.3 },
+                size:        { value: 3 },
+                line_linked: { enable: true, distance: 150, color: isDark ? '#ffffff' : '#3b82f6', opacity: 0.1, width: 1 },
+                move:        { enable: true, speed: 1 }
+            },
+            interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'grab' } } },
+            retina_detect: true
+        });
+    }).catch(() => {});   // decorative only
 }
 
 export function setupCmdPalette() {

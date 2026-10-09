@@ -16,6 +16,9 @@ const SHELL = [
   './manifest.json',
   './assets/css/tailwind.css',
   './assets/img/avatar.svg',
+  './assets/vendor/aos.js',
+  './assets/icons/favicon.svg',
+  './assets/icons/icon-192.png',
   './js/early.js',
   './js/analytics.js',
   './js/state.js',
@@ -28,8 +31,8 @@ const SHELL = [
   './js/actions.js'
 ];
 
-// Third-party hosts whose files are versioned/immutable: cache first.
-const CACHE_FIRST_HOSTS = ['cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
+// Third-party host whose files are versioned/immutable: cache first.
+const CACHE_FIRST_HOSTS = ['cdn.jsdelivr.net'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -60,6 +63,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(cacheFirst(request));
   }
   // Everything else (analytics, GitHub API, external images) goes straight to the network.
+  // Fonts under ./assets/fonts/ are same-origin and cached at runtime by networkFirst().
 });
 
 self.addEventListener('message', (event) => {

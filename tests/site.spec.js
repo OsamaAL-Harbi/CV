@@ -129,6 +129,8 @@ test.describe('navigation', () => {
 test.describe('service worker', () => {
     test('registers under /CV/ and precaches the app shell', async ({ page }) => {
         await openSite(page);
+        // ready resolves while the worker may still be "activating"
+        await expect.poll(() => page.evaluate(async () => (await navigator.serviceWorker.ready).active?.state)).toBe('activated');
         const sw = await page.evaluate(async () => {
             const reg = await navigator.serviceWorker.ready;
             const keys = await caches.keys();

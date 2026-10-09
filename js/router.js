@@ -82,22 +82,22 @@ export function toggleMobileMenu() {
     const menu = document.getElementById('mobile-menu');
     menu.classList.toggle('closed');
     menu.classList.toggle('open');
+    document.querySelector('[aria-controls="mobile-menu"]')?.setAttribute('aria-expanded', String(menu.classList.contains('open')));
 }
 
+// The canonical URL and og:url stay on the site root: hash fragments are not separate pages for crawlers.
 export function updateMetaTags(pageId) {
-    const meta    = PAGE_META[state.currentLang]?.[pageId];
+    const meta = PAGE_META[state.currentLang]?.[pageId];
     if (!meta) return;
-    const pageUrl = `${window.location.origin}${window.location.pathname}#${pageId}`;
 
     document.title = meta.title;
 
-    const setMeta = (id, attr, val) => { const el = document.getElementById(id); if (el) el.setAttribute(attr, val); };
-    setMeta('meta-description', 'content', meta.desc);
-    setMeta('og-title',         'content', meta.title);
-    setMeta('og-description',   'content', meta.desc);
-    setMeta('og-url',           'content', pageUrl);
-    setMeta('tw-title',         'content', meta.title);
-    setMeta('canonical',        'href',    pageUrl);
+    const setMeta = (id, val) => { const el = document.getElementById(id); if (el) el.setAttribute('content', val); };
+    setMeta('meta-description', meta.desc);
+    setMeta('og-title',         meta.title);
+    setMeta('og-description',   meta.desc);
+    setMeta('tw-title',         meta.title);   // was writing the title into twitter:card
+    setMeta('tw-description',   meta.desc);
 }
 
 function trackPageVisit(pageId) {

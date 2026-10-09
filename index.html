@@ -3,25 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.clarity.ms https://*.clarity.ms; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com https://*.clarity.ms https://c.bing.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.clarity.ms https://*.clarity.ms; style-src 'self' https://cdn.jsdelivr.net; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://api.github.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com https://*.clarity.ms https://c.bing.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>أسامة الحربي | Portfolio</title>
     <!-- Applies saved theme/language before first paint (no inline script: CSP) -->
     <script src="js/early.js"></script>
 
-    <!-- Dynamic SEO – updated per page via updateMetaTags() -->
+    <!-- SEO / social cards (title + descriptions are updated per section by js/router.js) -->
     <meta id="meta-description" name="description" content="الموقع الشخصي لأسامة عبدالعزيز الحربي - خريج تقنية المعلومات، الجامعة الإسلامية بالمدينة المنورة.">
-    <meta id="og-title"         property="og:title"       content="أسامة الحربي | Portfolio">
-    <meta id="og-description"   property="og:description" content="خريج تقنية المعلومات - الجامعة الإسلامية بالمدينة المنورة">
-    <meta id="og-image"         property="og:image"       content="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-    <meta id="og-url"           property="og:url"         content="">
-    <meta                       property="og:type"        content="website">
-    <meta id="tw-title"         name="twitter:card"       content="summary_large_image">
-    <meta                       name="twitter:title"      content="أسامة الحربي | Portfolio">
-    <link id="canonical"        rel="canonical"           href="">
-    <meta name="robots"         content="index, follow">
-    <meta name="author"         content="Osama Abdulaziz Al-Harbi">
-    <meta name="keywords"       content="أسامة الحربي, IT, تقنية المعلومات, الجامعة الإسلامية, Portfolio">
+    <link rel="canonical" href="https://osamaal-harbi.github.io/CV/">
+    <meta name="robots"   content="index, follow">
+    <meta name="author"   content="Osama Abdulaziz Al-Harbi">
+    <meta name="keywords" content="أسامة الحربي, IT, تقنية المعلومات, الجامعة الإسلامية, Portfolio">
+    <meta property="og:type"             content="website">
+    <meta property="og:site_name"        content="Osama Al-Harbi">
+    <meta property="og:url"              content="https://osamaal-harbi.github.io/CV/">
+    <meta property="og:locale"           content="ar_SA">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta id="og-title"       property="og:title"       content="أسامة الحربي | Portfolio">
+    <meta id="og-description" property="og:description" content="خريج تقنية المعلومات - الجامعة الإسلامية بالمدينة المنورة">
+    <meta property="og:image"        content="https://osamaal-harbi.github.io/CV/assets/img/og-image.jpg">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt"    content="أسامة عبدالعزيز الحربي — Osama Abdulaziz Al-Harbi, Information Technology Graduate">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta id="tw-title"       name="twitter:title"       content="أسامة الحربي | Portfolio">
+    <meta id="tw-description" name="twitter:description" content="خريج تقنية المعلومات - الجامعة الإسلامية بالمدينة المنورة">
+    <meta name="twitter:image" content="https://osamaal-harbi.github.io/CV/assets/img/og-image.jpg">
 
     <!-- Schema.org JSON-LD -->
     <script type="application/ld+json">
@@ -30,6 +38,8 @@
       "@type": "Person",
       "name": "Osama Abdulaziz Al-Harbi",
       "alternateName": "أسامة عبدالعزيز الحربي",
+      "url": "https://osamaal-harbi.github.io/CV/",
+      "image": "https://osamaal-harbi.github.io/CV/assets/img/og-image.jpg",
       "jobTitle": "Information Technology Graduate",
       "email": "osamafcv214@gmail.com",
       "telephone": "+966537820694",
@@ -37,36 +47,40 @@
       "address": { "@type": "PostalAddress", "addressLocality": "Madinah", "addressCountry": "SA" },
       "alumniOf": { "@type": "CollegeOrUniversity", "name": "Islamic University of Madinah" },
       "sameAs": [
-        "www.linkedin.com/in/اسامة-الحربي-368a5a23b",
+        "https://www.linkedin.com/in/osama-al-harbi",
         "https://github.com/OsamaAL-Harbi"
       ]
     }
     </script>
 
     <meta name="apple-mobile-web-app-capable"           content="yes">
+    <meta name="mobile-web-app-capable"                 content="yes">
     <meta name="apple-mobile-web-app-status-bar-style"  content="black-translucent">
     <meta name="apple-mobile-web-app-title"             content="Osama Portfolio">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-    <link rel="icon"     href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3b82f6">
 
+    <!-- Fetch the app modules in parallel with script.js instead of after it -->
+    <link rel="modulepreload" href="js/state.js">
+    <link rel="modulepreload" href="js/utils.js">
+    <link rel="modulepreload" href="js/i18n.js">
+    <link rel="modulepreload" href="js/router.js">
+    <link rel="modulepreload" href="js/render.js">
+    <link rel="modulepreload" href="js/modal.js">
+    <link rel="modulepreload" href="js/ui.js">
+    <link rel="modulepreload" href="js/actions.js">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Styles (CDN files pinned + Subresource Integrity) -->
+    <!-- Styles: one prebuilt file (Tailwind + AOS + icons + self-hosted Tajawal), see npm run build:css -->
     <link rel="stylesheet" href="assets/css/tailwind.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Roboto:wght@400;500;700&display=swap">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.css" integrity="sha384-/rJKQnzOkEo+daG0jMjU1IwwY9unxt1NBw3Ef2fmOJ3PW/TfAg2KXVoWwMZQZtw9" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.css" integrity="sha384-TO4IUm4upNqQuSHA3xAk5ixibmqyKUAvTD3UIJdx9KctftYoctvBVGeH6nzXTOO2" crossorigin="anonymous">
 
-    <!-- Scripts: deferred/module scripts run in order after parsing. SweetAlert2, Sortable,
-         jsPDF and html2canvas are loaded on demand by js/utils.js (admin / PDF only). -->
-    <script defer src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.js" integrity="sha384-AWFROZ10DoeXcNjhoQe0agryexFsipZEA17Cde6/tknpOUacvUGk27vXQ2a6ljSt" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.js" integrity="sha384-wziAfh6b/qT+3LrqebF9WeK4+J5sehS6FA10J1t3a866kJ/fvU5UwofWnQyzLtwu" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.js" integrity="sha384-VwoO4KYHycI5E2Vzjf4m+IY3C8JKnLhRzzVeR7n4Qdx+Qkq0YUC3aiJ6vY0XVlVT" crossorigin="anonymous"></script>
+    <!-- Scripts: deferred/module scripts run in order after parsing. AOS is served locally (its CSS
+         hides content until it runs). particles.js, Toastify, SweetAlert2, Sortable, jsPDF and
+         html2canvas are fetched from jsDelivr on demand by js/utils.js, pinned and with SRI. -->
+    <script defer src="assets/vendor/aos.js"></script>
     <script defer src="js/analytics.js"></script>
     <script type="module" src="script.js"></script>
 </head>
@@ -106,15 +120,15 @@
             </div>
             <div class="flex items-center gap-3 z-50">
                 <button data-action="toggle-language" id="lang-btn" class="px-3 py-1 text-xs font-bold border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">EN</button>
-                <button id="theme-btn" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition border border-gray-200 dark:border-gray-700">🌓</button>
-                <button data-action="toggle-menu" class="md:hidden text-xl focus:outline-none"><i class="fas fa-bars"></i></button>
+                <button id="theme-btn" aria-label="الوضع الليلي" data-lang-aria="aria_theme" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition border border-gray-200 dark:border-gray-700">🌓</button>
+                <button data-action="toggle-menu" aria-label="فتح القائمة" data-lang-aria="aria_menu_open" aria-controls="mobile-menu" class="md:hidden text-xl focus:outline-none"><i class="fas fa-bars" aria-hidden="true"></i></button>
             </div>
         </div>
     </nav>
 
     <!-- ═══ MOBILE MENU ════════════════════════════════════ -->
     <div id="mobile-menu" class="closed fixed inset-0 z-40 bg-white dark:bg-darkBg flex flex-col items-center justify-center space-y-8 md:hidden shadow-2xl">
-        <button data-action="toggle-menu" class="absolute top-6 right-6 text-3xl hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+        <button data-action="toggle-menu" aria-label="إغلاق القائمة" data-lang-aria="aria_menu_close" class="absolute top-6 right-6 text-3xl hover:text-red-500 transition"><i class="fas fa-times" aria-hidden="true"></i></button>
         <a href="#home"      data-action="toggle-menu" class="text-xl font-bold hover:text-primary transition" data-lang="nav_home">الرئيسية</a>
         <a href="#resume"    data-action="toggle-menu" class="text-xl font-bold hover:text-primary transition" data-lang="nav_resume">السيرة الذاتية</a>
         <a href="#portfolio" data-action="toggle-menu" class="text-xl font-bold hover:text-primary transition" data-lang="nav_portfolio">الأعمال</a>
@@ -134,7 +148,7 @@
                     <!-- Profile Image -->
                     <div class="mb-8 relative inline-block group cursor-pointer">
                         <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
-                        <img id="profile-img" src="" alt="Profile" class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl transition transform group-hover:scale-105">
+                        <img id="profile-img" src="assets/img/avatar.svg" alt="أسامة الحربي" width="192" height="192" class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl transition transform group-hover:scale-105">
                         <button data-action="edit-image" data-path="profile.image" class="admin-element absolute inset-0 bg-black/50 rounded-full items-center justify-center text-white opacity-0 hover:opacity-100 transition">
                             <i class="fas fa-camera text-2xl"></i>
                         </button>
@@ -176,11 +190,11 @@
                             <p class="text-xs text-gray-500 font-medium" data-lang="stat_certs">شهادات مهنية</p>
                         </div>
                         <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
-                            <div class="text-3xl font-extrabold text-orange-500 mb-1"><span class="stat-number" data-target="96">0</span></div>
+                            <div class="text-3xl font-extrabold text-orange-600 dark:text-orange-500 mb-1"><span class="stat-number" data-target="96">0</span></div>
                             <p class="text-xs text-gray-500 font-medium" data-lang="stat_volunteer">ساعة تطوع</p>
                         </div>
                         <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
-                            <div class="text-3xl font-extrabold text-green-500 mb-1"><span class="stat-number" data-target="1">0</span></div>
+                            <div class="text-3xl font-extrabold text-green-600 dark:text-green-500 mb-1"><span class="stat-number" data-target="1">0</span></div>
                             <p class="text-xs text-gray-500 font-medium" data-lang="stat_projects">مشروع تخرج</p>
                         </div>
                         <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
@@ -320,7 +334,7 @@
                             <textarea id="contact-message" rows="5" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-right resize-none" placeholder="اكتب رسالتك هنا... / Write your message here..." dir="auto"></textarea>
                         </div>
                         <p id="char-counter" class="text-xs text-gray-400 text-left ltr:text-right">0 / 2000</p>
-                        <button data-action="send-mail" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 active:scale-95 transition shadow-lg flex items-center justify-center gap-2">
+                        <button data-action="send-mail" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 active:scale-95 transition shadow-lg flex items-center justify-center gap-2">
                             <i class="fas fa-paper-plane"></i><span data-lang="btn_email">فتح تطبيق الإيميل للإرسال</span>
                         </button>
                         <p class="text-xs text-gray-400 text-center" data-lang="contact_mailto_note">سيفتح تطبيق الإيميل على جهازك مع الرسالة جاهزة</p>
@@ -332,7 +346,7 @@
                         <p class="font-bold text-sm dark:text-white" data-lang="contact_cv_title">هل تريد مراجعة سيرتي الذاتية أولاً؟</p>
                         <p class="text-xs text-gray-500 mt-0.5" data-lang="contact_cv_sub">تحميل مباشر — PDF جاهز</p>
                     </div>
-                    <a href="Osama_Alharbi.pdf" download data-cv-link class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-blue-600 hover:scale-105 transition shadow-md flex-shrink-0">
+                    <a href="Osama_Alharbi.pdf" download data-cv-link class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-blue-700 hover:scale-105 transition shadow-md flex-shrink-0">
                         <i class="fas fa-download"></i><span data-lang="btn_download_cv">تحميل PDF</span>
                     </a>
                 </div>
@@ -362,7 +376,7 @@
     </footer>
 
     <!-- Scroll Top -->
-    <button id="scrollTopBtn" data-action="scroll-top" class="fixed bottom-6 left-6 z-40 bg-primary text-white w-12 h-12 rounded-full shadow-xl hover:bg-blue-600 transition flex items-center justify-center transform translate-y-10 print-hide">
+    <button id="scrollTopBtn" data-action="scroll-top" aria-label="العودة للأعلى" data-lang-aria="aria_scroll_top" class="fixed bottom-6 left-6 z-40 bg-primary text-white w-12 h-12 rounded-full shadow-xl hover:bg-blue-700 transition flex items-center justify-center transform translate-y-10 print-hide">
         <i class="fas fa-arrow-up"></i>
     </button>
 
@@ -455,7 +469,7 @@
             </div>
             <div class="flex gap-3">
                 <button data-action="close-admin-modal" class="flex-1 py-3 text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 transition">Cancel</button>
-                <button data-action="login" class="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-600 transition shadow-lg">Login</button>
+                <button data-action="login" class="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">Login</button>
             </div>
         </div>
     </div>

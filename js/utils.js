@@ -9,6 +9,13 @@ const VENDOR = {
         styles:  [{ href: 'sweetalert2@11.26.25/dist/sweetalert2.min.css', integrity: 'sha384-dCW5imOdApH6OwpFau8cZNKjqVbJYnCA5q+8YsMYP3XwXKsV6Jfz1u6MZLnXaBsS' }],
         scripts: [{ src: 'sweetalert2@11.26.25/dist/sweetalert2.min.js', integrity: 'sha384-hW8ZCQHtRH+nVOAkHZ4amZvYsAtKn1ZOvMV6dNag1Rb1thWmLZMBKTRxFV0cOxiK' }]
     },
+    particles: {
+        scripts: [{ src: 'particles.js@2.0.0/particles.js', integrity: 'sha384-AWFROZ10DoeXcNjhoQe0agryexFsipZEA17Cde6/tknpOUacvUGk27vXQ2a6ljSt' }]
+    },
+    toast: {
+        styles:  [{ href: 'toastify-js@1.12.0/src/toastify.css', integrity: 'sha384-TO4IUm4upNqQuSHA3xAk5ixibmqyKUAvTD3UIJdx9KctftYoctvBVGeH6nzXTOO2' }],
+        scripts: [{ src: 'toastify-js@1.12.0/src/toastify.js', integrity: 'sha384-VwoO4KYHycI5E2Vzjf4m+IY3C8JKnLhRzzVeR7n4Qdx+Qkq0YUC3aiJ6vY0XVlVT' }]
+    },
     sortable: {
         scripts: [{ src: 'sortablejs@1.15.0/Sortable.min.js', integrity: 'sha384-eeLEhtwdMwD3X9y+8P3Cn7Idl/M+w8H4uZqkgD/2eJVkWIN1yKzEj6XegJ9dL3q0' }]
     },
@@ -78,7 +85,10 @@ export function setDeepValue(obj, path, value) {
     cur[keys[keys.length - 1]] = value;
 }
 
+// Toastify is fetched with the first toast, so it is not on the page's critical path.
 export function showToast(msg, type = 'info') {
     const colors = { success: '#10B981', error: '#EF4444', info: '#3b82f6' };
-    Toastify({ text: msg, duration: 3500, gravity: 'top', position: 'center', style: { background: colors[type] || colors.info } }).showToast();
+    loadVendor('toast')
+        .then(() => Toastify({ text: msg, duration: 3500, gravity: 'top', position: 'center', style: { background: colors[type] || colors.info } }).showToast())
+        .catch(() => {});   // a toast is never worth an error of its own
 }

@@ -19,7 +19,8 @@ function purgeLegacyAdminStorage() {
 
 async function loadContent() {
     try {
-        const res = await fetch(`data.json?t=${Date.now()}`);
+        // no-cache = revalidate with the server (ETag) instead of a cache-busting query string
+        const res = await fetch('data.json', { cache: 'no-cache' });
         if (!res.ok) throw new Error('data.json not found');
         state.appData    = await res.json();
         state.dataLoaded = true;
@@ -27,7 +28,7 @@ async function loadContent() {
         renderAll();
         updateStaticText();
         setSmartGreeting();
-        setTimeout(() => document.getElementById('loading-screen').classList.add('hidden'), 500);
+        document.getElementById('loading-screen').classList.add('hidden');
     } catch (err) {
         showToast('خطأ في تحميل البيانات / Error loading data', 'error');
         document.getElementById('loading-screen').classList.add('hidden');
@@ -35,14 +36,16 @@ async function loadContent() {
 }
 
 function boot() {
-    AOS.init({ duration: 800, once: true });
+    // Reduced motion: AOS removes its attributes so content is shown without animation
+    AOS.init({ duration: 800, once: true, disable: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches });
 
     const yearEl = document.getElementById('year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
 
     setDirection();
     initTheme();
-    initParticles();
+    // Decorative, so it waits until the page is idle
+    (window.requestIdleCallback || (cb => setTimeout(cb, 1500)))(() => initParticles());
     setupSecretTrigger();
     setupCmdPalette();
     setupModal();
