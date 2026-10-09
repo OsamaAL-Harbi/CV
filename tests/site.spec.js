@@ -18,6 +18,8 @@ test.describe('page load', () => {
         expect(csp).toContain("object-src 'none'");
         expect(csp).not.toContain('unsafe-inline');
         expect(csp).not.toContain('unsafe-eval');
+        // CDN scripts are allowed per pinned package path, never for the whole host
+        expect(csp).not.toMatch(/https:\/\/cdn\.jsdelivr\.net(\s|;|\/npm\/\s)/);
         await expect(page.locator('meta[name="referrer"]')).toHaveAttribute('content', 'strict-origin-when-cross-origin');
     });
 
@@ -155,6 +157,23 @@ test.describe('service worker', () => {
         await page.goto('./some/unknown/page.html');
         await expect(page.locator('body')).toContainText(/you are offline/i);
     });
+
+    test('offline it serves the latest copy it saw, not the install-time one', async ({ page, context }) => {
+        await openSite(page);
+        await expect.poll(() => page.evaluate(async () => (await navigator.serviceWorker.ready).active?.state)).toBe('activated');
+        await page.reload();
+        await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+        // A newer data.json is deployed after the worker installed…
+        const data = await (await page.request.get('data.json')).json();
+        data.profile.name.ar = 'اسم محدَّث بعد التثبيت';
+        await context.route(/\/CV\/data\.json/, route => route.fulfill({ json: data }));
+        await page.reload();
+        await expect(page.locator('[data-path="profile.name"]')).toHaveText(data.profile.name.ar);
+        // …and the visitor then goes offline.
+        await context.route(/\/CV\//, route => route.abort('internetdisconnected'));
+        await page.reload();
+        await expect(page.locator('[data-path="profile.name"]')).toHaveText(data.profile.name.ar);
+    });
 });
 
 test.describe('command palette', () => {
@@ -168,6 +187,20 @@ test.describe('command palette', () => {
         const download = page.waitForEvent('download', { timeout: 30_000 });
         await page.locator('#cmd-list [data-action="run-command"]:visible').first().click();
         expect((await download).suggestedFilename()).toMatch(/_CV\.pdf$/);
+        // html2canvas cannot draw CSS-mask icons; its copy of the page gets real images instead
+        const icons = await page.evaluate(async () => {
+            const { inlineIconsForCanvas } = await import('./js/ui.js');
+            const copy = document.getElementById('resume').cloneNode(true);
+            const frame = document.body.appendChild(Object.assign(document.createElement('div'), { hidden: false }));
+            frame.appendChild(copy);
+            copy.style.display = 'block';
+            await inlineIconsForCanvas(document);
+            const imgs = [...copy.querySelectorAll('i > img')];
+            frame.remove();
+            return { count: imgs.length, decoded: imgs.every(img => img.naturalWidth > 0) };
+        });
+        expect(icons.count).toBeGreaterThan(0);
+        expect(icons.decoded).toBe(true);
         expect(await page.evaluate(() => typeof window.jspdf)).toBe('object');
         expect(consoleErrors).toEqual([]);
     });
