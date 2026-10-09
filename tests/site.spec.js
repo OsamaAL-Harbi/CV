@@ -156,3 +156,19 @@ test.describe('service worker', () => {
         await expect(page.locator('body')).toContainText(/you are offline/i);
     });
 });
+
+test.describe('command palette', () => {
+    test('generates a PDF, loading jsPDF and html2canvas only then', async ({ page, isMobile, consoleErrors }) => {
+        test.skip(isMobile, 'keyboard shortcut (Ctrl+K) is a desktop feature');
+        await openSite(page);
+        expect(await page.evaluate(() => typeof window.jspdf)).toBe('undefined');
+        await page.keyboard.press('Control+k');
+        await expect(page.locator('#cmd-palette')).toBeVisible();
+        await page.locator('#cmd-input').fill('PDF');
+        const download = page.waitForEvent('download', { timeout: 30_000 });
+        await page.locator('#cmd-list [data-action="run-command"]:visible').first().click();
+        expect((await download).suggestedFilename()).toMatch(/_CV\.pdf$/);
+        expect(await page.evaluate(() => typeof window.jspdf)).toBe('object');
+        expect(consoleErrors).toEqual([]);
+    });
+});

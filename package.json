@@ -10,7 +10,8 @@
     "start": "node scripts/serve.mjs",
     "test": "playwright test",
     "check:sri": "node scripts/check-sri.mjs",
-    "mirror:cdn": "node scripts/mirror-cdn.mjs"
+    "mirror:cdn": "node scripts/mirror-cdn.mjs",
+    "lhci": "lhci autorun"
   },
   "devDependencies": {
     "@fontsource/tajawal": "5.3.0",
