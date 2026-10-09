@@ -5,7 +5,8 @@ export default {
     theme: {
         extend: {
             fontFamily: { sans: ['Tajawal', 'Roboto', 'sans-serif'] },
-            colors: { primary: '#3b82f6', secondary: '#8b5cf6', darkBg: '#0b1120', cardBg: '#1e293b' }
+            // primary is a CSS variable: blue-600 in light mode (WCAG AA with white text), blue-500 in dark mode
+            colors: { primary: 'rgb(var(--color-primary) / <alpha-value>)', secondary: '#8b5cf6', darkBg: '#0b1120', cardBg: '#1e293b' }
         }
     }
 };

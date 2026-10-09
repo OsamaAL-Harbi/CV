@@ -27,6 +27,7 @@ export const STATIC_TEXT = {
         stat_projects:'مشروع تخرج', stat_graduation:'سنة التخرج',
         not_found_title:'الصفحة غير موجودة', not_found_desc:'يبدو أن الرابط الذي طلبته غير موجود',
         not_found_btn:'العودة للرئيسية',
+        aria_theme:'الوضع الليلي', aria_menu_open:'فتح القائمة', aria_menu_close:'إغلاق القائمة', aria_scroll_top:'العودة للأعلى',
         filter_all:'الكل'
     },
     en: {
@@ -46,6 +47,7 @@ export const STATIC_TEXT = {
         stat_projects:'Graduation Project', stat_graduation:'Graduation Year',
         not_found_title:'Page Not Found', not_found_desc:'The link you requested does not exist',
         not_found_btn:'Back to Home',
+        aria_theme:'Toggle dark mode', aria_menu_open:'Open menu', aria_menu_close:'Close menu', aria_scroll_top:'Back to top',
         filter_all:'All'
     }
 };
@@ -61,6 +63,10 @@ export function updateStaticText() {
     document.querySelectorAll('[data-lang]').forEach(el => {
         const key = el.getAttribute('data-lang');
         if (STATIC_TEXT[state.currentLang]?.[key]) el.innerText = STATIC_TEXT[state.currentLang][key];
+    });
+    document.querySelectorAll('[data-lang-aria]').forEach(el => {
+        const label = STATIC_TEXT[state.currentLang]?.[el.getAttribute('data-lang-aria')];
+        if (label) el.setAttribute('aria-label', label);
     });
 }
 
