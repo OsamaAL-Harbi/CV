@@ -24,7 +24,7 @@ for (const [name, meta] of Object.entries(families)) {
 const sources = ['index.html', 'script.js', ...(await readdir(join(ROOT, 'js'))).map(f => `js/${f}`)];
 const used = new Set();
 for (const file of sources) {
-    for (const [, name] of (await readFile(join(ROOT, file), 'utf8')).matchAll(/\bfa-([a-z0-9-]+)/g)) {
+    for (const [, name] of (await readFile(join(ROOT, file), 'utf8')).matchAll(/(?<![\w-])fa-([a-z0-9-]+)/g)) {
         if (!UTILITIES.has(name)) used.add(name);
     }
 }
@@ -56,6 +56,7 @@ const css = `/*! Icons: Font Awesome Free ${version} by @fontawesome - https://f
   content: ""; display: inline-block; width: var(--fa-w, 1em); height: 1em; vertical-align: -0.125em;
   background-color: currentColor;
   -webkit-mask: var(--fa-icon) center / contain no-repeat; mask: var(--fa-icon) center / contain no-repeat;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;   /* icons are a background colour: keep them in print */
 }
 .fa-spin { animation: fa-spin 2s linear infinite; }
 @keyframes fa-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

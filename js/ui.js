@@ -48,6 +48,33 @@ function animateCounters() {
     });
 }
 
+// html2canvas cannot draw CSS masks, which is how the icons are rendered: in its copy of the page,
+// replace every icon with an <img> of the same SVG, filled with the icon's text colour. The returned
+// promise waits until the images are decoded (html2canvas skips images without a size yet).
+export function inlineIconsForCanvas(doc) {
+    const view = doc.defaultView;
+    const images = [];
+    doc.querySelectorAll('.fa, .fas, .fab, .far').forEach(icon => {
+        const style = view.getComputedStyle(icon);
+        const uri = style.getPropertyValue('--fa-icon').trim().match(/^url\((['"]?)(.+)\1\)$/)?.[2];
+        const width = uri?.match(/viewBox='0 0 (\d+) 512'/)?.[1];
+        if (!uri || !width) return;
+        const box = view.getComputedStyle(icon, '::before');
+        const img = doc.createElement('img');
+        img.alt = '';
+        img.src = uri
+            .replace('%3Csvg ', `%3Csvg width='${width}' height='512' `)
+            .replace('%3Cpath ', `%3Cpath fill='${encodeURIComponent(style.color)}' `);
+        img.style.cssText = `display:inline-block;width:${box.width};height:${box.height};vertical-align:-0.125em`;
+        icon.classList.remove('fa', 'fas', 'fab', 'far');   // drops the masked ::before…
+        icon.style.display = 'inline-block';                // …but keep the icon box those classes gave
+        icon.style.lineHeight = '1';
+        icon.replaceChildren(img);
+        images.push(img.decode().catch(() => {}));
+    });
+    return Promise.all(images);
+}
+
 async function generatePDF() {
     showToast(state.currentLang === 'ar' ? 'جاري إنشاء PDF...' : 'Generating PDF...', 'info');
     const resumeEl  = document.getElementById('resume');
@@ -59,7 +86,8 @@ async function generatePDF() {
         const canvas = await html2canvas(resumeEl, {
             scale: 2, useCORS: true, allowTaint: true,
             backgroundColor: document.documentElement.classList.contains('dark') ? '#0b1120' : '#ffffff',
-            logging: false, windowWidth: 1200
+            logging: false, windowWidth: 1200,
+            onclone: inlineIconsForCanvas
         });
         const pdf   = new jsPDF('p', 'mm', 'a4');
         const pageW = pdf.internal.pageSize.getWidth();
