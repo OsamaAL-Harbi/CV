@@ -69,7 +69,8 @@ async function generatePDF() {
         const img = canvas.toDataURL('image/jpeg', 0.92);
         pdf.addImage(img, 'JPEG', 0, pos, pageW, imgH); left -= pageH;
         while (left > 0) { pos -= pageH; pdf.addPage(); pdf.addImage(img, 'JPEG', 0, pos, pageW, imgH); left -= pageH; }
-        const name = t(state.appData.profile?.name || { ar: 'Osama', en: 'Osama' }).replace(/\s+/g, '_');
+        // ASCII file name in both languages: browsers drop non-Latin download names (file saved as "download")
+        const name = (state.appData.profile?.name?.en || 'Osama').replace(/\s+/g, '_');
         pdf.save(`${name}_CV.pdf`);
         showToast(state.currentLang === 'ar' ? 'تم تحميل PDF ✅' : 'PDF downloaded ✅', 'success');
     } catch (err) {
