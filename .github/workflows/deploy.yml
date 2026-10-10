@@ -13,6 +13,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  issues: write          # e-mail alerts: an issue that mentions the owner when a monitored site is down
 
 concurrency:
   group: pages
@@ -37,6 +38,11 @@ jobs:
 
       - name: System status (monitored sites)
         run: node scripts/check-status.mjs
+
+      - name: E-mail alerts for sites that went down or came back
+        run: node scripts/alert-status.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Assemble the published files
         run: node scripts/assemble-site.mjs _site

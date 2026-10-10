@@ -39,6 +39,13 @@ body { overflow-x: hidden; }
 .admin-mode .admin-element { display: flex !important; }
 .drag-handle { cursor: move; }
 
+/* Hidden sections/items (data.json → visibility.sections, item.hidden): gone for visitors, dimmed for the admin */
+.section-off { display: none !important; }
+.section-off-admin, .item-hidden { opacity: .45; outline: 2px dashed #9ca3af; outline-offset: 6px; border-radius: 12px; }
+.section-off-admin { position: relative; }
+.section-off-admin::before { content: "مخفي عن الزوار"; position: absolute; top: -.75rem; inset-inline-end: 0; z-index: 5;
+    font-size: 11px; font-weight: 700; padding: .1rem .5rem; border-radius: 999px; background: #374151; color: #fff; }
+
 /* Skills progress */
 .skill-bar-fill { width: 0; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
 .skill-bar-fill.animate { width: var(--target-width); }

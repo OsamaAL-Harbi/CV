@@ -14,6 +14,9 @@ function maliciousData() {
     data.projects[0].technologies.push("x');window.__xss=1;('", PAYLOAD);
     data.projects[0].link = 'javascript:window.__xss=5';
     data.projects[0].liveUrl = 'javascript:window.__xss=6';
+    data.projects[0].image = '"><img src=x onerror=window.__xss=7>';
+    data.certificates[0].image = 'javascript:window.__xss=8';
+    data.availability = { enabled: true, status: { ar: PAYLOAD, en: PAYLOAD }, roles: { ar: PAYLOAD } };
     data.skills[0].ar = PAYLOAD;
     data.skills[0].level = '50"><img src=x onerror=window.__xss=1>';
     data.certificates[0].credential = PAYLOAD;
@@ -31,7 +34,8 @@ test('values from data.json are rendered as text, never as HTML', async ({ page 
     await page.locator('#projects-container [data-action="open-project"]').first().click();
     await expect(page.locator('#modal-github-link')).toBeHidden();      // javascript: link dropped
     await expect(page.locator('#modal-live-link')).toBeHidden();
-    await expect(page.locator('main img:not(#profile-img), #project-modal img')).toHaveCount(0);
+    await expect(page.locator('main img:not(#profile-img), #project-modal img:not(#modal-image)')).toHaveCount(0);
+    await expect(page.locator('#modal-image')).toBeHidden();           // the project has no (safe) image
     await expect(page.locator('[data-path="profile.name"]')).toHaveText(PAYLOAD);
     await page.keyboard.press('Escape');
     await page.evaluate(() => { location.hash = 'contact'; });

@@ -6,6 +6,7 @@ import { escapeHTML, loadVendor, setDeepValue, showToast, skillLevel } from './u
 import { renderAll } from './render.js';
 import { closeDialog, openDialog } from './modal.js';
 import { DEFAULT_THEME, PRESETS, applyTheme, harmonies, isHex, syncSiteTheme } from './color.js';
+import { diffLines, diffStats, hunks } from './diff.js';
 
 let githubInfo     = { token: '', repo: '' };
 
@@ -60,6 +61,45 @@ function githubHeaders(token) {
         Accept: 'application/vnd.github+json',
         Authorization: `Bearer ${token}`,
         'X-GitHub-Api-Version': '2022-11-28'
+    };
+}
+
+// ── GitHub helpers shared with the lazily loaded admin tools (js/admin-tools.js) ──
+export function ghApi(path, init = {}) {
+    if (isSessionExpired(readSession().loginTime)) { expireSession(); return Promise.reject(new Error('انتهت الجلسة')); }
+    return fetch(`https://api.github.com/repos/${githubInfo.repo}${path}`, {
+        cache: 'no-store',      // the API answers with max-age=60; a cached sha would make the next write fail
+        ...init,
+        headers: { ...githubHeaders(githubInfo.token), ...(init.body ? { 'Content-Type': 'application/json' } : {}), ...init.headers }
+    });
+}
+
+// Creates or replaces a file in the repository (content already base64). Returns the API response.
+export async function putRepoFile(path, base64, message) {
+    const url = `/contents/${path.split('/').map(encodeURIComponent).join('/')}`;
+    let sha;
+    const existing = await ghApi(url);
+    if (existing.ok) sha = (await existing.json()).sha;
+    else if (existing.status !== 404) throw new Error(`HTTP ${existing.status}`);
+    return ghApi(url, { method: 'PUT', body: JSON.stringify({ message, content: base64, ...(sha ? { sha } : {}) }) });
+}
+
+// Line-by-line diff as HTML (− removed, + added; signs as well as colours)
+export function diffHTML(before, after, { context = 3, maxLines = 400 } = {}) {
+    const ops = diffLines(before, after);
+    const { added, removed } = diffStats(ops);
+    if (!added && !removed) return { html: '<p class="text-xs text-gray-500">لا توجد فروق.</p>', added, removed };
+    const lines = hunks(ops, context);
+    const rows = lines.slice(0, maxLines).map(o => {
+        if (o.op === '…') return '<div class="px-2 text-gray-400 select-none">⋯</div>';
+        const cls = o.op === '+' ? 'bg-green-50 text-green-900' : o.op === '-' ? 'bg-red-50 text-red-900 line-through decoration-red-300' : 'text-gray-600';
+        const num = o.op === '-' ? o.a : o.b;
+        return `<div class="flex ${cls}"><span class="w-10 shrink-0 text-end pe-2 text-gray-400 select-none">${num ?? ''}</span><span class="w-4 shrink-0 select-none font-bold">${o.op === ' ' ? '' : o.op}</span><span class="whitespace-pre-wrap break-all">${escapeHTML(o.text)}</span></div>`;
+    }).join('');
+    const more = lines.length > maxLines ? `<div class="px-2 text-gray-500">… و${lines.length - maxLines} سطراً آخر</div>` : '';
+    return {
+        added, removed,
+        html: `<div class="diff font-mono text-[11px] leading-5 text-left max-h-[45vh] overflow-auto rounded-lg border border-gray-200" dir="ltr">${rows}${more}</div>`
     };
 }
 
@@ -118,13 +158,13 @@ export function logout() {
 }
 
 // btoa() only accepts Latin-1, so encode the UTF-8 bytes first (and the reverse for reading).
-function toBase64Utf8(text) {
+export function toBase64Utf8(text) {
     let binary = '';
     new TextEncoder().encode(text).forEach(byte => { binary += String.fromCharCode(byte); });
     return btoa(binary);
 }
 
-function fromBase64Utf8(b64) {
+export function fromBase64Utf8(b64) {
     const binary = atob(String(b64).replace(/\s/g, ''));
     return new TextDecoder().decode(Uint8Array.from(binary, ch => ch.charCodeAt(0)));
 }
@@ -132,7 +172,8 @@ function fromBase64Utf8(b64) {
 const SECTION_NAMES = {
     profile: 'الملف الشخصي', experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات',
     projects: 'المشاريع', certificates: 'الشهادات', workshops: 'ورش العمل', languages: 'اللغات',
-    github: 'GitHub', monitor: 'المراقبة', theme: 'ألوان الموقع', analytics: 'الإحصائيات'
+    github: 'GitHub', monitor: 'المراقبة', theme: 'ألوان الموقع', analytics: 'الإحصائيات',
+    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة'
 };
 
 // Which sections differ from the last loaded/saved version, e.g. ["الخبرات (+1)", "الملف الشخصي"].
@@ -170,14 +211,24 @@ export async function saveToGitHub() {
         const fileData = await getRes.json();
 
         await loadVendor('swal');
-        let remoteChanged = false;
-        try { remoteChanged = JSON.stringify(JSON.parse(fromBase64Utf8(fileData.content))) !== state.lastSavedSnapshot; }
-        catch { remoteChanged = true; }
+        let remoteChanged = false, remoteText = '';
+        try {
+            const remote = JSON.parse(fromBase64Utf8(fileData.content));
+            remoteChanged = JSON.stringify(remote) !== state.lastSavedSnapshot;
+            remoteText = JSON.stringify(remote, null, 2);
+        } catch { remoteChanged = true; }
+        const json = JSON.stringify(state.appData, null, 2) + '\n';
+        // Preview: exactly what changes in the file on GitHub, line by line
+        const diff = diffHTML(remoteText, json.trimEnd());
         const answer = await Swal.fire({
             title: 'حفظ التعديلات في GitHub؟',
-            html: `<p class="text-sm mb-2">الأقسام المعدّلة:</p>
-                   <ul class="text-sm font-bold list-disc ps-6 text-right" dir="rtl">${changes.map(c => `<li>${escapeHTML(c)}</li>`).join('')}</ul>
-                   ${remoteChanged ? `<p class="mt-4 p-3 rounded-lg bg-amber-50 text-amber-800 text-sm text-right" dir="rtl">⚠️ تغيّر ملف data.json في GitHub منذ تحميل الصفحة (تعديل أو commit آخر). الحفظ سيستبدل تلك التغييرات.</p>` : ''}`,
+            width: '820px',
+            html: `<div class="text-right" dir="rtl"><p class="text-sm mb-2">الأقسام المعدّلة:</p>
+                   <ul class="text-sm font-bold list-disc ps-6">${changes.map(c => `<li>${escapeHTML(c)}</li>`).join('')}</ul>
+                   ${remoteChanged ? `<p class="mt-4 p-3 rounded-lg bg-amber-50 text-amber-800 text-sm">⚠️ تغيّر ملف data.json في GitHub منذ تحميل الصفحة (تعديل أو commit آخر). الحفظ سيستبدل تلك التغييرات.</p>` : ''}
+                   <details class="mt-4" open><summary class="cursor-pointer text-sm font-bold mb-2">معاينة الفرق سطراً بسطر
+                       <span class="font-mono text-xs" dir="ltr"><span class="text-green-700">+${diff.added}</span> <span class="text-red-600">−${diff.removed}</span></span></summary>
+                       ${diff.html}</details></div>`,
             icon: remoteChanged ? 'warning' : 'question',
             showCancelButton: true,
             confirmButtonText: remoteChanged ? 'استبدال وحفظ' : 'حفظ',
@@ -186,7 +237,6 @@ export async function saveToGitHub() {
         });
         if (!answer.isConfirmed) return;
 
-        const json   = JSON.stringify(state.appData, null, 2) + '\n';
         const putRes = await fetch(url, {
             method: 'PUT',
             headers: { ...githubHeaders(githubInfo.token), 'Content-Type': 'application/json' },
@@ -260,7 +310,8 @@ const SCHEMAS = {
         { key: 'issuer',     label: 'الجهة المانحة / Issuer' },
         { key: 'credential', label: 'Credential ID', simple: true },
         { key: 'url',        label: 'رابط التحقق / Verification URL (https://)', simple: true },
-        { key: 'date',       label: 'التاريخ / Date', simple: true }
+        { key: 'date',       label: 'التاريخ / Date', simple: true },
+        { key: 'image',      label: 'صورة الشهادة (اختياري)', simple: true, upload: 'certificate' }
     ],
     workshops: [
         { key: 'name',      label: 'اسم الورشة / Name' },
@@ -273,10 +324,12 @@ const SCHEMAS = {
     ]
 };
 
-async function manageItem(type, index = null) {
+// draft: values typed before an image upload interrupted the dialog (it reopens with them)
+async function manageItem(type, index = null, draft = null) {
     if (!state.isAdmin) return;
     const isEdit = index !== null;
-    const item   = isEdit ? (state.appData[type] || [])[index] : {};
+    const saved  = isEdit ? (state.appData[type] || [])[index] : {};
+    const item   = draft ? { ...saved, ...draft } : saved;
     const schema = SCHEMAS[type];
     if (!schema) return;
     await loadVendor('swal');
@@ -311,11 +364,12 @@ async function manageItem(type, index = null) {
             </div>`;
         }
         if (f.simple) {
-            const val = isEdit ? getSimple(item, f) : '';
+            const val = isEdit || draft ? getSimple(item, f) : '';
             const hint = f.array ? ' <span class="text-gray-400 text-xs">(مفصولة بفاصلة)</span>' : '';
             return `<div class="mb-3">
-                <label class="block text-xs mb-1 text-gray-500 text-right">${f.label}${hint}</label>
-                <input id="swal-${f.key}" class="swal2-input m-0 w-full" value="${escapeHTML(val)}" dir="ltr">
+                <label class="block text-xs mb-1 text-gray-500 text-right" for="swal-${f.key}">${f.label}${hint}</label>
+                <div class="flex gap-2"><input id="swal-${f.key}" class="swal2-input m-0 w-full" value="${escapeHTML(val)}" dir="ltr">
+                ${f.upload ? `<button type="button" id="swal-${f.key}-upload" class="px-3 rounded-lg bg-blue-600 text-white text-xs font-bold whitespace-nowrap">رفع صورة</button>` : ''}</div>
             </div>`;
         }
         const valAr = getVal(item, f, 'ar');
@@ -336,13 +390,7 @@ async function manageItem(type, index = null) {
         </div>`;
     }).join('');
 
-    const { value } = await Swal.fire({
-        title: isEdit ? 'تعديل البيانات' : 'إضافة جديدة',
-        html: `<div class="text-right" dir="rtl">${html}</div>`,
-        width: '700px', confirmButtonText: 'حفظ التغييرات',
-        showCancelButton: true, cancelButtonText: 'إلغاء',
-        focusConfirm: false,
-        preConfirm: () => {
+    const collect = () => {
             const obj = {};
             schema.forEach(f => {
                 const inputId = `swal-${f.key}`;
@@ -372,13 +420,31 @@ async function manageItem(type, index = null) {
                 }
             });
             return obj;
-        }
+    };
+
+    const { value } = await Swal.fire({
+        title: isEdit ? 'تعديل البيانات' : 'إضافة جديدة',
+        html: `<div class="text-right" dir="rtl">${html}</div>`,
+        width: '700px', confirmButtonText: 'حفظ التغييرات',
+        showCancelButton: true, cancelButtonText: 'إلغاء',
+        focusConfirm: false,
+        didOpen: popup => schema.filter(f => f.upload).forEach(f => {
+            popup.querySelector(`#swal-${f.key}-upload`)?.addEventListener('click', async () => {
+                const typed = collect();
+                Swal.close();
+                const tools = await import('./admin-tools.js');
+                const title = typed.name?.en || typed.name?.ar || typed.title?.en || type;
+                const path = await tools.uploadImage(tools.IMAGE_PRESETS[f.upload], `images/${type}/${tools.slug(title)}`);
+                manageItem(type, index, { ...typed, ...(path ? { [f.key]: path } : {}) });
+            });
+        }),
+        preConfirm: collect
     });
 
     if (value) {
         if (!state.appData[type]) state.appData[type] = [];
         // Merge: fields the editor does not show (added by hand in data.json) are kept
-        if (isEdit) state.appData[type][index] = { ...item, ...value }; else state.appData[type].push(value);
+        if (isEdit) state.appData[type][index] = { ...saved, ...value }; else state.appData[type].push(value);
         if (type === 'skills' && value.category !== state.activeSkillTab) state.activeSkillTab = value.category;
         renderAll();
         showToast(isEdit ? 'تم التعديل ✅' : 'تمت الإضافة ✅', 'success');
@@ -390,11 +456,12 @@ export function addItem(type)         { return type === 'projects' ? manageProje
 export function editItem(type, index) { return type === 'projects' ? manageProjectItem(index) : manageItem(type, index); }
 
 // ── Dedicated project editor (handles technologies array + nested details) ──
-async function manageProjectItem(index = null) {
+async function manageProjectItem(index = null, draft = null) {
     if (!state.isAdmin) return;
     await loadVendor('swal');
     const isEdit = index !== null;
-    const item   = isEdit ? (state.appData.projects || [])[index] : {};
+    const saved  = isEdit ? (state.appData.projects || [])[index] : {};
+    const item   = draft ? { ...saved, ...draft } : saved;
 
     // Helper: extract bilingual string
     const bv = (obj, lang) => {
@@ -408,6 +475,42 @@ async function manageProjectItem(index = null) {
     const challEn   = bv(item.details?.challenges, 'en');
     const resultsAr = bv(item.details?.results,    'ar');
     const resultsEn = bv(item.details?.results,    'en');
+
+    // validate = false while an image upload interrupts the dialog (an untitled draft is fine then)
+    const collectProject = validate => {
+            const titleAr = document.getElementById('pj-title-ar')?.value.trim();
+            const titleEn = document.getElementById('pj-title-en')?.value.trim();
+            if (validate && !titleAr && !titleEn) {
+                Swal.showValidationMessage(state.currentLang === 'ar' ? 'يرجى إدخال عنوان المشروع' : 'Please enter a project title');
+                return false;
+            }
+            const rawTech = document.getElementById('pj-tech')?.value || '';
+            const techs   = rawTech.split(',').map(t => t.trim()).filter(Boolean);
+            return {
+                title: {
+                    ar: titleAr || titleEn,
+                    en: titleEn || titleAr
+                },
+                desc: {
+                    ar: document.getElementById('pj-desc-ar')?.value.trim() || '',
+                    en: document.getElementById('pj-desc-en')?.value.trim() || ''
+                },
+                technologies: techs,
+                link:    document.getElementById('pj-link')?.value.trim() || '#',
+                liveUrl: document.getElementById('pj-live')?.value.trim() || '',
+                image:   document.getElementById('pj-image')?.value.trim() || '',
+                details: {
+                    challenges: {
+                        ar: document.getElementById('pj-chal-ar')?.value.trim() || '',
+                        en: document.getElementById('pj-chal-en')?.value.trim() || ''
+                    },
+                    results: {
+                        ar: document.getElementById('pj-res-ar')?.value.trim() || '',
+                        en: document.getElementById('pj-res-en')?.value.trim() || ''
+                    }
+                }
+            };
+    };
 
     const { value } = await Swal.fire({
         title: isEdit
@@ -472,6 +575,13 @@ async function manageProjectItem(index = null) {
             </div>
           </div>
 
+          <!-- Image (16:9, cropped and saved as WebP) -->
+          <div>
+            <label class="block text-xs mb-1 text-gray-500" for="pj-image">صورة المشروع (اختياري)</label>
+            <div class="flex gap-2"><input id="pj-image" class="swal2-input m-0 w-full" value="${escapeHTML(item.image || '')}" dir="ltr" placeholder="images/projects/…webp">
+            <button type="button" id="pj-image-upload" class="px-3 rounded-lg bg-blue-600 text-white text-xs font-bold whitespace-nowrap">رفع صورة</button></div>
+          </div>
+
           <!-- Links -->
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -490,44 +600,19 @@ async function manageProjectItem(index = null) {
         showCancelButton: true,
         cancelButtonText: 'إلغاء',
         focusConfirm: false,
-        preConfirm: () => {
-            const titleAr = document.getElementById('pj-title-ar')?.value.trim();
-            const titleEn = document.getElementById('pj-title-en')?.value.trim();
-            if (!titleAr && !titleEn) {
-                Swal.showValidationMessage(state.currentLang === 'ar' ? 'يرجى إدخال عنوان المشروع' : 'Please enter a project title');
-                return false;
-            }
-            const rawTech = document.getElementById('pj-tech')?.value || '';
-            const techs   = rawTech.split(',').map(t => t.trim()).filter(Boolean);
-            return {
-                title: {
-                    ar: titleAr || titleEn,
-                    en: titleEn || titleAr
-                },
-                desc: {
-                    ar: document.getElementById('pj-desc-ar')?.value.trim() || '',
-                    en: document.getElementById('pj-desc-en')?.value.trim() || ''
-                },
-                technologies: techs,
-                link:    document.getElementById('pj-link')?.value.trim() || '#',
-                liveUrl: document.getElementById('pj-live')?.value.trim() || '',
-                details: {
-                    challenges: {
-                        ar: document.getElementById('pj-chal-ar')?.value.trim() || '',
-                        en: document.getElementById('pj-chal-en')?.value.trim() || ''
-                    },
-                    results: {
-                        ar: document.getElementById('pj-res-ar')?.value.trim() || '',
-                        en: document.getElementById('pj-res-en')?.value.trim() || ''
-                    }
-                }
-            };
-        }
+        didOpen: popup => popup.querySelector('#pj-image-upload').addEventListener('click', async () => {
+            const typed = collectProject(false);
+            Swal.close();
+            const tools = await import('./admin-tools.js');
+            const path = await tools.uploadImage(tools.IMAGE_PRESETS.project, `images/projects/${tools.slug(typed.title?.en || typed.title?.ar)}`);
+            manageProjectItem(index, { ...typed, ...(path ? { image: path } : {}) });
+        }),
+        preConfirm: () => collectProject(true)
     });
 
     if (value) {
         if (!state.appData.projects) state.appData.projects = [];
-        if (isEdit) state.appData.projects[index] = { ...item, ...value };
+        if (isEdit) state.appData.projects[index] = { ...saved, ...value };
         else        state.appData.projects.push(value);
         renderAll();
         showToast(isEdit ? 'تم تعديل المشروع ✅' : 'تمت إضافة المشروع ✅', 'success');
@@ -675,7 +760,7 @@ export function cvPathFor(fileName) {
     return `cv/${/[A-Za-z0-9]/.test(base) ? base.slice(0, 60) : 'CV'}.pdf`;
 }
 
-function readAsBase64(file) {
+export function readAsBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(String(reader.result).split(',')[1]);
@@ -685,25 +770,15 @@ function readAsBase64(file) {
 }
 
 async function uploadCv(file, status) {
-    if (isSessionExpired(readSession().loginTime)) { expireSession(); return null; }
     const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
     const head = new Uint8Array(await file.slice(0, 5).arrayBuffer());
     if (!isPdf || String.fromCharCode(...head) !== '%PDF-') { status('❌ الملف ليس PDF'); return null; }
     if (file.size > CV_MAX_BYTES) { status('❌ الحجم أكبر من 10 MB'); return null; }
 
     const path = cvPathFor(file.name);
-    const url  = `https://api.github.com/repos/${githubInfo.repo}/contents/${path}`;
     status(`⏳ جاري الرفع إلى ${path}…`);
-    // An existing file with the same name is replaced (its sha is required)
-    let sha;
-    const existing = await fetch(url, { headers: githubHeaders(githubInfo.token), cache: 'no-store' });
-    if (existing.ok) sha = (await existing.json()).sha;
-    else if (existing.status !== 404) { status('❌ تعذّر الوصول للمستودع'); return null; }
-    const res = await fetch(url, {
-        method: 'PUT',
-        headers: { ...githubHeaders(githubInfo.token), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: `Upload CV (${path}) via admin panel`, content: await readAsBase64(file), ...(sha ? { sha } : {}) })
-    });
+    // An existing file with the same name is replaced
+    const res = await putRepoFile(path, await readAsBase64(file), `Upload CV (${path}) via admin panel`);
     if (!res.ok) { status(`❌ فشل الرفع (HTTP ${res.status})`); return null; }
     status(`✅ تم رفع الملف إلى ${path} — اضغط «حفظ التغييرات» ثم «حفظ» في شريط المدير ليُربط بأزرار التحميل.`);
     return path;
@@ -753,12 +828,33 @@ export async function deleteItem(type, index) {
 export async function editImage(key) {
     if (!state.isAdmin) return;
     await loadVendor('swal');
-    const { value } = await Swal.fire({
-        title: 'تغيير الصورة الشخصية', input: 'url',
-        inputLabel: 'رابط الصورة (Imgur, GitHub, Drive)', inputPlaceholder: 'https://...'
+    const result = await Swal.fire({
+        title: 'تغيير الصورة الشخصية',
+        input: 'url',
+        inputLabel: 'رابط صورة https:// — أو ارفع صورة من جهازك وستُقص وتُصغَّر تلقائياً (WebP)',
+        inputPlaceholder: 'https://...',
+        showDenyButton: true, showCancelButton: true,
+        confirmButtonText: 'استخدام الرابط', denyButtonText: 'رفع من جهازي', cancelButtonText: 'إلغاء'
     });
-    if (value) { setDeepValue(state.appData, key, value); renderAll(); }
+    if (result.isDenied) return openTool('uploadProfilePhoto');
+    if (result.value) { setDeepValue(state.appData, key, result.value); renderAll(); }
 }
+
+// Hidden items stay in data.json but are not shown to visitors (eye button on each card)
+export function toggleHidden(type, index) {
+    if (!state.isAdmin) return;
+    const item = state.appData[type]?.[index];
+    if (!item) return;
+    if (item.hidden) delete item.hidden; else item.hidden = true;
+    renderAll();
+    showToast(item.hidden ? 'أُخفي العنصر عن الزوار — اضغط «حفظ» لنشره' : 'أصبح العنصر ظاهراً — اضغط «حفظ» لنشره', 'info');
+}
+
+// Tools in js/admin-tools.js, downloaded the first time one of them is used
+const openTool = (name, ...args) => import('./admin-tools.js').then(m => m[name](...args));
+export const openHistory   = () => openTool('openHistory');
+export const openChecker   = () => openTool('openChecker');
+export const openTools     = () => openTool('openTools');
 
 function reorderSection(type, oldIdx, newIdx) {
     const moved = state.appData[type].splice(oldIdx, 1)[0];
@@ -1075,6 +1171,10 @@ export async function manageMonitor() {
             </p>
             <ul id="mon-list" class="space-y-2"></ul>
             <button type="button" id="mon-add" class="px-4 py-2 rounded-lg bg-green-100 text-green-800 text-sm font-bold">+ إضافة موقع</button>
+            <label class="flex items-start gap-2 text-sm p-3 rounded-xl border border-gray-200">
+                <input type="checkbox" id="mon-alerts" class="w-4 h-4 mt-0.5" ${state.appData.monitorAlerts === false ? '' : 'checked'}>
+                <span><b>تنبيه بالبريد عند توقف موقع</b><br><span class="text-xs text-gray-500">يفتح سير النشر Issue في المستودع يذكرك (@)، فيرسل GitHub رسالة إلى بريدك، ويُغلق تلقائياً عند عودة الموقع.</span></span>
+            </label>
         </div>`,
         showCancelButton: true,
         confirmButtonText: 'تطبيق',
@@ -1096,15 +1196,17 @@ export async function manageMonitor() {
             const clean = rows.filter(r => r.url);
             const bad = clean.find(r => !/^https:\/\/[^\s/$.?#].[^\s]*$/i.test(r.url));
             if (bad) { Swal.showValidationMessage(`رابط غير صالح (يجب أن يبدأ بـ https://): ${bad.url}`); return false; }
-            return clean.slice(0, MAX_MONITOR).map(r => {
+            const sites = clean.slice(0, MAX_MONITOR).map(r => {
                 let name = r.name;
                 if (!name) { try { name = new URL(r.url).hostname; } catch { name = r.url; } }
                 return { name, url: r.url };
             });
+            return { sites, alerts: document.getElementById('mon-alerts').checked };
         }
     });
     if (!value) return;
-    state.appData.monitor = value;
+    state.appData.monitor = value.sites;
+    if (value.alerts) delete state.appData.monitorAlerts; else state.appData.monitorAlerts = false;
     showToast('تم التطبيق — اضغط «حفظ» لنشره ✅', 'success');
 }
 

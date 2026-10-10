@@ -1,7 +1,7 @@
 // Dialogs (project details, command palette, admin login): open/close, focus trap and focus restore,
 // plus the project modal content.
 import { state } from './state.js';
-import { escapeHTML, safeUrl, track } from './utils.js';
+import { escapeHTML, imageSrc, safeUrl, track } from './utils.js';
 import { t } from './i18n.js';
 import { toggleMobileMenu } from './router.js';
 
@@ -57,6 +57,10 @@ export function openProjectModal(index) {
 
     const ar = state.currentLang === 'ar';
     document.getElementById('modal-title').textContent = t(item.title);
+    const image = document.getElementById('modal-image');
+    const src = imageSrc(item.image, state.previewImages);
+    image.classList.toggle('hidden', !src);
+    if (src) { image.src = src; image.alt = t(item.title); } else image.removeAttribute('src');
     document.getElementById('modal-desc').textContent  = t(item.desc);
 
     const techContainer = document.getElementById('modal-technologies');

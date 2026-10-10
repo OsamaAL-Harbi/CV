@@ -2,6 +2,34 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.5.0] — 2026-10-11
+
+### Added (admin panel)
+- **History**: the last 30 versions of `data.json` (GitHub commits); preview any of them as a line diff
+  against the editor and restore it into the editor, then save.
+- **Diff before publishing**: the save dialog shows exactly what changes in the file on GitHub, line by line
+  (− removed / + added, line numbers), computed by `js/diff.js` (no library).
+- **Profile photo upload** from the device: pick, drag to frame, zoom, and it is cropped to 512×512 and
+  encoded as WebP (JPEG fallback) in the browser, then committed to `images/`. Uploaded images are previewed
+  from memory until the next deploy publishes them.
+- **Project images** (16:9, 1200×675) and **certificate images** (original shape, ≤ 1600 px) from their editors;
+  shown on project cards, in the project modal and as certificate thumbnails.
+- **Content checker**: empty fields (e.g. a period or a certificate date), duplicates, overly long texts, invalid
+  levels or links, missing images/verification links — each with an "edit" button that opens the right editor.
+- **Translation checker**: one language missing, Arabic text in an English field, no Arabic in an Arabic field,
+  very different lengths.
+- **Hide sections or items** without deleting them (`data.json → visibility.sections`, `item.hidden`): hidden for
+  visitors, print and stats; dimmed and labelled for the admin; eye button on every card.
+- **"Open to work" badge** above the name (status, roles, cities, work type per language).
+- **SEO settings**: home title/description per language with character counters and a Google preview, and a
+  share image (1200×630 JPEG upload). The deploy writes them into `index.html` so link previews (WhatsApp,
+  LinkedIn, X) see them without JavaScript; the JSON-LD photo follows the uploaded profile photo; the sitemap date
+  is refreshed on every deploy.
+- **E-mail alerts** for monitored sites: the deploy workflow opens an issue that @-mentions the owner when a site
+  goes down (GitHub e-mails mentions) and closes it with a comment when it is back; one issue per outage. Toggle
+  on the monitoring page (`data.json → monitorAlerts`).
+- A tools menu groups every admin tool; toolbar adds history, checker and tools.
+
 ## [4.4.0] — 2026-10-11
 
 ### Added

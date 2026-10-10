@@ -156,8 +156,16 @@ export function toggleMobileMenu() {
 
 // The canonical URL and og:url stay on the site root: hash fragments are not separate pages for crawlers.
 export function updateMetaTags(pageId) {
-    const meta = PAGE_META[state.currentLang]?.[pageId];
+    let meta = PAGE_META[state.currentLang]?.[pageId];
     if (!meta) return;
+    // Home title/description can be set in admin → SEO (data.json → seo)
+    const seo = state.appData.seo?.[state.currentLang];
+    if (pageId === 'home' && seo) meta = { title: seo.title || meta.title, desc: seo.description || meta.desc };
+    const image = state.appData.seo?.image;
+    if (image) {
+        const abs = /^https:\/\//.test(image) ? image : new URL(image, 'https://osamaal-harbi.github.io/CV/').href;
+        document.querySelectorAll('meta[property="og:image"], meta[name="twitter:image"]').forEach(el => el.setAttribute('content', abs));
+    }
 
     document.title = meta.title;
 
