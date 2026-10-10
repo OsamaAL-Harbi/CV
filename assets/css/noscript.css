@@ -1,0 +1,9 @@
+/* Loaded only inside <noscript>: the app needs JavaScript, so drop the loading screen and the
+   empty sections, and show the static card from index.html instead. */
+#loading-screen, main, #scroll-progress, nav { display: none !important; }
+.noscript-card {
+    max-width: 40rem; margin: 6rem auto 2rem; padding: 2rem; text-align: center; line-height: 1.8;
+    border: 1px solid #e5e7eb; border-radius: 1rem; background: #fff; color: #1f2937;
+}
+.noscript-card h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: .5rem; }
+.noscript-card a { color: #2563eb; font-weight: 700; text-decoration: underline; }
