@@ -77,3 +77,22 @@ test('merge appends to the deployed history, keeps 60 entries, and grades slow r
     assert.equal(out.sensors[1].error, 'timeout');
     assert.equal(out.intervalHours, 12);
 });
+
+// Every admin('<name>') action in js/actions.js must be exported by js/admin.js (a missing one fails silently in the UI).
+test('admin actions resolve to exported functions', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const actions = await readFile(new URL('../../js/actions.js', import.meta.url), 'utf8');
+    const admin = await readFile(new URL('../../js/admin.js', import.meta.url), 'utf8');
+    const names = [...new Set([...actions.matchAll(/admin\('(\w+)'/g)].map(m => m[1]))];
+    assert.ok(names.length > 10);
+    assert.deepEqual(names.filter(n => !new RegExp(`export (async )?function ${n}\\b`).test(admin)), []);
+});
+
+test('deriveTheme keeps every preset within WCAG contrast', async () => {
+    const { PRESETS, deriveTheme } = await import('../../js/color.js');
+    for (const p of [...PRESETS, { primary: '#facc15', secondary: '#22d3ee' }, { primary: '#ffffff', secondary: '#000000' }]) {
+        const d = deriveTheme(p);
+        assert.deepEqual(d.report.filter(r => !r.pass).map(r => `${p.primary}: ${r.id} ${r.ratio}`), []);
+    }
+    assert.equal(deriveTheme({ primary: 'nope' }).chosen.primary, '#2563eb');
+});

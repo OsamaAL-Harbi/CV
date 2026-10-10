@@ -2,6 +2,39 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.4.0] — 2026-10-11
+
+### Added
+- **Admin → Site colours**: presets, a colour picker and harmonious secondary suggestions (analogous,
+  triadic, split, complementary), previewed live on the page. `js/color.js` keeps the chosen hue and moves
+  lightness as little as needed for WCAG AA in light and dark mode (white text on buttons, coloured text on
+  the page) and shows the contrast report. Saved in `data.json → theme`; cached so `js/early.js` paints it
+  from the first frame. Secondary colour is now a CSS variable as well.
+- **CV upload** in the profile editor: a PDF from the device is checked (`%PDF-`, ≤ 10 MB) and committed to
+  `cv/<name>.pdf` through the GitHub API, replacing a file of the same name; a Google Drive share link becomes a
+  direct-download link. External CV links open in a new tab. `cv/` is published.
+- **Live statistics** (admin → Statistics) from the Google Analytics Data API for every visitor: visitors,
+  visits, section views and CV downloads with the change against the previous period, daily visitors chart
+  (crosshair tooltip, table view), sections (Arabic and English titles merged), interactions, countries,
+  devices, sources, projects (with the optional `project` custom dimension) and visitors right now.
+  Google sign-in runs in a popup without loading any Google script (`oauth.html` + `js/oauth-callback.js`,
+  same-origin BroadcastChannel, state check, read-only scope); the token stays in this tab for an hour.
+  Settings (`data.json → analytics`: property ID and OAuth client ID) with a built-in setup guide.
+- GA tracking that matches the SPA: one `page_view` per section (automatic page views off), and events for
+  CV downloads, every contact method, vCard, shares, project and case-study views, PDF generation. The owner's
+  visits in admin mode are not counted.
+
+### Changed
+- The per-device view counters (project card badges, modal count, session page visits) are removed; the
+  numbers now come from Google Analytics.
+- Buttons darken on hover with the theme colour instead of a fixed blue; particles use the theme colour;
+  the admin toolbar scrolls on narrow screens.
+- Deploy workflow on Node 24 actions (configure-pages v6, upload-pages-artifact v5, deploy-pages v5).
+- CSP `connect-src` adds `https://analyticsdata.googleapis.com`. Service worker cache `portfolio-v6`.
+
+### Fixed
+- A unit test now fails when an admin toolbar action points to a function `js/admin.js` does not export.
+
 ## [4.3.0] — 2026-10-10
 
 ### Added

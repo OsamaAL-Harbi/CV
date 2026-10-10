@@ -1,13 +1,13 @@
 // Hash routing between the SPA sections, per-page meta tags and visit tracking.
 import { state } from './state.js';
-import { session } from './storage.js';
+import { track } from './utils.js';
 
 export const VALID_PAGES        = ['home', 'resume', 'portfolio', 'contact'];
 
 // Particles hue-rotation per section
 const SECTION_HUE = { home: 0, resume: 180, portfolio: 120, contact: 90, 'not-found': 0 };
 
-const PAGE_META = {
+export const PAGE_META = {
     ar: {
         home:      { title: 'أسامة الحربي | الرئيسية',                    desc: 'الموقع الشخصي لأسامة عبدالعزيز الحربي - خريج تقنية المعلومات من الجامعة الإسلامية بالمدينة المنورة.' },
         resume:    { title: 'السيرة الذاتية | أسامة الحربي',              desc: 'السيرة الذاتية الكاملة لأسامة الحربي: خبرات، تعليم، مهارات، شهادات.' },
@@ -75,8 +75,18 @@ export function showPage(pageId, pushState = true) {
     // GitHub activity and system status are fetched the first time the portfolio is shown
     if (pageId === 'portfolio') import('./github.js').then(m => m.showPortfolioExtras()).catch(() => {});
 
-    // Track page visit in sessionStorage
-    if (changed) trackPageVisit(pageId);
+    if (changed) trackPageView(pageId);
+}
+
+// One GA page_view per section shown, titled like the page so the dashboard can group AR and EN together
+function trackPageView(pageId) {
+    if (state.isAdmin) return;                 // the owner's own visits are not counted
+    track('page_view', {
+        page_title: PAGE_META[state.currentLang]?.[pageId]?.title || pageId,
+        page_location: `${location.origin}${location.pathname}${location.search}#${pageId}`,
+        page_path: `${location.pathname}#${pageId}`,
+        site_language: state.currentLang
+    });
 }
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -124,6 +134,7 @@ let initialised = false;
 let currentPage = null;
 
 function show404() {
+    if (currentPage !== 'not-found') trackPageView('not-found');
     currentPage = 'not-found';
     const changed = sectionChanges('not-found');
     withTransition(changed, () => activateSection('not-found', changed));
@@ -156,10 +167,4 @@ export function updateMetaTags(pageId) {
     setMeta('og-description',   meta.desc);
     setMeta('tw-title',         meta.title);   // was writing the title into twitter:card
     setMeta('tw-description',   meta.desc);
-}
-
-function trackPageVisit(pageId) {
-    const visits = session.getJSON('page_visits', {});
-    visits[pageId] = (visits[pageId] || 0) + 1;
-    session.setJSON('page_visits', visits);
 }

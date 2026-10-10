@@ -6,7 +6,7 @@ export default {
         extend: {
             fontFamily: { sans: ['Tajawal', 'Roboto', 'sans-serif'] },
             // primary is a CSS variable: blue-600 in light mode (WCAG AA with white text), blue-500 in dark mode
-            colors: { primary: 'rgb(var(--color-primary) / <alpha-value>)', secondary: '#8b5cf6', darkBg: '#0b1120', cardBg: '#1e293b' }
+            colors: { primary: 'rgb(var(--color-primary) / <alpha-value>)', secondary: 'rgb(var(--color-secondary) / <alpha-value>)', darkBg: '#0b1120', cardBg: '#1e293b' }
         }
     }
 };

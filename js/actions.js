@@ -1,6 +1,6 @@
 // UI actions: one delegated listener dispatches data-action attributes (no inline handlers, CSP-safe).
 import { state } from './state.js';
-import { showToast } from './utils.js';
+import { showToast, track } from './utils.js';
 import { toggleLanguage } from './i18n.js';
 import { toggleMobileMenu } from './router.js';
 import { setProjectFilter, setSkillTab } from './render.js';
@@ -30,6 +30,7 @@ const ACTIONS = {
     'close-case':            () => import('./github.js').then(m => m.closeCaseStudy()),
     'case-backdrop':         (el, e) => { if (e.target === el) return import('./github.js').then(m => m.closeCaseStudy()); },
     'manage-github':         () => admin('manageGithub'),
+    'manage-theme':          () => admin('manageTheme'),
     'manage-monitor':        () => admin('manageMonitor'),
     'retry-load':            () => location.reload(),
     'close-admin-modal':     () => closeDialog(document.getElementById('admin-modal')),
@@ -37,7 +38,7 @@ const ACTIONS = {
     'login':                 () => admin('authenticateAndEdit'),
     'logout':                () => admin('logout'),
     'save':                  () => admin('saveToGitHub'),
-    'analytics':             () => admin('showAnalyticsDashboard'),
+    'analytics':             () => import('./stats.js').then(m => m.openStatistics()),
     'restore-backup':        () => admin('restoreBackup'),
     'manage-profile':        () => admin('manageProfile'),
     'edit-image':            el => admin('editImage', el.dataset.path),
@@ -45,6 +46,12 @@ const ACTIONS = {
     'edit-item':             el => admin('editItem', el.dataset.type, Number(el.dataset.index)),
     'delete-item':           el => admin('deleteItem', el.dataset.type, Number(el.dataset.index))
 };
+
+// Links and buttons carrying data-track="<event>" are counted in Google Analytics (not the owner's own clicks)
+function trackClick(e) {
+    const el = e.target.closest('[data-track]');
+    if (el && !state.isAdmin) track(el.dataset.track, { link_url: el.getAttribute('href') || undefined });
+}
 
 function runAction(e) {
     const el = e.target.closest('[data-action]');
@@ -61,6 +68,7 @@ function runAction(e) {
 
 export function setupActions() {
     document.addEventListener('click', runAction);
+    document.addEventListener('click', trackClick);
     // Keyboard support for non-button elements acting as buttons
     document.addEventListener('keydown', e => {
         if (e.key !== 'Enter' && e.key !== ' ') return;

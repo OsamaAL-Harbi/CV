@@ -1,11 +1,10 @@
 // Dialogs (project details, command palette, admin login): open/close, focus trap and focus restore,
-// plus the project modal content and its per-session view counter.
+// plus the project modal content.
 import { state } from './state.js';
-import { session } from './storage.js';
-import { escapeHTML, safeUrl } from './utils.js';
+import { escapeHTML, safeUrl, track } from './utils.js';
 import { t } from './i18n.js';
 import { toggleMobileMenu } from './router.js';
-import { getProjectKey, renderFilteredProjects, viewLabel } from './render.js';
+
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 const openDialogs = [];   // stack: the last one is on top
@@ -52,20 +51,13 @@ export function openProjectModal(index) {
     if (!item) return;
     const modal = document.getElementById('project-modal');
 
-    // Stable key per project title; reopening (e.g. after a language switch) does not count again
-    const key   = getProjectKey(item, index);
-    const views = session.getJSON('project_views', {});
-    if (!isDialogOpen(modal)) {
-        views[key] = (views[key] || 0) + 1;
-        session.setJSON('project_views', views);
-    }
-    const count = views[key] || 0;
+    // Counted in Google Analytics (admin → Statistics), not on this device
+    if (!isDialogOpen(modal) && !state.isAdmin) track('view_project', { project: item.title?.en || item.title?.ar || String(index) });
     modal.dataset.index = String(index);
 
     const ar = state.currentLang === 'ar';
     document.getElementById('modal-title').textContent = t(item.title);
     document.getElementById('modal-desc').textContent  = t(item.desc);
-    document.getElementById('modal-views-count').textContent = `${count} ${viewLabel(count)}`;
 
     const techContainer = document.getElementById('modal-technologies');
     const techSection   = document.getElementById('modal-tech-section');
@@ -99,9 +91,6 @@ export function openProjectModal(index) {
     if (live) { liveLink.href = live; liveLink.style.display = 'inline-flex'; }
     else liveLink.style.display = 'none';
     document.getElementById('modal-actions').style.display = link || live ? 'flex' : 'none';
-
-    // Re-render cards to update the view badge
-    renderFilteredProjects();
 
     openDialog(modal, {
         focus: modal.querySelector('[data-action="close-project-modal"]'),

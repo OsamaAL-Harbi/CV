@@ -40,6 +40,9 @@
 | 📖 **دراسات الحالة** | صفحة لكل مستودع مختار تعرض ملف README بأمان (`#portfolio/<repo>`) |
 | 🩺 **مراقبة الأنظمة** | حالة مواقعك وزمن الاستجابة ونسبة التوفر لآخر 30 يوماً، فحص كل 12 ساعة |
 | ✨ **حركة حديثة** | انتقالات View Transitions بين الأقسام وبطاقات تميل مع المؤشر |
+| 🎨 **ألوان الموقع** | من لوحة المدير: ألوان جاهزة أو مخصصة مع اقتراحات متناسقة، وتعديل تلقائي لتحقيق تباين WCAG AA |
+| 📄 **رفع السيرة الذاتية** | رفع PDF من جهازك مباشرة إلى الموقع، أو رابط Google Drive |
+| 📊 **إحصائيات حقيقية** | لوحة من Google Analytics لكل الزوار: الزوار، الأقسام، تحميل السيرة، التواصل، الدول، الأجهزة، والزوار الآن |
 | 🛟 **حفظ آمن للمدير** | يعرض الأقسام المعدّلة قبل الحفظ، ويحذّر إذا تغيّر الملف في GitHub، ويمنع الحفظ المزدوج وإغلاق الصفحة بتعديلات غير محفوظة |
 | 🔒 **الأمان** | سياسة CSP صارمة، وSRI لملفات CDN، وتهريب كل المحتوى المعروض |
 
@@ -111,6 +114,22 @@ npm run test:unit                 # سكربتات بيانات GitHub والم�
 - الشهادات تقبل حقلاً اختيارياً `"url"` (رابط التحقق، `https://` فقط) فيظهر زر "تحقق من الشهادة".
 - التواريخ بصيغة `"January 2025"` تُعرض بأسماء الأشهر العربية في الواجهة العربية.
 - النصوص تُعرض كنص عادي، ولا يُفسَّر أي HTML بداخلها.
+
+---
+
+## 📊 إعداد لوحة الإحصائيات (مرة واحدة)
+
+1. **Google Analytics** → Admin → Property details → انسخ **Property ID** (أرقام).
+2. **Google Cloud Console** → فعّل **Google Analytics Data API**.
+3. OAuth consent screen → External → أضف بريدك في Test users.
+4. Credentials → OAuth client ID → Web application:
+   - Authorized JavaScript origins: `https://osamaal-harbi.github.io`
+   - Authorized redirect URIs: `https://osamaal-harbi.github.io/CV/oauth.html`
+5. في الموقع: لوحة المدير → 📊 → الصق Property ID وClient ID → تطبيق → حفظ.
+6. في GA: Data streams → Enhanced measurement → أوقف «Page changes based on browser history events».
+7. (اختياري) Custom definitions → بُعد مخصص `project` (Event) لعرض المشاريع الأكثر اهتماماً.
+
+لا يُحفظ أي سر في الموقع: Property ID وClient ID معرّفات عامة، والدخول يتم بحسابك في Google بصلاحية قراءة فقط.
 
 ---
 

@@ -1,7 +1,7 @@
 // Page chrome: theme, particles, scroll button, stats, command palette, sharing, contact, vCard and PDF.
 import { state } from './state.js';
 import { local } from './storage.js';
-import { loadVendor, safeUrl, showToast } from './utils.js';
+import { loadVendor, safeUrl, showToast, track } from './utils.js';
 import { SITE_URL, t, toggleLanguage, ui } from './i18n.js';
 import { showPage } from './router.js';
 import { renderSkills, setSkillTab } from './render.js';
@@ -143,6 +143,7 @@ function prepareCanvasCopy(doc) {
 }
 
 async function generatePDF() {
+    trackOwn('generate_pdf');
     showToast(ar() ? 'جاري إنشاء PDF...' : 'Generating PDF...', 'info');
     const resumeEl  = document.getElementById('resume');
     const wasActive = resumeEl.classList.contains('active');
@@ -189,6 +190,7 @@ export async function shareProfile() {
     const name    = t(state.appData.profile?.name || { ar: 'أسامة الحربي', en: 'Osama Al-Harbi' });
     const summary = t(state.appData.profile?.summary || {});
     const url     = window.location.href;
+    trackOwn('share');
     if (navigator.share) {
         try { await navigator.share({ title: name, text: summary.length > 120 ? `${summary.substring(0, 120)}…` : summary, url }); return; }
         catch (e) { if (e.name === 'AbortError') return; }
@@ -206,9 +208,12 @@ async function copyText(text, okMessage) {
     }
 }
 
+const trackOwn = (name, params) => { if (!state.isAdmin) track(name, params); };
+
 export function contactAction(type) {
     const p = state.appData.profile;
     if (!p) return;
+    trackOwn(`contact_${type}`);
     if (type === 'email') {
         if (p.email) copyText(p.email, ar() ? 'تم نسخ البريد ✅' : 'Email copied ✅');
     } else if (type === 'linkedin' || type === 'github') {
@@ -245,6 +250,7 @@ export function buildVCard(profile, lang) {
 export function downloadVCard() {
     const p = state.appData.profile;
     if (!p) return;
+    trackOwn('contact_vcard');
     const blob = new Blob([buildVCard(p, state.currentLang)], { type: 'text/vcard;charset=utf-8' });
     const url  = URL.createObjectURL(blob);
     const a    = Object.assign(document.createElement('a'), { href: url, download: `${asciiName()}.vcf` });
@@ -263,6 +269,7 @@ export function sendMailto() {
         document.getElementById('contact-subject')?.focus();
         return;
     }
+    trackOwn('contact_message');
     window.location.href = `mailto:${p?.email || 'osamafcv214@gmail.com'}?subject=${subject}&body=${body}`;
 }
 
@@ -292,10 +299,16 @@ export function setupSecretTrigger() {
 }
 
 // ─── Theme ───────────────────────────────────────────
+// The brand colour as currently in effect (default or the admin's theme), e.g. "#2563eb"
+export function brandHex() {
+    const rgb = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim().split(/\s+/).map(Number);
+    return rgb.length === 3 && rgb.every(Number.isFinite) ? `#${rgb.map(v => v.toString(16).padStart(2, '0')).join('')}` : '#2563eb';
+}
+
 function applyTheme(dark) {
     document.documentElement.classList.toggle('dark', dark);
     document.getElementById('theme-btn')?.setAttribute('aria-pressed', String(dark));
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0b1120' : '#2563eb');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0b1120' : brandHex());
 }
 
 export function initTheme() {
@@ -326,13 +339,14 @@ export function initParticles() {
         (window.pJSDom || []).forEach(p => cancelAnimationFrame(p.pJS.fn.drawAnimFrame));
         window.pJSDom = [];
         const isDark = document.documentElement.classList.contains('dark');
+        const brand = brandHex();
         particlesJS('particles-js', {
             particles: {
                 number:      { value: 40 },
-                color:       { value: isDark ? '#ffffff' : '#3b82f6' },
+                color:       { value: isDark ? '#ffffff' : brand },
                 opacity:     { value: 0.3 },
                 size:        { value: 3 },
-                line_linked: { enable: true, distance: 150, color: isDark ? '#ffffff' : '#3b82f6', opacity: 0.1, width: 1 },
+                line_linked: { enable: true, distance: 150, color: isDark ? '#ffffff' : brand, opacity: 0.1, width: 1 },
                 move:        { enable: true, speed: 1 }
             },
             interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'grab' } } },

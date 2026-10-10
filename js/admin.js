@@ -3,10 +3,9 @@
 import { SESSION_KEYS, state } from './state.js';
 import { local, session } from './storage.js';
 import { escapeHTML, loadVendor, setDeepValue, showToast, skillLevel } from './utils.js';
-import { t } from './i18n.js';
-import { VALID_PAGES } from './router.js';
-import { getProjectKey, renderAll } from './render.js';
+import { renderAll } from './render.js';
 import { closeDialog, openDialog } from './modal.js';
+import { DEFAULT_THEME, PRESETS, applyTheme, harmonies, isHex, syncSiteTheme } from './color.js';
 
 let githubInfo     = { token: '', repo: '' };
 
@@ -133,7 +132,7 @@ function fromBase64Utf8(b64) {
 const SECTION_NAMES = {
     profile: 'الملف الشخصي', experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات',
     projects: 'المشاريع', certificates: 'الشهادات', workshops: 'ورش العمل', languages: 'اللغات',
-    github: 'GitHub', monitor: 'المراقبة'
+    github: 'GitHub', monitor: 'المراقبة', theme: 'ألوان الموقع', analytics: 'الإحصائيات'
 };
 
 // Which sections differ from the last loaded/saved version, e.g. ["الخبرات (+1)", "الملف الشخصي"].
@@ -607,9 +606,15 @@ export async function manageProfile() {
             <label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
             <input id="pf-github" class="swal2-input m-0 w-full" value="${escapeHTML(v('github'))}" dir="ltr" placeholder="https://github.com/...">
           </div>
-          <div>
-            <label class="block text-xs mb-1 text-gray-500">رابط السيرة الذاتية (PDF path)</label>
-            <input id="pf-cv" class="swal2-input m-0 w-full" value="${escapeHTML(v('cv'))}" dir="ltr" placeholder="Osama_Alharbi.pdf">
+          <div class="p-3 rounded-xl border border-gray-200 space-y-2">
+            <label class="block text-xs text-gray-500" for="pf-cv">السيرة الذاتية (PDF) — مسار في الموقع أو رابط https</label>
+            <input id="pf-cv" class="swal2-input m-0 w-full" value="${escapeHTML(v('cv'))}" dir="ltr" placeholder="cv/Osama_Alharbi.pdf">
+            <div class="flex flex-wrap gap-2">
+              <button type="button" id="pf-cv-upload" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold">⬆️ رفع PDF من جهازي</button>
+              <button type="button" id="pf-cv-drive" class="px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-bold">رابط Google Drive</button>
+              <input type="file" id="pf-cv-file" accept="application/pdf,.pdf" class="hidden">
+            </div>
+            <p id="pf-cv-status" class="text-xs text-gray-500" role="status"></p>
           </div>
 
         </div>`,
@@ -618,17 +623,15 @@ export async function manageProfile() {
         showCancelButton: true,
         cancelButtonText: 'إلغاء',
         focusConfirm: false,
-        preConfirm: () => ({
-            name:     { ar: document.getElementById('pf-name-ar').value,     en: document.getElementById('pf-name-en').value },
-            title:    { ar: document.getElementById('pf-title-ar').value,    en: document.getElementById('pf-title-en').value },
-            summary:  { ar: document.getElementById('pf-summary-ar').value,  en: document.getElementById('pf-summary-en').value },
-            location: { ar: document.getElementById('pf-location-ar').value, en: document.getElementById('pf-location-en').value },
-            email:    document.getElementById('pf-email').value,
-            phone:    document.getElementById('pf-phone').value,
-            linkedin: document.getElementById('pf-linkedin').value,
-            github:   document.getElementById('pf-github').value,
-            cv:       document.getElementById('pf-cv').value
-        })
+        didOpen: popup => setupCvField(popup),
+        preConfirm: () => {
+            const cv = normalizeCvLink(document.getElementById('pf-cv').value);
+            if (cv === null) {
+                Swal.showValidationMessage('رابط السيرة الذاتية غير صالح: مسار داخل الموقع (مثل cv/file.pdf) أو رابط يبدأ بـ https://');
+                return false;
+            }
+            return profileFields(cv);
+        }
     });
 
     if (value) {
@@ -636,6 +639,104 @@ export async function manageProfile() {
         renderAll();
         showToast(state.currentLang === 'ar' ? 'تم تحديث الملف الشخصي ✅' : 'Profile updated ✅', 'success');
     }
+}
+
+function profileFields(cv) {
+    return {
+        name:     { ar: document.getElementById('pf-name-ar').value,     en: document.getElementById('pf-name-en').value },
+        title:    { ar: document.getElementById('pf-title-ar').value,    en: document.getElementById('pf-title-en').value },
+        summary:  { ar: document.getElementById('pf-summary-ar').value,  en: document.getElementById('pf-summary-en').value },
+        location: { ar: document.getElementById('pf-location-ar').value, en: document.getElementById('pf-location-en').value },
+        email:    document.getElementById('pf-email').value,
+        phone:    document.getElementById('pf-phone').value,
+        linkedin: document.getElementById('pf-linkedin').value,
+        github:   document.getElementById('pf-github').value,
+        cv
+    };
+}
+
+// ── CV: upload a PDF into the repository (cv/…), or use a Google Drive / https link ──
+const CV_MAX_BYTES = 10 * 1024 * 1024;
+
+// Drive "view" / "open" links → direct download link; site paths and https links pass; anything else → null.
+export function normalizeCvLink(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    const drive = raw.match(/^https:\/\/(?:drive|docs)\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=)([\w-]{10,})/);
+    if (drive) return `https://drive.google.com/uc?export=download&id=${drive[1]}`;
+    if (/^https:\/\/[^\s]+$/i.test(raw)) return raw;
+    if (/^[\w\-./]+$/.test(raw) && !raw.startsWith('/') && !raw.includes('..')) return raw;
+    return null;
+}
+
+// "سيرتي الذاتية 2026.pdf" → "cv/CV_2026.pdf"; keeps Latin letters, digits, dot, dash and underscore.
+export function cvPathFor(fileName) {
+    const base = String(fileName || '').replace(/\.pdf$/i, '').normalize('NFKD').replace(/[^\w.-]+/g, '_').replace(/_+/g, '_').replace(/^[_.-]+|[_.-]+$/g, '');
+    return `cv/${/[A-Za-z0-9]/.test(base) ? base.slice(0, 60) : 'CV'}.pdf`;
+}
+
+function readAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',')[1]);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+    });
+}
+
+async function uploadCv(file, status) {
+    if (isSessionExpired(readSession().loginTime)) { expireSession(); return null; }
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+    const head = new Uint8Array(await file.slice(0, 5).arrayBuffer());
+    if (!isPdf || String.fromCharCode(...head) !== '%PDF-') { status('❌ الملف ليس PDF'); return null; }
+    if (file.size > CV_MAX_BYTES) { status('❌ الحجم أكبر من 10 MB'); return null; }
+
+    const path = cvPathFor(file.name);
+    const url  = `https://api.github.com/repos/${githubInfo.repo}/contents/${path}`;
+    status(`⏳ جاري الرفع إلى ${path}…`);
+    // An existing file with the same name is replaced (its sha is required)
+    let sha;
+    const existing = await fetch(url, { headers: githubHeaders(githubInfo.token), cache: 'no-store' });
+    if (existing.ok) sha = (await existing.json()).sha;
+    else if (existing.status !== 404) { status('❌ تعذّر الوصول للمستودع'); return null; }
+    const res = await fetch(url, {
+        method: 'PUT',
+        headers: { ...githubHeaders(githubInfo.token), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: `Upload CV (${path}) via admin panel`, content: await readAsBase64(file), ...(sha ? { sha } : {}) })
+    });
+    if (!res.ok) { status(`❌ فشل الرفع (HTTP ${res.status})`); return null; }
+    status(`✅ تم رفع الملف إلى ${path} — اضغط «حفظ التغييرات» ثم «حفظ» في شريط المدير ليُربط بأزرار التحميل.`);
+    return path;
+}
+
+function setupCvField(popup) {
+    const input  = popup.querySelector('#pf-cv');
+    const file   = popup.querySelector('#pf-cv-file');
+    const status = text => { popup.querySelector('#pf-cv-status').textContent = text; };
+    popup.querySelector('#pf-cv-upload').addEventListener('click', () => file.click());
+    file.addEventListener('change', async () => {
+        const chosen = file.files?.[0];
+        file.value = '';
+        if (!chosen) return;
+        const confirmBtn = Swal.getConfirmButton();
+        confirmBtn.disabled = true;
+        try {
+            const path = await uploadCv(chosen, status);
+            if (path) input.value = path;
+        } catch {
+            status('❌ حدث خطأ أثناء الرفع');
+        } finally { confirmBtn.disabled = false; }
+    });
+    popup.querySelector('#pf-cv-drive').addEventListener('click', () => {
+        status('الصق رابط المشاركة من Google Drive في الحقل أعلاه (اجعل المشاركة: «أي شخص لديه الرابط»)، وسيُحوَّل تلقائياً إلى رابط تحميل مباشر.');
+        input.value = '';
+        input.placeholder = 'https://drive.google.com/file/d/…/view?usp=sharing';
+        input.focus();
+    });
+    input.addEventListener('change', () => {
+        const normal = normalizeCvLink(input.value);
+        if (normal && normal !== input.value.trim()) { input.value = normal; status('✅ حُوِّل رابط Google Drive إلى رابط تحميل مباشر.'); }
+    });
 }
 
 export async function deleteItem(type, index) {
@@ -693,79 +794,6 @@ function initSortable() {
     const skillsEl = document.getElementById('skills-container');
     makeSortable(skillsEl, () => applyVisualOrder('skills',
         [...skillsEl.querySelectorAll('.sortable-item')].map(item => Number(item.dataset.realIndex))));
-}
-
-export async function showAnalyticsDashboard() {
-    await loadVendor('swal');
-    const visits  = session.getJSON('page_visits', {});
-    const pViews  = session.getJSON('project_views', {});
-    const allProjects = state.appData.projects || [];
-
-    const pageNames = {
-        ar: { home:'الرئيسية', resume:'السيرة الذاتية', portfolio:'الأعمال', contact:'تواصل' },
-        en: { home:'Home', resume:'Resume', portfolio:'Portfolio', contact:'Contact' }
-    };
-
-    const visitRows = VALID_PAGES.map(p => `
-        <tr class="border-b border-gray-100 dark:border-gray-700">
-            <td class="py-2 px-3 font-medium text-sm">${pageNames[state.currentLang][p] || p}</td>
-            <td class="py-2 px-3 text-center">
-                <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-bold text-xs">${visits[p] || 0}</span>
-            </td>
-        </tr>
-    `).join('');
-
-    const projectRows = allProjects.map((proj, i) => {
-        const key   = getProjectKey(proj, i);
-        const count = pViews[key] || 0;
-        return `
-        <tr class="border-b border-gray-100 dark:border-gray-700">
-            <td class="py-2 px-3 font-medium text-xs">${escapeHTML(t(proj.title))}</td>
-            <td class="py-2 px-3 text-center">
-                <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded font-bold text-xs">${count}</span>
-            </td>
-        </tr>`;
-    }).join('');
-
-    Swal.fire({
-        title: state.currentLang === 'ar' ? '📊 لوحة الإحصائيات' : '📊 Analytics Dashboard',
-        html: `
-        <div class="text-right" dir="${state.currentLang === 'ar' ? 'rtl' : 'ltr'}">
-            <p class="text-xs text-gray-400 mb-4">${state.currentLang === 'ar' ? 'بيانات الجلسة الحالية فقط' : 'Current session data only'}</p>
-
-            <h4 class="font-bold text-sm mb-2">${state.currentLang === 'ar' ? 'زيارات الصفحات' : 'Page Visits'}</h4>
-            <table class="w-full mb-6 text-right">
-                <thead><tr class="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500">
-                    <th class="py-2 px-3 text-right">${state.currentLang === 'ar' ? 'الصفحة' : 'Page'}</th>
-                    <th class="py-2 px-3 text-center">${state.currentLang === 'ar' ? 'الزيارات' : 'Visits'}</th>
-                </tr></thead>
-                <tbody>${visitRows}</tbody>
-            </table>
-
-            <h4 class="font-bold text-sm mb-2">${state.currentLang === 'ar' ? 'مشاهدات المشاريع' : 'Project Views'}</h4>
-            <table class="w-full mb-6 text-right">
-                <thead><tr class="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500">
-                    <th class="py-2 px-3 text-right">${state.currentLang === 'ar' ? 'المشروع' : 'Project'}</th>
-                    <th class="py-2 px-3 text-center">${state.currentLang === 'ar' ? 'المشاهدات' : 'Views'}</th>
-                </tr></thead>
-                <tbody>${projectRows}</tbody>
-            </table>
-
-            <div class="flex gap-2 flex-wrap justify-center mt-4">
-                <a href="https://analytics.google.com/" target="_blank" rel="noopener noreferrer"
-                   class="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition">
-                   <i class="fab fa-google"></i> Google Analytics
-                </a>
-                <a href="https://clarity.microsoft.com/" target="_blank" rel="noopener noreferrer"
-                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition">
-                   <i class="fas fa-eye"></i> Microsoft Clarity
-                </a>
-            </div>
-        </div>`,
-        width: '600px',
-        showConfirmButton: false,
-        showCloseButton: true
-    });
 }
 
 // ── GitHub page: pick the public repositories shown on the site, and what else to show ──
@@ -891,6 +919,126 @@ export async function manageGithub() {
     if (!value) return;
     state.appData.github = { ...(state.appData.github || {}), ...value };
     showToast('تم التطبيق — اضغط «حفظ» لنشره ✅', 'success');
+}
+
+// ── Theme page: brand colours, previewed live, with automatic contrast fixes ──
+export async function manageTheme() {
+    if (!state.isAdmin) return;
+    await loadVendor('swal');
+    let current = { ...DEFAULT_THEME, ...(state.appData.theme || {}) };
+
+    const swatch = (hex, attrs, title) =>
+        `<button type="button" ${attrs} title="${escapeHTML(title)}" aria-label="${escapeHTML(title)}"
+                 class="w-9 h-9 rounded-full border-2 border-white shadow ring-1 ring-gray-300 hover:scale-110 transition" data-swatch="${hex}"></button>`;
+
+    const render = () => {
+        const d = applyTheme(current);                         // live preview on the page behind the dialog
+        document.getElementById('th-primary').value = current.primary;
+        document.getElementById('th-secondary').value = current.secondary;
+        document.getElementById('th-primary-hex').value = current.primary;
+        document.getElementById('th-secondary-hex').value = current.secondary;
+        document.getElementById('th-harmony').innerHTML = harmonies(current.primary)
+            .map(h => `<div class="flex flex-col items-center gap-1">${swatch(h.hex, `data-th-secondary="${h.hex}"`, h.label)}<span class="text-[10px] text-gray-500">${h.label}</span></div>`).join('');
+        const adjusted = [
+            d.light.primary !== d.chosen.primary && `الأساسي في الوضع الفاتح: <b dir="ltr">${d.chosen.primary} → ${d.light.primary}</b>`,
+            d.dark.primary !== d.chosen.primary && `الأساسي في الوضع الداكن: <b dir="ltr">${d.chosen.primary} → ${d.dark.primary}</b>`,
+            d.light.secondary !== d.chosen.secondary && `الثانوي في الوضع الفاتح: <b dir="ltr">${d.chosen.secondary} → ${d.light.secondary}</b>`,
+            d.dark.secondary !== d.chosen.secondary && `الثانوي في الوضع الداكن: <b dir="ltr">${d.chosen.secondary} → ${d.dark.secondary}</b>`
+        ].filter(Boolean);
+        document.getElementById('th-adjusted').innerHTML = adjusted.length
+            ? `<p class="font-bold mb-1">عُدّلت الإضاءة تلقائياً لتحقيق التباين (نفس الدرجة اللونية):</p><ul class="list-disc ps-5">${adjusted.map(a => `<li>${a}</li>`).join('')}</ul>`
+            : '<p>✅ الألوان المختارة تحقق التباين كما هي.</p>';
+        document.getElementById('th-report').innerHTML = d.report.map(r => `
+            <li class="flex items-center justify-between gap-3 py-1.5 border-b border-gray-100">
+                <span>${escapeHTML(r.label)}</span>
+                <span class="font-mono text-xs" dir="ltr">${r.ratio.toFixed(2)}:1 <span class="${r.pass ? 'text-green-700' : 'text-red-600'} font-bold">${r.pass ? `✓ ≥ ${r.min}` : `✗ < ${r.min}`}</span></span>
+            </li>`).join('');
+        const preview = document.getElementById('th-preview');
+        preview.querySelector('[data-p="btn"]').style.background = d.light.primary;
+        preview.querySelector('[data-p="text"]').style.color = d.light.primary;
+        preview.querySelector('[data-p="grad"]').style.backgroundImage = `linear-gradient(90deg, ${d.light.primary}, ${d.light.secondary})`;
+        preview.querySelector('[data-p="dbtn"]').style.background = d.dark.primary;
+        preview.querySelector('[data-p="dtext"]').style.color = d.dark.primary;
+        preview.querySelector('[data-p="dgrad"]').style.backgroundImage = `linear-gradient(90deg, ${d.dark.primary}, ${d.dark.secondary})`;
+    };
+
+    const result = await Swal.fire({
+        title: 'ألوان الموقع',
+        width: '760px',
+        html: `<div class="text-right space-y-4" dir="rtl">
+            <p class="text-xs leading-relaxed p-3 rounded-xl bg-blue-50 text-blue-900">
+                اختر لوناً أساسياً (الأزرار والروابط والعناوين) ولوناً ثانوياً (التدرّجات والأيقونات). يُعدَّل كل لون تلقائياً للوضعين
+                الفاتح والداكن ليبقى مقروءاً وفق معيار WCAG AA، والتغيير يظهر على الصفحة مباشرة للمعاينة.
+            </p>
+            <div>
+                <p class="text-xs font-bold text-gray-500 mb-2">ألوان جاهزة متناسقة</p>
+                <div class="flex flex-wrap gap-2">${PRESETS.map((p, i) => `
+                    <button type="button" data-th-preset="${i}" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-gray-200 hover:border-gray-400 text-xs">
+                        <span class="w-4 h-4 rounded-full" data-swatch="${p.primary}"></span><span class="w-4 h-4 rounded-full -ms-2.5 ring-2 ring-white" data-swatch="${p.secondary}"></span>${escapeHTML(p.name)}
+                    </button>`).join('')}
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <label class="block"><span class="text-xs font-bold text-gray-500">اللون الأساسي</span>
+                    <span class="flex items-center gap-2 mt-1"><input type="color" id="th-primary" class="w-12 h-10 rounded cursor-pointer"><input id="th-primary-hex" class="swal2-input m-0 flex-1 font-mono" dir="ltr" maxlength="7" aria-label="Primary hex"></span></label>
+                <label class="block"><span class="text-xs font-bold text-gray-500">اللون الثانوي</span>
+                    <span class="flex items-center gap-2 mt-1"><input type="color" id="th-secondary" class="w-12 h-10 rounded cursor-pointer"><input id="th-secondary-hex" class="swal2-input m-0 flex-1 font-mono" dir="ltr" maxlength="7" aria-label="Secondary hex"></span></label>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-gray-500 mb-2">ألوان ثانوية متناسقة مع الأساسي</p>
+                <div id="th-harmony" class="flex gap-4"></div>
+            </div>
+            <div id="th-preview" class="grid grid-cols-2 gap-3 text-sm">
+                <div class="p-4 rounded-xl border border-gray-200 bg-gray-50 space-y-2"><p class="text-[11px] text-gray-500">الوضع الفاتح</p>
+                    <span data-p="btn" class="inline-block px-3 py-1.5 rounded-lg text-white font-bold">زر</span> <b data-p="text">رابط ملوّن</b>
+                    <div data-p="grad" class="h-2 rounded-full"></div></div>
+                <div data-p="dark" class="p-4 rounded-xl border border-gray-700 space-y-2 text-gray-100"><p class="text-[11px] text-gray-400">الوضع الداكن</p>
+                    <span data-p="dbtn" class="inline-block px-3 py-1.5 rounded-lg text-white font-bold">زر</span> <b data-p="dtext">رابط ملوّن</b>
+                    <div data-p="dgrad" class="h-2 rounded-full"></div></div>
+            </div>
+            <div id="th-adjusted" class="text-xs p-3 rounded-xl bg-gray-50 leading-relaxed"></div>
+            <div><p class="text-xs font-bold text-gray-500 mb-1">تقرير التباين</p><ul id="th-report" class="text-xs"></ul></div>
+        </div>`,
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: 'تطبيق',
+        denyButtonText: 'الألوان الافتراضية',
+        cancelButtonText: 'إلغاء',
+        focusConfirm: false,
+        didOpen: popup => {
+            popup.querySelector('[data-p="dark"]').style.background = '#0b1120';    // CSSOM: the CSP forbids style=""
+            const paintSwatches = () => popup.querySelectorAll('[data-swatch]').forEach(el => { el.style.background = el.dataset.swatch; });
+            const set = (key, hex) => { if (isHex(hex)) { current[key] = hex.toLowerCase(); render(); paintSwatches(); } };
+            render();
+            paintSwatches();
+            ['primary', 'secondary'].forEach(key => {
+                popup.querySelector(`#th-${key}`).addEventListener('input', e => set(key, e.target.value));
+                popup.querySelector(`#th-${key}-hex`).addEventListener('change', e => {
+                    const v = e.target.value.trim();
+                    set(key, v.startsWith('#') ? v : `#${v}`);
+                    e.target.value = current[key];
+                });
+            });
+            popup.addEventListener('click', e => {
+                const preset = e.target.closest('[data-th-preset]');
+                if (preset) { const p = PRESETS[Number(preset.dataset.thPreset)]; current = { primary: p.primary, secondary: p.secondary }; render(); paintSwatches(); return; }
+                const sec = e.target.closest('[data-th-secondary]');
+                if (sec) set('secondary', sec.dataset.thSecondary);
+            });
+        },
+        preConfirm: () => ({ ...current })
+    });
+
+    if (result.isConfirmed) {
+        const isDefault = result.value.primary === DEFAULT_THEME.primary && result.value.secondary === DEFAULT_THEME.secondary;
+        if (isDefault) delete state.appData.theme; else state.appData.theme = result.value;
+        showToast('تم تطبيق الألوان — اضغط «حفظ» لنشرها ✅', 'success');
+    } else if (result.isDenied) {
+        delete state.appData.theme;
+        showToast('عادت الألوان الافتراضية — اضغط «حفظ» لنشرها', 'info');
+    }
+    syncSiteTheme(state.appData.theme);                   // "cancel" restores the colours from before
+    renderAll();
 }
 
 // ── Monitoring page: the sites checked every 12 hours ──

@@ -8,7 +8,7 @@ import { ROOT } from './cdn-assets.mjs';
 export const PUBLIC = [
     'index.html', 'offline.html', 'script.js', 'sw.js', 'data.json', 'manifest.json',
     'robots.txt', 'sitemap.xml', '.nojekyll', 'Osama_Alharbi.pdf',
-    'assets', 'js', 'images', 'generated'
+    'oauth.html', 'assets', 'js', 'images', 'cv', 'generated'
 ];
 
 const dest = join(ROOT, process.argv[2] || '_site');
