@@ -73,6 +73,13 @@ export function safeAssetUrl(value) {
     return safeUrl(raw);
 }
 
+// Image source for a data.json path: an image uploaded in this admin session is shown from memory until the
+// next deploy publishes it (state.previewImages); otherwise the validated path or https URL.
+export function imageSrc(value, previews) {
+    const url = safeAssetUrl(value);
+    return (url && previews?.[url]) || url;
+}
+
 export function skillLevel(skill) {
     const n = Number(skill?.level);
     return Number.isFinite(n) ? Math.min(100, Math.max(0, Math.round(n))) : 0;
