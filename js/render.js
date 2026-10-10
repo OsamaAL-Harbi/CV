@@ -95,9 +95,40 @@ function renderProfile() {
     const locDisplay = document.getElementById('contact-location-display');
     if (locDisplay) locDisplay.textContent = t(p.location);
 
+    renderWhatsApp(p);
+
     // CV download buttons follow profile.cv (the static href is the fallback)
     const cv = safeAssetUrl(p.cv);
     if (cv) document.querySelectorAll('[data-cv-link]').forEach(a => { a.href = cv; });
+}
+
+// ─── WhatsApp (wa.me link from profile.phone, with a greeting in the visitor's language) ───
+export function whatsAppUrl(profile, lang) {
+    const digits = String(profile?.phone || '').replace(/\D/g, '');
+    if (digits.length < 8) return '';
+    const first = (profile.name?.[lang] || profile.name?.en || '').trim().split(/\s+/)[0] || '';
+    const text  = lang === 'ar'
+        ? `مرحباً ${first}، اطّلعت على موقعك الشخصي وأودّ التواصل معك.`
+        : `Hello ${first}, I visited your portfolio and would like to get in touch.`;
+    return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
+}
+
+// +966537820694 → +966 53 782 0694 (other numbers are shown as stored)
+function formatPhone(phone) {
+    const m = String(phone || '').replace(/[\s-]/g, '').match(/^\+966(5\d)(\d{3})(\d{4})$/);
+    return m ? `+966 ${m[1]} ${m[2]} ${m[3]}` : String(phone || '');
+}
+
+function renderWhatsApp(p) {
+    const card = document.getElementById('contact-whatsapp');
+    if (!card) return;
+    const url = whatsAppUrl(p, state.currentLang);
+    card.classList.toggle('hidden', !url);
+    if (!url) return;
+    card.href = url;
+    card.setAttribute('aria-label', `WhatsApp: ${formatPhone(p.phone)}`);
+    const num = document.getElementById('contact-whatsapp-number');
+    if (num) num.textContent = formatPhone(p.phone);
 }
 
 // ─── Home stats (computed from data.json instead of hard-coded numbers) ───

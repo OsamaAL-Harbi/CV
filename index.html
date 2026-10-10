@@ -327,7 +327,7 @@
                     <p class="text-gray-500 text-sm" id="contact-location-display"></p>
                 </div>
                 <!-- Contact cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                     <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-primary transition-all cursor-pointer text-center" data-action="contact" data-contact="email" role="button" tabindex="0">
                         <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center mx-auto mb-3 text-primary text-xl group-hover:scale-110 transition-transform"><i class="fas fa-envelope"></i></div>
                         <p class="text-xs text-gray-400 mb-1" data-lang="contact_email_label">البريد الإلكتروني</p>
@@ -346,6 +346,13 @@
                         <p class="font-bold text-sm dark:text-white">OsamaAL-Harbi</p>
                         <span class="inline-block mt-2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" data-lang="contact_open">فتح الملف</span>
                     </div>
+                    <!-- WhatsApp: href and number come from profile.phone (js/render.js); hidden without a phone -->
+                    <a id="contact-whatsapp" href="#" target="_blank" rel="noopener noreferrer" class="hidden contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-green-500 transition-all text-center">
+                        <div class="w-12 h-12 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center mx-auto mb-3 text-green-600 dark:text-green-500 text-xl group-hover:scale-110 transition-transform" aria-hidden="true"><i class="fab fa-whatsapp"></i></div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">WhatsApp</p>
+                        <p id="contact-whatsapp-number" class="font-bold text-sm dark:text-white" dir="ltr"></p>
+                        <span class="inline-block mt-2 text-xs text-green-600 dark:text-green-500 opacity-0 group-hover:opacity-100 transition-opacity" data-lang="contact_whatsapp">ابدأ محادثة</span>
+                    </a>
                 </div>
                 <!-- Message form -->
                 <div class="bg-white dark:bg-cardBg rounded-3xl p-8 border border-gray-100 dark:border-gray-700 shadow-sm">

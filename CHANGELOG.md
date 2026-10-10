@@ -26,6 +26,8 @@ All notable changes to this site. Format: [Keep a Changelog](https://keepachange
 - `?lang=en` link for the English version, `hreflang` alternates (page and sitemap); canonical, `og:url` and
   `og:locale` follow the language.
 - "Save contact" button: a vCard generated from `data.json` in the browser.
+- WhatsApp contact card (`wa.me` link from `profile.phone`, greeting in the visitor's language; hidden
+  when there is no phone) and a matching command-palette entry.
 - Optional certificate `url` field rendered as a "Verify credential" link (https only); Arabic month names
   for "January 2025"-style dates in the Arabic UI.
 - Command palette: search button (also on phones), labels in the current language with search in both,

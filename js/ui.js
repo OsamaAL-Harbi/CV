@@ -328,6 +328,7 @@ function commands() {
         { icon: 'fa-share-alt',     ar: 'مشاركة',                   en: 'Share',                run: shareProfile },
         { icon: 'fa-copy',          ar: 'نسخ البريد الإلكتروني',    en: 'Copy email',           run: () => contactAction('email') },
         { icon: 'fa-address-card',  ar: 'حفظ جهة الاتصال (vCard)',  en: 'Save contact (vCard)', run: downloadVCard },
+        { icon: 'fa-whatsapp',      ar: 'محادثة واتساب',            en: 'WhatsApp chat',        run: () => document.getElementById('contact-whatsapp')?.click(), keywords: 'whatsapp واتساب' },
         { icon: 'fa-language',      ar: 'English',                  en: 'العربية',              run: toggleLanguage, keywords: 'language لغة' },
         { icon: 'fa-moon',          ar: 'الوضع الليلي',             en: 'Dark mode',            run: () => document.getElementById('theme-btn').click(), keywords: 'theme ثيم' }
     ];
