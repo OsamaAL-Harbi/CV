@@ -13,6 +13,7 @@ import { setupModal } from './js/modal.js';
 import { initTheme, initParticles, setupSecretTrigger, setupCmdPalette, registerPWA, setupScrollTop, checkLinkedInReferrer, initStatsObserver, setupPrint, setupTilt } from './js/ui.js';
 import { setupActions } from './js/actions.js';
 import { syncSiteTheme } from './js/color.js';
+import { syncSiteFonts } from './js/fonts.js';
 
 // Older versions kept the token (and a data backup) in localStorage forever.
 function purgeLegacyAdminStorage() {
@@ -28,6 +29,7 @@ async function loadContent() {
         state.dataLoaded = true;
         state.lastSavedSnapshot = JSON.stringify(state.appData);
         syncSiteTheme(state.appData.theme);
+        syncSiteFonts(state.appData.fonts);
         renderAll();
         setSmartGreeting();
         initStatsObserver();

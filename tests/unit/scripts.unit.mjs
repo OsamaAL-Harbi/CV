@@ -160,3 +160,21 @@ test('merge3 keeps both sides: a stale editor copy never erases a newer value on
     // deletions in the editor survive when GitHub did not touch the key
     assert.deepEqual(merge3({ a: 1, b: 2 }, { a: 1 }, { a: 1, b: 2, c: 3 }).merged, { a: 1, c: 3 });
 });
+
+test('fonts: every option has its files, stacks put the Latin family first', async () => {
+    const { FONTS, fontStack } = await import('../../js/fonts.js');
+    const { readFile } = await import('node:fs/promises');
+    const css = await readFile(new URL('../../src/vendor/fonts.css', import.meta.url), 'utf8');
+    for (const f of [...FONTS.ar, ...FONTS.en].filter(f => f.family)) {
+        assert.ok(css.includes(`font-family: '${f.family}'`), `${f.family} missing from fonts.css`);
+    }
+    assert.ok(/U\+0600-06FF/.test(css));
+    assert.equal(fontStack({}), '"Tajawal", system-ui, sans-serif');
+    assert.equal(fontStack({ ar: 'cairo', en: 'same' }), '"Cairo", system-ui, sans-serif');
+    assert.equal(fontStack({ ar: 'cairo', en: 'inter' }), '"Inter", "Cairo", system-ui, sans-serif');
+    assert.equal(fontStack({ ar: '"; x', en: 'nope' }), '"Tajawal", system-ui, sans-serif');
+    const { applyFonts } = await import('../../scripts/assemble-site.mjs');
+    const html = '<meta id="site-fonts" name="site-fonts" content="">';
+    assert.equal(applyFonts(html, { fonts: { ar: 'cairo', en: 'inter' } }), '<meta id="site-fonts" name="site-fonts" content="&quot;Inter&quot;, &quot;Cairo&quot;, system-ui, sans-serif">');
+    assert.match(applyFonts(html, {}), /content="&quot;Tajawal&quot;, system-ui, sans-serif"/);
+});

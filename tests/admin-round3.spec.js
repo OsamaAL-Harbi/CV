@@ -250,3 +250,72 @@ test.describe('open to work and SEO', () => {
         expect((await state(page)).seo.ar.title).toBe('عنوان تجريبي');
     });
 });
+
+test.describe('fonts', () => {
+    const bodyFont = page => page.evaluate(() => getComputedStyle(document.body).fontFamily);
+
+    test('visitors get the fonts from data.json, downloaded from this site only', async ({ page }) => {
+        const data = clone();
+        data.fonts = { ar: 'cairo', en: 'inter' };
+        await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
+        const fontFiles = [];
+        page.on('request', r => { if (r.resourceType() === 'font') fontFiles.push(new URL(r.url())); });
+        await openSite(page);
+        await expect.poll(() => bodyFont(page)).toMatch(/^Inter, Cairo,/);
+        await page.evaluate(() => document.fonts.ready);
+        expect(await page.evaluate(() => document.fonts.check('700 16px Cairo', 'أسامة'))).toBe(true);
+        expect(fontFiles.length).toBeGreaterThan(0);
+        const site = new URL(page.url()).origin;
+        expect(fontFiles.every(u => u.origin === site && u.pathname.includes('/assets/fonts/'))).toBe(true);
+        expect(fontFiles.some(u => u.pathname.includes('cairo-arabic'))).toBe(true);
+        // cached for the next visit's first paint (js/early.js)
+        expect(await page.evaluate(() => localStorage.getItem('font_stack'))).toBe('"Inter", "Cairo", system-ui, sans-serif');
+    });
+
+    test('the deployed page applies the fonts before first paint, so the default font is never downloaded', async ({ page }) => {
+        const data = clone();
+        data.fonts = { ar: 'almarai', en: 'same' };
+        const { applyFonts } = await import('../scripts/assemble-site.mjs');
+        const html = applyFonts(readFileSync(new URL('../index.html', import.meta.url), 'utf8'), data);
+        await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
+        await page.context().route(url => /\/(index\.html)?$/.test(url.pathname), route => route.fulfill({ body: html, contentType: 'text/html' }));
+        const fontFiles = [];
+        page.on('request', r => { if (r.resourceType() === 'font') fontFiles.push(r.url()); });
+        await openSite(page);
+        await page.evaluate(() => document.fonts.ready);
+        expect(await bodyFont(page)).toBe('Almarai, system-ui, sans-serif');
+        expect(fontFiles.some(u => u.includes('almarai-arabic'))).toBe(true);
+        expect(fontFiles.some(u => u.includes('tajawal'))).toBe(false);
+    });
+
+    test('a tampered cached font stack is ignored before first paint', async ({ page }) => {
+        await page.addInitScript(() => localStorage.setItem('font_stack', 'x; background: url(https://evil.example/)'));
+        await openSite(page);
+        expect(await bodyFont(page)).toBe('Tajawal, system-ui, sans-serif');
+    });
+
+    test('admin previews fonts live, cancel restores, apply saves to data.json', async ({ page }) => {
+        await stubGitHub(page);
+        await login(page);
+        await tool(page, 'الخطوط');
+        await expect(page.locator('[data-font-sample="Almarai"]')).toHaveCSS('font-family', /Almarai/);
+        await page.locator('input[name="font-ar"][value="almarai"]').check();
+        await expect.poll(() => bodyFont(page)).toContain('Almarai');
+        await page.locator('.swal2-cancel').click();
+        await expect.poll(() => bodyFont(page)).toBe('Tajawal, system-ui, sans-serif');
+
+        await tool(page, 'الخطوط');
+        await page.locator('input[name="font-ar"][value="ibm-plex-sans-arabic"]').check();
+        await page.locator('input[name="font-en"][value="poppins"]').check();
+        await page.locator('.swal2-confirm').click();
+        await expect.poll(() => bodyFont(page)).toMatch(/^Poppins, "IBM Plex Sans Arabic",/);
+        expect((await state(page)).fonts).toEqual({ ar: 'ibm-plex-sans-arabic', en: 'poppins' });
+
+        await tool(page, 'الخطوط');                                  // back to the default removes the setting
+        await page.locator('input[name="font-ar"][value="tajawal"]').check();
+        await page.locator('input[name="font-en"][value="same"]').check();
+        await page.locator('.swal2-confirm').click();
+        expect((await state(page)).fonts).toBeUndefined();
+        expect(await page.evaluate(() => localStorage.getItem('font_stack'))).toBeNull();
+    });
+});

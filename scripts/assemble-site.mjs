@@ -1,11 +1,13 @@
 // Copies only the files the site serves into a folder for GitHub Pages (the "Deploy site" workflow
 // uploads it), so tests, scripts, sources and package files are not published. It also writes the SEO
 // settings from data.json (admin → SEO) into index.html, because link previews (WhatsApp, LinkedIn, X)
-// read the HTML without running JavaScript, and refreshes the sitemap date.
+// read the HTML without running JavaScript, writes the chosen fonts (admin → Fonts) so the first paint already
+// uses them, and refreshes the sitemap date.
 // Usage: node scripts/assemble-site.mjs _site
 import { cp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ROOT } from './cdn-assets.mjs';
+import { fontStack } from '../js/fonts.js';
 
 export const SITE_URL = 'https://osamaal-harbi.github.io/CV/';
 
@@ -52,6 +54,11 @@ export function applyProfileImage(html, data) {
     return img ? html.replace(/(<script type="application\/ld\+json">[\s\S]*?"image": ")[^"]*(")/, (_, a, b) => `${a}${img}${b}`) : html;
 }
 
+// Font stack from admin → Fonts for js/early.js (always written, so a stale cached stack never wins)
+export function applyFonts(html, data) {
+    return setMeta(html, 'id="site-fonts"', fontStack(data?.fonts || {}));
+}
+
 export function touchSitemap(xml, date = new Date().toISOString().slice(0, 10)) {
     return xml.replace(/<lastmod>[^<]*<\/lastmod>/g, `<lastmod>${date}</lastmod>`);
 }
@@ -68,8 +75,8 @@ async function main() {
     const data = JSON.parse(await readFile(join(ROOT, 'data.json'), 'utf8'));
     const index = join(dest, 'index.html');
     const html = await readFile(index, 'utf8');
-    const seoHtml = applyProfileImage(applySeo(html, data), data);
-    if (seoHtml !== html) { await writeFile(index, seoHtml); console.log('seo   index.html meta tags from data.json'); }
+    const seoHtml = applyFonts(applyProfileImage(applySeo(html, data), data), data);
+    if (seoHtml !== html) { await writeFile(index, seoHtml); console.log('seo   index.html meta tags and fonts from data.json'); }
     const sitemap = join(dest, 'sitemap.xml');
     await writeFile(sitemap, touchSitemap(await readFile(sitemap, 'utf8')));
 }
