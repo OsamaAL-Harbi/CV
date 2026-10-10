@@ -7,7 +7,8 @@
     window.dataLayer = window.dataLayer || [];
     window.gtag = function () { window.dataLayer.push(arguments); };
     window.gtag('js', new Date());
-    window.gtag('config', GA_ID);
+    // Page views are sent by js/router.js for every section (#resume, #portfolio…), the first one included.
+    window.gtag('config', GA_ID, { send_page_view: false });
     window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
 
     function load(src) {

@@ -94,3 +94,9 @@ export function showToast(msg, type = 'info') {
         .then(() => Toastify({ text: msg, duration, close: true, stopOnFocus: true, gravity: 'top', position: 'center', style: { background: colors[type] || colors.info } }).showToast())
         .catch(() => {});   // a toast is never worth an error of its own
 }
+
+// Google Analytics events (js/analytics.js queues them until gtag loads; nothing is sent when it is blocked).
+// Section changes are sent as page_view by js/router.js because the SPA never reloads.
+export function track(name, params = {}) {
+    try { window.gtag?.('event', name, params); } catch { /* analytics must never break the page */ }
+}

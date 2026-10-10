@@ -4,7 +4,7 @@
 //   generated/status.json   → "System status" sensors (uptime, response time)
 // Loaded on demand the first time the portfolio is shown; every section stays hidden when its file is missing.
 import { state } from './state.js';
-import { escapeHTML, safeUrl } from './utils.js';
+import { escapeHTML, safeUrl, track } from './utils.js';
 import { ui } from './i18n.js';
 import { closeDialog, isDialogOpen, openDialog } from './modal.js';
 import { sanitizeReadme } from './sanitize.js';
@@ -327,6 +327,7 @@ export async function openCaseStudy(name) {
 
     body.replaceChildren(Object.assign(document.createElement('p'), { className: 'text-gray-500', textContent: ar() ? 'جاري التحميل…' : 'Loading…' }));
     if (!isDialogOpen(modal)) {
+        if (!state.isAdmin) track('view_case_study', { project: repo.name });
         openDialog(modal, {
             focus: modal.querySelector('[data-action="close-case"]'),
             restoreFocus: () => document.querySelector(`#github-repos a[href="#portfolio/${CSS.escape(encodeURIComponent(repo.name))}"]`)?.focus(),

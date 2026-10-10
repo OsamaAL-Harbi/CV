@@ -1,6 +1,5 @@
 // Render engine: builds every section from data.json (all values escaped).
 import { state } from './state.js';
-import { session } from './storage.js';
 import { escapeHTML, safeAssetUrl, safeUrl, showToast, skillLevel } from './utils.js';
 import { t, ui } from './i18n.js';
 
@@ -98,8 +97,14 @@ function renderProfile() {
     renderWhatsApp(p);
 
     // CV download buttons follow profile.cv (the static href is the fallback)
+    // A CV hosted elsewhere (e.g. Google Drive) opens in a new tab; a file on this site downloads.
     const cv = safeAssetUrl(p.cv);
-    if (cv) document.querySelectorAll('[data-cv-link]').forEach(a => { a.href = cv; });
+    if (cv) document.querySelectorAll('[data-cv-link]').forEach(a => {
+        a.href = cv;
+        const external = /^https:/i.test(cv);
+        if (external) { a.target = '_blank'; a.rel = 'noopener noreferrer'; a.removeAttribute('download'); }
+        else { a.removeAttribute('target'); a.removeAttribute('rel'); a.setAttribute('download', ''); }
+    });
 }
 
 // ─── WhatsApp (wa.me link from profile.phone, with a greeting in the visitor's language) ───
@@ -239,20 +244,7 @@ function renderLanguageItem(item) {
 }
 
 // ─── Project Card ─────────────────────────────────────
-// Uses stable key (title-based) for sessionStorage, not array index
-export function getProjectKey(item, fallback) {
-    const raw = item.title?.en || item.title?.ar || String(fallback);
-    return 'pv_' + raw.replace(/[^a-zA-Z0-9؀-ۿ]/g, '_').substring(0, 40);
-}
-
-export function viewLabel(count) {
-    if (state.currentLang === 'ar') return 'مشاهدة';
-    return count === 1 ? 'view' : 'views';
-}
-
 function renderProjectItem(item, realIdx) {
-    const key     = getProjectKey(item, realIdx);
-    const count   = session.getJSON('project_views', {})[key] || 0;
     const liveUrl = safeUrl(item.liveUrl);
     const hasLive = liveUrl !== '';
     const title   = t(item.title);
@@ -272,10 +264,6 @@ function renderProjectItem(item, realIdx) {
                     class="px-4 py-2 bg-green-600 text-white rounded-full font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition duration-500 shadow-xl">
                     ${escapeHTML(ui('btn_live'))}</a>` : ''}
             </div>
-            ${count > 0 ? `
-                <span class="absolute top-3 right-3 ltr:left-3 ltr:right-auto bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 pointer-events-none">
-                    <i class="fas fa-eye text-[10px]" aria-hidden="true"></i>&nbsp;${count} ${viewLabel(count)}
-                </span>` : ''}
             ${hasLive ? `<span class="absolute top-3 left-3 ltr:right-3 ltr:left-auto bg-green-600 text-white text-xs px-2 py-1 rounded-full font-bold pointer-events-none">${escapeHTML(ui('badge_live'))}</span>` : ''}
         </div>
         <div class="p-5 flex-grow flex flex-col">
