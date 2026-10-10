@@ -1,10 +1,12 @@
 // Admin panel (loaded only after login): GitHub session, editors, drag & drop and saving.
 // The token is kept in sessionStorage only and expires after SESSION_DURATION.
 import { SESSION_KEYS, state } from './state.js';
+import { local, session } from './storage.js';
 import { escapeHTML, loadVendor, setDeepValue, showToast, skillLevel } from './utils.js';
 import { t } from './i18n.js';
 import { VALID_PAGES } from './router.js';
 import { getProjectKey, renderAll } from './render.js';
+import { closeDialog, openDialog } from './modal.js';
 
 let githubInfo     = { token: '', repo: '' };
 
@@ -16,9 +18,9 @@ let sessionTimer         = null;
 
 function readSession() {
     return {
-        token:     sessionStorage.getItem(SESSION_KEYS.token),
-        repo:      sessionStorage.getItem(SESSION_KEYS.repo),
-        loginTime: Number(sessionStorage.getItem(SESSION_KEYS.loginTime)) || 0
+        token:     session.get(SESSION_KEYS.token),
+        repo:      session.get(SESSION_KEYS.repo),
+        loginTime: Number(session.get(SESSION_KEYS.loginTime)) || 0
     };
 }
 
@@ -27,7 +29,7 @@ function isSessionExpired(loginTime) {
 }
 
 function clearSession() {
-    Object.values(SESSION_KEYS).forEach(k => sessionStorage.removeItem(k));
+    Object.values(SESSION_KEYS).forEach(k => session.remove(k));
     githubInfo = { token: '', repo: '' };
     if (sessionTimer) { clearTimeout(sessionTimer); sessionTimer = null; }
 }
@@ -41,7 +43,7 @@ function scheduleSessionExpiry(loginTime) {
 function expireSession() {
     clearSession();
     showToast('انتهت الجلسة — سجّل الدخول مجدداً للحفظ، تعديلاتك باقية / Session expired — log in again to save', 'error');
-    if (state.isAdmin) document.getElementById('admin-modal').classList.remove('hidden');
+    if (state.isAdmin) openDialog(document.getElementById('admin-modal'));
 }
 
 export function checkSession() {
@@ -80,13 +82,13 @@ export async function authenticateAndEdit() {
 
     tokenInput.value = '';
     const loginTime = Date.now();
-    sessionStorage.setItem(SESSION_KEYS.token, token);
-    sessionStorage.setItem(SESSION_KEYS.repo, repo);
-    sessionStorage.setItem(SESSION_KEYS.loginTime, String(loginTime));
-    localStorage.setItem('saved_repo', repo);   // repo name only, not secret
+    session.set(SESSION_KEYS.token, token);
+    session.set(SESSION_KEYS.repo, repo);
+    session.set(SESSION_KEYS.loginTime, String(loginTime));
+    local.set('saved_repo', repo);   // repo name only, not secret
     githubInfo.repo = repo; githubInfo.token = token;
     scheduleSessionExpiry(loginTime);
-    document.getElementById('admin-modal').classList.add('hidden');
+    closeDialog(document.getElementById('admin-modal'));
     enableAdminMode();
     showToast('تم تفعيل وضع المدير 🚀', 'success');
     if (!token.startsWith('github_pat_')) {
@@ -95,10 +97,20 @@ export async function authenticateAndEdit() {
 }
 
 function enableAdminMode() {
+    if (!state.isAdmin) window.addEventListener('beforeunload', warnUnsaved);
     state.isAdmin = true;
     document.body.classList.add('admin-mode');
     document.getElementById('admin-toolbar').classList.remove('hidden');
     if (state.dataLoaded) renderAll();
+}
+
+const hasUnsavedChanges = () => state.lastSavedSnapshot !== null && JSON.stringify(state.appData) !== state.lastSavedSnapshot;
+
+// Closing the tab, reloading or logging out with unsaved edits asks first.
+function warnUnsaved(e) {
+    if (!hasUnsavedChanges()) return;
+    e.preventDefault();
+    e.returnValue = '';
 }
 
 export function logout() {
@@ -106,41 +118,106 @@ export function logout() {
     location.reload();
 }
 
-// btoa() only accepts Latin-1, so encode the UTF-8 bytes first.
+// btoa() only accepts Latin-1, so encode the UTF-8 bytes first (and the reverse for reading).
 function toBase64Utf8(text) {
     let binary = '';
     new TextEncoder().encode(text).forEach(byte => { binary += String.fromCharCode(byte); });
     return btoa(binary);
 }
 
+function fromBase64Utf8(b64) {
+    const binary = atob(String(b64).replace(/\s/g, ''));
+    return new TextDecoder().decode(Uint8Array.from(binary, ch => ch.charCodeAt(0)));
+}
+
+const SECTION_NAMES = {
+    profile: 'الملف الشخصي', experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات',
+    projects: 'المشاريع', certificates: 'الشهادات', workshops: 'ورش العمل', languages: 'اللغات'
+};
+
+// Which sections differ from the last loaded/saved version, e.g. ["الخبرات (+1)", "الملف الشخصي"].
+export function describeChanges(before, after) {
+    const keys = [...new Set([...Object.keys(before || {}), ...Object.keys(after || {})])];
+    return keys.filter(k => JSON.stringify(before?.[k]) !== JSON.stringify(after?.[k])).map(k => {
+        const name = SECTION_NAMES[k] || k;
+        if (Array.isArray(before?.[k]) && Array.isArray(after?.[k])) {
+            const diff = after[k].length - before[k].length;
+            if (diff) return `${name} (${diff > 0 ? '+' : ''}${diff})`;
+        }
+        return name;
+    });
+}
+
+let saving = false;
+
 export async function saveToGitHub() {
     if (isSessionExpired(readSession().loginTime)) { expireSession(); return; }
-    const btn      = document.querySelector('#admin-toolbar button');
+    if (saving) return;                                   // a second click would PUT with a stale sha
+    const before  = state.lastSavedSnapshot ? JSON.parse(state.lastSavedSnapshot) : {};
+    const changes = describeChanges(before, state.appData);
+    if (!changes.length) { showToast('لا توجد تعديلات للحفظ / Nothing to save', 'info'); return; }
+
+    const btn      = document.querySelector('#admin-toolbar [data-action="save"]');
     const origHTML = btn.innerHTML;
+    saving = true;
+    btn.disabled = true;
     btn.innerHTML  = '<i class="fas fa-spinner fa-spin"></i>';
     try {
         const url    = `https://api.github.com/repos/${githubInfo.repo}/contents/data.json`;
-        const getRes = await fetch(url, { headers: githubHeaders(githubInfo.token) });
+        // no-store: the API answers with max-age=60, and a cached sha makes the next save fail (409)
+        const getRes = await fetch(url, { headers: githubHeaders(githubInfo.token), cache: 'no-store' });
         if (!getRes.ok) throw new Error('فشل الاتصال. تحقق من الـ Token.');
         const fileData = await getRes.json();
-        const json     = JSON.stringify(state.appData, null, 2);
-        const putRes   = await fetch(url, {
+
+        await loadVendor('swal');
+        let remoteChanged = false;
+        try { remoteChanged = JSON.stringify(JSON.parse(fromBase64Utf8(fileData.content))) !== state.lastSavedSnapshot; }
+        catch { remoteChanged = true; }
+        const answer = await Swal.fire({
+            title: 'حفظ التعديلات في GitHub؟',
+            html: `<p class="text-sm mb-2">الأقسام المعدّلة:</p>
+                   <ul class="text-sm font-bold list-disc ps-6 text-right" dir="rtl">${changes.map(c => `<li>${escapeHTML(c)}</li>`).join('')}</ul>
+                   ${remoteChanged ? `<p class="mt-4 p-3 rounded-lg bg-amber-50 text-amber-800 text-sm text-right" dir="rtl">⚠️ تغيّر ملف data.json في GitHub منذ تحميل الصفحة (تعديل أو commit آخر). الحفظ سيستبدل تلك التغييرات.</p>` : ''}`,
+            icon: remoteChanged ? 'warning' : 'question',
+            showCancelButton: true,
+            confirmButtonText: remoteChanged ? 'استبدال وحفظ' : 'حفظ',
+            cancelButtonText: 'إلغاء',
+            confirmButtonColor: remoteChanged ? '#d33' : '#2563eb'
+        });
+        if (!answer.isConfirmed) return;
+
+        const json   = JSON.stringify(state.appData, null, 2) + '\n';
+        const putRes = await fetch(url, {
             method: 'PUT',
             headers: { ...githubHeaders(githubInfo.token), 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: 'Update via Admin Panel', content: toBase64Utf8(json), sha: fileData.sha })
+            body: JSON.stringify({ message: `Update data.json via admin panel (${changes.join(', ')})`, content: toBase64Utf8(json), sha: fileData.sha })
         });
+        if (putRes.status === 409) throw new Error('تعارض: الملف تغيّر أثناء الحفظ، أعد المحاولة');
         if (!putRes.ok) throw new Error('فشل الحفظ في GitHub');
-        state.lastSavedSnapshot = json;
-        showToast('تم الحفظ في GitHub ✅', 'success');
+        state.lastSavedSnapshot = JSON.stringify(state.appData);
+        showToast('تم الحفظ في GitHub ✅ يظهر على الموقع خلال دقيقة تقريباً', 'success');
     } catch (e) {
         showToast('خطأ: ' + e.message, 'error');
-    } finally { btn.innerHTML = origHTML; }
+    } finally {
+        saving = false;
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+    }
 }
 
 // Reverts unsaved edits to the last version loaded from or saved to GitHub (memory only).
-export function restoreBackup() {
-    if (state.lastSavedSnapshot) { state.appData = JSON.parse(state.lastSavedSnapshot); renderAll(); showToast('تم التراجع إلى آخر نسخة محفوظة ✅', 'success'); }
-    else showToast('لا توجد نسخة احتياطية', 'error');
+export async function restoreBackup() {
+    if (!state.lastSavedSnapshot) { showToast('لا توجد نسخة احتياطية', 'error'); return; }
+    if (!hasUnsavedChanges()) { showToast('لا توجد تعديلات غير محفوظة', 'info'); return; }
+    await loadVendor('swal');
+    const { isConfirmed } = await Swal.fire({
+        title: 'التراجع عن كل التعديلات غير المحفوظة؟', icon: 'warning',
+        showCancelButton: true, confirmButtonText: 'نعم، تراجع', cancelButtonText: 'إلغاء', confirmButtonColor: '#d33'
+    });
+    if (!isConfirmed) return;
+    state.appData = JSON.parse(state.lastSavedSnapshot);
+    renderAll();
+    showToast('تم التراجع إلى آخر نسخة محفوظة ✅', 'success');
 }
 
 const SCHEMAS = {
@@ -148,7 +225,7 @@ const SCHEMAS = {
         { key: 'ar',       label: 'اسم المهارة (عربي)',   simple: true },
         { key: 'en',       label: 'Skill Name (English)', simple: true },
         { key: 'level',    label: 'المستوى % (0-100)',    simple: true, number: true },
-        { key: 'category', label: 'النوع (hard / soft)',  simple: true }
+        { key: 'category', label: 'النوع / Type',         simple: true, options: { hard: 'تقنية / Technical', soft: 'شخصية / Soft' } }
     ],
     experience: [
         { key: 'role',        label: 'المسمى الوظيفي / Role' },
@@ -182,6 +259,7 @@ const SCHEMAS = {
         { key: 'name',       label: 'اسم الشهادة / Name' },
         { key: 'issuer',     label: 'الجهة المانحة / Issuer' },
         { key: 'credential', label: 'Credential ID', simple: true },
+        { key: 'url',        label: 'رابط التحقق / Verification URL (https://)', simple: true },
         { key: 'date',       label: 'التاريخ / Date', simple: true }
     ],
     workshops: [
@@ -223,6 +301,15 @@ async function manageItem(type, index = null) {
 
     const html = schema.map(f => {
         // Simple field (string / array)
+        if (f.options) {
+            const current = isEdit ? getSimple(item, f) : (type === 'skills' ? state.activeSkillTab : '');
+            return `<div class="mb-3">
+                <label class="block text-xs mb-1 text-gray-500 text-right" for="swal-${f.key}">${f.label}</label>
+                <select id="swal-${f.key}" class="swal2-select m-0 w-full">
+                    ${Object.entries(f.options).map(([v, label]) => `<option value="${v}"${v === current ? ' selected' : ''}>${label}</option>`).join('')}
+                </select>
+            </div>`;
+        }
         if (f.simple) {
             const val = isEdit ? getSimple(item, f) : '';
             const hint = f.array ? ' <span class="text-gray-400 text-xs">(مفصولة بفاصلة)</span>' : '';
@@ -290,7 +377,9 @@ async function manageItem(type, index = null) {
 
     if (value) {
         if (!state.appData[type]) state.appData[type] = [];
-        if (isEdit) state.appData[type][index] = value; else state.appData[type].push(value);
+        // Merge: fields the editor does not show (added by hand in data.json) are kept
+        if (isEdit) state.appData[type][index] = { ...item, ...value }; else state.appData[type].push(value);
+        if (type === 'skills' && value.category !== state.activeSkillTab) state.activeSkillTab = value.category;
         renderAll();
         showToast(isEdit ? 'تم التعديل ✅' : 'تمت الإضافة ✅', 'success');
     }
@@ -438,7 +527,7 @@ async function manageProjectItem(index = null) {
 
     if (value) {
         if (!state.appData.projects) state.appData.projects = [];
-        if (isEdit) state.appData.projects[index] = value;
+        if (isEdit) state.appData.projects[index] = { ...item, ...value };
         else        state.appData.projects.push(value);
         renderAll();
         showToast(isEdit ? 'تم تعديل المشروع ✅' : 'تمت إضافة المشروع ✅', 'success');
@@ -537,15 +626,12 @@ export async function manageProfile() {
             phone:    document.getElementById('pf-phone').value,
             linkedin: document.getElementById('pf-linkedin').value,
             github:   document.getElementById('pf-github').value,
-            cv:       document.getElementById('pf-cv').value,
-            // preserve unchanged fields
-            image:       state.appData.profile?.image || '',
-            nationality: state.appData.profile?.nationality || { ar: 'سعودي', en: 'Saudi' }
+            cv:       document.getElementById('pf-cv').value
         })
     });
 
     if (value) {
-        state.appData.profile = value;
+        state.appData.profile = { ...p, ...value };   // keeps image, nationality and any other field
         renderAll();
         showToast(state.currentLang === 'ar' ? 'تم تحديث الملف الشخصي ✅' : 'Profile updated ✅', 'success');
     }
@@ -610,8 +696,8 @@ function initSortable() {
 
 export async function showAnalyticsDashboard() {
     await loadVendor('swal');
-    const visits  = JSON.parse(sessionStorage.getItem('page_visits')  || '{}');
-    const pViews  = JSON.parse(sessionStorage.getItem('project_views') || '{}');
+    const visits  = session.getJSON('page_visits', {});
+    const pViews  = session.getJSON('project_views', {});
     const allProjects = state.appData.projects || [];
 
     const pageNames = {
@@ -665,11 +751,11 @@ export async function showAnalyticsDashboard() {
             </table>
 
             <div class="flex gap-2 flex-wrap justify-center mt-4">
-                <a href="https://analytics.google.com/" target="_blank"
+                <a href="https://analytics.google.com/" target="_blank" rel="noopener noreferrer"
                    class="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition">
                    <i class="fab fa-google"></i> Google Analytics
                 </a>
-                <a href="https://clarity.microsoft.com/" target="_blank"
+                <a href="https://clarity.microsoft.com/" target="_blank" rel="noopener noreferrer"
                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition">
                    <i class="fas fa-eye"></i> Microsoft Clarity
                 </a>
