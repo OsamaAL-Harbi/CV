@@ -25,24 +25,36 @@ const PAGE_META = {
 };
 
 // Called on every hashchange and on first load
+// Sub-routes: #portfolio/<repo> opens that repository's case study on top of the portfolio.
 export function handleHash() {
-    const hash   = window.location.hash.replace('#', '').trim();
-    const pageId = VALID_PAGES.includes(hash) ? hash : (hash === '' ? 'home' : null);
-    if (pageId) showPage(pageId, false);  // false = don't push state again
-    else if (hash !== '') show404();
+    const hash   = decodeHash(window.location.hash.replace('#', '').trim());
+    const [page, sub] = hash.split(/\/(.*)/s);
+    const pageId = VALID_PAGES.includes(page) ? page : (hash === '' ? 'home' : null);
+    // Opening/closing a case study keeps the portfolio where it was (no re-render, no scroll to top)
+    if (pageId && !(pageId === 'portfolio' && currentPage === 'portfolio')) showPage(pageId, false);
+    else if (!pageId && hash !== '') { show404(); return; }
+    if (pageId !== 'portfolio') return;
+    import('./github.js').then(m => (sub ? m.openCaseStudy(sub) : m.closeCaseStudy())).catch(() => {});
+}
+
+function decodeHash(value) {
+    try { return decodeURIComponent(value); } catch { return value; }
 }
 
 export function showPage(pageId, pushState = true) {
     if (!VALID_PAGES.includes(pageId)) { show404(); return; }
 
-    const changed = activateSection(pageId);
-    window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
-
-    document.querySelectorAll('.nav-link').forEach(btn => {
-        const active = btn.id === `nav-${pageId}`;
-        btn.classList.toggle('nav-active', active);
-        if (active) btn.setAttribute('aria-current', 'page'); else btn.removeAttribute('aria-current');
+    const changed = sectionChanges(pageId);
+    currentPage = pageId;
+    withTransition(changed, () => {
+        activateSection(pageId, changed);
+        document.querySelectorAll('.nav-link').forEach(btn => {
+            const active = btn.id === `nav-${pageId}`;
+            btn.classList.toggle('nav-active', active);
+            if (active) btn.setAttribute('aria-current', 'page'); else btn.removeAttribute('aria-current');
+        });
     });
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
 
     const mobileMenu = document.getElementById('mobile-menu');
     if (mobileMenu && mobileMenu.classList.contains('open')) toggleMobileMenu();
@@ -60,24 +72,43 @@ export function showPage(pageId, pushState = true) {
     const pEl = document.getElementById('particles-js');
     if (pEl) pEl.style.filter = `hue-rotate(${hue}deg)`;
 
+    // GitHub activity and system status are fetched the first time the portfolio is shown
+    if (pageId === 'portfolio') import('./github.js').then(m => m.showPortfolioExtras()).catch(() => {});
+
     // Track page visit in sessionStorage
     if (changed) trackPageVisit(pageId);
 }
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const canTransition = () => typeof document.startViewTransition === 'function' && !prefersReducedMotion();
+if (canTransition()) document.documentElement.classList.add('vt');
 
-// Shows one section and hides the others. Returns false when it was already the visible one.
-function activateSection(id) {
+// Section switches cross-fade with the View Transitions API where available (the nav underline glides
+// to the new link); elsewhere, and on the first render, the DOM simply changes.
+function withTransition(changed, update) {
+    if (changed && initialised && canTransition() && !document.hidden) {
+        try { document.startViewTransition(update); return; } catch { /* fall through */ }
+    }
+    update();
+}
+
+function sectionChanges(id) {
     const target = document.getElementById(id);
-    if (!target) return false;
-    const changed = target.style.display !== 'block' || !target.classList.contains('active');
+    return !!target && (target.style.display !== 'block' || !target.classList.contains('active'));
+}
+
+// Shows one section and hides the others.
+function activateSection(id, changed = sectionChanges(id)) {
+    const target = document.getElementById(id);
+    if (!target) return;
     document.querySelectorAll('.page-section').forEach(sec => {
         if (sec === target) return;
         sec.classList.remove('active');
         sec.style.display = 'none';
     });
-    if (!changed) return false;
+    if (!changed) return;
     target.style.display = 'block';
+    if (document.documentElement.classList.contains('vt')) target.classList.add('active');
     setTimeout(() => { target.classList.add('active'); window.AOS?.refresh(); }, 10);
     // Screen readers and keyboard users start at the new section's heading, not at the old link.
     if (initialised) {
@@ -86,13 +117,16 @@ function activateSection(id) {
         heading.focus({ preventScroll: true });
     }
     initialised = true;
-    return true;
 }
 
 let initialised = false;
 
+let currentPage = null;
+
 function show404() {
-    activateSection('not-found');
+    currentPage = 'not-found';
+    const changed = sectionChanges('not-found');
+    withTransition(changed, () => activateSection('not-found', changed));
     document.querySelectorAll('.nav-link').forEach(btn => { btn.classList.remove('nav-active'); btn.removeAttribute('aria-current'); });
     updateMetaTags('not-found');
 }

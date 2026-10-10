@@ -42,7 +42,7 @@ export const STATIC_TEXT = {
         cert_verify:'تحقق من الشهادة', btn_vcard:'حفظ جهة الاتصال', contact_vcard_sub:'بطاقة vCard لهاتفك أو بريدك',
         cmd_placeholder:'اكتب أمراً...', cmd_hint:'للتنقل ↑↓ · للتنفيذ Enter', cmd_empty:'لا توجد نتائج',
         load_error:'تعذّر تحميل المحتوى. تحقق من اتصالك ثم أعد المحاولة.', btn_retry:'إعادة المحاولة',
-        skills_hard:'المهارات التقنية', skills_soft:'المهارات الشخصية'
+        skills_hard:'المهارات التقنية', skills_soft:'المهارات الشخصية', case_label:'دراسة حالة'
     },
     en: {
         nav_home:'Home', nav_resume:'Resume', nav_portfolio:'Portfolio', nav_contact:'Contact',
@@ -68,7 +68,7 @@ export const STATIC_TEXT = {
         cert_verify:'Verify credential', btn_vcard:'Save Contact', contact_vcard_sub:'vCard for your phone or mail app',
         cmd_placeholder:'Type a command...', cmd_hint:'↑↓ to navigate · Enter to run', cmd_empty:'No results',
         load_error:'Could not load the content. Check your connection and try again.', btn_retry:'Try again',
-        skills_hard:'Technical Skills', skills_soft:'Soft Skills'
+        skills_hard:'Technical Skills', skills_soft:'Soft Skills', case_label:'Case study'
     }
 };
 
@@ -122,6 +122,7 @@ export function toggleLanguage() {
     renderAll();
     updateStaticText();
     setSmartGreeting();               // the greeting stayed in the previous language
+    window.dispatchEvent(new Event('langchange'));   // lazily loaded parts (js/github.js) re-render
     // Re-apply meta for current page
     const hash = window.location.hash.replace('#', '') || 'home';
     updateMetaTags(hash);
