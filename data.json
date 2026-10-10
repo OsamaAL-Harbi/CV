@@ -355,7 +355,10 @@
   ],
   "github": {
     "user": "OsamaAL-Harbi",
-    "repos": [],
+    "repos": [
+      "CV",
+      "jobmatch"
+    ],
     "calendar": true,
     "languages": true,
     "activity": true
