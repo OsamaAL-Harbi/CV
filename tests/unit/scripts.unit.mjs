@@ -143,3 +143,20 @@ test('planAlerts opens one issue per outage and closes it on recovery', async ()
     assert.match(issue.body, /<!-- status-alert:https:\/\/a\.example\/ -->$/);
     assert.match(issue.body, /انتهت المهلة/);
 });
+
+test('merge3 keeps both sides: a stale editor copy never erases a newer value on GitHub', async () => {
+    const { merge3 } = await import('../../js/diff.js');
+    // The real case: photo saved from one load, availability saved from a stale load
+    const base   = { profile: { name: 'O', image: '' }, theme: { primary: '#334155' } };
+    const local  = { profile: { name: 'O', image: '' }, theme: { primary: '#334155' }, availability: { enabled: true } };
+    const remote = { profile: { name: 'O', image: 'images/profile-1.webp' }, theme: { primary: '#334155' } };
+    const { merged, conflicts } = merge3(base, local, remote);
+    assert.deepEqual(merged, { profile: { name: 'O', image: 'images/profile-1.webp' }, theme: { primary: '#334155' }, availability: { enabled: true } });
+    assert.deepEqual(conflicts, []);
+    // both changed the same value → the editor wins and it is reported
+    const c = merge3({ a: 1, list: [1] }, { a: 2, list: [1] }, { a: 3, list: [1, 2] });
+    assert.deepEqual(c.merged, { a: 2, list: [1, 2] });
+    assert.deepEqual(c.conflicts, ['a']);
+    // deletions in the editor survive when GitHub did not touch the key
+    assert.deepEqual(merge3({ a: 1, b: 2 }, { a: 1 }, { a: 1, b: 2, c: 3 }).merged, { a: 1, c: 3 });
+});

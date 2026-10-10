@@ -149,7 +149,7 @@ test.describe('checker', () => {
         data.languages[1].level.en = '';
         data.workshops[0].name.en = 'ورشة بالعربي';
         await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
-        await stubGitHub(page);
+        await stubGitHub(page, { remote: data });       // the admin panel loads the GitHub copy at login
         await login(page);
         await page.locator('#admin-toolbar [data-action="open-checker"]').click();
         const quality = page.locator('[data-panel="quality"]');
