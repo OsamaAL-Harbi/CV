@@ -9,9 +9,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Brand colour. Light: #2563eb (4.5:1+ with white text and on white). Dark: #3b82f6 (5:1 on #0b1120). */
-:root { --color-primary: 37 99 235; }
-.dark { --color-primary: 59 130 246; }
+/* Brand colours. Defaults — light: #2563eb (4.5:1+ with white text and on white), dark: #3b82f6 (5:1 on #0b1120),
+   secondary #8b5cf6. A theme picked in the admin panel sets --primary-light/-dark and --secondary-light/-dark
+   (js/color.js derives them so every pair keeps its contrast). */
+:root { --color-primary: var(--primary-light, 37 99 235); --color-secondary: var(--secondary-light, 139 92 246); }
+.dark { --color-primary: var(--primary-dark, 59 130 246); --color-secondary: var(--secondary-dark, 139 92 246); }
 
 /* ─── Custom styles (moved from the inline <style> in index.html) ─── */
 body { overflow-x: hidden; }
