@@ -6,6 +6,8 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/particles.js@2.0.0/ https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/ https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/ https://cdn.jsdelivr.net/npm/jspdf@2.5.1/ https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/ https://www.googletagmanager.com/gtag/ https://www.clarity.ms/ https://scripts.clarity.ms/; style-src 'self' https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/ 'sha256-UP0QZg7irvSMvOBz9mH2PIIE28+57UiavRfeVea0l3g='; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://api.github.com https://analyticsdata.googleapis.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com https://*.clarity.ms https://c.bing.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>أسامة الحربي | Portfolio</title>
+    <!-- Fonts from admin → Fonts, written here at deploy time (scripts/assemble-site.mjs) so js/early.js applies them before first paint -->
+    <meta id="site-fonts" name="site-fonts" content="">
     <!-- Applies saved theme/language before first paint (no inline script: CSP) -->
     <script src="js/early.js"></script>
 
@@ -78,6 +80,7 @@
     <link rel="modulepreload" href="js/ui.js">
     <link rel="modulepreload" href="js/actions.js">
     <link rel="modulepreload" href="js/color.js">
+    <link rel="modulepreload" href="js/fonts.js">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
     <!-- Styles: one prebuilt file (Tailwind + AOS + icons + self-hosted Tajawal), see npm run build:css -->

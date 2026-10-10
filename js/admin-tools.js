@@ -4,6 +4,7 @@ import { state } from './state.js';
 import { escapeHTML, loadVendor, safeAssetUrl, showToast } from './utils.js';
 import { renderAll } from './render.js';
 import { syncSiteTheme } from './color.js';
+import { DEFAULT_FONTS, FONTS, applyFonts, syncSiteFonts } from './fonts.js';
 import { diffHTML, editItem, fromBase64Utf8, ghApi, manageProfile, putRepoFile, readAsBase64 } from './admin.js';
 
 const pretty = data => JSON.stringify(data, null, 2);
@@ -74,6 +75,7 @@ export async function openHistory() {
                 if (e.target.closest('#hist-restore') && chosen) {
                     state.appData = structuredClone(chosen.data);
                     syncSiteTheme(state.appData.theme);
+                    syncSiteFonts(state.appData.fonts);
                     renderAll();
                     Swal.close();
                     showToast(`استُرجعت النسخة ${chosen.sha.slice(0, 7)} في المحرر — راجعها ثم اضغط «حفظ» لنشرها`, 'success');
@@ -470,6 +472,50 @@ async function manageAvailability() {
     showToast('تم التطبيق — اضغط «حفظ» لنشره ✅', 'success');
 }
 
+// ─── Fonts: one Arabic and one English family, previewed live on the page ───
+async function manageFonts() {
+    await loadVendor('swal');
+    const current = { ...DEFAULT_FONTS, ...(state.appData.fonts || {}) };
+    const sample = { ar: 'أسامة الحربي — دعم تقني وشبكات ١٢٣', en: 'Osama Alharbi — IT Support & Networking 123' };
+    const card = (lang, f) => `
+        <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-gray-50">
+            <input type="radio" name="font-${lang}" value="${f.id}" class="w-4 h-4 shrink-0" ${current[lang] === f.id ? 'checked' : ''}>
+            <span class="min-w-0">
+                <span class="block text-xs text-gray-500">${escapeHTML(f.label)}</span>
+                <span class="block text-lg font-bold truncate" data-font-sample="${escapeHTML(f.family || '')}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">${escapeHTML(f.family ? sample[lang] : sample.en)}</span>
+            </span>
+        </label>`;
+    const picked = () => ({
+        ar: document.querySelector('input[name="font-ar"]:checked')?.value || DEFAULT_FONTS.ar,
+        en: document.querySelector('input[name="font-en"]:checked')?.value || DEFAULT_FONTS.en
+    });
+    const { value } = await Swal.fire({
+        title: 'خطوط الموقع',
+        width: '820px',
+        html: `<div class="text-right space-y-4" dir="rtl">
+            <p class="text-xs text-gray-500">اختر خطاً للنص العربي وآخر للنص الإنجليزي؛ يتغيّر الموقع خلفك مباشرة للمعاينة. كل الخطوط مجانية (SIL OFL) ومستضافة في الموقع نفسه، والزائر يحمّل الخط المختار فقط.</p>
+            <div><h3 class="font-bold mb-2">الخط العربي</h3><div class="grid sm:grid-cols-2 gap-2">${FONTS.ar.map(f => card('ar', f)).join('')}</div></div>
+            <div><h3 class="font-bold mb-2">الخط الإنجليزي</h3><div class="grid sm:grid-cols-2 gap-2">${FONTS.en.map(f => card('en', f)).join('')}</div></div>
+            <p class="text-xs text-gray-500 border-t pt-3">خط «ثمانية» غير موجود لأن رخصته للاستخدام الشخصي فقط ولا تسمح باستضافته أو نشره في موقع. إن حصلت على ترخيص تجاري له فأضف ملفاته في <code>assets/fonts</code> واسمه في <code>js/fonts.js</code>.</p>
+        </div>`,
+        showCancelButton: true, confirmButtonText: 'تطبيق', cancelButtonText: 'إلغاء', focusConfirm: false,
+        didOpen: popup => {
+            // each sample in its own family (CSSOM, allowed by the CSP); "same" previews the Arabic choice
+            popup.querySelectorAll('[data-font-sample]').forEach(el => {
+                const family = el.dataset.fontSample;
+                el.style.fontFamily = family ? `"${family}", system-ui, sans-serif` : 'inherit';
+            });
+            popup.addEventListener('change', e => { if (e.target.name?.startsWith('font-')) applyFonts(picked()); });
+        },
+        preConfirm: picked
+    });
+    if (!value) { syncSiteFonts(state.appData.fonts); return; }   // cancel restores the fonts from before
+    if (value.ar === DEFAULT_FONTS.ar && value.en === DEFAULT_FONTS.en) delete state.appData.fonts;
+    else state.appData.fonts = value;
+    syncSiteFonts(state.appData.fonts);
+    showToast('تم تطبيق الخط — اضغط «حفظ» لنشره ✅', 'success');
+}
+
 // ─── 9. SEO: title, description and share image per language ───
 async function manageSeo() {
     const seo = state.appData.seo || {};
@@ -542,6 +588,7 @@ function collect() {
 const TOOLS = [
     { action: 'manage-visibility',   icon: 'fa-eye-slash',   label: 'إظهار وإخفاء الأقسام', run: manageVisibility },
     { action: 'manage-availability', icon: 'fa-briefcase',   label: 'متاح للعمل',            run: manageAvailability },
+    { action: 'manage-fonts',        icon: 'fa-font',        label: 'الخطوط',               run: manageFonts },
     { action: 'manage-seo',          icon: 'fa-magnifying-glass', label: 'SEO والمشاركة',   run: manageSeo },
     { action: 'upload-photo',        icon: 'fa-camera',      label: 'رفع الصورة الشخصية',   run: uploadProfilePhoto },
     { action: 'open-checker',        icon: 'fa-list-check',  label: 'مدقق المحتوى والترجمة', run: openChecker },
