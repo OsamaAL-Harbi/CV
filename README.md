@@ -124,7 +124,7 @@ npm test
 
 ## 👤 التواصل
 
-- 💼 [LinkedIn](https://www.linkedin.com/in/osama-al-harbi)
+- 💼 [LinkedIn](https://www.linkedin.com/in/osama-alharbi-it/)
 - 🐙 [GitHub](https://github.com/OsamaAL-Harbi)
 - 🌐 [الموقع الشخصي](https://osamaal-harbi.github.io/CV/)
 
