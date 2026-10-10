@@ -21,7 +21,7 @@
     "linkedin": "https://www.linkedin.com/in/osama-alharbi-it/",
     "github": "https://github.com/OsamaAL-Harbi",
     "cv": "cv/Osama_AlHarbi_CV.pdf",
-    "image": "images/profile-202610102128.webp",
+    "image": "",
     "nationality": {
       "ar": "سعودي",
       "en": "Saudi"
@@ -372,5 +372,24 @@
   "theme": {
     "primary": "#334155",
     "secondary": "#0284c7"
+  },
+  "availability": {
+    "enabled": true,
+    "status": {
+      "ar": "متاح للعمل",
+      "en": "Open to work"
+    },
+    "roles": {
+      "ar": "",
+      "en": ""
+    },
+    "cities": {
+      "ar": "",
+      "en": ""
+    },
+    "types": {
+      "ar": "",
+      "en": ""
+    }
   }
 }
