@@ -352,5 +352,18 @@
         "en": "STEP Score: 60"
       }
     }
+  ],
+  "github": {
+    "user": "OsamaAL-Harbi",
+    "repos": [],
+    "calendar": true,
+    "languages": true,
+    "activity": true
+  },
+  "monitor": [
+    {
+      "name": "Portfolio (GitHub Pages)",
+      "url": "https://osamaal-harbi.github.io/CV/"
+    }
   ]
 }
