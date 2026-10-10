@@ -88,7 +88,9 @@ export function setDeepValue(obj, path, value) {
 // Toastify is fetched with the first toast, so it is not on the page's critical path.
 export function showToast(msg, type = 'info') {
     const colors = { success: '#10B981', error: '#EF4444', info: '#3b82f6' };
+    // Short and dismissible: success/info 2 s, errors a little longer so they can be read
+    const duration = type === 'error' ? 3000 : 2000;
     loadVendor('toast')
-        .then(() => Toastify({ text: msg, duration: 3500, gravity: 'top', position: 'center', style: { background: colors[type] || colors.info } }).showToast())
+        .then(() => Toastify({ text: msg, duration, close: true, stopOnFocus: true, gravity: 'top', position: 'center', style: { background: colors[type] || colors.info } }).showToast())
         .catch(() => {});   // a toast is never worth an error of its own
 }

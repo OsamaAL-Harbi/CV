@@ -50,6 +50,8 @@ All notable changes to this site. Format: [Keep a Changelog](https://keepachange
   (cache `portfolio-v5`); scroll handling is passive and frame-throttled.
 - The project filter bar is hidden while there is only one project.
 - Manifest no longer locks the installed app to portrait. CI actions updated to v5 (Node 24).
+- Notifications are shorter (2 s, errors 3 s), pause on hover and have a close button.
+- JSON-LD `sameAs` uses the LinkedIn profile from `data.json` (`/in/osama-alharbi-it/`).
 
 ## [4.1.0] — 2026-10-09
 
