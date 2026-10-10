@@ -10,7 +10,7 @@ import { setDirection, updateStaticText } from './js/i18n.js';
 import { handleHash } from './js/router.js';
 import { renderAll, setSmartGreeting } from './js/render.js';
 import { setupModal } from './js/modal.js';
-import { initTheme, initParticles, setupSecretTrigger, setupCmdPalette, registerPWA, setupScrollTop, checkLinkedInReferrer, initStatsObserver, setupPrint } from './js/ui.js';
+import { initTheme, initParticles, setupSecretTrigger, setupCmdPalette, registerPWA, setupScrollTop, checkLinkedInReferrer, initStatsObserver, setupPrint, setupTilt } from './js/ui.js';
 import { setupActions } from './js/actions.js';
 
 // Older versions kept the token (and a data backup) in localStorage forever.
@@ -58,6 +58,7 @@ function boot() {
     setupPrint();
     registerPWA();
     setupScrollTop();
+    setupTilt();
     checkLinkedInReferrer();
 
     purgeLegacyAdminStorage();
