@@ -4,8 +4,8 @@ import { showToast } from './utils.js';
 import { toggleLanguage } from './i18n.js';
 import { toggleMobileMenu } from './router.js';
 import { setProjectFilter, setSkillTab } from './render.js';
-import { closeProjectModal, openProjectModal } from './modal.js';
-import { contactAction, filterCmd, runCommand, sendMailto, shareProfile, triggerPrint, updateCharCounter } from './ui.js';
+import { closeDialog, closeProjectModal, openProjectModal } from './modal.js';
+import { closeCmdPalette, contactAction, downloadVCard, filterCmd, openCmdPalette, runCommand, sendMailto, shareProfile, triggerPrint, updateCharCounter } from './ui.js';
 
 // Admin code is only downloaded when an admin action is used.
 const admin = (name, ...args) => import('./admin.js').then(m => m[name](...args));
@@ -24,7 +24,12 @@ const ACTIONS = {
     'close-project-modal':   () => closeProjectModal(),
     'project-modal-backdrop': (el, e) => { if (e.target === el) closeProjectModal(); },
     'run-command':           el => runCommand(Number(el.dataset.index)),
-    'close-admin-modal':     () => document.getElementById('admin-modal').classList.add('hidden'),
+    'open-cmd':              () => openCmdPalette(),
+    'cmd-backdrop':          (el, e) => { if (e.target === el) closeCmdPalette(); },
+    'download-vcard':        () => downloadVCard(),
+    'retry-load':            () => location.reload(),
+    'close-admin-modal':     () => closeDialog(document.getElementById('admin-modal')),
+    'admin-backdrop':        (el, e) => { if (e.target === el) closeDialog(el); },
     'login':                 () => admin('authenticateAndEdit'),
     'logout':                () => admin('logout'),
     'save':                  () => admin('saveToGitHub'),
@@ -62,4 +67,8 @@ export function setupActions() {
     });
     document.getElementById('contact-message')?.addEventListener('input', e => updateCharCounter(e.target));
     document.getElementById('cmd-input')?.addEventListener('input', e => filterCmd(e.target.value));
+    // Enter in the login fields submits, like a form would
+    ['repo-input', 'token-input'].forEach(id => document.getElementById(id)?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); document.querySelector('[data-action="login"]')?.click(); }
+    }));
 }

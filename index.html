@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="scroll-smooth">
+<html lang="ar" dir="rtl" class="motion-safe:scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +12,10 @@
     <!-- SEO / social cards (title + descriptions are updated per section by js/router.js) -->
     <meta id="meta-description" name="description" content="الموقع الشخصي لأسامة عبدالعزيز الحربي - خريج تقنية المعلومات، الجامعة الإسلامية بالمدينة المنورة.">
     <link rel="canonical" href="https://osamaal-harbi.github.io/CV/">
+    <!-- Arabic at the root, English at ?lang=en (js/i18n.js keeps canonical/og:url in step) -->
+    <link rel="alternate" hreflang="ar" href="https://osamaal-harbi.github.io/CV/">
+    <link rel="alternate" hreflang="en" href="https://osamaal-harbi.github.io/CV/?lang=en">
+    <link rel="alternate" hreflang="x-default" href="https://osamaal-harbi.github.io/CV/">
     <meta name="robots"   content="index, follow">
     <meta name="author"   content="Osama Abdulaziz Al-Harbi">
     <meta name="keywords" content="أسامة الحربي, IT, تقنية المعلومات, الجامعة الإسلامية, Portfolio">
@@ -61,9 +65,10 @@
     <link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" type="image/png">
     <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#3b82f6">
+    <meta name="theme-color" content="#2563eb">
 
     <!-- Fetch the app modules in parallel with script.js instead of after it -->
+    <link rel="modulepreload" href="js/storage.js">
     <link rel="modulepreload" href="js/state.js">
     <link rel="modulepreload" href="js/utils.js">
     <link rel="modulepreload" href="js/i18n.js">
@@ -76,6 +81,8 @@
 
     <!-- Styles: one prebuilt file (Tailwind + AOS + icons + self-hosted Tajawal), see npm run build:css -->
     <link rel="stylesheet" href="assets/css/tailwind.css">
+    <!-- Without JavaScript: hide the loading screen and show the static fallback below -->
+    <noscript><link rel="stylesheet" href="assets/css/noscript.css"></noscript>
 
     <!-- Scripts: deferred/module scripts run in order after parsing. AOS is served locally (its CSS
          hides content until it runs). particles.js, Toastify, SweetAlert2, Sortable, jsPDF and
@@ -85,6 +92,18 @@
     <script type="module" src="script.js"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-darkBg dark:text-gray-100 font-sans transition-colors duration-300 min-h-screen flex flex-col">
+
+    <a href="#main" class="skip-link" data-lang="skip_link">تخطَّ إلى المحتوى</a>
+    <div id="scroll-progress" class="fixed top-0 inset-x-0 h-0.5 z-[60] bg-gradient-to-r from-primary to-secondary origin-left rtl:origin-right print-hide" aria-hidden="true"></div>
+
+    <noscript>
+        <div class="noscript-card">
+            <h1>أسامة عبدالعزيز الحربي — Osama Abdulaziz Al-Harbi</h1>
+            <p>خريج تقنية المعلومات — Information Technology Graduate</p>
+            <p>يحتاج هذا الموقع إلى JavaScript. This site needs JavaScript.</p>
+            <p><a href="Osama_Alharbi.pdf">السيرة الذاتية PDF — CV (PDF)</a> · <a href="mailto:osamafcv214@gmail.com">osamafcv214@gmail.com</a></p>
+        </div>
+    </noscript>
 
     <!-- Skeleton Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 z-[200] bg-white dark:bg-darkBg flex flex-col items-center justify-center transition-opacity duration-700 px-8">
@@ -119,16 +138,17 @@
                 <a href="#contact"   class="nav-link hover:text-primary transition"           id="nav-contact"   data-lang="nav_contact">تواصل</a>
             </div>
             <div class="flex items-center gap-3 z-50">
-                <button data-action="toggle-language" id="lang-btn" class="px-3 py-1 text-xs font-bold border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">EN</button>
-                <button id="theme-btn" aria-label="الوضع الليلي" data-lang-aria="aria_theme" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition border border-gray-200 dark:border-gray-700">🌓</button>
-                <button data-action="toggle-menu" aria-label="فتح القائمة" data-lang-aria="aria_menu_open" aria-controls="mobile-menu" class="md:hidden text-xl focus:outline-none"><i class="fas fa-bars" aria-hidden="true"></i></button>
+                <button type="button" data-action="toggle-language" id="lang-btn" aria-label="EN — التبديل إلى الإنجليزية" data-lang-aria="aria_lang" class="px-3 py-1 text-xs font-bold border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">EN</button>
+                <button type="button" data-action="open-cmd" aria-label="لوحة الأوامر (Ctrl+K)" data-lang-aria="aria_cmd" aria-haspopup="dialog" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition border border-gray-200 dark:border-gray-700 flex items-center justify-center text-sm text-gray-600 dark:text-gray-300"><i class="fas fa-search" aria-hidden="true"></i></button>
+                <button type="button" id="theme-btn" aria-label="الوضع الليلي" data-lang-aria="aria_theme" aria-pressed="false" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 transition border border-gray-200 dark:border-gray-700">🌓</button>
+                <button type="button" data-action="toggle-menu" aria-label="فتح القائمة" data-lang-aria="aria_menu_open" aria-controls="mobile-menu" aria-expanded="false" class="md:hidden text-xl w-9 h-9 flex items-center justify-center rounded-full"><i class="fas fa-bars" aria-hidden="true"></i></button>
             </div>
         </div>
     </nav>
 
     <!-- ═══ MOBILE MENU ════════════════════════════════════ -->
-    <div id="mobile-menu" class="closed fixed inset-0 z-40 bg-white dark:bg-darkBg flex flex-col items-center justify-center space-y-8 md:hidden shadow-2xl">
-        <button data-action="toggle-menu" aria-label="إغلاق القائمة" data-lang-aria="aria_menu_close" class="absolute top-6 right-6 text-3xl hover:text-red-500 transition"><i class="fas fa-times" aria-hidden="true"></i></button>
+    <div id="mobile-menu" role="navigation" aria-label="القائمة / Menu" class="closed fixed inset-0 z-40 bg-white dark:bg-darkBg flex flex-col items-center justify-center space-y-8 md:hidden shadow-2xl">
+        <button type="button" data-action="toggle-menu" aria-label="إغلاق القائمة" data-lang-aria="aria_menu_close" class="absolute top-6 right-6 text-3xl hover:text-red-500 transition"><i class="fas fa-times" aria-hidden="true"></i></button>
         <a href="#home"      data-action="toggle-menu" class="text-xl font-bold hover:text-primary transition" data-lang="nav_home">الرئيسية</a>
         <a href="#resume"    data-action="toggle-menu" class="text-xl font-bold hover:text-primary transition" data-lang="nav_resume">السيرة الذاتية</a>
         <a href="#portfolio" data-action="toggle-menu" class="text-xl font-bold hover:text-primary transition" data-lang="nav_portfolio">الأعمال</a>
@@ -139,7 +159,13 @@
     </div>
 
     <!-- ═══ MAIN ════════════════════════════════════════════ -->
-    <main class="container mx-auto px-4 pt-32 pb-20 flex-grow relative z-10 max-w-5xl">
+    <main id="main" tabindex="-1" class="container mx-auto px-4 pt-32 pb-20 flex-grow relative z-10 max-w-5xl focus:outline-none">
+
+        <!-- Shown by script.js when data.json cannot be loaded -->
+        <div id="load-error" class="hidden max-w-lg mx-auto mb-10 p-6 rounded-2xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 text-center" role="alert">
+            <p class="font-bold text-red-700 dark:text-red-300 mb-4" data-lang="load_error">تعذّر تحميل المحتوى. تحقق من اتصالك ثم أعد المحاولة.</p>
+            <button type="button" data-action="retry-load" class="px-6 py-2 bg-primary text-white rounded-xl font-bold" data-lang="btn_retry">إعادة المحاولة</button>
+        </div>
 
         <!-- ─── HOME ─────────────────────────────────────── -->
         <section id="home" class="page-section active min-h-[70vh]">
@@ -160,9 +186,10 @@
                     </button>
                     <p id="smart-greeting" class="text-primary font-bold mb-2 text-lg">مرحباً</p>
                     <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight leading-tight" data-path="profile.name"></h1>
-                    <div class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 font-medium mb-6 h-8 flex justify-center gap-2">
-                        <span id="typewriter"></span><span class="animate-pulse text-primary">|</span>
-                    </div>
+                    <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-medium mb-6 min-h-8 flex justify-center gap-2">
+                        <span id="typewriter-sr" class="sr-only"></span>
+                        <span id="typewriter" aria-hidden="true"></span><span class="motion-safe:animate-pulse text-primary" aria-hidden="true">|</span>
+                    </p>
                     <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto text-lg leading-relaxed mb-3" data-path="profile.summary"></p>
                     <p class="text-sm text-gray-400 mb-10 flex items-center justify-center gap-2">
                         <i class="fas fa-map-marker-alt text-primary"></i>
@@ -186,19 +213,19 @@
                     <!-- Stats -->
                     <div id="stats-section" class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto" data-aos="fade-up">
                         <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
-                            <div class="text-3xl font-extrabold text-primary mb-1"><span class="stat-number" data-target="3">0</span></div>
+                            <div class="text-3xl font-extrabold text-primary mb-1"><span class="stat-number" data-stat="certificates" data-target="0">0</span></div>
                             <p class="text-xs text-gray-500 font-medium" data-lang="stat_certs">شهادات مهنية</p>
                         </div>
                         <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
-                            <div class="text-3xl font-extrabold text-orange-600 dark:text-orange-500 mb-1"><span class="stat-number" data-target="96">0</span></div>
+                            <div class="text-3xl font-extrabold text-orange-600 dark:text-orange-500 mb-1"><span class="stat-number" data-stat="volunteerHours" data-target="0">0</span></div>
                             <p class="text-xs text-gray-500 font-medium" data-lang="stat_volunteer">ساعة تطوع</p>
                         </div>
                         <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
-                            <div class="text-3xl font-extrabold text-green-600 dark:text-green-500 mb-1"><span class="stat-number" data-target="1">0</span></div>
-                            <p class="text-xs text-gray-500 font-medium" data-lang="stat_projects">مشروع تخرج</p>
+                            <div class="text-3xl font-extrabold text-green-600 dark:text-green-500 mb-1"><span class="stat-number" data-stat="projects" data-target="0">0</span></div>
+                            <p class="text-xs text-gray-500 font-medium" data-lang="stat_projects">مشاريع</p>
                         </div>
                         <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
-                            <div class="text-3xl font-extrabold text-secondary mb-1"><span class="stat-number" data-target="2026">0</span></div>
+                            <div class="text-3xl font-extrabold text-secondary mb-1"><span class="stat-number" data-stat="graduationYear" data-target="0">0</span></div>
                             <p class="text-xs text-gray-500 font-medium" data-lang="stat_graduation">سنة التخرج</p>
                         </div>
                     </div>
@@ -210,7 +237,9 @@
         <section id="resume" class="page-section">
             <div id="print-header" class="hidden mb-8 text-center border-b pb-4">
                 <h1 class="text-2xl font-bold" id="print-name"></h1>
+                <p id="print-title" class="text-base text-gray-700 mt-1"></p>
                 <p id="print-contact" class="text-sm text-gray-600 mt-1"></p>
+                <p id="print-links" class="text-sm text-gray-600 mt-0.5" dir="ltr"></p>
             </div>
             <div class="flex justify-between items-center mb-16" data-aos="fade-down">
                 <h2 class="text-4xl font-bold" data-lang="sec_resume">السيرة الذاتية</h2>
@@ -233,13 +262,13 @@
                     <div id="experience-container" class="space-y-10 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8 ltr:border-l-2 ltr:border-r-0 ltr:mr-0 ltr:ml-3 ltr:pr-0 ltr:pl-8 mb-12"></div>
 
                     <div class="flex justify-between items-center mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
-                        <h3 class="text-2xl font-bold flex items-center gap-3 text-blue-500"><i class="fas fa-university"></i><span data-lang="sec_edu">التعليم</span></h3>
+                        <h3 class="text-2xl font-bold flex items-center gap-3 text-blue-600 dark:text-blue-400"><i class="fas fa-university"></i><span data-lang="sec_edu">التعليم</span></h3>
                         <button data-action="add-item" data-type="education" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="education-container" class="space-y-6 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8 ltr:border-l-2 ltr:border-r-0 ltr:mr-0 ltr:ml-3 ltr:pr-0 ltr:pl-8 mb-12"></div>
 
                     <div class="flex justify-between items-center mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
-                        <h3 class="text-2xl font-bold flex items-center gap-3 text-orange-500"><i class="fas fa-hands-helping"></i><span data-lang="sec_volunteer">التطوع</span></h3>
+                        <h3 class="text-2xl font-bold flex items-center gap-3 text-orange-600 dark:text-orange-400"><i class="fas fa-hands-helping"></i><span data-lang="sec_volunteer">التطوع</span></h3>
                         <button data-action="add-item" data-type="volunteer" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="volunteer-container" class="space-y-6 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8 ltr:border-l-2 ltr:border-r-0 ltr:mr-0 ltr:ml-3 ltr:pr-0 ltr:pl-8"></div>
@@ -247,12 +276,12 @@
                 <!-- RIGHT -->
                 <div>
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
-                        <h3 class="text-2xl font-bold flex items-center gap-3 text-green-500"><i class="fas fa-code"></i><span data-lang="sec_skills">المهارات</span></h3>
+                        <h3 class="text-2xl font-bold flex items-center gap-3 text-green-600 dark:text-green-400"><i class="fas fa-code"></i><span data-lang="sec_skills">المهارات</span></h3>
                         <button data-action="add-item" data-type="skills" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
-                    <div class="flex gap-2 mb-5 print-hide" id="skill-tabs">
-                        <button data-action="set-skill-tab" data-tab="hard" id="tab-hard" class="px-4 py-1.5 text-xs font-bold rounded-full bg-primary text-white transition" data-lang="tab_hard">تقنية</button>
-                        <button data-action="set-skill-tab" data-tab="soft" id="tab-soft" class="px-4 py-1.5 text-xs font-bold rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 transition" data-lang="tab_soft">شخصية</button>
+                    <div class="flex gap-2 mb-5 print-hide" id="skill-tabs" role="group" aria-label="المهارات / Skills">
+                        <button type="button" data-action="set-skill-tab" data-tab="hard" id="tab-hard" aria-pressed="true" class="px-4 py-1.5 text-xs font-bold rounded-full bg-primary text-white transition" data-lang="tab_hard">تقنية</button>
+                        <button type="button" data-action="set-skill-tab" data-tab="soft" id="tab-soft" aria-pressed="false" class="px-4 py-1.5 text-xs font-bold rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 transition" data-lang="tab_soft">شخصية</button>
                     </div>
                     <div id="skills-container" class="space-y-3 mb-12"></div>
 
@@ -263,13 +292,13 @@
                     <div id="certificates-container" class="space-y-4 mb-12"></div>
 
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
-                        <h3 class="text-2xl font-bold flex items-center gap-3 text-yellow-500"><i class="fas fa-chalkboard-teacher"></i><span data-lang="sec_workshops">ورش العمل</span></h3>
+                        <h3 class="text-2xl font-bold flex items-center gap-3 text-amber-600 dark:text-yellow-400"><i class="fas fa-chalkboard-teacher"></i><span data-lang="sec_workshops">ورش العمل</span></h3>
                         <button data-action="add-item" data-type="workshops" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="workshops-container" class="space-y-4 mb-12"></div>
 
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
-                        <h3 class="text-2xl font-bold flex items-center gap-3 text-teal-500"><i class="fas fa-language"></i><span data-lang="sec_languages">اللغات</span></h3>
+                        <h3 class="text-2xl font-bold flex items-center gap-3 text-teal-600 dark:text-teal-400"><i class="fas fa-language"></i><span data-lang="sec_languages">اللغات</span></h3>
                         <button data-action="add-item" data-type="languages" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="languages-container" class="space-y-3"></div>
@@ -326,18 +355,18 @@
                     </h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1.5" data-lang="contact_subject_label">الموضوع</label>
-                            <input type="text" id="contact-subject" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-right" placeholder="موضوع الرسالة / Subject" dir="auto">
+                            <label for="contact-subject" class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5" data-lang="contact_subject_label">الموضوع</label>
+                            <input type="text" id="contact-subject" maxlength="200" autocomplete="off" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-start" placeholder="موضوع الرسالة / Subject" dir="auto">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1.5" data-lang="contact_message_label">الرسالة</label>
-                            <textarea id="contact-message" rows="5" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-right resize-none" placeholder="اكتب رسالتك هنا... / Write your message here..." dir="auto"></textarea>
+                            <label for="contact-message" class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5" data-lang="contact_message_label">الرسالة</label>
+                            <textarea id="contact-message" rows="5" maxlength="2000" aria-describedby="char-counter" class="w-full p-4 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-primary dark:text-white transition text-start resize-none" placeholder="اكتب رسالتك هنا... / Write your message here..." dir="auto"></textarea>
                         </div>
-                        <p id="char-counter" class="text-xs text-gray-400 text-left ltr:text-right">0 / 2000</p>
-                        <button data-action="send-mail" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 active:scale-95 transition shadow-lg flex items-center justify-center gap-2">
+                        <p id="char-counter" class="text-xs text-gray-500 dark:text-gray-400 text-left ltr:text-right" aria-live="polite">0 / 2000</p>
+                        <button type="button" data-action="send-mail" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 active:scale-95 transition shadow-lg flex items-center justify-center gap-2">
                             <i class="fas fa-paper-plane"></i><span data-lang="btn_email">فتح تطبيق الإيميل للإرسال</span>
                         </button>
-                        <p class="text-xs text-gray-400 text-center" data-lang="contact_mailto_note">سيفتح تطبيق الإيميل على جهازك مع الرسالة جاهزة</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 text-center" data-lang="contact_mailto_note">سيفتح تطبيق الإيميل على جهازك مع الرسالة جاهزة</p>
                     </div>
                 </div>
                 <!-- CV Download CTA -->
@@ -349,6 +378,16 @@
                     <a href="Osama_Alharbi.pdf" download data-cv-link class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-blue-700 hover:scale-105 transition shadow-md flex-shrink-0">
                         <i class="fas fa-download"></i><span data-lang="btn_download_cv">تحميل PDF</span>
                     </a>
+                </div>
+                <!-- vCard: built from data.json in the browser -->
+                <div class="mt-4 bg-white dark:bg-cardBg rounded-2xl p-5 flex items-center justify-between gap-4 border border-gray-100 dark:border-gray-700">
+                    <div>
+                        <p class="font-bold text-sm dark:text-white" data-lang="btn_vcard">حفظ جهة الاتصال</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" data-lang="contact_vcard_sub">بطاقة vCard لهاتفك أو بريدك</p>
+                    </div>
+                    <button type="button" data-action="download-vcard" class="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold hover:scale-105 transition flex-shrink-0">
+                        <i class="fas fa-address-card text-primary" aria-hidden="true"></i><span>.vcf</span>
+                    </button>
                 </div>
             </div>
         </section>
@@ -370,22 +409,22 @@
 
     <!-- Footer -->
     <footer class="text-center py-8 text-xs text-gray-500 border-t border-gray-200 dark:border-gray-800 print-hide">
-        <p id="secret-trigger" class="cursor-pointer select-none hover:text-primary transition inline-block px-4 py-2" title="Admin Login (Triple Click)">
+        <p id="secret-trigger" class="select-none inline-block px-4 py-2">
             &copy; <span id="year"></span> Osama Al-Harbi. Built with ❤️ & Code.
         </p>
     </footer>
 
     <!-- Scroll Top -->
-    <button id="scrollTopBtn" data-action="scroll-top" aria-label="العودة للأعلى" data-lang-aria="aria_scroll_top" class="fixed bottom-6 left-6 z-40 bg-primary text-white w-12 h-12 rounded-full shadow-xl hover:bg-blue-700 transition flex items-center justify-center transform translate-y-10 print-hide">
+    <button type="button" id="scrollTopBtn" data-action="scroll-top" aria-label="العودة للأعلى" data-lang-aria="aria_scroll_top" class="fixed bottom-6 left-6 z-40 bg-primary text-white w-12 h-12 rounded-full shadow-xl hover:bg-blue-700 transition flex items-center justify-center transform translate-y-10 print-hide">
         <i class="fas fa-arrow-up"></i>
     </button>
 
     <!-- ═══ PROJECT MODAL ════════════════════════════════════ -->
     <div id="project-modal" class="hidden fixed inset-0 z-[150] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 print-hide" data-action="project-modal-backdrop">
-        <div class="bg-white dark:bg-cardBg w-full max-w-2xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden" id="modal-box">
+        <div class="bg-white dark:bg-cardBg w-full max-w-2xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden" id="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc">
             <div class="bg-gradient-to-r from-primary to-secondary p-6 text-white relative">
-                <button data-action="close-project-modal" class="absolute top-4 left-4 ltr:right-4 ltr:left-auto w-8 h-8 bg-white/20 rounded-full hover:bg-white/40 transition flex items-center justify-center">
-                    <i class="fas fa-times text-sm"></i>
+                <button type="button" data-action="close-project-modal" aria-label="إغلاق" data-lang-aria="aria_close" class="absolute top-4 left-4 ltr:right-4 ltr:left-auto w-8 h-8 bg-white/20 rounded-full hover:bg-white/40 transition flex items-center justify-center">
+                    <i class="fas fa-times text-sm" aria-hidden="true"></i>
                 </button>
                 <h3 id="modal-title" class="text-xl font-bold pr-8 ltr:pr-0 ltr:pl-8"></h3>
                 <span class="inline-flex items-center gap-1 mt-2 text-xs bg-white/20 px-3 py-1 rounded-full">
@@ -400,13 +439,13 @@
                     </h4>
                     <div id="modal-technologies" class="flex flex-wrap gap-2"></div>
                 </div>
-                <div>
+                <div id="modal-challenges-block">
                     <h4 class="font-bold text-sm mb-2 flex items-center gap-2">
                         <i class="fas fa-puzzle-piece text-yellow-500"></i><span id="modal-challenges-label">التحديات</span>
                     </h4>
                     <p id="modal-challenges" class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed bg-yellow-50 dark:bg-yellow-900/10 p-3 rounded-xl border border-yellow-100 dark:border-yellow-800"></p>
                 </div>
-                <div>
+                <div id="modal-results-block">
                     <h4 class="font-bold text-sm mb-2 flex items-center gap-2">
                         <i class="fas fa-chart-line text-green-500"></i><span id="modal-results-label">النتائج والإنجازات</span>
                     </h4>
@@ -419,7 +458,7 @@
                         <i class="fab fa-github"></i><span id="modal-link-label">GitHub</span>
                     </a>
                     <a id="modal-live-link" href="#" target="_blank" rel="noopener noreferrer"
-                       class="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-bold hover:scale-105 transition">
+                       class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-bold hover:scale-105 transition">
                         <i class="fas fa-external-link-alt"></i><span id="modal-live-label">Live Demo</span>
                     </a>
                 </div>
@@ -428,14 +467,16 @@
     </div>
 
     <!-- ═══ COMMAND PALETTE ══════════════════════════════════ -->
-    <div id="cmd-palette" class="hidden fixed inset-0 z-[100] bg-black/50 flex items-start justify-center pt-24 backdrop-blur-sm print-hide">
-        <div class="bg-white dark:bg-cardBg w-full max-w-lg rounded-xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div id="cmd-palette" class="hidden fixed inset-0 z-[100] bg-black/50 flex items-start justify-center pt-24 px-4 backdrop-blur-sm print-hide" data-action="cmd-backdrop">
+        <div class="bg-white dark:bg-cardBg w-full max-w-lg rounded-xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700" role="dialog" aria-modal="true" aria-label="لوحة الأوامر / Command palette">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
-                <i class="fas fa-search text-gray-400"></i>
-                <input type="text" id="cmd-input" class="w-full bg-transparent outline-none text-lg dark:text-white" placeholder="Type a command..." aria-label="Command palette">
-                <span class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-gray-500">ESC</span>
+                <i class="fas fa-search text-gray-400" aria-hidden="true"></i>
+                <input type="text" id="cmd-input" class="w-full bg-transparent outline-none text-lg dark:text-white" placeholder="اكتب أمراً..." data-lang-placeholder="cmd_placeholder"
+                       role="combobox" aria-expanded="true" aria-controls="cmd-list" aria-autocomplete="list" aria-label="لوحة الأوامر / Command palette" autocomplete="off" spellcheck="false">
+                <kbd class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-gray-500 dark:text-gray-400 font-sans">ESC</kbd>
             </div>
-            <div id="cmd-list" class="max-h-60 overflow-y-auto p-2"></div>
+            <div id="cmd-list" class="max-h-72 overflow-y-auto p-2" role="listbox" aria-label="الأوامر / Commands"></div>
+            <p class="px-4 py-2 text-[11px] text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800" data-lang="cmd_hint">للتنقل ↑↓ · للتنفيذ Enter</p>
         </div>
     </div>
 
@@ -452,11 +493,11 @@
     </div>
 
     <!-- ═══ ADMIN LOGIN MODAL ════════════════════════════════ -->
-    <div id="admin-modal" class="hidden fixed inset-0 bg-black/90 z-[110] flex items-center justify-center p-4 backdrop-blur-sm print-hide">
-        <div class="bg-white dark:bg-cardBg w-full max-w-sm rounded-2xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/90 z-[110] flex items-center justify-center p-4 backdrop-blur-sm print-hide" data-action="admin-backdrop">
+        <div class="bg-white dark:bg-cardBg w-full max-w-sm rounded-2xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
             <div class="text-center mb-6">
                 <div class="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-user-lock"></i></div>
-                <h3 class="text-xl font-bold dark:text-white">Admin Access</h3>
+                <h3 id="admin-modal-title" class="text-xl font-bold dark:text-white">Admin Access</h3>
             </div>
             <label for="repo-input" class="block text-xs font-bold text-gray-500 mb-1">Repository (owner/repo)</label>
             <input type="text"     id="repo-input"  class="w-full p-3 mb-3 bg-gray-50 dark:bg-darkBg border dark:border-gray-600 rounded-xl text-center outline-none focus:ring-2 focus:ring-primary transition" placeholder="Username/Repo" autocomplete="off" spellcheck="false" dir="ltr">
@@ -468,8 +509,8 @@
                 <p class="mt-1" lang="en" dir="ltr">Use a fine-grained PAT scoped to this repository only, with <b>Contents: Read and write</b> and a short expiry. It is kept for this tab session only.</p>
             </div>
             <div class="flex gap-3">
-                <button data-action="close-admin-modal" class="flex-1 py-3 text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 transition">Cancel</button>
-                <button data-action="login" class="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">Login</button>
+                <button type="button" data-action="close-admin-modal" class="flex-1 py-3 text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 transition">Cancel</button>
+                <button type="button" data-action="login" class="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">Login</button>
             </div>
         </div>
     </div>

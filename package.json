@@ -1,6 +1,6 @@
 {
   "name": "osama-portfolio",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "private": true,
   "description": "Bilingual (AR/EN) static portfolio served from GitHub Pages",
   "type": "module",

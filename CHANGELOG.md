@@ -2,6 +2,55 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.2.0] — 2026-10-10
+
+### Fixed
+- **Blank page when the browser blocks site data** (cookies/storage disabled): reading `localStorage` threw before
+  `data.json` was loaded. Storage now goes through `js/storage.js`, which falls back to memory.
+- The greeting ("صباح الخير" / "Good Morning") stayed in the previous language after switching.
+- Home stats were hard-coded (3 certificates while `data.json` lists 5) and the year was shown as "2,026" in
+  English; they are computed from `data.json`, present in the page before the count-up animation.
+- `Ctrl + K` did nothing on an Arabic keyboard layout (`e.key` is "ن") or with Caps Lock; the palette also
+  reopened with the old search text over an unfiltered list.
+- Printing (and "Generate PDF") contained only the selected skills tab, and AOS could leave the resume title
+  transparent on paper. Both skill groups are now printed, with the LinkedIn/GitHub URLs written out.
+- Paragraphs in descriptions (blank lines in `data.json`) were merged into one block; an empty `period`
+  showed an empty grey badge; empty challenge/result boxes were shown in the project modal.
+- Admin save: a second save within 60 s could fail with a stale `sha` (the API response was cached), and a
+  double click sent two PUTs. Editors dropped fields they do not show (`{...item, ...value}` now).
+- Message counter showed "2001 / 2000" before trimming (`maxlength` is used instead); contact form labels
+  were not linked to their fields; the 404 view kept the previous page title.
+- Corrupted `sessionStorage` values no longer throw; `?lang=xx` / unknown saved languages fall back to Arabic.
+
+### Added
+- `?lang=en` link for the English version, `hreflang` alternates (page and sitemap); canonical, `og:url` and
+  `og:locale` follow the language.
+- "Save contact" button: a vCard generated from `data.json` in the browser.
+- Optional certificate `url` field rendered as a "Verify credential" link (https only); Arabic month names
+  for "January 2025"-style dates in the Arabic UI.
+- Command palette: search button (also on phones), labels in the current language with search in both,
+  arrow keys + Enter, backdrop click, new commands (download CV, copy email, save contact).
+- Admin: list of changed sections before saving, warning when `data.json` changed on GitHub since the page
+  loaded, "nothing to save", confirmation for "restore", warning before leaving with unsaved edits, Enter to
+  log in, skill type as a select.
+- Error message with a retry button when `data.json` cannot be loaded; static fallback without JavaScript.
+- Reading progress bar.
+
+### Accessibility
+- Dialogs (project, palette, admin login) have `role="dialog"`, trap focus and return it to the opener;
+  Escape closes them and the mobile menu.
+- Project cards are keyboard-operable; focus moves to the new section's heading on navigation;
+  `aria-current`, `aria-pressed` (tabs, filters, theme), progress bars with values, skip link,
+  visible focus ring, full typewriter title for screen readers.
+- Section heading and secondary text colours raised to WCAG AA contrast in light and dark mode.
+
+### Changed
+- Theme follows the operating system until the visitor picks one; `theme-color` matches the theme.
+- Particles are skipped on phone-sized screens and with Data Saver; the service worker registers after load
+  (cache `portfolio-v5`); scroll handling is passive and frame-throttled.
+- The project filter bar is hidden while there is only one project.
+- Manifest no longer locks the installed app to portrait. CI actions updated to v5 (Node 24).
+
 ## [4.1.0] — 2026-10-09
 
 ### Fixed

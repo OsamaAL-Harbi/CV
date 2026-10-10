@@ -45,8 +45,19 @@ body { overflow-x: hidden; }
 .stat-card { transition: transform 0.3s, box-shadow 0.3s; }
 .stat-card:hover { transform: translateY(-4px); }
 
-/* LTR */
-html[dir="ltr"] { font-family: 'Roboto', sans-serif; }
+/* Keyboard focus: visible ring everywhere; programmatic focus targets (tabindex=-1) stay quiet */
+:focus-visible { outline: 3px solid rgb(var(--color-primary) / .7); outline-offset: 2px; border-radius: 4px; }
+[tabindex="-1"]:focus { outline: none; }
+
+/* Skip link: off-screen until focused */
+.skip-link {
+    position: fixed; top: .75rem; inset-inline-start: .75rem; z-index: 300; padding: .5rem 1rem; border-radius: .75rem;
+    background: rgb(var(--color-primary)); color: #fff; font-weight: 700; transform: translateY(-200%); transition: transform .2s;
+}
+.skip-link:focus { transform: translateY(0); }
+
+/* Reading progress (scaled by js/ui.js) */
+#scroll-progress { transform: scaleX(0); will-change: transform; }
 
 /* Mobile menu */
 #mobile-menu { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
@@ -65,6 +76,12 @@ html[dir="ltr"] #mobile-menu.closed { transform: translateX(-100%); }
 
 /* Contact card press */
 .contact-card:active { transform: scale(0.97); }
+
+/* Respect "reduce motion" for the CSS animations as well */
+@media (prefers-reduced-motion: reduce) {
+    .page-section, .skeleton-pulse, #not-found .float-icon { animation: none !important; }
+    .skill-bar-fill { transition: none; }
+}
 
 /* Skeleton */
 @keyframes skeleton-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
@@ -89,5 +106,9 @@ html[dir="ltr"] #mobile-menu.closed { transform: translateX(-100%); }
     .text-primary { color: #1d4ed8 !important; }
     .skill-bar-fill { transition: none !important; }
     #print-header { display: block !important; }
+    /* AOS hides elements until they scroll into view; paper has no scrolling */
+    [data-aos] { opacity: 1 !important; transform: none !important; }
+    .skill-item, #experience-container > div, #certificates-container > div { break-inside: avoid; }
+    a[href^="http"] { text-decoration: none; }
     @page { margin: 1.5cm; }
 }
