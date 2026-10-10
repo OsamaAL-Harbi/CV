@@ -78,8 +78,9 @@ test.describe('admin session', () => {
         await login(page);
         await page.evaluate(() => sessionStorage.setItem('gh_login_time', String(Date.now() - 2 * 60 * 60 * 1000)));
         await page.reload();
+        await expect(page.locator('#loading-screen')).toBeHidden();
+        await expect.poll(() => page.evaluate(() => sessionStorage.getItem('gh_token'))).toBeNull();
         await expect(page.locator('#admin-toolbar')).toBeHidden();
-        expect(await page.evaluate(() => sessionStorage.getItem('gh_token'))).toBeNull();
     });
 
     test('when the session expires, unsaved edits stay and the login dialog reopens', async ({ page }) => {

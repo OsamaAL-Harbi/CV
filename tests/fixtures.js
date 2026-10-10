@@ -31,7 +31,12 @@ export const test = base.extend({
     // Collects console errors, uncaught exceptions and CSP violations for the whole test.
     consoleErrors: async ({ page }, use) => {
         const errors = [];
-        page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
+        page.on('console', msg => {
+            if (msg.type() !== 'error') return;
+            // generated/*.json only exist after the Deploy site workflow ran; a 404 there just hides a section
+            if (/\/generated\//.test(msg.location()?.url || '') && /404/.test(msg.text())) return;
+            errors.push(msg.text());
+        });
         page.on('pageerror', err => errors.push(`pageerror: ${err.message}`));
         await use(errors);
     }
