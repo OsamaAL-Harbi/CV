@@ -5,3 +5,5 @@ playwright-report/
 lhci-reports/
 .cdn-mirror/
 src/vendor/
+generated/
+_site/

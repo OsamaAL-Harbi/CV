@@ -10,7 +10,7 @@ const WC = {
     experience:   'relative group mb-8',
     education:    'relative group mb-6',
     volunteer:    'relative group mb-6',
-    projects:     'relative group bg-white dark:bg-cardBg rounded-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-full shadow-sm hover:shadow-2xl transition duration-300 transform hover:-translate-y-1',
+    projects:     'tilt relative group bg-white dark:bg-cardBg rounded-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-full shadow-sm',
     certificates: 'relative group flex items-center gap-4 bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
     workshops:    'relative group bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
     languages:    'relative group flex items-center gap-3 bg-white dark:bg-cardBg px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition'
@@ -95,9 +95,40 @@ function renderProfile() {
     const locDisplay = document.getElementById('contact-location-display');
     if (locDisplay) locDisplay.textContent = t(p.location);
 
+    renderWhatsApp(p);
+
     // CV download buttons follow profile.cv (the static href is the fallback)
     const cv = safeAssetUrl(p.cv);
     if (cv) document.querySelectorAll('[data-cv-link]').forEach(a => { a.href = cv; });
+}
+
+// ─── WhatsApp (wa.me link from profile.phone, with a greeting in the visitor's language) ───
+export function whatsAppUrl(profile, lang) {
+    const digits = String(profile?.phone || '').replace(/\D/g, '');
+    if (digits.length < 8) return '';
+    const first = (profile.name?.[lang] || profile.name?.en || '').trim().split(/\s+/)[0] || '';
+    const text  = lang === 'ar'
+        ? `مرحباً ${first}، اطّلعت على موقعك الشخصي وأودّ التواصل معك.`
+        : `Hello ${first}, I visited your portfolio and would like to get in touch.`;
+    return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
+}
+
+// +966537820694 → +966 53 782 0694 (other numbers are shown as stored)
+function formatPhone(phone) {
+    const m = String(phone || '').replace(/[\s-]/g, '').match(/^\+966(5\d)(\d{3})(\d{4})$/);
+    return m ? `+966 ${m[1]} ${m[2]} ${m[3]}` : String(phone || '');
+}
+
+function renderWhatsApp(p) {
+    const card = document.getElementById('contact-whatsapp');
+    if (!card) return;
+    const url = whatsAppUrl(p, state.currentLang);
+    card.classList.toggle('hidden', !url);
+    if (!url) return;
+    card.href = url;
+    card.setAttribute('aria-label', `WhatsApp: ${formatPhone(p.phone)}`);
+    const num = document.getElementById('contact-whatsapp-number');
+    if (num) num.textContent = formatPhone(p.phone);
 }
 
 // ─── Home stats (computed from data.json instead of hard-coded numbers) ───

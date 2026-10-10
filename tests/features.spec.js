@@ -175,3 +175,23 @@ test('downloads a vCard built from data.json', async ({ page }) => {
     expect(text).toContain('URL:https://osamaal-harbi.github.io/CV/');
     expect(text.trimEnd()).toMatch(/END:VCARD$/);
 });
+
+test('WhatsApp card opens wa.me with the number from data.json and a greeting', async ({ page }) => {
+    await openSite(page, 'contact');
+    const card = page.locator('#contact-whatsapp');
+    await expect(card).toBeVisible();
+    const href = new URL(await card.getAttribute('href'));
+    expect(href.origin + href.pathname).toBe(`https://wa.me/${DATA.profile.phone.replace(/\D/g, '')}`);
+    expect(href.searchParams.get('text')).toContain('مرحباً');
+    await expect(card).toHaveAttribute('rel', /noopener/);
+    await page.locator('#lang-btn').click();
+    expect(new URL(await card.getAttribute('href')).searchParams.get('text')).toMatch(/^Hello /);
+
+    const data = clone();
+    data.profile.phone = '';
+    // context.route: once the service worker controls the page, it makes the data.json request
+    await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
+    await page.reload();
+    await expect(page.locator('#loading-screen')).toBeHidden();
+    await expect(card).toBeHidden();
+});

@@ -132,7 +132,8 @@ function fromBase64Utf8(b64) {
 
 const SECTION_NAMES = {
     profile: 'الملف الشخصي', experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات',
-    projects: 'المشاريع', certificates: 'الشهادات', workshops: 'ورش العمل', languages: 'اللغات'
+    projects: 'المشاريع', certificates: 'الشهادات', workshops: 'ورش العمل', languages: 'اللغات',
+    github: 'GitHub', monitor: 'المراقبة'
 };
 
 // Which sections differ from the last loaded/saved version, e.g. ["الخبرات (+1)", "الملف الشخصي"].
@@ -765,6 +766,198 @@ export async function showAnalyticsDashboard() {
         showConfirmButton: false,
         showCloseButton: true
     });
+}
+
+// ── GitHub page: pick the public repositories shown on the site, and what else to show ──
+const MAX_FEATURED = 12;
+
+function githubLogin() {
+    return state.appData.github?.user
+        || String(state.appData.profile?.github || '').match(/^https:\/\/github\.com\/([A-Za-z0-9-]+)\/?$/)?.[1] || '';
+}
+
+export async function manageGithub() {
+    if (!state.isAdmin) return;
+    await loadVendor('swal');
+    const login = githubLogin();
+    if (!login) { showToast('أضف رابط GitHub في الملف الشخصي أولاً', 'error'); return; }
+    let repos;
+    try {
+        const res = await fetch(`https://api.github.com/users/${encodeURIComponent(login)}/repos?per_page=100&type=owner&sort=pushed`,
+            { headers: githubHeaders(githubInfo.token), cache: 'no-store' });
+        if (!res.ok) throw new Error(String(res.status));
+        repos = await res.json();
+    } catch {
+        showToast('تعذّر جلب المستودعات من GitHub', 'error');
+        return;
+    }
+    const current = { repos: [], calendar: true, activity: true, languages: true, ...(state.appData.github || {}) };
+    const byName  = new Map(repos.map(r => [r.name.toLowerCase(), r]));
+    let selected  = current.repos.filter(n => byName.has(String(n).toLowerCase())).map(n => byName.get(n.toLowerCase()).name);
+    let query     = '';
+
+    const row = (r, idx) => {
+        const on = idx !== -1;
+        const badges = [
+            r.fork && '<span class="px-1.5 rounded bg-gray-200 text-gray-700 text-[10px]">fork</span>',
+            r.archived && '<span class="px-1.5 rounded bg-amber-100 text-amber-800 text-[10px]">archived</span>',
+            r.language && `<span class="text-gray-500 text-[11px]">${escapeHTML(r.language)}</span>`,
+            `<span class="text-gray-500 text-[11px]">★ ${Number(r.stargazers_count) || 0}</span>`,
+            `<span class="text-gray-400 text-[11px]">${escapeHTML(String(r.pushed_at || '').slice(0, 10))}</span>`
+        ].filter(Boolean).join(' ');
+        return `
+        <li class="flex items-center gap-3 p-2.5 rounded-xl border ${on ? 'border-blue-300 bg-blue-50' : 'border-gray-200'}" dir="ltr">
+            <input type="checkbox" class="w-4 h-4" data-gh-toggle="${escapeHTML(r.name)}" ${on ? 'checked' : ''} aria-label="${escapeHTML(r.name)}">
+            <div class="flex-1 min-w-0 text-left">
+                <p class="font-bold text-sm truncate">${on ? `<span class="text-blue-600">${idx + 1}.</span> ` : ''}${escapeHTML(r.name)}</p>
+                <p class="text-xs text-gray-500 truncate">${escapeHTML(r.description || '—')}</p>
+                <p class="flex flex-wrap gap-2 mt-0.5">${badges}</p>
+            </div>
+            ${on ? `<div class="flex flex-col gap-0.5">
+                <button type="button" class="px-2 rounded bg-gray-100 hover:bg-gray-200 text-xs" data-gh-move="${escapeHTML(r.name)}" data-dir="-1" aria-label="Move up">▲</button>
+                <button type="button" class="px-2 rounded bg-gray-100 hover:bg-gray-200 text-xs" data-gh-move="${escapeHTML(r.name)}" data-dir="1" aria-label="Move down">▼</button>
+            </div>` : ''}
+        </li>`;
+    };
+
+    const renderList = () => {
+        const list = document.getElementById('gh-list');
+        if (!list) return;
+        const q = query.toLowerCase();
+        const chosen = selected.map(n => byName.get(n.toLowerCase()));
+        const rest   = repos.filter(r => !selected.includes(r.name));
+        list.innerHTML = [...chosen, ...rest]
+            .filter(r => !q || `${r.name} ${r.description || ''}`.toLowerCase().includes(q))
+            .map(r => row(r, selected.indexOf(r.name))).join('') || '<li class="text-sm text-gray-500 p-3">لا توجد نتائج</li>';
+        document.getElementById('gh-count').textContent = `${selected.length} / ${MAX_FEATURED}`;
+    };
+
+    const toggle = (id, label, on) => `
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="${id}" class="w-4 h-4" ${on ? 'checked' : ''}> ${label}</label>`;
+
+    const { value } = await Swal.fire({
+        title: 'GitHub — المستودعات المعروضة',
+        width: '760px',
+        html: `<div class="text-right space-y-4" dir="rtl">
+            <p class="text-xs leading-relaxed p-3 rounded-xl bg-blue-50 text-blue-900">
+                تظهر هنا مستودعاتك <b>العامة</b> فقط. اختر ما تريد عرضه ورتّبه بالأسهم، ثم اضغط «حفظ» في شريط المدير.
+                تُحدَّث بيانات GitHub على الموقع خلال دقائق بعد الحفظ، ثم تلقائياً كل 12 ساعة.
+                لعرض مشروع خاص اجعله عاماً من إعدادات المستودع بعد التأكد من خلوّه من أي مفاتيح أو كلمات سر.
+            </p>
+            <div class="flex flex-wrap gap-4">
+                ${toggle('gh-calendar', 'جدول المساهمات', current.calendar !== false)}
+                ${toggle('gh-languages', 'اللغات', current.languages !== false)}
+                ${toggle('gh-activity', 'آخر النشاطات', current.activity !== false)}
+            </div>
+            <div class="flex items-center gap-2">
+                <input id="gh-search" class="swal2-input m-0 flex-1" placeholder="بحث / Search" dir="auto" autocomplete="off">
+                <span id="gh-count" class="text-xs font-bold text-gray-500 whitespace-nowrap" dir="ltr"></span>
+            </div>
+            <ul id="gh-list" class="space-y-2 max-h-[45vh] overflow-y-auto"></ul>
+        </div>`,
+        showCancelButton: true,
+        confirmButtonText: 'تطبيق',
+        cancelButtonText: 'إلغاء',
+        focusConfirm: false,
+        didOpen: popup => {
+            renderList();
+            popup.querySelector('#gh-search').addEventListener('input', e => { query = e.target.value.trim(); renderList(); });
+            popup.querySelector('#gh-list').addEventListener('click', e => {
+                const move = e.target.closest('[data-gh-move]');
+                if (move) {
+                    const i = selected.indexOf(move.dataset.ghMove), j = i + Number(move.dataset.dir);
+                    if (i !== -1 && j >= 0 && j < selected.length) { [selected[i], selected[j]] = [selected[j], selected[i]]; renderList(); }
+                    return;
+                }
+                const box = e.target.closest('[data-gh-toggle]');
+                if (!box) return;
+                const name = box.dataset.ghToggle;
+                if (box.checked) {
+                    if (selected.length >= MAX_FEATURED) { box.checked = false; Swal.showValidationMessage(`الحد الأقصى ${MAX_FEATURED} مستودعاً`); return; }
+                    selected = [...selected, name];
+                } else selected = selected.filter(n => n !== name);
+                Swal.resetValidationMessage();
+                renderList();
+            });
+        },
+        preConfirm: () => ({
+            user: login,
+            repos: [...selected],
+            calendar: document.getElementById('gh-calendar').checked,
+            languages: document.getElementById('gh-languages').checked,
+            activity: document.getElementById('gh-activity').checked
+        })
+    });
+    if (!value) return;
+    state.appData.github = { ...(state.appData.github || {}), ...value };
+    showToast('تم التطبيق — اضغط «حفظ» لنشره ✅', 'success');
+}
+
+// ── Monitoring page: the sites checked every 12 hours ──
+const MAX_MONITOR = 10;
+
+export async function manageMonitor() {
+    if (!state.isAdmin) return;
+    await loadVendor('swal');
+    let rows = (state.appData.monitor || []).map(m => ({ name: m.name || '', url: m.url || '' }));
+    if (!rows.length) rows = [{ name: 'Portfolio (GitHub Pages)', url: 'https://osamaal-harbi.github.io/CV/' }];
+
+    const render = () => {
+        const list = document.getElementById('mon-list');
+        list.innerHTML = rows.map((r, i) => `
+            <li class="grid grid-cols-[1fr_2fr_auto] gap-2 items-center" dir="ltr">
+                <input class="swal2-input m-0" data-mon-name="${i}" value="${escapeHTML(r.name)}" placeholder="Name" dir="auto">
+                <input class="swal2-input m-0" data-mon-url="${i}" value="${escapeHTML(r.url)}" placeholder="https://…" type="url">
+                <button type="button" class="px-3 py-2 rounded-lg bg-red-50 text-red-600 text-sm" data-mon-remove="${i}" aria-label="Remove">✕</button>
+            </li>`).join('');
+        document.getElementById('mon-add').disabled = rows.length >= MAX_MONITOR;
+    };
+    const sync = () => document.querySelectorAll('[data-mon-name]').forEach(el => {
+        const i = Number(el.dataset.monName);
+        rows[i] = { name: el.value.trim(), url: document.querySelector(`[data-mon-url="${i}"]`).value.trim() };
+    });
+
+    const { value } = await Swal.fire({
+        title: 'مراقبة الأنظمة',
+        width: '720px',
+        html: `<div class="text-right space-y-4" dir="rtl">
+            <p class="text-xs leading-relaxed p-3 rounded-xl bg-green-50 text-green-900">
+                تُفحص هذه المواقع كل 12 ساعة من خوادم GitHub، وتظهر حالتها وزمن استجابتها ونسبة التوفر لآخر 30 يوماً
+                في قسم «مراقبة الأنظمة» بصفحة الأعمال. روابط <b>https://</b> فقط، وبحد أقصى ${MAX_MONITOR}.
+            </p>
+            <ul id="mon-list" class="space-y-2"></ul>
+            <button type="button" id="mon-add" class="px-4 py-2 rounded-lg bg-green-100 text-green-800 text-sm font-bold">+ إضافة موقع</button>
+        </div>`,
+        showCancelButton: true,
+        confirmButtonText: 'تطبيق',
+        cancelButtonText: 'إلغاء',
+        focusConfirm: false,
+        didOpen: popup => {
+            render();
+            popup.querySelector('#mon-add').addEventListener('click', () => { sync(); rows.push({ name: '', url: '' }); render(); });
+            popup.querySelector('#mon-list').addEventListener('click', e => {
+                const rm = e.target.closest('[data-mon-remove]');
+                if (!rm) return;
+                sync();
+                rows.splice(Number(rm.dataset.monRemove), 1);
+                render();
+            });
+        },
+        preConfirm: () => {
+            sync();
+            const clean = rows.filter(r => r.url);
+            const bad = clean.find(r => !/^https:\/\/[^\s/$.?#].[^\s]*$/i.test(r.url));
+            if (bad) { Swal.showValidationMessage(`رابط غير صالح (يجب أن يبدأ بـ https://): ${bad.url}`); return false; }
+            return clean.slice(0, MAX_MONITOR).map(r => {
+                let name = r.name;
+                if (!name) { try { name = new URL(r.url).hostname; } catch { name = r.url; } }
+                return { name, url: r.url };
+            });
+        }
+    });
+    if (!value) return;
+    state.appData.monitor = value;
+    showToast('تم التطبيق — اضغط «حفظ» لنشره ✅', 'success');
 }
 
 export async function enableSorting() {

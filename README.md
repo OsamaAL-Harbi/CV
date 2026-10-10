@@ -36,6 +36,10 @@
 | 🗂️ **المشاريع** | تصفية حسب التقنية ونافذة تفاصيل لكل مشروع |
 | ⌨️ **لوحة الأوامر** | `Ctrl + K` أو زر البحث (يعمل على الجوال)، بحث بالعربي والإنجليزي والتنقل بالأسهم |
 | ♿ **سهولة الوصول** | تباين ألوان AA، تنقل كامل بلوحة المفاتيح، نوافذ تحبس التركيز، رابط "تخطَّ إلى المحتوى"، واحترام "تقليل الحركة" |
+| 🐙 **GitHub** | جدول المساهمات، واللغات، والمستودعات التي تختارها من لوحة المدير، وآخر النشاطات — تُحدَّث كل 12 ساعة |
+| 📖 **دراسات الحالة** | صفحة لكل مستودع مختار تعرض ملف README بأمان (`#portfolio/<repo>`) |
+| 🩺 **مراقبة الأنظمة** | حالة مواقعك وزمن الاستجابة ونسبة التوفر لآخر 30 يوماً، فحص كل 12 ساعة |
+| ✨ **حركة حديثة** | انتقالات View Transitions بين الأقسام وبطاقات تميل مع المؤشر |
 | 🛟 **حفظ آمن للمدير** | يعرض الأقسام المعدّلة قبل الحفظ، ويحذّر إذا تغيّر الملف في GitHub، ويمنع الحفظ المزدوج وإغلاق الصفحة بتعديلات غير محفوظة |
 | 🔒 **الأمان** | سياسة CSP صارمة، وSRI لملفات CDN، وتهريب كل المحتوى المعروض |
 
@@ -82,7 +86,8 @@ npm run build:css
 
 ```bash
 npx playwright install chromium   # مرة واحدة
-npm test
+npm test                          # المتصفح (سطح المكتب + الجوال)
+npm run test:unit                 # سكربتات بيانات GitHub والمراقبة
 ```
 
 ---
@@ -111,7 +116,19 @@ npm test
 
 ## 🌍 النشر
 
-**Settings → Pages → Source: Deploy from a branch → `main` / `(root)`**
+**Settings → Pages → Build and deployment → Source: `GitHub Actions`**
+
+ينشر سير العمل `Deploy site` الموقع عند كل دمج في `main` وكل 12 ساعة، ويولّد قبل النشر:
+
+| الملف | المصدر |
+|-------|--------|
+| `generated/github.json` و`generated/readme/*.html` | GitHub API (المستودعات العامة المختارة في `data.json → github.repos`) |
+| `generated/status.json` | فحص المواقع في `data.json → monitor` |
+
+- لا يحتاج أي توكن إضافي: يستخدم `GITHUB_TOKEN` الخاص بسير العمل.
+- لإظهار مساهماتك في المستودعات الخاصة كأرقام فقط في الجدول: فعّل **Private contributions** من إعدادات ملفك في GitHub.
+- للتشغيل يدوياً: **Actions → Deploy site → Run workflow**.
+- يوقف GitHub سير العمل المجدول إذا لم يُحدَّث المستودع 60 يوماً؛ أي commit أو تشغيل يدوي يعيد تفعيله.
 
 ---
 
@@ -124,7 +141,7 @@ npm test
 
 ## 👤 التواصل
 
-- 💼 [LinkedIn](https://www.linkedin.com/in/osama-al-harbi)
+- 💼 [LinkedIn](https://www.linkedin.com/in/osama-alharbi-it/)
 - 🐙 [GitHub](https://github.com/OsamaAL-Harbi)
 - 🌐 [الموقع الشخصي](https://osamaal-harbi.github.io/CV/)
 

@@ -2,6 +2,31 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.3.0] — 2026-10-10
+
+### Added
+- **GitHub section** in the portfolio: contribution calendar for the last year (own SVG in the site colours,
+  mirrored in RTL, tooltips and a screen-reader summary), language share across the featured repositories,
+  repository cards (language, stars, forks, topics, last push, GitHub/live links) and recent public activity.
+- **Admin → GitHub page**: lists the public repositories, pick up to 12 and order them, and switch the
+  calendar, languages and activity on or off. Saved in `data.json` → `github`.
+- **Case studies** (`#portfolio/<repo>`): the README of a featured repository, rendered by GitHub and passed
+  through an allow-list sanitizer (`js/sanitize.js`: inert DOMParser, https-only links/images, relative paths
+  resolved to the repository); deep-linkable, closes back to `#portfolio`.
+- **System status**: PRTG-style sensors for the sites in `data.json` → `monitor` (admin → Monitoring page),
+  checked every 12 hours with one retry: state, HTTP code, response time, 30-day uptime and a sparkline.
+- **Deploy site** workflow (`.github/workflows/deploy.yml`): on every push to `main` and every 12 hours it
+  builds `generated/github.json`, `generated/readme/*.html` and `generated/status.json` with the workflow's own
+  token (no secret to create), keeps the deployed copy if GitHub cannot be reached, and publishes only the
+  site's files to GitHub Pages. Requires Settings → Pages → Source: **GitHub Actions**.
+- View Transitions between sections (the nav underline glides to the new link) and tilt-on-hover cards with
+  a light spot (mouse only, off with "reduce motion").
+- Unit tests for the data scripts (`npm run test:unit`, also in CI).
+
+### Changed
+- `data.json` gains two settings blocks, `github` (no repositories picked yet) and `monitor` (the portfolio
+  itself); CV content is unchanged.
+
 ## [4.2.0] — 2026-10-10
 
 ### Fixed
@@ -26,6 +51,8 @@ All notable changes to this site. Format: [Keep a Changelog](https://keepachange
 - `?lang=en` link for the English version, `hreflang` alternates (page and sitemap); canonical, `og:url` and
   `og:locale` follow the language.
 - "Save contact" button: a vCard generated from `data.json` in the browser.
+- WhatsApp contact card (`wa.me` link from `profile.phone`, greeting in the visitor's language; hidden
+  when there is no phone) and a matching command-palette entry.
 - Optional certificate `url` field rendered as a "Verify credential" link (https only); Arabic month names
   for "January 2025"-style dates in the Arabic UI.
 - Command palette: search button (also on phones), labels in the current language with search in both,
@@ -50,6 +77,8 @@ All notable changes to this site. Format: [Keep a Changelog](https://keepachange
   (cache `portfolio-v5`); scroll handling is passive and frame-throttled.
 - The project filter bar is hidden while there is only one project.
 - Manifest no longer locks the installed app to portrait. CI actions updated to v5 (Node 24).
+- Notifications are shorter (2 s, errors 3 s), pause on hover and have a close button.
+- JSON-LD `sameAs` uses the LinkedIn profile from `data.json` (`/in/osama-alharbi-it/`).
 
 ## [4.1.0] — 2026-10-09
 

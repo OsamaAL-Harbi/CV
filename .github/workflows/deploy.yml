@@ -1,0 +1,58 @@
+name: Deploy site
+
+# Publishes the site to GitHub Pages with fresh GitHub data (generated/github.json) and system status
+# (generated/status.json). Requires Settings → Pages → Source: "GitHub Actions".
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '23 3,15 * * *'      # every 12 hours (03:23 and 15:23 UTC)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      # Both steps fall back to the copy already on the site, so an API hiccup never breaks the deploy.
+      - name: GitHub data (repositories, contributions, activity, READMEs)
+        run: node scripts/fetch-github.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: System status (monitored sites)
+        run: node scripts/check-status.mjs
+
+      - name: Assemble the published files
+        run: node scripts/assemble-site.mjs _site
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -26,7 +26,7 @@ export const STATIC_TEXT = {
         sec_volunteer:'التطوع', sec_skills:'المهارات', sec_certs:'الشهادات',
         sec_workshops:'ورش العمل', sec_languages:'اللغات', sec_projects:'معرض المشاريع',
         contact_title:'تواصل معي', contact_email_label:'البريد الإلكتروني',
-        contact_click_copy:'انقر للنسخ', contact_open:'فتح الملف',
+        contact_click_copy:'انقر للنسخ', contact_open:'فتح الملف', contact_whatsapp:'ابدأ محادثة',
         contact_compose:'اكتب رسالة', contact_subject_label:'الموضوع',
         contact_message_label:'الرسالة', contact_mailto_note:'سيفتح تطبيق الإيميل على جهازك',
         contact_cv_title:'هل تريد مراجعة سيرتي الذاتية أولاً؟', contact_cv_sub:'تحميل مباشر — PDF جاهز',
@@ -42,7 +42,7 @@ export const STATIC_TEXT = {
         cert_verify:'تحقق من الشهادة', btn_vcard:'حفظ جهة الاتصال', contact_vcard_sub:'بطاقة vCard لهاتفك أو بريدك',
         cmd_placeholder:'اكتب أمراً...', cmd_hint:'للتنقل ↑↓ · للتنفيذ Enter', cmd_empty:'لا توجد نتائج',
         load_error:'تعذّر تحميل المحتوى. تحقق من اتصالك ثم أعد المحاولة.', btn_retry:'إعادة المحاولة',
-        skills_hard:'المهارات التقنية', skills_soft:'المهارات الشخصية'
+        skills_hard:'المهارات التقنية', skills_soft:'المهارات الشخصية', case_label:'دراسة حالة'
     },
     en: {
         nav_home:'Home', nav_resume:'Resume', nav_portfolio:'Portfolio', nav_contact:'Contact',
@@ -52,7 +52,7 @@ export const STATIC_TEXT = {
         sec_volunteer:'Volunteer', sec_skills:'Skills', sec_certs:'Certificates',
         sec_workshops:'Workshops', sec_languages:'Languages', sec_projects:'Portfolio',
         contact_title:'Get in Touch', contact_email_label:'Email',
-        contact_click_copy:'Click to copy', contact_open:'Open Profile',
+        contact_click_copy:'Click to copy', contact_open:'Open Profile', contact_whatsapp:'Start a chat',
         contact_compose:'Write a Message', contact_subject_label:'Subject',
         contact_message_label:'Message', contact_mailto_note:'Your email app will open with the message',
         contact_cv_title:'Want to review my CV first?', contact_cv_sub:'Direct download — PDF ready',
@@ -68,7 +68,7 @@ export const STATIC_TEXT = {
         cert_verify:'Verify credential', btn_vcard:'Save Contact', contact_vcard_sub:'vCard for your phone or mail app',
         cmd_placeholder:'Type a command...', cmd_hint:'↑↓ to navigate · Enter to run', cmd_empty:'No results',
         load_error:'Could not load the content. Check your connection and try again.', btn_retry:'Try again',
-        skills_hard:'Technical Skills', skills_soft:'Soft Skills'
+        skills_hard:'Technical Skills', skills_soft:'Soft Skills', case_label:'Case study'
     }
 };
 
@@ -122,6 +122,7 @@ export function toggleLanguage() {
     renderAll();
     updateStaticText();
     setSmartGreeting();               // the greeting stayed in the previous language
+    window.dispatchEvent(new Event('langchange'));   // lazily loaded parts (js/github.js) re-render
     // Re-apply meta for current page
     const hash = window.location.hash.replace('#', '') || 'home';
     updateMetaTags(hash);

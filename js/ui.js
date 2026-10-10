@@ -69,6 +69,37 @@ function animateCounters() {
     });
 }
 
+// ─── Tilt: cards lean toward the pointer, with a soft light spot (mouse/trackpad only) ───
+export function setupTilt() {
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+    if (!fine.matches || prefersReducedMotion()) return;
+    const MAX = 6;                                  // degrees
+    let card = null, frame = 0, last = null;
+    const reset = el => {
+        el.classList.remove('tilting');
+        ['--rx', '--ry'].forEach(v => el.style.removeProperty(v));
+    };
+    const apply = () => {
+        frame = 0;
+        if (!card || !last) return;
+        const r = card.getBoundingClientRect();
+        const x = (last.clientX - r.left) / r.width, y = (last.clientY - r.top) / r.height;
+        card.style.setProperty('--ry', `${((x - 0.5) * 2 * MAX).toFixed(2)}deg`);
+        card.style.setProperty('--rx', `${((0.5 - y) * 2 * MAX).toFixed(2)}deg`);
+        card.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
+        card.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
+    };
+    document.addEventListener('pointermove', e => {
+        if (e.pointerType !== 'mouse') return;
+        const el = e.target.closest?.('.tilt');
+        if (el !== card) { if (card) reset(card); card = el; if (card) card.classList.add('tilting'); }
+        if (!card) return;
+        last = e;
+        if (!frame) frame = requestAnimationFrame(apply);
+    }, { passive: true });
+    document.documentElement.addEventListener('pointerleave', () => { if (card) reset(card); card = null; });
+}
+
 // ─── Print and PDF: tabs, animations and admin controls do not exist on paper ───
 export function setupPrint() {
     window.addEventListener('beforeprint', () => renderSkills('all', { instant: true }));
@@ -328,6 +359,7 @@ function commands() {
         { icon: 'fa-share-alt',     ar: 'مشاركة',                   en: 'Share',                run: shareProfile },
         { icon: 'fa-copy',          ar: 'نسخ البريد الإلكتروني',    en: 'Copy email',           run: () => contactAction('email') },
         { icon: 'fa-address-card',  ar: 'حفظ جهة الاتصال (vCard)',  en: 'Save contact (vCard)', run: downloadVCard },
+        { icon: 'fa-whatsapp',      ar: 'محادثة واتساب',            en: 'WhatsApp chat',        run: () => document.getElementById('contact-whatsapp')?.click(), keywords: 'whatsapp واتساب' },
         { icon: 'fa-language',      ar: 'English',                  en: 'العربية',              run: toggleLanguage, keywords: 'language لغة' },
         { icon: 'fa-moon',          ar: 'الوضع الليلي',             en: 'Dark mode',            run: () => document.getElementById('theme-btn').click(), keywords: 'theme ثيم' }
     ];
