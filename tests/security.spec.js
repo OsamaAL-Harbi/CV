@@ -149,11 +149,41 @@ test.describe('admin session', () => {
         expect(puts[0].message).toContain('الملف الشخصي');
     });
 
+    test('a stale page never erases a newer value on GitHub: the save merges both', async ({ page }) => {
+        const original = JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8'));
+        const remote = structuredClone(original);
+        remote.profile.image = 'images/profile-newer.webp';      // saved from another tab a minute ago
+        const puts = await stubContents(page, remote);
+        // the page itself still serves the old data.json (CDN cache) and the GitHub read at login fails
+        await page.route('https://api.github.com/repos/*/*/contents/data.json', route =>
+            route.request().method() === 'GET' && !puts.length && !page.__saving ? route.fulfill({ status: 503, json: {} }) : route.fallback());
+        await login(page);
+        await editName(page);
+        page.__saving = true;
+        await page.locator('#admin-toolbar [data-action="save"]').click();
+        await expect(page.locator('.swal2-popup')).toContainText('دُمجت تعديلاتك');
+        await page.locator('.swal2-confirm').click();
+        await expect.poll(() => puts.length).toBe(1);
+        const saved = JSON.parse(Buffer.from(puts[0].content, 'base64').toString('utf8'));
+        expect(saved.profile.image).toBe('images/profile-newer.webp');   // kept
+        expect(saved.profile.name.ar).toContain('(edited)');            // and the edit applied
+    });
+
+    test('logging in loads the newest data.json from GitHub when the page copy is stale', async ({ page }) => {
+        const original = JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8'));
+        const remote = structuredClone(original);
+        remote.profile.title.ar = 'مسمى أحدث على GitHub';
+        await stubContents(page, remote);
+        await login(page);
+        await expect(page.locator('#typewriter-sr')).toHaveText('مسمى أحدث على GitHub');
+        await expect(page.locator('.toastify', { hasText: 'أحدث نسخة' })).toBeVisible();
+    });
+
     test('saving warns when data.json changed on GitHub since the page loaded', async ({ page }) => {
         const remote = JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8'));
-        remote.profile.phone = '+966500000000';           // someone committed in the meantime
         const puts = await stubContents(page, remote);
         await login(page);
+        remote.profile.phone = '+966500000000';           // someone commits after this page loaded
         await editName(page);
         await page.locator('#admin-toolbar [data-action="save"]').click();
         await expect(page.locator('.swal2-popup')).toContainText('تغيّر ملف data.json');

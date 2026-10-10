@@ -6,7 +6,7 @@ import { escapeHTML, loadVendor, setDeepValue, showToast, skillLevel } from './u
 import { renderAll } from './render.js';
 import { closeDialog, openDialog } from './modal.js';
 import { DEFAULT_THEME, PRESETS, applyTheme, harmonies, isHex, syncSiteTheme } from './color.js';
-import { diffLines, diffStats, hunks } from './diff.js';
+import { diffLines, diffStats, hunks, merge3 } from './diff.js';
 
 let githubInfo     = { token: '', repo: '' };
 
@@ -136,11 +136,32 @@ export async function authenticateAndEdit() {
 }
 
 function enableAdminMode() {
-    if (!state.isAdmin) window.addEventListener('beforeunload', warnUnsaved);
+    const first = !state.isAdmin;
+    if (first) window.addEventListener('beforeunload', warnUnsaved);
     state.isAdmin = true;
     document.body.classList.add('admin-mode');
     document.getElementById('admin-toolbar').classList.remove('hidden');
     if (state.dataLoaded) renderAll();
+    if (first) loadLatestFromGitHub();
+}
+
+// The site's data.json can be a few minutes old right after a deploy (GitHub Pages caches it). Editing from
+// that copy and saving used to undo the newer change (e.g. a photo saved a minute earlier). The editor now
+// starts from the file as it is on GitHub; saving also merges (see saveToGitHub).
+async function loadLatestFromGitHub() {
+    try {
+        const res = await ghApi('/contents/data.json');
+        if (!res.ok) return;
+        const remote = JSON.parse(fromBase64Utf8((await res.json()).content));
+        const text = JSON.stringify(remote);
+        if (text === state.lastSavedSnapshot) return;
+        if (hasUnsavedChanges()) return;             // a resumed session keeps its edits; the save will merge
+        state.appData = remote;
+        state.lastSavedSnapshot = text;
+        syncSiteTheme(remote.theme);
+        renderAll();
+        showToast('حُمّلت أحدث نسخة من البيانات من GitHub', 'info');
+    } catch { /* offline or no access yet: the save still merges */ }
 }
 
 const hasUnsavedChanges = () => state.lastSavedSnapshot !== null && JSON.stringify(state.appData) !== state.lastSavedSnapshot;
@@ -211,11 +232,17 @@ export async function saveToGitHub() {
         const fileData = await getRes.json();
 
         await loadVendor('swal');
-        let remoteChanged = false, remoteText = '';
+        let remoteChanged = false, remoteText = '', conflicts = [];
         try {
             const remote = JSON.parse(fromBase64Utf8(fileData.content));
             remoteChanged = JSON.stringify(remote) !== state.lastSavedSnapshot;
             remoteText = JSON.stringify(remote, null, 2);
+            // Newer changes on GitHub are kept: only what was edited here is applied on top of them
+            if (remoteChanged && state.lastSavedSnapshot) {
+                const result = merge3(JSON.parse(state.lastSavedSnapshot), state.appData, remote);
+                state.appData = result.merged;
+                conflicts = result.conflicts;
+            }
         } catch { remoteChanged = true; }
         const json = JSON.stringify(state.appData, null, 2) + '\n';
         // Preview: exactly what changes in the file on GitHub, line by line
@@ -225,15 +252,15 @@ export async function saveToGitHub() {
             width: '820px',
             html: `<div class="text-right" dir="rtl"><p class="text-sm mb-2">الأقسام المعدّلة:</p>
                    <ul class="text-sm font-bold list-disc ps-6">${changes.map(c => `<li>${escapeHTML(c)}</li>`).join('')}</ul>
-                   ${remoteChanged ? `<p class="mt-4 p-3 rounded-lg bg-amber-50 text-amber-800 text-sm">⚠️ تغيّر ملف data.json في GitHub منذ تحميل الصفحة (تعديل أو commit آخر). الحفظ سيستبدل تلك التغييرات.</p>` : ''}
+                   ${remoteChanged ? `<p class="mt-4 p-3 rounded-lg bg-amber-50 text-amber-800 text-sm">ℹ️ تغيّر ملف data.json في GitHub منذ تحميل الصفحة، فدُمجت تعديلاتك مع النسخة الأحدث دون أن يضيع شيء منها${conflicts.length ? `. عُدّل نفس الحقل في المكانين، واعتُمدت قيمتك هنا في: <span dir="ltr" class="font-mono">${conflicts.map(escapeHTML).join(', ')}</span>` : ''}.</p>` : ''}
                    <details class="mt-4" open><summary class="cursor-pointer text-sm font-bold mb-2">معاينة الفرق سطراً بسطر
                        <span class="font-mono text-xs" dir="ltr"><span class="text-green-700">+${diff.added}</span> <span class="text-red-600">−${diff.removed}</span></span></summary>
                        ${diff.html}</details></div>`,
-            icon: remoteChanged ? 'warning' : 'question',
+            icon: conflicts.length ? 'warning' : 'question',
             showCancelButton: true,
-            confirmButtonText: remoteChanged ? 'استبدال وحفظ' : 'حفظ',
+            confirmButtonText: 'حفظ',
             cancelButtonText: 'إلغاء',
-            confirmButtonColor: remoteChanged ? '#d33' : '#2563eb'
+            confirmButtonColor: conflicts.length ? '#d97706' : '#2563eb'
         });
         if (!answer.isConfirmed) return;
 
@@ -245,6 +272,7 @@ export async function saveToGitHub() {
         if (putRes.status === 409) throw new Error('تعارض: الملف تغيّر أثناء الحفظ، أعد المحاولة');
         if (!putRes.ok) throw new Error('فشل الحفظ في GitHub');
         state.lastSavedSnapshot = JSON.stringify(state.appData);
+        if (remoteChanged) { syncSiteTheme(state.appData.theme); renderAll(); }   // show what came from GitHub too
         showToast('تم الحفظ في GitHub ✅ يظهر على الموقع خلال دقيقة تقريباً', 'success');
     } catch (e) {
         showToast('خطأ: ' + e.message, 'error');

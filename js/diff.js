@@ -53,3 +53,29 @@ export function hunks(ops, context = 3) {
 }
 
 export const diffStats = ops => ({ added: ops.filter(o => o.op === '+').length, removed: ops.filter(o => o.op === '-').length });
+
+// Three-way merge of data.json: `base` is what the editor loaded, `local` the editor now, `remote` the file on
+// GitHub now (someone saved from another tab/device, or the page loaded a cached copy). Changes on either side
+// survive; where both sides changed the same value differently the editor wins and the path is reported.
+// Arrays are merged as a whole (an edited list wins over the untouched one).
+export function merge3(base, local, remote) {
+    const conflicts = [];
+    const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+    const walk = (b, l, r, path) => {
+        if (same(l, b)) return r;                         // only GitHub changed (or nothing did)
+        if (same(r, b) || same(r, l)) return l;           // only the editor changed
+        if (isObj(b) && isObj(l) && isObj(r)) {
+            const out = {};
+            const keys = [...Object.keys(r), ...Object.keys(l).filter(k => !(k in r))];
+            for (const k of keys) {
+                const v = walk(b[k], l[k], r[k], path ? `${path}.${k}` : k);
+                if (v !== undefined) out[k] = v;
+            }
+            return out;
+        }
+        conflicts.push(path || '(root)');
+        return l;
+    };
+    return { merged: walk(base, local, remote, ''), conflicts };
+}
