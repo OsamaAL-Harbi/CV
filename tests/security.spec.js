@@ -100,6 +100,63 @@ test.describe('admin session', () => {
         await expect(name).toContainText('(edited)');
     });
 
+    // GitHub contents API stub: GET returns `remote` as the file, PUTs are recorded.
+    async function stubContents(page, remote) {
+        const puts = [];
+        await page.route('https://api.github.com/repos/*/*/contents/data.json', async route => {
+            if (route.request().method() === 'PUT') {
+                puts.push(JSON.parse(route.request().postData()));
+                return route.fulfill({ json: { content: { sha: 'new' } } });
+            }
+            return route.fulfill({ json: { sha: 'abc123', content: Buffer.from(JSON.stringify(remote)).toString('base64') } });
+        });
+        return puts;
+    }
+
+    async function editName(page) {
+        const name = page.locator('[data-path="profile.name"]');
+        await name.click();
+        await page.keyboard.press('End');
+        await page.keyboard.type(' (edited)');
+        await page.locator('#year').click();          // blur → saved into the in-memory data
+    }
+
+    test('saving: nothing to save, then one confirmed PUT with the changed sections', async ({ page }) => {
+        const original = JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8'));
+        const puts = await stubContents(page, original);
+        await login(page);
+        const save = page.locator('#admin-toolbar [data-action="save"]');
+        await save.click();
+        await expect(page.locator('.toastify', { hasText: 'Nothing to save' })).toBeVisible();
+        expect(puts).toHaveLength(0);
+
+        await editName(page);
+        await page.evaluate(() => { const b = document.querySelector('#admin-toolbar [data-action="save"]'); b.click(); b.click(); });
+        await expect(page.locator('.swal2-popup')).toContainText('الملف الشخصي');
+        await expect(page.locator('.swal2-popup')).not.toContainText('تغيّر ملف data.json');
+        await page.locator('.swal2-confirm').click();
+        await expect.poll(() => puts.length).toBe(1);
+        await page.waitForTimeout(300);
+        expect(puts).toHaveLength(1);                  // the double click did not save twice
+        const saved = JSON.parse(Buffer.from(puts[0].content, 'base64').toString('utf8'));
+        expect(saved.profile.name.ar).toContain('(edited)');
+        expect(puts[0].sha).toBe('abc123');
+        expect(puts[0].message).toContain('الملف الشخصي');
+    });
+
+    test('saving warns when data.json changed on GitHub since the page loaded', async ({ page }) => {
+        const remote = JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8'));
+        remote.profile.phone = '+966500000000';           // someone committed in the meantime
+        const puts = await stubContents(page, remote);
+        await login(page);
+        await editName(page);
+        await page.locator('#admin-toolbar [data-action="save"]').click();
+        await expect(page.locator('.swal2-popup')).toContainText('تغيّر ملف data.json');
+        await page.locator('.swal2-cancel').click();
+        await page.waitForTimeout(300);
+        expect(puts).toHaveLength(0);
+    });
+
     test('loads SweetAlert2 on demand for the editors', async ({ page }) => {
         await login(page);
         await page.locator('#admin-toolbar [data-action="manage-profile"]').click();

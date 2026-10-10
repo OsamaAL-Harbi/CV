@@ -141,7 +141,7 @@ test.describe('service worker', () => {
         });
         expect(sw.scope).toMatch(/\/CV\/$/);
         expect(sw.state).toBe('activated');
-        expect(sw.keys).toContain('portfolio-v4');
+        expect(sw.keys).toContain('portfolio-v5');
         expect(sw.offline).toBe(true);
     });
 
@@ -183,7 +183,7 @@ test.describe('command palette', () => {
         expect(await page.evaluate(() => typeof window.jspdf)).toBe('undefined');
         await page.keyboard.press('Control+k');
         await expect(page.locator('#cmd-palette')).toBeVisible();
-        await page.locator('#cmd-input').fill('PDF');
+        await page.locator('#cmd-input').fill('Generate');
         const download = page.waitForEvent('download', { timeout: 30_000 });
         await page.locator('#cmd-list [data-action="run-command"]:visible').first().click();
         expect((await download).suggestedFilename()).toMatch(/_CV\.pdf$/);
