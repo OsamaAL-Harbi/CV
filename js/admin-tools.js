@@ -4,6 +4,7 @@ import { state } from './state.js';
 import { escapeHTML, loadVendor, safeAssetUrl, showToast } from './utils.js';
 import { renderAll } from './render.js';
 import { syncSiteTheme } from './color.js';
+import { verificationToken } from './seo.js';
 import { DEFAULT_FONTS, FONTS, applyFonts, syncSiteFonts } from './fonts.js';
 import { diffHTML, editItem, fromBase64Utf8, ghApi, manageProfile, putRepoFile, readAsBase64 } from './admin.js';
 
@@ -544,6 +545,12 @@ async function manageSeo() {
                 <input id="seo-image" class="swal2-input m-0 flex-1" dir="ltr" placeholder="assets/img/og-image.jpg" value="${escapeHTML(seo.image || '')}" aria-label="صورة المشاركة">
                 <button type="button" id="seo-upload" class="px-3 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold">رفع صورة 1200×630</button>
             </div>
+            <div class="border-t pt-3 space-y-2">
+                <p class="text-sm font-bold">التحقق من ملكية الموقع</p>
+                <p class="text-xs text-gray-500">في <a class="text-primary underline" href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">Google Search Console</a> أضف الموقع بنوع «بادئة عنوان URL» (<span dir="ltr">https://osamaal-harbi.github.io/CV/</span>) واختر طريقة «علامة HTML»، ثم الصق العلامة أو الرمز هنا واحفظ وانتظر النشر (دقيقة) واضغط «تحقق». ومثله في <a class="text-primary underline" href="https://www.bing.com/webmasters" target="_blank" rel="noopener noreferrer">Bing Webmaster</a>. بعد التحقق أرسل خريطة الموقع <span dir="ltr">sitemap.xml</span>.</p>
+                <label class="block text-xs text-gray-500">Google<input id="seo-verify-google" class="swal2-input m-0 mt-1 w-full font-mono" dir="ltr" placeholder='<meta name="google-site-verification" content="…">' value="${escapeHTML(seo.verify?.google || '')}"></label>
+                <label class="block text-xs text-gray-500">Bing<input id="seo-verify-bing" class="swal2-input m-0 mt-1 w-full font-mono" dir="ltr" placeholder='<meta name="msvalidate.01" content="…">' value="${escapeHTML(seo.verify?.bing || '')}"></label>
+            </div>
         </div>`,
         showCancelButton: true, confirmButtonText: 'تطبيق', cancelButtonText: 'إلغاء', focusConfirm: false,
         didOpen: popup => {
@@ -570,7 +577,7 @@ async function manageSeo() {
         preConfirm: () => collect()
     });
     if (!value) return;
-    const empty = !value.image && ['ar', 'en'].every(l => !value[l].title && !value[l].description);
+    const empty = !value.image && !value.verify && ['ar', 'en'].every(l => !value[l].title && !value[l].description);
     if (empty) delete state.appData.seo; else state.appData.seo = value;
     renderAll();
     showToast('تم التطبيق — اضغط «حفظ» لنشره ✅', 'success');
@@ -581,7 +588,15 @@ function collect() {
     document.querySelectorAll('[data-seo]').forEach(el => { const [lang, key] = el.dataset.seo.split('.'); out[lang][key] = el.value.trim(); });
     const image = document.getElementById('seo-image')?.value.trim() || '';
     if (image && !safeAssetUrl(image)) { Swal.showValidationMessage('مسار الصورة غير صالح'); return false; }
-    return { ...out, image };
+    const verify = {};
+    for (const engine of ['google', 'bing']) {
+        const raw = document.getElementById(`seo-verify-${engine}`)?.value.trim() || '';
+        if (!raw) continue;
+        const token = verificationToken(raw);
+        if (!token) { Swal.showValidationMessage(`رمز التحقق من ${engine === 'google' ? 'Google' : 'Bing'} غير صالح`); return false; }
+        verify[engine] = token;
+    }
+    return { ...out, image, ...(Object.keys(verify).length ? { verify } : {}) };
 }
 
 // ─── Tools menu (keeps the toolbar short) ───

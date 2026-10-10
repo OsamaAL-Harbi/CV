@@ -319,3 +319,44 @@ test.describe('fonts', () => {
         expect(await page.evaluate(() => localStorage.getItem('font_stack'))).toBeNull();
     });
 });
+
+test.describe('search engines', () => {
+    // index.html as the deploy writes it (scripts/assemble-site.mjs)
+    async function deployedPage(page, data) {
+        const { applySeo, applyProfileImage, applyFonts } = await import('../scripts/assemble-site.mjs');
+        const { applyJsonLd, applyVerification, prerenderContent } = await import('../scripts/prerender.mjs');
+        const html = [applySeo, applyProfileImage, applyJsonLd, applyVerification, prerenderContent, applyFonts]
+            .reduce((out, step) => step(out, data), readFileSync(new URL('../index.html', import.meta.url), 'utf8'));
+        await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
+        await page.context().route(url => /\/(index\.html)?$/.test(url.pathname), route => route.fulfill({ body: html, contentType: 'text/html' }));
+        return html;
+    }
+
+    test('the deployed HTML carries the CV, and the app replaces it with the real cards', async ({ page }) => {
+        const data = clone();
+        const html = await deployedPage(page, data);
+        expect(html).toContain(data.experience[0].role.ar);
+        expect(html).toContain(data.certificates[0].name.ar);
+        expect(html).toContain('"hasCredential"');
+        await openSite(page);
+        await expect(page.locator('[data-path="profile.name"]')).toHaveText(data.profile.name.ar);
+        await page.evaluate(() => { location.hash = 'resume'; });
+        await expect(page.locator('#experience-container article')).toHaveCount(0);
+        await expect(page.locator('#experience-container .sortable-item')).toHaveCount(data.experience.filter(x => !x.hidden).length);
+        await page.locator('#lang-btn').click();
+        await expect(page.locator('[data-path="profile.name"]')).toHaveText(data.profile.name.en);
+    });
+
+    test('admin pastes the Google verification tag; only the token is kept', async ({ page }) => {
+        await stubGitHub(page);
+        await login(page);
+        await tool(page, 'SEO');
+        await page.locator('#seo-verify-google').fill('<meta name="google-site-verification" content="Ab_12-cdEFgh" />');
+        await page.locator('#seo-verify-bing').fill('not a token!');
+        await page.locator('.swal2-confirm').click();
+        await expect(page.locator('.swal2-validation-message')).toContainText('Bing');
+        await page.locator('#seo-verify-bing').fill('');
+        await page.locator('.swal2-confirm').click();
+        expect((await state(page)).seo.verify).toEqual({ google: 'Ab_12-cdEFgh' });
+    });
+});

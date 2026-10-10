@@ -2,12 +2,14 @@
 // uploads it), so tests, scripts, sources and package files are not published. It also writes the SEO
 // settings from data.json (admin → SEO) into index.html, because link previews (WhatsApp, LinkedIn, X)
 // read the HTML without running JavaScript, writes the chosen fonts (admin → Fonts) so the first paint already
-// uses them, and refreshes the sitemap date.
+// uses them, writes the CV itself into the page for crawlers (scripts/prerender.mjs), and refreshes the
+// sitemap date.
 // Usage: node scripts/assemble-site.mjs _site
 import { cp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ROOT } from './cdn-assets.mjs';
 import { fontStack } from '../js/fonts.js';
+import { applyJsonLd, applyVerification, prerenderContent } from './prerender.mjs';
 
 export const SITE_URL = 'https://osamaal-harbi.github.io/CV/';
 
@@ -75,8 +77,9 @@ async function main() {
     const data = JSON.parse(await readFile(join(ROOT, 'data.json'), 'utf8'));
     const index = join(dest, 'index.html');
     const html = await readFile(index, 'utf8');
-    const seoHtml = applyFonts(applyProfileImage(applySeo(html, data), data), data);
-    if (seoHtml !== html) { await writeFile(index, seoHtml); console.log('seo   index.html meta tags and fonts from data.json'); }
+    const steps = [applySeo, applyProfileImage, applyJsonLd, applyVerification, prerenderContent, applyFonts];
+    const seoHtml = steps.reduce((out, step) => step(out, data), html);
+    if (seoHtml !== html) { await writeFile(index, seoHtml); console.log('seo   index.html meta tags, JSON-LD, CV content and fonts from data.json'); }
     const sitemap = join(dest, 'sitemap.xml');
     await writeFile(sitemap, touchSitemap(await readFile(sitemap, 'utf8')));
 }
