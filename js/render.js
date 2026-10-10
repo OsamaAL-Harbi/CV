@@ -1,6 +1,6 @@
 // Render engine: builds every section from data.json (all values escaped).
 import { state } from './state.js';
-import { escapeHTML, safeAssetUrl, safeUrl, showToast, skillLevel } from './utils.js';
+import { escapeHTML, imageSrc, safeAssetUrl, safeUrl, showToast, skillLevel } from './utils.js';
 import { t, ui } from './i18n.js';
 
 let twInterval     = null;
@@ -20,8 +20,24 @@ const SKILL_TAB_OFF = 'px-4 py-1.5 text-xs font-bold rounded-full bg-gray-100 da
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Hidden items (item.hidden) and sections (data.json → visibility.sections) are skipped for visitors;
+// the admin still sees them, dimmed and labelled, to switch them back on.
+const isShown = item => state.isAdmin || !item?.hidden;
+const shownOnly = list => (list || []).filter(item => !item?.hidden);
+
+function applySectionVisibility() {
+    const off = new Set(state.appData.visibility?.sections || []);
+    document.querySelectorAll('[data-section]').forEach(el => {
+        const hidden = off.has(el.dataset.section);
+        el.classList.toggle('section-off', hidden && !state.isAdmin);
+        el.classList.toggle('section-off-admin', hidden && state.isAdmin);
+    });
+}
+
 export function renderAll() {
+    applySectionVisibility();
     renderProfile();
+    renderAvailability();
     renderStats();
     renderSection('experience',   state.appData.experience   || [], renderExperienceItem,  WC.experience);
     renderSection('education',    state.appData.education    || [], renderEducationItem,   WC.education);
@@ -79,7 +95,7 @@ function renderProfile() {
     const imgEl = document.getElementById('profile-img');
     if (imgEl) {
         imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = fallback; };
-        const src = safeAssetUrl(p.image) || fallback;
+        const src = imageSrc(p.image, state.previewImages) || fallback;
         if (imgEl.getAttribute('src') !== src) imgEl.src = src;
         imgEl.alt = t(p.name);
     }
@@ -136,16 +152,28 @@ function renderWhatsApp(p) {
     if (num) num.textContent = formatPhone(p.phone);
 }
 
+// ─── "Open to work" badge ─────────────────────────────
+function renderAvailability() {
+    const badge = document.getElementById('availability-badge');
+    if (!badge) return;
+    const a = state.appData.availability;
+    badge.classList.toggle('hidden', !a?.enabled);
+    if (!a?.enabled) return;
+    document.getElementById('availability-status').textContent = t(a.status) || ui('open_to_work');
+    document.getElementById('availability-details').textContent = [t(a.roles), t(a.cities), t(a.types)].filter(Boolean).join(' · ');
+}
+
 // ─── Home stats (computed from data.json instead of hard-coded numbers) ───
 export function computeStats(data) {
     const years = (data.education || [])
+        .filter(e => !e.hidden)
         .flatMap(e => [e.period?.en, e.period?.ar, typeof e.period === 'string' ? e.period : ''])
         .flatMap(text => String(text || '').match(/\b(?:19|20)\d{2}\b/g) || [])
         .map(Number);
     return {
-        certificates:   (data.certificates || []).length,
-        volunteerHours: (data.volunteer || []).reduce((sum, v) => sum + (Number.parseInt(v.hours, 10) || 0), 0),
-        projects:       (data.projects || []).length,
+        certificates:   shownOnly(data.certificates).length,
+        volunteerHours: shownOnly(data.volunteer).reduce((sum, v) => sum + (Number.parseInt(v.hours, 10) || 0), 0),
+        projects:       shownOnly(data.projects).length,
         graduationYear: years.length ? Math.max(...years) : 0
     };
 }
@@ -166,13 +194,13 @@ function renderSection(type, data, contentFn, wrapperClass) {
     const container = document.getElementById(`${type}-container`);
     if (!container) return;
     const hasTimeline = ['experience','education','volunteer'].includes(type);
-    container.innerHTML = data.map((item, i) => `
-        <div class="${wrapperClass} sortable-item" data-index="${i}">
-            ${renderAdminButtons(type, i)}
+    container.innerHTML = data.map((item, i) => (isShown(item) ? `
+        <div class="${wrapperClass} sortable-item${item.hidden ? ' item-hidden' : ''}" data-index="${i}">
+            ${renderAdminButtons(type, i, item)}
             ${hasTimeline ? `<div class="absolute -right-[39px] ltr:-left-[39px] ltr:right-auto top-1 w-4 h-4 bg-primary rounded-full border-4 border-white dark:border-darkBg z-10 group-hover:scale-125 transition" aria-hidden="true"></div>` : ''}
             ${contentFn(item, i)}
         </div>
-    `).join('');
+    ` : '')).join('');
 }
 
 // ─── Item renderers ───────────────────────────────────
@@ -208,8 +236,12 @@ function renderVolunteerItem(item) {
 function renderCertItem(item) {
     const verify = safeUrl(item.url);
     const date   = localDate(item.date);
+    const image  = imageSrc(item.image, state.previewImages);
     return `
-        <div class="text-2xl text-secondary flex-shrink-0" aria-hidden="true"><i class="fas fa-certificate"></i></div>
+        ${image
+            ? `<a href="${escapeHTML(safeAssetUrl(item.image))}" target="_blank" rel="noopener" class="flex-shrink-0 print-hide" aria-label="${escapeHTML(`${state.currentLang === 'ar' ? 'صورة الشهادة' : 'Certificate image'}: ${t(item.name)}`)}">
+                   <img src="${escapeHTML(image)}" alt="" width="56" height="56" loading="lazy" decoding="async" class="w-14 h-14 object-cover rounded-lg border border-gray-200 dark:border-gray-700"></a>`
+            : '<div class="text-2xl text-secondary flex-shrink-0" aria-hidden="true"><i class="fas fa-certificate"></i></div>'}
         <div class="flex-1 min-w-0">
             <h4 class="font-bold text-sm dark:text-white">${escapeHTML(t(item.name))}</h4>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${escapeHTML(t(item.issuer))}${item.credential ? ` · <span dir="ltr" class="font-mono">${escapeHTML(item.credential)}</span>` : ''}</p>
@@ -255,7 +287,9 @@ function renderProjectItem(item, realIdx) {
                     focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/60"
              data-action="open-project" data-index="${realIdx}" role="button" tabindex="0"
              aria-haspopup="dialog" aria-label="${escapeHTML(`${ui('btn_details')}: ${title}`)}">
-            <i class="fas fa-laptop-code text-5xl text-gray-300 dark:text-gray-700 group-hover:scale-110 transition duration-500" aria-hidden="true"></i>
+            ${imageSrc(item.image, state.previewImages)
+                ? `<img src="${escapeHTML(imageSrc(item.image, state.previewImages))}" alt="" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500">`
+                : '<i class="fas fa-laptop-code text-5xl text-gray-300 dark:text-gray-700 group-hover:scale-110 transition duration-500" aria-hidden="true"></i>'}
             <div class="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-300 backdrop-blur-sm">
                 <span class="px-4 py-2 bg-white text-gray-900 rounded-full font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition duration-300 shadow-xl">
                     ${escapeHTML(ui('btn_details'))}
@@ -300,10 +334,11 @@ function renderProjectFilters() {
 
     // Collect all unique techs across all projects
     const techSet = new Set();
-    (state.appData.projects || []).forEach(p => (p.technologies || []).forEach(tech => techSet.add(tech)));
+    const projects = (state.appData.projects || []).filter(isShown);
+    projects.forEach(p => (p.technologies || []).forEach(tech => techSet.add(tech)));
 
     // One project (or no technologies) — a filter bar would only offer "All" plus its own tags.
-    if (techSet.size === 0 || (state.appData.projects || []).length < 2) {
+    if (techSet.size === 0 || projects.length < 2) {
         container.innerHTML = '';
         state.activeFilter = 'all';
         return;
@@ -334,6 +369,7 @@ export function renderFilteredProjects() {
     if (!container) return;
     const allProjects = state.appData.projects || [];
     const filtered    = allProjects.map((item, i) => ({ item, realIdx: i }))
+        .filter(({ item }) => isShown(item))
         .filter(({ item }) => state.activeFilter === 'all' || (item.technologies || []).includes(state.activeFilter));
 
     if (filtered.length === 0) {
@@ -347,8 +383,8 @@ export function renderFilteredProjects() {
     }
 
     container.innerHTML = filtered.map(({ item, realIdx }) => `
-        <div class="${WC.projects} sortable-item" data-index="${realIdx}">
-            ${renderAdminButtons('projects', realIdx)}
+        <div class="${WC.projects} sortable-item${item.hidden ? ' item-hidden' : ''}" data-index="${realIdx}">
+            ${renderAdminButtons('projects', realIdx, item)}
             ${renderProjectItem(item, realIdx)}
         </div>
     `).join('');
@@ -371,8 +407,8 @@ function skillRow(skill, allSkills, barColor) {
     const level   = skillLevel(skill);
     const name    = t(skill);
     return `
-        <div class="skill-item relative group sortable-item" data-real-index="${realIdx}">
-            ${renderAdminButtons('skills', realIdx)}
+        <div class="skill-item relative group sortable-item${skill.hidden ? ' item-hidden' : ''}" data-real-index="${realIdx}">
+            ${renderAdminButtons('skills', realIdx, skill)}
             <div class="flex justify-between items-center mb-1">
                 <span class="text-sm font-bold dark:text-white">${escapeHTML(name)}</span>
                 <span class="text-xs font-bold text-gray-500 dark:text-gray-400" aria-hidden="true">${level}%</span>
@@ -396,11 +432,11 @@ export function renderSkills(tab = 'hard', { instant = false } = {}) {
     const allSkills = state.appData.skills || [];
     if (tab === 'all') {
         container.innerHTML = ['hard', 'soft'].map(cat => {
-            const rows = allSkills.filter(s => s.category === cat).map(s => skillRow(s, allSkills, BAR_COLOR[cat])).join('');
+            const rows = allSkills.filter(s => s.category === cat && isShown(s)).map(s => skillRow(s, allSkills, BAR_COLOR[cat])).join('');
             return rows ? `<h4 class="text-sm font-bold text-gray-500 dark:text-gray-400 pt-2">${escapeHTML(ui(`skills_${cat}`))}</h4>${rows}` : '';
         }).join('');
     } else {
-        container.innerHTML = allSkills.filter(s => s.category === tab).map(s => skillRow(s, allSkills, BAR_COLOR[tab])).join('');
+        container.innerHTML = allSkills.filter(s => s.category === tab && isShown(s)).map(s => skillRow(s, allSkills, BAR_COLOR[tab])).join('');
     }
     if (instant || prefersReducedMotion()) animateSkillBars();
     else setTimeout(animateSkillBars, 80);
@@ -413,15 +449,22 @@ function animateSkillBars() {
     });
 }
 
-function renderAdminButtons(type, index) {
+function renderAdminButtons(type, index, item = {}) {
     if (!state.isAdmin) return '';
+    const hidden = !!item.hidden;
     return `
+        ${hidden ? '<span class="admin-element absolute top-2 left-2 ltr:right-2 ltr:left-auto z-30 px-2 py-0.5 rounded-full bg-gray-800 text-white text-[10px] font-bold items-center gap-1"><i class="fas fa-eye-slash"></i> مخفي</span>' : ''}
         <div class="admin-element absolute top-2 right-2 ltr:left-2 ltr:right-auto z-30
                     gap-1.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-center">
             <span class="drag-handle bg-white dark:bg-gray-700 text-gray-500 w-7 h-7 rounded-lg shadow
                          flex items-center justify-center hover:bg-gray-100 cursor-move border border-gray-200 dark:border-gray-600">
                 <i class="fas fa-grip-vertical text-[10px]"></i>
             </span>
+            <button type="button" data-action="toggle-hidden" data-type="${type}" data-index="${index}" aria-pressed="${hidden}"
+                    aria-label="${hidden ? 'إظهار للزوار / Show' : 'إخفاء عن الزوار / Hide'}" title="${hidden ? 'إظهار للزوار' : 'إخفاء عن الزوار'}"
+                    class="bg-gray-700 text-white w-7 h-7 rounded-lg shadow flex items-center justify-center hover:bg-gray-800 hover:scale-110 transition">
+                <i class="fas ${hidden ? 'fa-eye' : 'fa-eye-slash'} text-[10px]"></i>
+            </button>
             <button type="button" data-action="edit-item" data-type="${type}" data-index="${index}" aria-label="Edit"
                     class="bg-blue-500 text-white w-7 h-7 rounded-lg shadow flex items-center justify-center hover:bg-blue-600 hover:scale-110 transition">
                 <i class="fas fa-pen text-[10px]"></i>

@@ -185,6 +185,11 @@
                     <button data-action="manage-profile" class="admin-element mt-2 mb-4 mx-auto items-center gap-2 px-4 py-1.5 bg-teal-500 text-white rounded-full text-xs font-bold hover:bg-teal-600 transition">
                         <i class="fas fa-user-edit"></i> تعديل الملف الشخصي
                     </button>
+                    <!-- "Open to work" (data.json → availability, admin → Tools) -->
+                    <p id="availability-badge" class="hidden mx-auto mb-4 w-fit max-w-full flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-4 py-2 rounded-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-sm text-green-800 dark:text-green-300">
+                        <span class="w-2.5 h-2.5 rounded-full bg-green-500 motion-safe:animate-pulse" aria-hidden="true"></span>
+                        <b id="availability-status"></b><span id="availability-details" class="text-green-700 dark:text-green-400"></span>
+                    </p>
                     <p id="smart-greeting" class="text-primary font-bold mb-2 text-lg">مرحباً</p>
                     <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight leading-tight" data-path="profile.name"></h1>
                     <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-medium mb-6 min-h-8 flex justify-center gap-2">
@@ -212,7 +217,7 @@
                     </div>
 
                     <!-- Stats -->
-                    <div id="stats-section" class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto" data-aos="fade-up">
+                    <div id="stats-section" data-section="stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto" data-aos="fade-up">
                         <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
                             <div class="text-3xl font-extrabold text-primary mb-1"><span class="stat-number" data-stat="certificates" data-target="0">0</span></div>
                             <p class="text-xs text-gray-500 font-medium" data-lang="stat_certs">شهادات مهنية</p>
@@ -256,26 +261,33 @@
             <div class="grid md:grid-cols-2 gap-12">
                 <!-- LEFT -->
                 <div>
+                    <div data-section="experience">
                     <div class="flex justify-between items-center mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-primary"><i class="fas fa-briefcase"></i><span data-lang="sec_exp">الخبرات</span></h3>
                         <button data-action="add-item" data-type="experience" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="experience-container" class="space-y-10 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8 ltr:border-l-2 ltr:border-r-0 ltr:mr-0 ltr:ml-3 ltr:pr-0 ltr:pl-8 mb-12"></div>
+                    </div>
 
+                    <div data-section="education">
                     <div class="flex justify-between items-center mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-blue-600 dark:text-blue-400"><i class="fas fa-university"></i><span data-lang="sec_edu">التعليم</span></h3>
                         <button data-action="add-item" data-type="education" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="education-container" class="space-y-6 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8 ltr:border-l-2 ltr:border-r-0 ltr:mr-0 ltr:ml-3 ltr:pr-0 ltr:pl-8 mb-12"></div>
+                    </div>
 
+                    <div data-section="volunteer">
                     <div class="flex justify-between items-center mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-orange-600 dark:text-orange-400"><i class="fas fa-hands-helping"></i><span data-lang="sec_volunteer">التطوع</span></h3>
                         <button data-action="add-item" data-type="volunteer" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="volunteer-container" class="space-y-6 border-r-2 border-gray-200 dark:border-gray-800 mr-3 pr-8 ltr:border-l-2 ltr:border-r-0 ltr:mr-0 ltr:ml-3 ltr:pr-0 ltr:pl-8"></div>
+                    </div>
                 </div>
                 <!-- RIGHT -->
                 <div>
+                    <div data-section="skills">
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-green-600 dark:text-green-400"><i class="fas fa-code"></i><span data-lang="sec_skills">المهارات</span></h3>
                         <button data-action="add-item" data-type="skills" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
@@ -285,24 +297,31 @@
                         <button type="button" data-action="set-skill-tab" data-tab="soft" id="tab-soft" aria-pressed="false" class="px-4 py-1.5 text-xs font-bold rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 transition" data-lang="tab_soft">شخصية</button>
                     </div>
                     <div id="skills-container" class="space-y-3 mb-12"></div>
+                    </div>
 
+                    <div data-section="certificates">
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-secondary"><i class="fas fa-certificate"></i><span data-lang="sec_certs">الشهادات</span></h3>
                         <button data-action="add-item" data-type="certificates" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="certificates-container" class="space-y-4 mb-12"></div>
+                    </div>
 
+                    <div data-section="workshops">
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-amber-600 dark:text-yellow-400"><i class="fas fa-chalkboard-teacher"></i><span data-lang="sec_workshops">ورش العمل</span></h3>
                         <button data-action="add-item" data-type="workshops" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="workshops-container" class="space-y-4 mb-12"></div>
+                    </div>
 
+                    <div data-section="languages">
                     <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
                         <h3 class="text-2xl font-bold flex items-center gap-3 text-teal-600 dark:text-teal-400"><i class="fas fa-language"></i><span data-lang="sec_languages">اللغات</span></h3>
                         <button data-action="add-item" data-type="languages" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
                     </div>
                     <div id="languages-container" class="space-y-3"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -315,11 +334,13 @@
                 <button data-action="add-item" data-type="projects" class="admin-element absolute top-0 right-0 bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-200 gap-2 transition shadow-lg"><i class="fas fa-plus"></i> مشروع جديد</button>
             </div>
             <!-- Project filters (generated dynamically) -->
+            <div data-section="projects">
             <div id="project-filters" class="flex flex-wrap justify-center gap-2 mb-10 print-hide"></div>
             <div id="projects-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            </div>
 
             <!-- GitHub: filled by js/github.js from generated/github.json (Deploy site workflow, every 12 h) -->
-            <section id="github-section" class="hidden mt-24" aria-labelledby="github-title">
+            <section id="github-section" data-section="github" class="hidden mt-24" aria-labelledby="github-title">
                 <div class="flex flex-wrap items-end justify-between gap-3 mb-8">
                     <div>
                         <h3 id="github-title" class="text-3xl font-bold flex items-center gap-3"><i class="fab fa-github" aria-hidden="true"></i><span></span></h3>
@@ -358,7 +379,7 @@
             </section>
 
             <!-- System status: generated/status.json, sites from data.json → monitor, checked every 12 h -->
-            <section id="status-section" class="hidden mt-24" aria-labelledby="status-title">
+            <section id="status-section" data-section="status" class="hidden mt-24" aria-labelledby="status-title">
                 <h3 id="status-title" class="text-3xl font-bold flex items-center gap-3 mb-2"><i class="fas fa-heart-pulse text-green-600 dark:text-green-500" aria-hidden="true"></i><span></span></h3>
                 <p class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-6"><span id="status-summary-dot" class="w-2.5 h-2.5 rounded-full bg-gray-400" aria-hidden="true"></span><span id="status-summary"></span></p>
                 <ul id="status-sensors" class="space-y-3"></ul>
@@ -394,7 +415,7 @@
                         <span class="inline-block mt-2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" data-lang="contact_open">فتح الملف</span>
                     </div>
                     <!-- WhatsApp: href and number come from profile.phone (js/render.js); hidden without a phone -->
-                    <a id="contact-whatsapp" data-track="contact_whatsapp" href="#" target="_blank" rel="noopener noreferrer" class="hidden contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-green-500 transition-all text-center">
+                    <a id="contact-whatsapp" data-section="whatsapp" data-track="contact_whatsapp" href="#" target="_blank" rel="noopener noreferrer" class="hidden contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-green-500 transition-all text-center">
                         <div class="w-12 h-12 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center mx-auto mb-3 text-green-600 dark:text-green-500 text-xl group-hover:scale-110 transition-transform" aria-hidden="true"><i class="fab fa-whatsapp"></i></div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">WhatsApp</p>
                         <p id="contact-whatsapp-number" class="font-bold text-sm dark:text-white" dir="ltr"></p>
@@ -434,7 +455,7 @@
                     </a>
                 </div>
                 <!-- vCard: built from data.json in the browser -->
-                <div class="mt-4 bg-white dark:bg-cardBg rounded-2xl p-5 flex items-center justify-between gap-4 border border-gray-100 dark:border-gray-700">
+                <div data-section="vcard" class="mt-4 bg-white dark:bg-cardBg rounded-2xl p-5 flex items-center justify-between gap-4 border border-gray-100 dark:border-gray-700">
                     <div>
                         <p class="font-bold text-sm dark:text-white" data-lang="btn_vcard">حفظ جهة الاتصال</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" data-lang="contact_vcard_sub">بطاقة vCard لهاتفك أو بريدك</p>
@@ -483,6 +504,7 @@
                 <h3 id="modal-title" class="text-xl font-bold pr-8 ltr:pr-0 ltr:pl-8"></h3>
             </div>
             <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                <img id="modal-image" class="hidden w-full aspect-video object-cover rounded-2xl border border-gray-200 dark:border-gray-700" alt="" loading="lazy" decoding="async">
                 <p id="modal-desc" class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed"></p>
                 <div id="modal-tech-section">
                     <h4 class="font-bold text-sm mb-3 flex items-center gap-2">
@@ -557,6 +579,9 @@
         <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
         <button data-action="save" class="text-sm font-bold text-primary hover:brightness-75 transition flex items-center gap-2"><i class="fas fa-save"></i><span data-lang="btn_save">حفظ</span></button>
         <button data-action="manage-profile" class="text-sm font-bold text-teal-500 hover:text-teal-600 transition flex items-center gap-2" title="تعديل الملف الشخصي"><i class="fas fa-user-edit"></i></button>
+        <button type="button" data-action="open-history" class="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-primary transition" title="سجل التعديلات / History" aria-label="سجل التعديلات / History"><i class="fas fa-clock-rotate-left"></i></button>
+        <button type="button" data-action="open-checker" class="text-sm font-bold text-amber-600 hover:text-amber-700 transition" title="مدقق المحتوى / Checker" aria-label="مدقق المحتوى / Checker"><i class="fas fa-list-check"></i></button>
+        <button type="button" data-action="open-tools" class="text-sm font-bold text-gray-700 dark:text-gray-200 hover:text-primary transition" title="أدوات المدير / Tools" aria-label="أدوات المدير / Tools"><i class="fas fa-toolbox"></i></button>
         <button type="button" data-action="manage-theme" class="text-sm font-bold text-pink-600 hover:text-pink-700 transition" title="ألوان الموقع / Theme" aria-label="ألوان الموقع / Theme"><i class="fas fa-palette"></i></button>
         <button type="button" data-action="manage-github" class="text-sm font-bold text-gray-800 dark:text-gray-200 hover:text-primary transition" title="GitHub" aria-label="GitHub"><i class="fab fa-github"></i></button>
         <button type="button" data-action="manage-monitor" class="text-sm font-bold text-green-600 hover:text-green-700 transition" title="المراقبة / Monitoring" aria-label="المراقبة / Monitoring"><i class="fas fa-heart-pulse"></i></button>
