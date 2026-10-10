@@ -85,7 +85,7 @@ test('admin actions resolve to exported functions', async () => {
     const admin = await readFile(new URL('../../js/admin.js', import.meta.url), 'utf8');
     const names = [...new Set([...actions.matchAll(/admin\('(\w+)'/g)].map(m => m[1]))];
     assert.ok(names.length > 10);
-    assert.deepEqual(names.filter(n => !new RegExp(`export (async )?function ${n}\\b`).test(admin)), []);
+    assert.deepEqual(names.filter(n => !new RegExp(`export (async )?(function|const) ${n}\\b`).test(admin)), []);
 });
 
 test('deriveTheme keeps every preset within WCAG contrast', async () => {
@@ -95,4 +95,51 @@ test('deriveTheme keeps every preset within WCAG contrast', async () => {
         assert.deepEqual(d.report.filter(r => !r.pass).map(r => `${p.primary}: ${r.id} ${r.ratio}`), []);
     }
     assert.equal(deriveTheme({ primary: 'nope' }).chosen.primary, '#2563eb');
+});
+
+test('diffLines finds the changed lines and hunks keeps context around them', async () => {
+    const { diffLines, hunks, diffStats } = await import('../../js/diff.js');
+    const a = ['{', '  "a": 1,', '  "b": 2,', '  "c": 3,', '  "d": 4,', '  "e": 5,', '  "f": 6,', '}'].join('\n');
+    const b = a.replace('"c": 3', '"c": 30').replace('"f": 6', '"f": 6,\n  "g": 7');
+    const ops = diffLines(a, b);
+    assert.deepEqual(diffStats(ops), { added: 2, removed: 1 });
+    assert.deepEqual(ops.filter(o => o.op !== ' ').map(o => o.op + o.text.trim()), ['-"c": 3,', '+"c": 30,', '+"g": 7,']);
+    assert.deepEqual(ops.find(o => o.op === '+' && o.text.includes('"g"')), { op: '+', text: '  "g": 7,', b: 8 });
+    const h = hunks(ops, 1);                       // c (±1 line) and g (±1 line), with a gap between
+    assert.deepEqual(h.map(o => o.op), [' ', '-', '+', ' ', '…', ' ', '+', ' ']);
+    assert.deepEqual(diffStats(diffLines(a, a)), { added: 0, removed: 0 });
+    assert.equal(hunks(diffLines(a, a)).length, 0);
+});
+
+test('applySeo writes escaped meta tags; applyProfileImage sets the JSON-LD photo', async () => {
+    const { applySeo, applyProfileImage, touchSitemap } = await import('../../scripts/assemble-site.mjs');
+    const { readFile } = await import('node:fs/promises');
+    const html = await readFile(new URL('../../index.html', import.meta.url), 'utf8');
+    const out = applySeo(html, { seo: { ar: { title: 'T "q" <x> $1', description: 'D & d' }, image: 'images/og.jpg' } });
+    assert.match(out, /<title>T "q" &lt;x&gt; \$1<\/title>/);
+    assert.match(out, /id="og-title"[^>]*content="T &quot;q&quot; &lt;x&gt; \$1"/);
+    assert.match(out, /id="meta-description"[^>]*content="D &amp; d"/);
+    assert.match(out, /property="og:image"\s+content="https:\/\/osamaal-harbi\.github\.io\/CV\/images\/og\.jpg"/);
+    assert.equal(applySeo(html, {}), html);
+    assert.equal(applySeo(html, { seo: { image: 'javascript:alert(1)' } }).includes('javascript'), false);
+    assert.match(applyProfileImage(html, { profile: { image: 'images/p.webp' } }), /"image": "https:\/\/osamaal-harbi\.github\.io\/CV\/images\/p\.webp"/);
+    assert.equal(applyProfileImage(html, { profile: { image: '' } }), html);
+    assert.equal(touchSitemap('<lastmod>2020-01-01</lastmod>', '2026-10-11'), '<lastmod>2026-10-11</lastmod>');
+});
+
+test('planAlerts opens one issue per outage and closes it on recovery', async () => {
+    const { planAlerts, issueFor } = await import('../../scripts/alert-status.mjs');
+    const sensors = [
+        { name: 'A', url: 'https://a.example/', state: 'down', code: 0, error: 'timeout' },
+        { name: 'B', url: 'https://b.example/', state: 'down', code: 503 },
+        { name: 'C', url: 'https://c.example/', state: 'up', code: 200, ms: 90 }
+    ];
+    const open = [{ number: 7, body: 'x <!-- status-alert:https://b.example/ -->' }, { number: 8, body: '<!-- status-alert:https://c.example/ -->' }, { number: 9, body: 'unrelated' }];
+    const plan = planAlerts(sensors, open);
+    assert.deepEqual(plan.open.map(s => s.name), ['A']);              // B already has an open issue
+    assert.deepEqual(plan.close.map(c => c.issue.number), [8]);       // C recovered
+    const issue = issueFor(sensors[0], 'OsamaAL-Harbi', '2026-10-11T03:23:00Z');
+    assert.match(issue.body, /^@OsamaAL-Harbi /);
+    assert.match(issue.body, /<!-- status-alert:https:\/\/a\.example\/ -->$/);
+    assert.match(issue.body, /انتهت المهلة/);
 });
