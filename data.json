@@ -20,7 +20,7 @@
     "phone": "+966537820694",
     "linkedin": "https://www.linkedin.com/in/osama-alharbi-it/",
     "github": "https://github.com/OsamaAL-Harbi",
-    "cv": "Osama_Alharbi.pdf",
+    "cv": "cv/Osama_AlHarbi_CV.pdf",
     "image": "",
     "nationality": {
       "ar": "سعودي",
@@ -368,5 +368,9 @@
       "name": "Portfolio (GitHub Pages)",
       "url": "https://osamaal-harbi.github.io/CV/"
     }
-  ]
+  ],
+  "theme": {
+    "primary": "#334155",
+    "secondary": "#0284c7"
+  }
 }
