@@ -175,7 +175,8 @@
 
         <!-- ─── HOME ─────────────────────────────────────── -->
         <section id="home" class="page-section active min-h-[70vh]">
-            <div class="flex items-center justify-center text-center" data-aos="zoom-in">
+            <!-- No entrance animation above the fold: AOS keeps it transparent until scripts run (slow LCP) -->
+            <div class="flex items-center justify-center text-center">
                 <div class="w-full">
                     <!-- Profile Image -->
                     <div class="mb-8 relative inline-block group cursor-pointer">

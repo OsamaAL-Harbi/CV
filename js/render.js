@@ -548,7 +548,9 @@ function renderAdminButtons(type, index, item = {}) {
 function updateText(key, value) {
     const el = document.querySelector(`[data-path="${key}"]`);
     if (!el) return;
-    el.innerText = value;
+    // The deploy already wrote this text into the page; rewriting the same text would repaint the largest
+    // element (the summary) and push Largest Contentful Paint to the moment the app finished loading
+    if (el.textContent !== value || value.includes('\n')) el.innerText = value;
     if (state.isAdmin) {
         el.contentEditable = 'true';
         el.classList.add('editable-active');
