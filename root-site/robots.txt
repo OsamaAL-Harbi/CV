@@ -1,0 +1,5 @@
+# https://osamaal-harbi.github.io/robots.txt — the only robots.txt crawlers read for this host
+User-agent: *
+Allow: /
+
+Sitemap: https://osamaal-harbi.github.io/CV/sitemap.xml

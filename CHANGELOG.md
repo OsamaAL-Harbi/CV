@@ -2,6 +2,35 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.6.0] — 2026-10-11
+
+### Added
+- **Site fonts** (admin → tools → Fonts): one Arabic family (Tajawal, IBM Plex Sans Arabic, Cairo, Almarai,
+  Readex Pro, Noto Kufi Arabic, El Messiri) and one English family (same as Arabic, Inter, Poppins, Roboto,
+  IBM Plex Sans), each card previewed in its own font and the page restyled live; cancel restores. Saved in
+  `data.json → fonts`. All are SIL OFL 1.1, self-hosted (CSP stays `font-src 'self'`), arabic + latin subsets
+  in 400/500/700/800 where the family has them; a visitor downloads only the chosen families and only the scripts
+  on the page. Thmanyah is not offered: its licence is personal use only (no self-hosting or redistribution).
+- The deploy writes the chosen stack into `index.html` (`<meta id="site-fonts">`) and `js/early.js` applies it
+  before first paint, so the default font is never downloaded once another is chosen; the stack is validated
+  (quoted family names only).
+
+- **Search engines** (`scripts/prerender.mjs`, run by the deploy):
+  - the CV is written into `index.html`: name, title, summary and location in place (the same text the app
+    sets), and plain versions of experience, education, volunteering, skills, certificates, workshops, languages
+    and projects inside their containers, which the app replaces on load. Crawlers that do not run JavaScript
+    now see the whole CV; hidden sections and items stay out;
+  - the schema.org `Person` is built from the CV: job title, description, university, skills (`knowsAbout`),
+    languages, certificates (`hasCredential` with the issuer), current role, LinkedIn and GitHub;
+  - admin → SEO has Google Search Console and Bing Webmaster verification fields (paste the whole tag or the
+    token; only a valid token is kept), written into the page as `<meta>` tags at deploy.
+- `root-site/`: the files for the `OsamaAL-Harbi.github.io` repository (host-root `robots.txt` pointing to the
+  sitemap, `/` → `/CV/` redirect, `/cv` → `/CV/` from the 404 page). Not part of this site's deploy.
+
+### Changed
+- `scripts/build-vendor.mjs` builds `fonts.css` from every family in `js/fonts.js`; Tailwind's `font-sans` is
+  `var(--font-stack)`. Service worker cache v7 (adds `js/fonts.js`).
+
 ## [4.5.0] — 2026-10-11
 
 ### Added (admin panel)

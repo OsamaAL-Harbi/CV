@@ -160,3 +160,56 @@ test('merge3 keeps both sides: a stale editor copy never erases a newer value on
     // deletions in the editor survive when GitHub did not touch the key
     assert.deepEqual(merge3({ a: 1, b: 2 }, { a: 1 }, { a: 1, b: 2, c: 3 }).merged, { a: 1, c: 3 });
 });
+
+test('fonts: every option has its files, stacks put the Latin family first', async () => {
+    const { FONTS, fontStack } = await import('../../js/fonts.js');
+    const { readFile } = await import('node:fs/promises');
+    const css = await readFile(new URL('../../src/vendor/fonts.css', import.meta.url), 'utf8');
+    for (const f of [...FONTS.ar, ...FONTS.en].filter(f => f.family)) {
+        assert.ok(css.includes(`font-family: '${f.family}'`), `${f.family} missing from fonts.css`);
+    }
+    assert.ok(/U\+0600-06FF/.test(css));
+    assert.equal(fontStack({}), '"Tajawal", system-ui, sans-serif');
+    assert.equal(fontStack({ ar: 'cairo', en: 'same' }), '"Cairo", system-ui, sans-serif');
+    assert.equal(fontStack({ ar: 'cairo', en: 'inter' }), '"Inter", "Cairo", system-ui, sans-serif');
+    assert.equal(fontStack({ ar: '"; x', en: 'nope' }), '"Tajawal", system-ui, sans-serif');
+    const { applyFonts } = await import('../../scripts/assemble-site.mjs');
+    const html = '<meta id="site-fonts" name="site-fonts" content="">';
+    assert.equal(applyFonts(html, { fonts: { ar: 'cairo', en: 'inter' } }), '<meta id="site-fonts" name="site-fonts" content="&quot;Inter&quot;, &quot;Cairo&quot;, system-ui, sans-serif">');
+    assert.match(applyFonts(html, {}), /content="&quot;Tajawal&quot;, system-ui, sans-serif"/);
+});
+
+test('prerender writes the CV into the page, escaped, without hidden sections or items', async () => {
+    const { prerenderContent, applyJsonLd, applyVerification } = await import('../../scripts/prerender.mjs');
+    const html = '<h1 class="x" data-path="profile.name"></h1><p data-path="profile.summary"></p>'
+        + '<div id="experience-container" class="a"></div><div id="certificates-container"></div><div id="skills-container"></div>'
+        + '<script type="application/ld+json">{"@type":"Person","image":"https://x/p.webp","sameAs":["https://github.com/OsamaAL-Harbi"]}</script>'
+        + '<meta name="robots"   content="index, follow">';
+    const data = {
+        profile: { name: { ar: 'أسامة <b>', en: 'Osama' }, summary: { ar: 'نبذة', en: 'About' }, title: { ar: 'خريج', en: 'Graduate' }, linkedin: 'https://www.linkedin.com/in/x/' },
+        experience: [{ role: { ar: 'متدرب', en: 'Trainee' }, company: { ar: 'جهة', en: 'Org' }, period: { ar: '2026', en: '2026' }, description: { ar: 'سطر 1\nسطر 2', en: '' } },
+                     { role: { ar: 'مخفي', en: 'Hidden' }, hidden: true }],
+        certificates: [{ name: { ar: 'شهادة', en: 'Cert </script>' }, issuer: { ar: 'IBM', en: 'IBM' }, credential: 'javascript:alert(1)' }],
+        skills: [{ ar: 'الشبكات', en: 'Networking', category: 'hard' }],
+        visibility: { sections: ['skills'] },
+        seo: { verify: { google: '<meta name="google-site-verification" content="abc_DEF-12345" />', bing: 'bad token!' } }
+    };
+    const out = prerenderContent(html, data);
+    assert.match(out, /data-path="profile.name">أسامة &lt;b&gt;<\/h1>/);
+    assert.match(out, /<div id="experience-container" class="a"><article.*متدرب.*جهة · 2026.*<li>سطر 1<\/li><li>سطر 2<\/li>/);
+    assert.ok(!out.includes('مخفي'));
+    assert.match(out, /<div id="skills-container"><\/div>/);           // hidden section stays empty
+    const ld = applyJsonLd(out, data);
+    const json = JSON.parse(ld.match(/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    assert.equal(json.name, 'Osama');
+    assert.equal(json.image, 'https://x/p.webp');
+    assert.equal(json.hasCredential[0].recognizedBy.name, 'IBM');
+    assert.equal(json.hasCredential[0].url, undefined);
+    assert.equal(json.knowsAbout, undefined);
+    assert.deepEqual(json.sameAs, ['https://www.linkedin.com/in/x/', 'https://github.com/OsamaAL-Harbi']);
+    assert.ok(!ld.includes('Cert </script>'));
+    const verified = applyVerification(html, data);
+    assert.match(verified, /<meta name="google-site-verification" content="abc_DEF-12345">/);
+    assert.ok(!verified.includes('msvalidate'));
+    assert.equal(applyVerification(html, {}), html);
+});

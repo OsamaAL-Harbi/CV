@@ -4,7 +4,8 @@ export default {
     darkMode: 'class',
     theme: {
         extend: {
-            fontFamily: { sans: ['Tajawal', 'Roboto', 'sans-serif'] },
+            // --font-stack is set from admin → Fonts (js/fonts.js); Tajawal when nothing was picked
+            fontFamily: { sans: ['var(--font-stack, "Tajawal", system-ui, sans-serif)'] },
             // primary is a CSS variable: blue-600 in light mode (WCAG AA with white text), blue-500 in dark mode
             colors: { primary: 'rgb(var(--color-primary) / <alpha-value>)', secondary: 'rgb(var(--color-secondary) / <alpha-value>)', darkBg: '#0b1120', cardBg: '#1e293b' }
         }

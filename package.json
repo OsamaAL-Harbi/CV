@@ -1,6 +1,6 @@
 {
   "name": "osama-portfolio",
-  "version": "4.5.0",
+  "version": "4.6.0",
   "private": true,
   "description": "Bilingual (AR/EN) static portfolio served from GitHub Pages",
   "type": "module",
@@ -16,6 +16,16 @@
     "build:site": "node scripts/fetch-github.mjs && node scripts/check-status.mjs && node scripts/assemble-site.mjs _site"
   },
   "devDependencies": {
+    "@fontsource/almarai": "5.3.0",
+    "@fontsource/cairo": "5.3.0",
+    "@fontsource/el-messiri": "5.3.0",
+    "@fontsource/ibm-plex-sans": "5.3.0",
+    "@fontsource/ibm-plex-sans-arabic": "5.3.0",
+    "@fontsource/inter": "5.3.0",
+    "@fontsource/noto-kufi-arabic": "5.3.0",
+    "@fontsource/poppins": "5.3.0",
+    "@fontsource/readex-pro": "5.3.0",
+    "@fontsource/roboto": "5.3.0",
     "@fontsource/tajawal": "5.3.0",
     "@fortawesome/fontawesome-free": "6.4.0",
     "@lhci/cli": "0.15.1",
