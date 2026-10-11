@@ -288,14 +288,20 @@ test.describe('fonts', () => {
         expect(fontFiles.some(u => u.includes('tajawal'))).toBe(false);
     });
 
+    // data.json as it would be with the default fonts (the real file follows whatever admin → Fonts saved)
+    const withDefaultFonts = () => { const data = clone(); delete data.fonts; return data; };
+
     test('a tampered cached font stack is ignored before first paint', async ({ page }) => {
         await page.addInitScript(() => localStorage.setItem('font_stack', 'x; background: url(https://evil.example/)'));
+        await page.context().route('**/data.json*', route => route.fulfill({ json: withDefaultFonts() }));
         await openSite(page);
         expect(await bodyFont(page)).toBe('Tajawal, system-ui, sans-serif');
     });
 
     test('admin previews fonts live, cancel restores, apply saves to data.json', async ({ page }) => {
-        await stubGitHub(page);
+        const data = withDefaultFonts();
+        await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
+        await stubGitHub(page, { remote: data });
         await login(page);
         await tool(page, 'الخطوط');
         await expect(page.locator('[data-font-sample="Almarai"]')).toHaveCSS('font-family', /Almarai/);
