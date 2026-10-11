@@ -35,6 +35,7 @@ const ACTIONS = {
     'open-checker':          () => admin('openChecker'),
     'open-tools':            () => admin('openTools'),
     'toggle-hidden':         el => admin('toggleHidden', el.dataset.type, Number(el.dataset.index)),
+    'preview-post':          el => admin('previewPost', Number(el.dataset.index)),
     'manage-monitor':        () => admin('manageMonitor'),
     'retry-load':            () => location.reload(),
     'close-admin-modal':     () => closeDialog(document.getElementById('admin-modal')),

@@ -360,3 +360,102 @@ test.describe('search engines', () => {
         expect((await state(page)).seo.verify).toEqual({ google: 'Ab_12-cdEFgh' });
     });
 });
+
+test.describe('blog, recommendations, project pages, verified certificates', () => {
+    const extra = () => {
+        const data = clone();
+        data.testimonials = [{ name: { ar: 'م. خالد', en: 'Eng. Khalid' }, role: { ar: 'مشرف التدريب', en: 'Training supervisor' }, text: { ar: 'متدرب مميز <b>جداً</b>', en: 'An outstanding trainee' }, link: 'https://www.linkedin.com/in/x/' },
+                             { name: { ar: 'مخفية' }, text: { ar: 'لا تظهر' }, hidden: true }];
+        data.posts = [{ title: { ar: 'مقال قديم', en: 'Old post' }, body: { ar: 'نص', en: 'Text' }, date: '2025-01-01' },
+                      { title: { ar: 'إعداد شبكة منزلية', en: 'Home network setup' }, summary: { ar: 'خطوات عملية' }, body: { ar: '## مقدمة\nنص', en: 'Text' }, date: '2026-10-01', tags: ['شبكات'] }];
+        data.certificates = [{ name: { ar: 'شهادة موثقة', en: 'Verified cert' }, issuer: { ar: 'IBM', en: 'IBM' }, url: 'https://www.credly.com/badges/x' }, ...data.certificates.map(c => ({ ...c, url: '' }))];
+        return data;
+    };
+
+    test('visitors: empty recommendations and blog are hidden', async ({ page }) => {
+        const data = clone();
+        delete data.testimonials; delete data.posts;
+        await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
+        await openSite(page);
+        await expect(page.locator('[data-section="testimonials"]')).toHaveClass(/hidden/);
+        await expect(page.locator('[data-section="blog"]')).toHaveClass(/hidden/);
+    });
+
+    test('visitors see recommendations, newest articles first with links to their pages, and verified badges', async ({ page }) => {
+        await page.context().route('**/data.json*', route => route.fulfill({ json: extra() }));
+        await openSite(page, 'resume');
+        const cards = page.locator('#testimonials-container > div');
+        await expect(cards).toHaveCount(1);
+        await expect(cards.first()).toContainText('متدرب مميز <b>جداً</b>');           // shown as text, not markup
+        await expect(cards.first().locator('a[href="https://www.linkedin.com/in/x/"]')).toBeVisible();
+        await expect(page.locator('#certs-verified')).toHaveText('1 شهادة موثّقة');
+        await expect(page.locator('#certificates-container .cert-verified')).toHaveCount(1);
+        await page.evaluate(() => { location.hash = 'portfolio'; });
+        const posts = page.locator('#posts-container article');
+        await expect(posts).toHaveCount(2);
+        await expect(posts.first()).toContainText('إعداد شبكة منزلية');
+        await expect(posts.first().locator('h3 a')).toHaveAttribute('href', 'blog/home-network-setup.html');
+        await page.locator('#lang-btn').click();
+        await expect(posts.first()).toContainText('Home network setup');
+        await expect(page.locator('#certs-verified')).toHaveText('1 verified');
+    });
+
+    test('the project dialog links to the project page, and the generated page renders under the CSP', async ({ page, consoleErrors }) => {
+        const data = extra();
+        await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
+        await openSite(page, 'portfolio');
+        await page.locator('#projects-container [data-action="open-project"]').first().click();
+        const { projectPages } = await import('../js/pages.js');
+        const first = projectPages(data)[0];
+        await expect(page.locator('#modal-page-link')).toHaveAttribute('href', `projects/${first.slug}.html`);
+
+        const { sitePages } = await import('../scripts/pages.mjs');
+        const pages = sitePages(data);
+        await page.context().route(/\/CV\/(projects|blog)\//, route => {
+            const path = new URL(route.request().url()).pathname.replace('/CV/', '');
+            const hit = pages.find(p => p.path === path || p.path === `${path}index.html`);
+            return hit ? route.fulfill({ body: hit.html, contentType: 'text/html' }) : route.fallback();
+        });
+        await page.context().route('**/assets/css/site-fonts.css', route => route.fulfill({ body: ':root{}', contentType: 'text/css' }));
+        await page.goto(`./projects/${first.slug}.html`);
+        await expect(page.locator('h1')).toHaveText(data.projects[first.index].title.ar);
+        await expect(page.locator('a[href="../#portfolio"]').first()).toBeVisible();
+        await page.goto('./blog/');
+        await expect(page.locator('main li')).toHaveCount(2);
+        await page.locator('main li a').first().click();
+        await expect(page.locator('h1')).toHaveText('إعداد شبكة منزلية');
+        await expect(page.locator('.readme h3')).toHaveText('مقدمة');
+        expect(consoleErrors).toEqual([]);
+    });
+
+    test('admin writes an article (validated), previews it, and adds a recommendation', async ({ page }) => {
+        await stubGitHub(page);
+        await login(page);
+        await page.evaluate(() => { location.hash = 'portfolio'; });
+        await page.locator('[data-action="add-item"][data-type="posts"]').click();
+        await page.locator('#swal-title-ar').fill('أول مقال');
+        await page.locator('#swal-body-ar').fill('## مقدمة\nهذا **نص** المقال');
+        await expect(page.locator('#swal-date')).toHaveValue(/^\d{4}-\d{2}-\d{2}$/);
+        await page.locator('#swal-slug').fill('Bad Slug!');
+        await page.locator('.swal2-confirm').click();
+        await expect(page.locator('.swal2-validation-message')).toContainText('رابط المقال');
+        await page.locator('#swal-slug').fill('first-post');
+        await page.locator('.swal2-confirm').click();
+        const posts = (await state(page)).posts;
+        expect(posts.at(-1)).toMatchObject({ title: { ar: 'أول مقال' }, slug: 'first-post' });
+        await page.locator('#posts-container [data-action="preview-post"]').first().click();
+        await expect(page.locator('.swal2-popup .readme strong')).toHaveText('نص');
+        await page.locator('.swal2-confirm').click();
+
+        await page.evaluate(() => { location.hash = 'resume'; });
+        await page.locator('[data-action="add-item"][data-type="testimonials"]').click();
+        await page.locator('#swal-name-ar').fill('أ. سارة');
+        await page.locator('#swal-text-ar').fill('عمل متقن');
+        await page.locator('#swal-link').fill('http://insecure.example');
+        await page.locator('.swal2-confirm').click();
+        await expect(page.locator('.swal2-validation-message')).toContainText('https://');
+        await page.locator('#swal-link').fill('');
+        await page.locator('.swal2-confirm').click();
+        await expect(page.locator('#testimonials-container')).toContainText('عمل متقن');
+    });
+});

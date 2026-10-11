@@ -2,7 +2,8 @@
 // plus the project modal content.
 import { state } from './state.js';
 import { escapeHTML, imageSrc, safeUrl, track } from './utils.js';
-import { t } from './i18n.js';
+import { t, ui } from './i18n.js';
+import { projectPages, projectPath } from './pages.js';
 import { toggleMobileMenu } from './router.js';
 
 
@@ -94,7 +95,13 @@ export function openProjectModal(index) {
     const live = safeUrl(item.liveUrl);
     if (live) { liveLink.href = live; liveLink.style.display = 'inline-flex'; }
     else liveLink.style.display = 'none';
-    document.getElementById('modal-actions').style.display = link || live ? 'flex' : 'none';
+    // The project's own page (projects/<slug>.html, written at deploy; hidden projects have none)
+    const page = projectPages(state.appData).find(p => p.index === index);
+    const pageLink = document.getElementById('modal-page-link');
+    if (page) { pageLink.href = projectPath(page.slug); pageLink.style.display = 'inline-flex'; }
+    else pageLink.style.display = 'none';
+    document.getElementById('modal-page-label').textContent = ui('project_page');
+    document.getElementById('modal-actions').style.display = link || live || page ? 'flex' : 'none';
 
     openDialog(modal, {
         focus: modal.querySelector('[data-action="close-project-modal"]'),

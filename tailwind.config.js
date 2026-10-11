@@ -1,6 +1,6 @@
 /** Tailwind CLI config — replaces the old in-page Play CDN config. Run `npm run build:css`. */
 export default {
-    content: ['./index.html', './script.js', './js/**/*.js'],
+    content: ['./index.html', './script.js', './js/**/*.js', './scripts/pages.mjs', './scripts/prerender.mjs'],
     darkMode: 'class',
     theme: {
         extend: {

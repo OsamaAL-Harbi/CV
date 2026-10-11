@@ -189,7 +189,7 @@ test('prerender writes the CV into the page, escaped, without hidden sections or
         profile: { name: { ar: 'أسامة <b>', en: 'Osama' }, summary: { ar: 'نبذة', en: 'About' }, title: { ar: 'خريج', en: 'Graduate' }, linkedin: 'https://www.linkedin.com/in/x/' },
         experience: [{ role: { ar: 'متدرب', en: 'Trainee' }, company: { ar: 'جهة', en: 'Org' }, period: { ar: '2026', en: '2026' }, description: { ar: 'سطر 1\nسطر 2', en: '' } },
                      { role: { ar: 'مخفي', en: 'Hidden' }, hidden: true }],
-        certificates: [{ name: { ar: 'شهادة', en: 'Cert </script>' }, issuer: { ar: 'IBM', en: 'IBM' }, credential: 'javascript:alert(1)' }],
+        certificates: [{ name: { ar: 'شهادة', en: 'Cert </script>' }, issuer: { ar: 'IBM', en: 'IBM' }, credential: 'ID-1', url: 'javascript:alert(1)' }],
         skills: [{ ar: 'الشبكات', en: 'Networking', category: 'hard' }],
         visibility: { sections: ['skills'] },
         seo: { verify: { google: '<meta name="google-site-verification" content="abc_DEF-12345" />', bing: 'bad token!' } }
@@ -212,4 +212,61 @@ test('prerender writes the CV into the page, escaped, without hidden sections or
     assert.match(verified, /<meta name="google-site-verification" content="abc_DEF-12345">/);
     assert.ok(!verified.includes('msvalidate'));
     assert.equal(applyVerification(html, {}), html);
+});
+
+test('markdown: a safe subset — everything escaped, only https/site links', async () => {
+    const { renderMarkdown, readingMinutes } = await import('../../js/markdown.js');
+    const html = renderMarkdown('## عنوان\n\nنص **عريض** و*مائل* و`<b>`\n\n- أ\n- ب\n\n1. one\n\n> quote\n\n```\n<script>x</script>\n```\n[ok](https://example.com) [bad](javascript:alert(1)) [site](blog/x.html)\n\n<img src=x onerror=alert(1)>');
+    assert.match(html, /<h3 dir="auto">عنوان<\/h3>/);
+    assert.match(html, /<strong>عريض<\/strong>/);
+    assert.match(html, /<em>مائل<\/em>/);
+    assert.match(html, /<code>&lt;b&gt;<\/code>/);
+    assert.match(html, /<ul><li dir="auto">أ<\/li><li dir="auto">ب<\/li><\/ul>/);
+    assert.match(html, /<ol><li dir="auto">one<\/li><\/ol>/);
+    assert.match(html, /<blockquote dir="auto">quote<\/blockquote>/);
+    assert.match(html, /<pre dir="ltr"><code>&lt;script&gt;x&lt;\/script&gt;<\/code><\/pre>/);
+    assert.match(html, /<a href="https:\/\/example.com" target="_blank" rel="noopener noreferrer">ok<\/a>/);
+    assert.match(html, /<a href="blog\/x.html">site<\/a>/);
+    assert.ok(!html.includes('javascript:'));
+    assert.ok(!/<img|<script/.test(html));
+    assert.equal(readingMinutes('word '.repeat(450)), 2);
+});
+
+test('pages: one per visible project and post, stable unique slugs', async () => {
+    const { projectPages, postPages } = await import('../../js/pages.js');
+    const data = {
+        projects: [{ title: { ar: 'أ', en: 'Voice of Student' } }, { title: { ar: 'ب', en: 'Voice of Student' } }, { title: { ar: 'مخفي' }, hidden: true }, { title: { ar: 'عربي فقط' } }],
+        posts: [{ title: { en: 'Old' }, date: '2025-01-01' }, { title: { en: 'New' }, date: '2026-05-01', slug: 'my-post' }]
+    };
+    assert.deepEqual(projectPages(data).map(p => [p.slug, p.index]), [['voice-of-student', 0], ['voice-of-student-2', 1], ['project-4', 3]]);
+    assert.deepEqual(postPages(data).map(p => p.slug), ['my-post', 'old']);
+    assert.deepEqual(postPages({ ...data, visibility: { sections: ['blog'] } }), []);
+});
+
+test('sitePages: project and article pages with their own meta, JSON-LD and sitemap entries', async () => {
+    const { sitePages, addToSitemap } = await import('../../scripts/pages.mjs');
+    const data = {
+        profile: { name: { ar: 'أسامة', en: 'Osama' } },
+        projects: [{ title: { ar: 'نظام <x>', en: 'System' }, desc: { ar: 'وصف', en: 'Desc' }, technologies: ['SQL'], link: 'https://github.com/u/r', liveUrl: 'javascript:alert(1)' }],
+        posts: [{ title: { ar: 'مقال', en: 'Post' }, summary: { ar: 'ملخص' }, body: { ar: '## قسم\nنص', en: 'Text' }, date: '2026-10-01', tags: ['شبكات'] }]
+    };
+    const pages = sitePages(data);
+    assert.deepEqual(pages.map(p => p.path), ['projects/system.html', 'blog/index.html', 'blog/post.html']);
+    const project = pages[0].html;
+    assert.match(project, /<title>نظام &lt;x&gt; \| أسامة<\/title>/);
+    assert.match(project, /<link rel="canonical" href="https:\/\/osamaal-harbi.github.io\/CV\/projects\/system.html">/);
+    assert.match(project, /script-src 'none'/);
+    assert.ok(!project.includes('javascript:'));
+    const ld = JSON.parse(project.match(/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    assert.equal(ld['@type'], 'SoftwareSourceCode');
+    assert.equal(ld.codeRepository, 'https://github.com/u/r');
+    const post = pages[2].html;
+    assert.match(post, /<h3 dir="auto">قسم<\/h3>/);
+    assert.match(post, /<meta name="description" content="ملخص">/);
+    assert.equal(JSON.parse(post.match(/ld\+json">([\s\S]*?)<\/script>/)[1]).datePublished, '2026-10-01');
+    assert.match(pages[1].html, /href="post.html"/);
+    const xml = addToSitemap('<urlset>\n</urlset>', pages, '2026-10-11');
+    assert.match(xml, /<loc>https:\/\/osamaal-harbi.github.io\/CV\/projects\/system.html<\/loc>\s*<lastmod>2026-10-11<\/lastmod>/);
+    assert.match(xml, /<loc>https:\/\/osamaal-harbi.github.io\/CV\/blog\/post.html<\/loc>\s*<lastmod>2026-10-01<\/lastmod>/);
+    assert.equal(sitePages({}).length, 0);
 });
