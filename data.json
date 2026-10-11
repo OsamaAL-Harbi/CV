@@ -395,7 +395,7 @@
     }
   },
   "fonts": {
-    "ar": "almarai",
+    "ar": "ibm-plex-sans-arabic",
     "en": "ibm-plex-sans"
   },
   "seo": {
