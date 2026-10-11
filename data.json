@@ -312,7 +312,9 @@
         "en": "Amazon Web Services (AWS)"
       },
       "credential": "",
-      "date": ""
+      "date": "",
+      "url": "https://mcit.futurex.sa/certificates/7d0da97038944395ac5e991ad86f3b85",
+      "image": "images/certificates/aws-certified-cloud-practitioner-sda-202610110720.webp"
     }
   ],
   "workshops": [
@@ -409,5 +411,10 @@
     "verify": {
       "google": "8Y1B4oYaT6N9zb7qRBTLNGSOYvK11SgGS_KIRJEREmo"
     }
+  },
+  "visibility": {
+    "sections": [
+      "testimonials"
+    ]
   }
 }
