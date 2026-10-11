@@ -391,5 +391,23 @@
       "ar": "",
       "en": ""
     }
+  },
+  "fonts": {
+    "ar": "almarai",
+    "en": "ibm-plex-sans"
+  },
+  "seo": {
+    "ar": {
+      "title": "",
+      "description": ""
+    },
+    "en": {
+      "title": "",
+      "description": ""
+    },
+    "image": "",
+    "verify": {
+      "google": "8Y1B4oYaT6N9zb7qRBTLNGSOYvK11SgGS_KIRJEREmo"
+    }
   }
 }
