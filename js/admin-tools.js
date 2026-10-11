@@ -268,7 +268,9 @@ const SECTIONS = {
     workshops:    { label: 'ورش العمل', title: i => i.name,  fields: { name: 'الاسم', organizer: 'الجهة', date: 'التاريخ' } },
     languages:    { label: 'اللغات',   title: i => i.name,   fields: { name: 'اللغة', level: 'المستوى' } },
     projects:     { label: 'المشاريع', title: i => i.title,  fields: { title: 'العنوان', desc: 'الوصف' } },
-    skills:       { label: 'المهارات', title: i => i,        fields: {} }
+    skills:       { label: 'المهارات', title: i => i,        fields: {} },
+    testimonials: { label: 'التوصيات', title: i => i.name,   fields: { name: 'الاسم', role: 'المنصب', text: 'النص' } },
+    posts:        { label: 'المقالات', title: i => i.title,  fields: { title: 'العنوان', summary: 'الملخص', body: 'النص' } }
 };
 const LIMITS = { summary: [120, 700], description: [0, 900], title: [0, 90] };
 
@@ -415,7 +417,8 @@ export async function openChecker() {
 export const HIDEABLE = {
     experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات', certificates: 'الشهادات',
     workshops: 'ورش العمل', languages: 'اللغات', projects: 'المشاريع', stats: 'الأرقام في الرئيسية',
-    github: 'قسم GitHub', status: 'مراقبة الأنظمة', whatsapp: 'بطاقة واتساب', vcard: 'حفظ جهة الاتصال'
+    github: 'قسم GitHub', status: 'مراقبة الأنظمة', whatsapp: 'بطاقة واتساب', vcard: 'حفظ جهة الاتصال',
+    testimonials: 'التوصيات', blog: 'المقالات'
 };
 
 async function manageVisibility() {

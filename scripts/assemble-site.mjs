@@ -10,6 +10,7 @@ import { join } from 'node:path';
 import { ROOT } from './cdn-assets.mjs';
 import { fontStack } from '../js/fonts.js';
 import { applyJsonLd, applyVerification, prerenderContent } from './prerender.mjs';
+import { addToSitemap, fontsCss, sitePages } from './pages.mjs';
 
 export const SITE_URL = 'https://osamaal-harbi.github.io/CV/';
 
@@ -80,8 +81,17 @@ async function main() {
     const steps = [applySeo, applyProfileImage, applyJsonLd, applyVerification, prerenderContent, applyFonts];
     const seoHtml = steps.reduce((out, step) => step(out, data), html);
     if (seoHtml !== html) { await writeFile(index, seoHtml); console.log('seo   index.html meta tags, JSON-LD, CV content and fonts from data.json'); }
+    // One page per project and per blog post (scripts/pages.mjs), listed in the sitemap
+    const pages = sitePages(data);
+    for (const page of pages) {
+        await mkdir(join(dest, page.path, '..'), { recursive: true });
+        await writeFile(join(dest, page.path), page.html);
+    }
+    if (pages.length) console.log(`pages ${pages.map(p => p.path).join(', ')}`);
+    await writeFile(join(dest, 'assets/css/site-fonts.css'), fontsCss(fontStack(data?.fonts || {})));
+    const today = new Date().toISOString().slice(0, 10);
     const sitemap = join(dest, 'sitemap.xml');
-    await writeFile(sitemap, touchSitemap(await readFile(sitemap, 'utf8')));
+    await writeFile(sitemap, addToSitemap(touchSitemap(await readFile(sitemap, 'utf8'), today), pages, today));
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) await main();

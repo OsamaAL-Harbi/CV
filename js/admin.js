@@ -196,7 +196,7 @@ const SECTION_NAMES = {
     profile: 'الملف الشخصي', experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات',
     projects: 'المشاريع', certificates: 'الشهادات', workshops: 'ورش العمل', languages: 'اللغات',
     github: 'GitHub', monitor: 'المراقبة', theme: 'ألوان الموقع', analytics: 'الإحصائيات',
-    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة', fonts: 'الخطوط'
+    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة', fonts: 'الخطوط', testimonials: 'التوصيات', posts: 'المقالات'
 };
 
 // Which sections differ from the last loaded/saved version, e.g. ["الخبرات (+1)", "الملف الشخصي"].
@@ -351,8 +351,55 @@ const SCHEMAS = {
     languages: [
         { key: 'name',  label: 'اللغة / Language' },
         { key: 'level', label: 'المستوى / Level' }
+    ],
+    testimonials: [
+        { key: 'name', label: 'الاسم / Name' },
+        { key: 'role', label: 'المنصب والجهة / Role & organization' },
+        { key: 'text', label: 'نص التوصية / Recommendation', type: 'textarea' },
+        { key: 'link', label: 'رابط LinkedIn (https://)', simple: true }
+    ],
+    posts: [
+        { key: 'title',   label: 'العنوان / Title' },
+        { key: 'summary', label: 'ملخص قصير / Summary', type: 'textarea' },
+        { key: 'body',    label: 'نص المقال / Article', type: 'textarea', tall: true,
+          hint: 'Markdown: ## عنوان فرعي، - قائمة، **عريض**، *مائل*، `كود`، [نص](https://رابط)، > اقتباس، ``` كتلة كود ```' },
+        { key: 'date',    label: 'التاريخ (YYYY-MM-DD)', simple: true, placeholder: () => new Date().toISOString().slice(0, 10) },
+        { key: 'tags',    label: 'الوسوم / Tags', simple: true, array: true },
+        { key: 'slug',    label: 'رابط المقال (اختياري، إنجليزي) — blog/<slug>.html', simple: true },
+        { key: 'image',   label: 'صورة الغلاف (اختياري)', simple: true, upload: 'project' }
     ]
 };
+
+// Checks the editor cannot leave to the deploy: a post needs a title and text, links must be https
+function validateItem(type, obj) {
+    if (type === 'posts') {
+        if (!obj.title.ar && !obj.title.en) return 'اكتب عنوان المقال';
+        if (!obj.body.ar && !obj.body.en) return 'اكتب نص المقال';
+        if (obj.date && !/^\d{4}-\d{2}-\d{2}$/.test(obj.date)) return 'التاريخ بالصيغة YYYY-MM-DD، مثل 2026-10-11';
+        if (obj.slug && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(obj.slug)) return 'رابط المقال: حروف إنجليزية صغيرة وأرقام وشرطات فقط';
+    }
+    if (type === 'testimonials') {
+        if (!obj.name.ar && !obj.name.en) return 'اكتب اسم صاحب التوصية';
+        if (!obj.text.ar && !obj.text.en) return 'اكتب نص التوصية';
+        if (obj.link && !/^https:\/\//.test(obj.link)) return 'رابط LinkedIn يجب أن يبدأ بـ https://';
+    }
+    return '';
+}
+
+// Admin preview of a post as the visitor will read it (its own page appears after the next deploy)
+export async function previewPost(index) {
+    const post = (state.appData.posts || [])[index];
+    if (!post) return;
+    await loadVendor('swal');
+    const { renderMarkdown } = await import('./markdown.js');
+    const block = (lang) => `<article dir="${lang === 'ar' ? 'rtl' : 'ltr'}" lang="${lang}" class="text-start space-y-3">
+        <h2 class="text-2xl font-extrabold">${escapeHTML(post.title?.[lang] || '')}</h2>
+        <div class="readme">${renderMarkdown(post.body?.[lang] || '')}</div></article>`;
+    await Swal.fire({
+        title: 'معاينة المقال', width: '900px', showCloseButton: true, confirmButtonText: 'إغلاق',
+        html: `<div class="space-y-8 max-h-[65vh] overflow-y-auto px-1">${post.body?.ar ? block('ar') : ''}${post.body?.en ? `<hr>${block('en')}` : ''}</div>`
+    });
+}
 
 // draft: values typed before an image upload interrupted the dialog (it reopens with them)
 async function manageItem(type, index = null, draft = null) {
@@ -394,7 +441,7 @@ async function manageItem(type, index = null, draft = null) {
             </div>`;
         }
         if (f.simple) {
-            const val = isEdit || draft ? getSimple(item, f) : '';
+            const val = isEdit || draft ? getSimple(item, f) : (f.placeholder ? f.placeholder() : '');
             const hint = f.array ? ' <span class="text-gray-400 text-xs">(مفصولة بفاصلة)</span>' : '';
             return `<div class="mb-3">
                 <label class="block text-xs mb-1 text-gray-500 text-right" for="swal-${f.key}">${f.label}${hint}</label>
@@ -405,11 +452,12 @@ async function manageItem(type, index = null, draft = null) {
         const valAr = getVal(item, f, 'ar');
         const valEn = getVal(item, f, 'en');
         if (f.type === 'textarea') {
-            return `<div class="grid grid-cols-2 gap-2 mb-3">
+            const h = f.tall ? 'h-72 font-mono text-xs' : 'h-24';
+            return `${f.hint ? `<p class="text-[11px] text-gray-500 text-right mb-1">${escapeHTML(f.hint)}</p>` : ''}<div class="grid grid-cols-2 gap-2 mb-3">
                 <div><label class="block text-xs mb-1 text-gray-500 text-right">${f.label} (AR)</label>
-                <textarea id="swal-${f.key}-ar" class="swal2-textarea m-0 w-full h-24 text-right" dir="rtl">${escapeHTML(valAr)}</textarea></div>
+                <textarea id="swal-${f.key}-ar" class="swal2-textarea m-0 w-full ${h} text-right" dir="rtl">${escapeHTML(valAr)}</textarea></div>
                 <div><label class="block text-xs mb-1 text-gray-500 text-left">${f.label} (EN)</label>
-                <textarea id="swal-${f.key}-en" class="swal2-textarea m-0 w-full h-24 text-left" dir="ltr">${escapeHTML(valEn)}</textarea></div>
+                <textarea id="swal-${f.key}-en" class="swal2-textarea m-0 w-full ${h} text-left" dir="ltr">${escapeHTML(valEn)}</textarea></div>
             </div>`;
         }
         return `<div class="grid grid-cols-2 gap-2 mb-3">
@@ -455,7 +503,7 @@ async function manageItem(type, index = null, draft = null) {
     const { value } = await Swal.fire({
         title: isEdit ? 'تعديل البيانات' : 'إضافة جديدة',
         html: `<div class="text-right" dir="rtl">${html}</div>`,
-        width: '700px', confirmButtonText: 'حفظ التغييرات',
+        width: type === 'posts' ? '960px' : '700px', confirmButtonText: 'حفظ التغييرات',
         showCancelButton: true, cancelButtonText: 'إلغاء',
         focusConfirm: false,
         didOpen: popup => schema.filter(f => f.upload).forEach(f => {
@@ -468,7 +516,12 @@ async function manageItem(type, index = null, draft = null) {
                 manageItem(type, index, { ...typed, ...(path ? { [f.key]: path } : {}) });
             });
         }),
-        preConfirm: collect
+        preConfirm: () => {
+            const obj = collect();
+            const problem = validateItem(type, obj);
+            if (problem) { Swal.showValidationMessage(problem); return false; }
+            return obj;
+        }
     });
 
     if (value) {
@@ -908,7 +961,7 @@ function makeSortable(el, onEnd) {
 }
 
 function initSortable() {
-    ['experience','education','volunteer','certificates','workshops','languages'].forEach(type => {
+    ['experience','education','volunteer','certificates','workshops','languages','testimonials'].forEach(type => {
         makeSortable(document.getElementById(`${type}-container`), evt => reorderSection(type, evt.oldIndex, evt.newIndex));
     });
 

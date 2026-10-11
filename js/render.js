@@ -2,6 +2,8 @@
 import { state } from './state.js';
 import { escapeHTML, imageSrc, safeAssetUrl, safeUrl, showToast, skillLevel } from './utils.js';
 import { t, ui } from './i18n.js';
+import { postPages, postPath } from './pages.js';
+import { readingMinutes, plainText } from './markdown.js';
 
 let twInterval     = null;
 
@@ -12,7 +14,9 @@ const WC = {
     projects:     'tilt relative group bg-white dark:bg-cardBg rounded-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-full shadow-sm',
     certificates: 'relative group flex items-center gap-4 bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
     workshops:    'relative group bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
-    languages:    'relative group flex items-center gap-3 bg-white dark:bg-cardBg px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition'
+    languages:    'relative group flex items-center gap-3 bg-white dark:bg-cardBg px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
+    testimonials: 'relative group flex flex-col gap-4 bg-white dark:bg-cardBg p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
+    posts:        'relative group flex flex-col bg-white dark:bg-cardBg p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition'
 };
 
 const SKILL_TAB_ON  = 'px-4 py-1.5 text-xs font-bold rounded-full bg-primary text-white transition';
@@ -46,6 +50,10 @@ export function renderAll() {
     renderSection('certificates', state.appData.certificates || [], renderCertItem,        WC.certificates);
     renderSection('workshops',    state.appData.workshops    || [], renderWorkshopItem,    WC.workshops);
     renderSection('languages',    state.appData.languages    || [], renderLanguageItem,    WC.languages);
+    renderSection('testimonials', state.appData.testimonials || [], renderTestimonialItem, WC.testimonials);
+    renderPosts();
+    renderVerifiedCount();
+    hideEmptyForVisitors(['testimonials', 'posts']);
     // Projects: filters first, then filtered grid
     renderProjectFilters();
     renderFilteredProjects();
@@ -241,16 +249,77 @@ function renderCertItem(item) {
         ${image
             ? `<a href="${escapeHTML(safeAssetUrl(item.image))}" target="_blank" rel="noopener" class="flex-shrink-0 print-hide" aria-label="${escapeHTML(`${state.currentLang === 'ar' ? 'صورة الشهادة' : 'Certificate image'}: ${t(item.name)}`)}">
                    <img src="${escapeHTML(image)}" alt="" width="56" height="56" loading="lazy" decoding="async" class="w-14 h-14 object-cover rounded-lg border border-gray-200 dark:border-gray-700"></a>`
-            : '<div class="text-2xl text-secondary flex-shrink-0" aria-hidden="true"><i class="fas fa-certificate"></i></div>'}
+            : `<div class="text-2xl ${verify ? 'text-green-600 dark:text-green-400' : 'text-secondary'} flex-shrink-0" aria-hidden="true"><i class="fas ${verify ? 'fa-award' : 'fa-certificate'}"></i></div>`}
         <div class="flex-1 min-w-0">
-            <h4 class="font-bold text-sm dark:text-white">${escapeHTML(t(item.name))}</h4>
+            <h4 class="font-bold text-sm dark:text-white flex flex-wrap items-center gap-x-2 gap-y-1">${escapeHTML(t(item.name))}
+                ${verify ? `<span class="cert-verified inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"><i class="fas fa-check-circle" aria-hidden="true"></i>${escapeHTML(ui('cert_verified'))}</span>` : ''}</h4>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${escapeHTML(t(item.issuer))}${item.credential ? ` · <span dir="ltr" class="font-mono">${escapeHTML(item.credential)}</span>` : ''}</p>
             ${date ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${escapeHTML(date)}</p>` : ''}
         </div>
         ${verify ? `<a href="${escapeHTML(verify)}" target="_blank" rel="noopener noreferrer"
-                      class="flex-shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline print-hide"
+                      class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/40 text-xs font-bold text-primary hover:bg-primary hover:text-white transition print-hide"
                       aria-label="${escapeHTML(`${ui('cert_verify')}: ${t(item.name)}`)}">
-                      <i class="fas fa-external-link-alt" aria-hidden="true"></i><span>${escapeHTML(ui('cert_verify'))}</span></a>` : ''}`;
+                      <i class="fas fa-shield-alt" aria-hidden="true"></i><span>${escapeHTML(ui('cert_verify'))}</span></a>` : ''}`;
+}
+
+// "3 verified" next to the Certificates heading (certificates with a verification link)
+function renderVerifiedCount() {
+    const el = document.getElementById('certs-verified');
+    if (!el) return;
+    const n = shownOnly(state.appData.certificates).filter(c => safeUrl(c.url)).length;
+    el.classList.toggle('hidden', n === 0);
+    el.textContent = `${n} ${ui('certs_verified')}`;
+}
+
+function renderTestimonialItem(item) {
+    const link = safeUrl(item.link);
+    return `
+        <i class="fas fa-quote-right text-3xl text-pink-200 dark:text-pink-900" aria-hidden="true"></i>
+        <blockquote class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed flex-1" dir="auto">${escapeHTML(t(item.text))}</blockquote>
+        <footer class="border-t border-gray-100 dark:border-gray-700 pt-3">
+            <p class="font-bold text-sm dark:text-white">${escapeHTML(t(item.name))}</p>
+            ${t(item.role) ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${escapeHTML(t(item.role))}</p>` : ''}
+            ${link ? `<a href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline mt-1 print-hide"><i class="fab fa-linkedin" aria-hidden="true"></i>${escapeHTML(ui('testimonial_profile'))}</a>` : ''}
+        </footer>`;
+}
+
+// Blog cards, newest first; each links to the article's own page (blog/<slug>.html, written at deploy).
+// The admin also sees hidden posts and gets a preview, since a new post has no page until it is published.
+function renderPosts() {
+    const container = document.getElementById('posts-container');
+    if (!container) return;
+    const visible = new Map(postPages(state.appData).map(p => [p.index, p.slug]));
+    const list = (state.appData.posts || []).map((item, index) => ({ item, index }))
+        .filter(({ item }) => isShown(item))
+        .sort((a, b) => String(b.item.date || '').localeCompare(String(a.item.date || '')) || a.index - b.index);
+    const fmt = new Intl.DateTimeFormat(state.currentLang === 'ar' ? 'ar-u-nu-latn' : 'en', { dateStyle: 'medium', timeZone: 'UTC' });
+    container.innerHTML = list.map(({ item, index }) => {
+        const slug = visible.get(index);
+        const date = /^\d{4}-\d{2}-\d{2}$/.test(String(item.date || '')) ? fmt.format(new Date(`${item.date}T00:00:00Z`)) : '';
+        const summary = t(item.summary) || plainText(t(item.body)).slice(0, 200);
+        const meta = [date, `${readingMinutes(t(item.body))} ${ui('blog_minutes')}`].filter(Boolean).join(' · ');
+        return `
+        <article class="${WC.posts}${item.hidden ? ' item-hidden' : ''}" data-index="${index}">
+            ${renderAdminButtons('posts', index, item)}
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">${escapeHTML(meta)}</p>
+            <h3 class="text-lg font-bold dark:text-white mb-2 leading-snug" dir="auto">${slug ? `<a href="${escapeHTML(postPath(slug))}" class="hover:text-primary">${escapeHTML(t(item.title))}</a>` : escapeHTML(t(item.title))}</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1" dir="auto">${escapeHTML(summary)}</p>
+            ${(item.tags || []).length ? `<div class="flex flex-wrap gap-1.5 mt-3">${item.tags.map(tag => `<span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold">${escapeHTML(tag)}</span>`).join('')}</div>` : ''}
+            <div class="flex gap-3 mt-4">
+                ${slug ? `<a href="${escapeHTML(postPath(slug))}" class="text-sm font-bold text-primary hover:underline">${escapeHTML(ui('blog_read'))}</a>` : ''}
+                ${state.isAdmin ? `<button type="button" data-action="preview-post" data-index="${index}" class="admin-element text-sm font-bold text-gray-500 hover:underline">معاينة</button>` : ''}
+            </div>
+        </article>`;
+    }).join('');
+}
+
+// Sections that only make sense with content (recommendations, blog) are hidden from visitors while empty
+function hideEmptyForVisitors(types) {
+    const section = { testimonials: 'testimonials', posts: 'blog' };
+    for (const type of types) {
+        const empty = !shownOnly(state.appData[type]).length;
+        document.querySelector(`[data-section="${section[type]}"]`)?.classList.toggle('hidden', empty && !state.isAdmin);
+    }
 }
 
 function renderWorkshopItem(item) {

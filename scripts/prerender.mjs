@@ -5,6 +5,7 @@
 // screen), a schema.org Person built from the CV, and the search-console verification tags from admin → SEO.
 // Everything is escaped; hidden sections and items (admin → visibility) are left out.
 import { verificationToken } from '../js/seo.js';
+import { postPages, postPath } from '../js/pages.js';
 
 const SITE_URL = 'https://osamaal-harbi.github.io/CV/';
 
@@ -48,12 +49,17 @@ export function prerenderContent(html, data) {
         certificates: x => item(ar(x.name), joinMeta(x.issuer, x.date)),
         workshops:    x => item(ar(x.name), joinMeta(x.organizer, x.date)),
         languages:    x => item(ar(x.name), ar(x.level)),
-        projects:     x => item(ar(x.title), (x.technologies || []).join('، '), desc(x.desc))
+        projects:     x => item(ar(x.title), (x.technologies || []).join('، '), desc(x.desc)),
+        testimonials: x => item(ar(x.name), ar(x.role), desc(x.text))
     };
     for (const [section, render] of Object.entries(lists)) {
         const items = shown(data, section);
         if (items.length) html = fill(html, `id="${section}-container"`, items.map(render).join(''));
     }
+    // Blog: title, date and summary, linking to each article's own page (blog/<slug>.html)
+    const posts = postPages(data);
+    if (posts.length) html = fill(html, 'id="posts-container"', posts.map(({ slug, item: x }) =>
+        `<article class="mb-6"><h3 class="text-xl font-bold"><a href="${esc(postPath(slug))}">${esc(ar(x.title))}</a></h3>${x.date ? `<p class="text-sm text-gray-500">${esc(x.date)}</p>` : ''}${desc(x.summary)}</article>`).join(''));
     const skills = shown(data, 'skills');
     if (skills.length) html = fill(html, 'id="skills-container"', `<ul class="list-disc ps-5">${skills.map(s => `<li>${esc(ar(s))}</li>`).join('')}</ul>`);
     return html;
@@ -80,7 +86,8 @@ export function personJsonLd(base, data) {
         name: en(c.name),
         credentialCategory: 'certificate',
         ...(c.issuer ? { recognizedBy: { '@type': 'Organization', name: en(c.issuer) } } : {}),
-        ...(https(c.credential) ? { url: https(c.credential) } : {})
+        ...(https(c.url) ? { url: https(c.url) } : {}),
+        ...(c.credential ? { identifier: String(c.credential) } : {})
     }));
     const current = shown(data, 'experience')[0];
     if (current?.role) person.hasOccupation = { '@type': 'Occupation', name: en(current.role) };

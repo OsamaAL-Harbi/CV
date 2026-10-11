@@ -2,6 +2,30 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.7.0] — 2026-10-11
+
+### Added
+- **A page for every project**: the deploy writes `projects/<slug>.html` (slug from the English title, unique)
+  with the project in Arabic and English, its own title, description, canonical URL, social-card tags and
+  schema.org `SoftwareSourceCode`/`CreativeWork`; the project dialog links to it («صفحة المشروع»).
+- **Blog** (`data.json → posts`, admin → «مقال جديد»): title, summary, body, date, tags, optional slug and cover
+  image, in both languages, validated in the editor and previewable before publishing. The body is a safe Markdown
+  subset rendered by `js/markdown.js` (no library, no raw HTML; only https or site links). Cards (newest first,
+  reading time) in a new «المقالات» section; the deploy writes `blog/<slug>.html` (schema.org `BlogPosting`) and
+  `blog/index.html`.
+- **Recommendations** (`data.json → testimonials`): name, role and organization, text and a LinkedIn link, in a new
+  section on the resume page; sortable, hideable, and hidden from visitors while empty.
+- **Verified certificates**: a certificate with a verification link gets a «موثّقة» badge, a clearer «تحقق»
+  button and an award icon; the number of verified certificates shows next to the heading.
+- The new pages are added to `sitemap.xml`; the CV written into `index.html` at deploy now also has the
+  recommendations and the article list. Recommendations and the blog can be hidden from admin → visibility, and the
+  content checker covers them.
+
+### Changed
+- JSON-LD credentials use the verification link (`url`) and the credential ID (`identifier`).
+- The deploy writes `assets/css/site-fonts.css` so the standalone pages use the fonts chosen in admin → Fonts.
+- Service worker cache v8 (adds `js/pages.js` and `js/markdown.js`).
+
 ## [4.6.0] — 2026-10-11
 
 ### Added
