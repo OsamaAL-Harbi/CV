@@ -354,3 +354,10 @@ test('scrollbar style: written into index.html and the standalone pages, unknown
     const page = sitePages({ scrollbar: 'slim', projects: [{ title: { ar: 'أ', en: 'A' } }] })[0].html;
     assert.match(page, /<html lang="ar" dir="rtl" data-scrollbar="slim">/);
 });
+
+test('motion level: written into index.html, unknown values fall back to lively', async () => {
+    const { applyMotionLevel } = await import('../../scripts/assemble-site.mjs');
+    const html = '<html lang="ar" data-motion="lively">\n<meta id="site-motion" name="site-motion" content="">';
+    assert.equal(applyMotionLevel(html, { motion: 'off' }), '<html lang="ar" data-motion="off">\n<meta id="site-motion" name="site-motion" content="off">');
+    assert.match(applyMotionLevel(html, { motion: 'x"><b>' }), /data-motion="lively"[\s\S]*content="lively"/);
+});

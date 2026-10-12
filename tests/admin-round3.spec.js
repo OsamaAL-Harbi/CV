@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { test, expect, openSite } from './fixtures.js';
 
-// The real data.json without the owner's display settings (hidden sections, fonts), which change whenever they are
-// edited in the admin panel; each test sets the ones it is about.
-const DATA = (({ visibility, fonts, ...rest }) => rest)(JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8')));
+// The real data.json without the owner's display settings (hidden sections, fonts, scrollbar, motion), which change
+// whenever they are edited in the admin panel; each test sets the ones it is about.
+const DATA = (({ visibility, fonts, scrollbar, motion, ...rest }) => rest)(JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8')));
 const clone = () => structuredClone(DATA);
 const b64 = obj => Buffer.from(JSON.stringify(obj)).toString('base64');
 const state = page => page.evaluate(async () => (await import('./js/state.js')).state.appData);
@@ -507,10 +507,12 @@ test.describe('scrollbar style', () => {
     const sb = page => page.evaluate(() => document.documentElement.dataset.scrollbar);
 
     test('brand style by default; data.json picks another; dark mode gets dark native controls', async ({ page }) => {
+        await page.context().route('**/data.json*', route => route.fulfill({ json: clone() }));
         await openSite(page);
         expect(await sb(page)).toBe('brand');
         const data = clone();
         data.scrollbar = 'gradient';
+        await page.context().unroute('**/data.json*');
         await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
         await page.reload();
         await expect.poll(() => sb(page)).toBe('gradient');
@@ -540,5 +542,57 @@ test.describe('scrollbar style', () => {
         await page.locator('.swal2-confirm').click();
         expect((await state(page)).scrollbar).toBe('slim');
         expect(await sb(page)).toBe('slim');
+    });
+});
+
+test.describe('motion', () => {
+    const motion = page => page.evaluate(() => document.documentElement.dataset.motion);
+
+    test('cards reveal once as they scroll into view; a re-render does not animate them again', async ({ page }) => {
+        await page.context().route('**/data.json*', route => route.fulfill({ json: clone() }));
+        await openSite(page);
+        await expect.poll(() => page.evaluate(() => document.documentElement.classList.contains('is-ready'))).toBe(true);
+        expect(await motion(page)).toBe('lively');
+        await page.evaluate(() => { location.hash = 'resume'; });
+        const card = page.locator('#experience-container > div').first();
+        await expect(card).toHaveClass(/reveal/);
+        expect(await card.evaluate(el => getComputedStyle(el).opacity)).toBe('0');   // waits below the fold
+        await card.scrollIntoViewIfNeeded();
+        await expect.poll(() => card.evaluate(el => getComputedStyle(el).opacity)).toBe('1');
+        await expect(card).not.toHaveClass(/reveal/, { timeout: 3000 });      // back to its own transitions
+        await page.locator('#lang-btn').click();                              // re-render
+        await page.waitForTimeout(150);
+        expect(await page.locator('#experience-container > div.reveal').count()).toBe(0);
+    });
+
+    test('nothing moves with the system «reduce motion» setting or with motion off', async ({ page }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await openSite(page, 'resume');
+        await page.waitForTimeout(200);
+        expect(await page.locator('.reveal').count()).toBe(0);
+        const data = clone();
+        data.motion = 'off';
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
+        await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
+        await page.reload();
+        await expect.poll(() => motion(page)).toBe('off');
+        await page.waitForTimeout(200);
+        expect(await page.locator('.reveal').count()).toBe(0);
+        expect(await page.evaluate(() => localStorage.getItem('motion'))).toBe('off');
+    });
+
+    test('admin picks a level live, cancel restores, apply saves', async ({ page }) => {
+        await stubGitHub(page);
+        await login(page);
+        await tool(page, 'الحركة والتأثيرات');
+        await page.locator('input[name="motion"][value="subtle"]').check();
+        expect(await motion(page)).toBe('subtle');
+        await page.locator('#motion-replay').click();
+        await page.locator('.swal2-cancel').click();
+        await expect.poll(() => motion(page)).toBe('lively');
+        await tool(page, 'الحركة والتأثيرات');
+        await page.locator('input[name="motion"][value="off"]').check();
+        await page.locator('.swal2-confirm').click();
+        expect((await state(page)).motion).toBe('off');
     });
 });

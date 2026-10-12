@@ -141,7 +141,7 @@ test.describe('service worker', () => {
         });
         expect(sw.scope).toMatch(/\/CV\/$/);
         expect(sw.state).toBe('activated');
-        expect(sw.keys).toContain('portfolio-v10');
+        expect(sw.keys).toContain('portfolio-v11');
         expect(sw.offline).toBe(true);
     });
 

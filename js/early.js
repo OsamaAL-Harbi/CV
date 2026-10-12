@@ -32,6 +32,12 @@
         var sb = (sbMeta && sbMeta.content) || localStorage.getItem('scrollbar');
         if (sb && /^(brand|gradient|slim|bold|classic)$/.test(sb)) root.setAttribute('data-scrollbar', sb);
     } catch (e) { /* storage blocked: default scrollbar */ }
+    // Motion level (admin → Motion): same order — the page's own setting, else the cached choice
+    try {
+        var mvMeta = document.getElementById('site-motion');
+        var mv = (mvMeta && mvMeta.content) || localStorage.getItem('motion');
+        if (mv && /^(lively|subtle|off)$/.test(mv)) root.setAttribute('data-motion', mv);
+    } catch (e) { /* storage blocked: default motion */ }
     var fromUrl = /[?&]lang=(ar|en)(&|$)/.exec(location.search);
     if (fromUrl) lang = fromUrl[1];
     if (lang !== 'en') lang = 'ar';
