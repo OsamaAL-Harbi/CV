@@ -2,6 +2,26 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.11.0] — 2026-10-12
+
+### Added
+- **Mouse cursor styles** (admin → tools → «مؤشر الفأرة», `data.json → cursor`, `js/cursor.js`):
+  - **brand** (default): an arrow and a hand in the primary colour with a white outline;
+  - **gradient**: primary → secondary;
+  - **ring**: the brand arrow plus a ring that follows it and grows over links and buttons;
+  - **dot**: a dot in place of the arrow plus a trailing ring;
+  - **system cursor**.
+- The images are SVGs built in the colours actually in use (custom theme, light/dark mode) and redrawn when they
+  change; icons are Font Awesome Free (CC BY 4.0).
+- Mouse and trackpad only, so touch screens are untouched. Text fields keep the text cursor.
+- Without JavaScript the system cursor shows. «dot» hides the system cursor only once its dot is following the
+  pointer. The followers move without easing under «reduce motion» or motion off.
+- The admin dialog draws every option in the site's colours, with a box to try each one. The page switches live,
+  and cancel restores.
+- The deploy writes the choice into `index.html` (applied by `js/early.js` before first paint), and into
+  `assets/css/site-cursor.css` for the standalone project and blog pages.
+- Service worker cache v12.
+
 ## [4.10.0] — 2026-10-12
 
 ### Added

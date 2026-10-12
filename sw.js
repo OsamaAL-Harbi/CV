@@ -1,6 +1,6 @@
 // Service worker: offline support for the portfolio.
 // Bump VERSION whenever SHELL changes so visitors drop the old caches on activate.
-const VERSION = 'v11';
+const VERSION = 'v12';
 const CACHE_NAME = `portfolio-${VERSION}`;
 const DYNAMIC_CACHE = `portfolio-dynamic-${VERSION}`;
 const DYNAMIC_MAX_ENTRIES = 60;
@@ -37,6 +37,7 @@ const SHELL = [
   './js/timeline.js',
   './js/timeline-data.js',
   './js/scrollbar.js',
+  './js/cursor.js',
   './js/motion.js'
 ];
 
