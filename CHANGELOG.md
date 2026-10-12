@@ -2,6 +2,25 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.7.2] — 2026-10-12
+
+### Security
+- Deploy: a crafted `profile.image` in `data.json` could end the JSON-LD string and inject HTML into the published
+  `<head>` (e.g. a `<meta http-equiv="refresh">` redirect). The image is now validated as a strict https URL and
+  written JSON-encoded; the JSON-LD step stops the deploy if the block ever stops parsing instead of publishing it.
+- GitHub cards: star/fork counts from `generated/github.json` are written as numbers (a tampered file could break
+  out of an attribute).
+- Admin → Monitoring: an invalid URL from `data.json` is escaped in the validation message (SweetAlert renders it
+  as HTML).
+- `fetch-github.mjs` only writes README copies for safe repository names (no path traversal from a tampered
+  deployed JSON).
+- `offline.html` gets a strict CSP (`default-src 'none'`, its one style allowed by hash).
+- Markdown: emphasis no longer touches link addresses.
+
+### Changed
+- Project pages: headings no longer skip a level (accessibility).
+- Removed the 16 unused weight-500 font files (no longer bundled since 4.7.1).
+
 ## [4.7.1] — 2026-10-12
 
 ### Changed

@@ -198,8 +198,8 @@ function renderRepos(repos) {
             ${repo.topics?.length ? `<div class="flex flex-wrap gap-1.5 mt-3">${repo.topics.map(tp => `<span class="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold" dir="ltr">${escapeHTML(tp)}</span>`).join('')}</div>` : ''}
             <div class="flex flex-wrap items-center gap-4 mt-4 text-xs text-gray-500 dark:text-gray-400">
                 ${repo.language ? `<span class="flex items-center gap-1.5" dir="ltr"><span class="w-2.5 h-2.5 rounded-full" data-bg="${safeColor(repo.language.color)}" aria-hidden="true"></span>${escapeHTML(repo.language.name)}</span>` : ''}
-                <span class="flex items-center gap-1" dir="ltr" aria-label="${ar() ? 'النجوم' : 'Stars'}: ${repo.stars}"><i class="fas fa-star" aria-hidden="true"></i>${number(repo.stars)}</span>
-                <span class="flex items-center gap-1" dir="ltr" aria-label="${ar() ? 'النسخ' : 'Forks'}: ${repo.forks}"><i class="fas fa-code-branch" aria-hidden="true"></i>${number(repo.forks)}</span>
+                <span class="flex items-center gap-1" dir="ltr" aria-label="${ar() ? 'النجوم' : 'Stars'}: ${Number(repo.stars) || 0}"><i class="fas fa-star" aria-hidden="true"></i>${number(repo.stars)}</span>
+                <span class="flex items-center gap-1" dir="ltr" aria-label="${ar() ? 'النسخ' : 'Forks'}: ${Number(repo.forks) || 0}"><i class="fas fa-code-branch" aria-hidden="true"></i>${number(repo.forks)}</span>
                 <span>${escapeHTML(relativeTime(repo.pushedAt))}</span>
             </div>
             <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">

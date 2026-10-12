@@ -100,7 +100,8 @@ export function applyJsonLd(html, data) {
     const m = html.match(re);
     if (!m) return html;
     let base;
-    try { base = JSON.parse(m[2]); } catch { return html; }
+    // A block that no longer parses means something injected into it: stop the deploy instead of publishing it
+    try { base = JSON.parse(m[2]); } catch (err) { throw new Error(`index.html JSON-LD is not valid JSON: ${err.message}`); }
     // "<" escaped so no text in data.json can close the script element
     const json = JSON.stringify(personJsonLd(base, data), null, 2).replace(/</g, '\\u003c').replace(/\n/g, '\n    ');
     return html.replace(re, (_, open, _old, close) => `${open}\n    ${json}\n    ${close}`);

@@ -1278,7 +1278,7 @@ export async function manageMonitor() {
             sync();
             const clean = rows.filter(r => r.url);
             const bad = clean.find(r => !/^https:\/\/[^\s/$.?#].[^\s]*$/i.test(r.url));
-            if (bad) { Swal.showValidationMessage(`رابط غير صالح (يجب أن يبدأ بـ https://): ${bad.url}`); return false; }
+            if (bad) { Swal.showValidationMessage(`رابط غير صالح (يجب أن يبدأ بـ https://): ${escapeHTML(bad.url)}`); return false; }
             const sites = clean.slice(0, MAX_MONITOR).map(r => {
                 let name = r.name;
                 if (!name) { try { name = new URL(r.url).hostname; } catch { name = r.url; } }

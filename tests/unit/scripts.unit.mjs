@@ -284,3 +284,44 @@ test('inlineEarlyScript: inlines js/early.js and allows exactly it by hash in th
     assert.equal(inlineEarlyScript(html, 'x("</script>")'), html);      // never breaks out of the tag
     assert.equal(inlineEarlyScript('<p></p>', code), '<p></p>');
 });
+
+test('offline.html: strict CSP whose style hash matches its inline <style>', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const { createHash } = await import('node:crypto');
+    const html = await readFile(new URL('../../offline.html', import.meta.url), 'utf8');
+    const style = html.match(/<style>([\s\S]*?)<\/style>/)[1];
+    const csp = html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
+    assert.match(csp, /default-src 'none'/);
+    assert.ok(csp.includes(`'sha256-${createHash('sha256').update(style).digest('base64')}'`), 'update the style hash in offline.html');
+    assert.ok(!/<script/i.test(html));
+});
+
+test('project pages: headings never skip a level (h1 → h2, then English h2 → h3)', async () => {
+    const { sitePages } = await import('../../scripts/pages.mjs');
+    const data = { projects: [{ title: { ar: 'أ', en: 'A' }, desc: { ar: 'و', en: 'd' }, technologies: ['SQL'], details: { challenges: { ar: 'ت', en: 'c' }, results: { ar: 'ن', en: 'r' } } }] };
+    const levels = [...sitePages(data)[0].html.matchAll(/<h([1-6])\b/g)].map(m => Number(m[1]));
+    levels.forEach((l, i) => assert.ok(i === 0 ? l === 1 : l <= levels[i - 1] + 1, `h${levels[i - 1]} → h${l}`));
+});
+
+test('deploy: a crafted profile image cannot break out of the JSON-LD script', async () => {
+    const { applySeo, applyProfileImage } = await import('../../scripts/assemble-site.mjs');
+    const { applyJsonLd } = await import('../../scripts/prerender.mjs');
+    const { readFile } = await import('node:fs/promises');
+    const html = await readFile(new URL('../../index.html', import.meta.url), 'utf8');
+    for (const image of ['https://x.example/a"</script><meta http-equiv="refresh" content="0;url=https://evil.example/"><script>',
+                         'https://x.example/a\\"</script><meta http-equiv="refresh">', 'https://x.example/</script>']) {
+        const data = { profile: { image } };
+        const out = applyJsonLd(applyProfileImage(applySeo(html, data), data), data);
+        assert.ok(!/<meta http-equiv="refresh"/.test(out), image);
+        assert.equal(out.match(/<\/script>/g).length, html.match(/<\/script>/g).length);
+    }
+    assert.throws(() => applyJsonLd('<script type="application/ld+json">{"broken": </script>', {}), /not valid JSON/);
+});
+
+test('markdown: emphasis never alters link addresses', async () => {
+    const { renderMarkdown } = await import('../../js/markdown.js');
+    const html = renderMarkdown('[a](https://x/*) [b](https://y/*) and [**c**](blog/x.html)');
+    assert.match(html, /href="https:\/\/x\/\*"/);
+    assert.match(html, /href="https:\/\/y\/\*"/);
+    assert.match(html, /<a href="blog\/x.html"><strong>c<\/strong><\/a>/);
+});
