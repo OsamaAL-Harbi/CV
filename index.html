@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="motion-safe:scroll-smooth" data-scrollbar="brand">
+<html lang="ar" dir="rtl" class="motion-safe:scroll-smooth" data-scrollbar="brand" data-motion="lively">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,7 @@
     <!-- Fonts from admin → Fonts, written here at deploy time (scripts/assemble-site.mjs) so js/early.js applies them before first paint -->
     <meta id="site-fonts" name="site-fonts" content="">
     <meta id="site-scrollbar" name="site-scrollbar" content="">
+    <meta id="site-motion" name="site-motion" content="">
     <!-- Applies saved theme/language before first paint (no inline script: CSP) -->
     <script src="js/early.js"></script>
 
@@ -87,6 +88,7 @@
     <link rel="modulepreload" href="js/timeline.js">
     <link rel="modulepreload" href="js/timeline-data.js">
     <link rel="modulepreload" href="js/scrollbar.js">
+    <link rel="modulepreload" href="js/motion.js">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
     <!-- Styles: one prebuilt file (Tailwind + AOS + icons + self-hosted Tajawal), see npm run build:css -->
@@ -183,8 +185,8 @@
             <div class="flex items-center justify-center text-center">
                 <div class="w-full">
                     <!-- Profile Image -->
-                    <div class="mb-8 relative inline-block group cursor-pointer">
-                        <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
+                    <div class="mb-8 relative inline-block group cursor-pointer hero-pop">
+                        <div class="hero-glow absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
                         <img id="profile-img" src="assets/img/avatar.svg" alt="أسامة الحربي" width="192" height="192" class="relative w-48 h-48 rounded-full border-4 border-white dark:border-darkBg object-cover shadow-2xl transition transform group-hover:scale-105">
                         <button data-action="edit-image" data-path="profile.image" class="admin-element absolute inset-0 bg-black/50 rounded-full items-center justify-center text-white opacity-0 hover:opacity-100 transition">
                             <i class="fas fa-camera text-2xl"></i>
@@ -200,20 +202,20 @@
                         <span class="w-2.5 h-2.5 rounded-full bg-green-500 motion-safe:animate-pulse" aria-hidden="true"></span>
                         <b id="availability-status"></b><span id="availability-details" class="text-green-700 dark:text-green-400"></span>
                     </p>
-                    <p id="smart-greeting" class="text-primary font-bold mb-2 text-lg">مرحباً</p>
-                    <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight leading-tight" data-path="profile.name"></h1>
-                    <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-medium mb-6 min-h-8 flex justify-center gap-2">
+                    <p id="smart-greeting" class="hero-rise text-primary font-bold mb-2 text-lg">مرحباً</p>
+                    <h1 class="hero-rise hero-d1 text-5xl md:text-7xl font-extrabold mb-4 tracking-tight leading-tight" data-path="profile.name"></h1>
+                    <p class="hero-rise hero-d2 text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-medium mb-6 min-h-8 flex justify-center gap-2">
                         <span id="typewriter-sr" class="sr-only"></span>
                         <span id="typewriter" aria-hidden="true"></span><span class="motion-safe:animate-pulse text-primary" aria-hidden="true">|</span>
                     </p>
-                    <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto text-lg leading-relaxed mb-3" data-path="profile.summary"></p>
-                    <p class="text-sm text-gray-400 mb-10 flex items-center justify-center gap-2">
+                    <p class="hero-rise hero-d3 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto text-lg leading-relaxed mb-3" data-path="profile.summary"></p>
+                    <p class="hero-rise hero-d4 text-sm text-gray-400 mb-10 flex items-center justify-center gap-2">
                         <i class="fas fa-map-marker-alt text-primary"></i>
                         <span id="profile-location"></span>
                     </p>
 
                     <!-- CTA Buttons -->
-                    <div class="flex justify-center gap-3 flex-wrap mb-16">
+                    <div class="hero-rise hero-d5 flex justify-center gap-3 flex-wrap mb-16">
                         <a href="#portfolio" class="px-7 py-3 bg-primary text-white rounded-xl font-bold hover:scale-105 transition shadow-lg shadow-primary/30" data-lang="btn_projects">أعمالي</a>
                         <a href="Osama_Alharbi.pdf" download data-cv-link data-track="cv_download" class="px-7 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-bold hover:scale-105 transition shadow-lg shadow-red-500/30 flex items-center gap-2">
                             <i class="fas fa-file-pdf"></i><span data-lang="btn_download_cv">تحميل السيرة الذاتية</span>

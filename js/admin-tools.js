@@ -6,6 +6,7 @@ import { renderAll } from './render.js';
 import { syncSiteTheme } from './color.js';
 import { verificationToken } from './seo.js';
 import { SCROLLBARS, applyScrollbar, syncSiteScrollbar, DEFAULT_SCROLLBAR } from './scrollbar.js';
+import { MOTIONS, DEFAULT_MOTION, applyMotion, syncSiteMotion } from './motion.js';
 import { DEFAULT_FONTS, FONTS, applyFonts, syncSiteFonts } from './fonts.js';
 import { diffHTML, editItem, fromBase64Utf8, ghApi, manageProfile, putRepoFile, readAsBase64 } from './admin.js';
 
@@ -79,6 +80,7 @@ export async function openHistory() {
                     syncSiteTheme(state.appData.theme);
                     syncSiteFonts(state.appData.fonts);
                     syncSiteScrollbar(state.appData.scrollbar);
+                    syncSiteMotion(state.appData.motion);
                     renderAll();
                     Swal.close();
                     showToast(`استُرجعت النسخة ${chosen.sha.slice(0, 7)} في المحرر — راجعها ثم اضغط «حفظ» لنشرها`, 'success');
@@ -554,6 +556,43 @@ async function manageScrollbar() {
     showToast('تم تطبيق شكل شريط التمرير — اضغط «حفظ» لنشره ✅', 'success');
 }
 
+// ─── Motion level: lively / subtle / off, applied live; «replay» plays the hero entrance again ───
+async function manageMotion() {
+    await loadVendor('swal');
+    const current = state.appData.motion || DEFAULT_MOTION;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const option = m => `
+        <label class="flex items-start gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-gray-50 dark:has-[:checked]:bg-gray-800">
+            <input type="radio" name="motion" value="${m.id}" class="w-4 h-4 mt-1 shrink-0" ${current === m.id ? 'checked' : ''}>
+            <span><span class="block text-sm font-bold">${escapeHTML(m.label)}</span><span class="block text-xs text-gray-500 mt-0.5">${escapeHTML(m.desc)}</span></span>
+        </label>`;
+    const { value } = await Swal.fire({
+        title: 'الحركة والتأثيرات',
+        width: '640px',
+        html: `<div class="text-right space-y-3" dir="rtl">
+            ${MOTIONS.map(option).join('')}
+            ${reduced ? '<p class="text-xs text-amber-700 bg-amber-50 rounded-lg p-2">جهازك مضبوط على «تقليل الحركة»، لذلك لن ترى التأثيرات هنا. الزوار الذين لم يفعّلوا هذا الإعداد سيرونها.</p>' : ''}
+            <p class="text-xs text-gray-500">الزائر الذي فعّل «تقليل الحركة» في جهازه لا يرى أي حركة مهما كان الاختيار.</p>
+            <button type="button" id="motion-replay" class="px-3 py-2 rounded-lg bg-gray-800 text-white text-xs font-bold">إعادة تشغيل حركة الواجهة</button>
+        </div>`,
+        showCancelButton: true, confirmButtonText: 'تطبيق', cancelButtonText: 'إلغاء', focusConfirm: false,
+        didOpen: popup => {
+            popup.addEventListener('change', e => { if (e.target.name === 'motion') applyMotion(e.target.value); });
+            popup.querySelector('#motion-replay').addEventListener('click', () => {
+                const root = document.documentElement;
+                root.classList.remove('is-ready');
+                void root.offsetWidth;               // restart the CSS animations
+                root.classList.add('is-ready');
+            });
+        },
+        preConfirm: () => document.querySelector('input[name="motion"]:checked')?.value || DEFAULT_MOTION
+    });
+    if (!value) { syncSiteMotion(state.appData.motion); return; }   // cancel restores the level from before
+    if (value === DEFAULT_MOTION) delete state.appData.motion; else state.appData.motion = value;
+    syncSiteMotion(state.appData.motion);
+    showToast('تم تطبيق مستوى الحركة — اضغط «حفظ» لنشره ✅', 'success');
+}
+
 // ─── 9. SEO: title, description and share image per language ───
 async function manageSeo() {
     const seo = state.appData.seo || {};
@@ -641,6 +680,7 @@ const TOOLS = [
     { action: 'manage-visibility',   icon: 'fa-eye-slash',   label: 'إظهار وإخفاء الأقسام', run: manageVisibility },
     { action: 'manage-availability', icon: 'fa-briefcase',   label: 'متاح للعمل',            run: manageAvailability },
     { action: 'manage-fonts',        icon: 'fa-font',        label: 'الخطوط',               run: manageFonts },
+    { action: 'manage-motion',       icon: 'fa-magic',       label: 'الحركة والتأثيرات',    run: manageMotion },
     { action: 'manage-scrollbar',    icon: 'fa-arrows-alt-v', label: 'شريط التمرير',        run: manageScrollbar },
     { action: 'manage-seo',          icon: 'fa-magnifying-glass', label: 'SEO والمشاركة',   run: manageSeo },
     { action: 'upload-photo',        icon: 'fa-camera',      label: 'رفع الصورة الشخصية',   run: uploadProfilePhoto },

@@ -2,6 +2,25 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.10.0] — 2026-10-12
+
+### Added
+- **Motion across the site** (`js/motion.js`, CSS in `src/tailwind.css`; admin → tools → «الحركة والتأثيرات»,
+  `data.json → motion`: lively (default) / subtle / off):
+  - scroll reveal: cards and section headings rise into place the first time they enter the viewport, staggered
+    within their list (IntersectionObserver; new content from any render is picked up by a MutationObserver;
+    lists that already revealed do not animate again on re-render; the timeline reveals as one block);
+  - hero entrance once the loading screen is gone (transform only, so the LCP text is painted from the start),
+    the profile photo pops in and its glow ring turns slowly;
+  - hover lift on cards, a press on buttons (individual `translate`/`scale`, composing with tilt), a pointer
+    spotlight in the primary colour (mouse only), the active nav underline grows in, mobile menu links slide in,
+    a sweep across filled skill bars, a pulse on ongoing timeline milestones, section icons nudge on hover, the
+    scroll-to-top button pops in;
+  - nothing runs with the system «reduce motion» setting; content is never hidden without JavaScript; printing
+    shows everything.
+  - The deploy writes the level into `index.html` and `js/early.js` applies it before first paint.
+- Service worker cache v11.
+
 ## [4.9.0] — 2026-10-12
 
 ### Added

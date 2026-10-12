@@ -1,6 +1,6 @@
 // Service worker: offline support for the portfolio.
 // Bump VERSION whenever SHELL changes so visitors drop the old caches on activate.
-const VERSION = 'v10';
+const VERSION = 'v11';
 const CACHE_NAME = `portfolio-${VERSION}`;
 const DYNAMIC_CACHE = `portfolio-dynamic-${VERSION}`;
 const DYNAMIC_MAX_ENTRIES = 60;
@@ -36,7 +36,8 @@ const SHELL = [
   './js/markdown.js',
   './js/timeline.js',
   './js/timeline-data.js',
-  './js/scrollbar.js'
+  './js/scrollbar.js',
+  './js/motion.js'
 ];
 
 // Third-party host whose files are versioned/immutable: cache first.

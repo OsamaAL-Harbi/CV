@@ -32,7 +32,7 @@ export function renderTimeline() {
         const org = t(def.org(e.item));
         return `${year}<li class="timeline-item">
             <button type="button" data-action="timeline-go" data-type="${e.type}" data-index="${e.index}" class="timeline-card group text-start">
-                <span class="timeline-dot ${def.color}" aria-hidden="true"><i class="fas ${def.icon}"></i></span>
+                <span class="timeline-dot ${def.color}${e.ongoing ? ' is-ongoing' : ''}" aria-hidden="true"><i class="fas ${def.icon}"></i></span>
                 <span class="block text-[11px] font-bold text-gray-500 dark:text-gray-400">${escapeHTML(monthLabel(e.start))}${e.ongoing ? ` · ${escapeHTML(state.currentLang === 'ar' ? 'حتى الآن' : 'present')}` : ''}</span>
                 <span class="block text-sm font-bold dark:text-white leading-snug group-hover:text-primary transition">${escapeHTML(t(def.title(e.item)))}</span>
                 ${org ? `<span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">${escapeHTML(org)}</span>` : ''}

@@ -15,6 +15,7 @@ import { setupActions } from './js/actions.js';
 import { syncSiteTheme } from './js/color.js';
 import { syncSiteFonts } from './js/fonts.js';
 import { syncSiteScrollbar } from './js/scrollbar.js';
+import { initMotion, markReady, syncSiteMotion } from './js/motion.js';
 
 // Older versions kept the token (and a data backup) in localStorage forever.
 function purgeLegacyAdminStorage() {
@@ -32,6 +33,7 @@ async function loadContent() {
         syncSiteTheme(state.appData.theme);
         syncSiteFonts(state.appData.fonts);
         syncSiteScrollbar(state.appData.scrollbar);
+        syncSiteMotion(state.appData.motion);
         renderAll();
         setSmartGreeting();
         initStatsObserver();
@@ -44,6 +46,7 @@ async function loadContent() {
     } finally {
         updateStaticText();
         document.getElementById('loading-screen').classList.add('hidden');
+        markReady();
     }
 }
 
@@ -65,6 +68,7 @@ function boot() {
     registerPWA();
     setupScrollTop();
     setupTilt();
+    initMotion();
     checkLinkedInReferrer();
 
     purgeLegacyAdminStorage();

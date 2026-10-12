@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { ROOT } from './cdn-assets.mjs';
 import { fontStack } from '../js/fonts.js';
 import { DEFAULT_SCROLLBAR, isScrollbar } from '../js/scrollbar.js';
+import { DEFAULT_MOTION, isMotion } from '../js/motion.js';
 import { applyJsonLd, applyVerification, prerenderContent } from './prerender.mjs';
 import { addToSitemap, fontsCss, sitePages } from './pages.mjs';
 
@@ -84,6 +85,12 @@ export function applyScrollbarStyle(html, data) {
     return setMeta(html, 'id="site-scrollbar"', style).replace(/(<html\b[^>]*\bdata-scrollbar=")[^"]*(")/, `$1${style}$2`);
 }
 
+// Motion level from admin → Motion for js/early.js, and the default on <html>
+export function applyMotionLevel(html, data) {
+    const motion = isMotion(data?.motion) ? data.motion : DEFAULT_MOTION;
+    return setMeta(html, 'id="site-motion"', motion).replace(/(<html\b[^>]*\bdata-motion=")[^"]*(")/, `$1${motion}$2`);
+}
+
 export function touchSitemap(xml, date = new Date().toISOString().slice(0, 10)) {
     return xml.replace(/<lastmod>[^<]*<\/lastmod>/g, `<lastmod>${date}</lastmod>`);
 }
@@ -100,7 +107,7 @@ async function main() {
     const data = JSON.parse(await readFile(join(ROOT, 'data.json'), 'utf8'));
     const index = join(dest, 'index.html');
     const html = await readFile(index, 'utf8');
-    const steps = [applySeo, applyProfileImage, applyJsonLd, applyVerification, prerenderContent, applyFonts, applyScrollbarStyle];
+    const steps = [applySeo, applyProfileImage, applyJsonLd, applyVerification, prerenderContent, applyFonts, applyScrollbarStyle, applyMotionLevel];
     const early = await readFile(join(ROOT, 'js/early.js'), 'utf8');
     const seoHtml = inlineEarlyScript(steps.reduce((out, step) => step(out, data), html), early);
     if (seoHtml !== html) { await writeFile(index, seoHtml); console.log('seo   index.html meta tags, JSON-LD, CV content, fonts and inlined early.js'); }

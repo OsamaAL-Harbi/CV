@@ -9,6 +9,7 @@ import { DEFAULT_THEME, PRESETS, applyTheme, harmonies, isHex, syncSiteTheme } f
 import { diffLines, diffStats, hunks, merge3 } from './diff.js';
 import { syncSiteFonts } from './fonts.js';
 import { syncSiteScrollbar } from './scrollbar.js';
+import { syncSiteMotion } from './motion.js';
 
 let githubInfo     = { token: '', repo: '' };
 
@@ -163,6 +164,7 @@ async function loadLatestFromGitHub() {
         syncSiteTheme(remote.theme);
         syncSiteFonts(remote.fonts);
         syncSiteScrollbar(remote.scrollbar);
+        syncSiteMotion(remote.motion);
         renderAll();
         showToast('حُمّلت أحدث نسخة من البيانات من GitHub', 'info');
     } catch { /* offline or no access yet: the save still merges */ }
@@ -198,7 +200,7 @@ const SECTION_NAMES = {
     profile: 'الملف الشخصي', experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات',
     projects: 'المشاريع', certificates: 'الشهادات', workshops: 'ورش العمل', languages: 'اللغات',
     github: 'GitHub', monitor: 'المراقبة', theme: 'ألوان الموقع', analytics: 'الإحصائيات',
-    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة', fonts: 'الخطوط', testimonials: 'التوصيات', posts: 'المقالات', scrollbar: 'شريط التمرير'
+    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة', fonts: 'الخطوط', testimonials: 'التوصيات', posts: 'المقالات', scrollbar: 'شريط التمرير', motion: 'الحركة والتأثيرات'
 };
 
 // Which sections differ from the last loaded/saved version, e.g. ["الخبرات (+1)", "الملف الشخصي"].
@@ -276,7 +278,7 @@ export async function saveToGitHub() {
         if (putRes.status === 409) throw new Error('تعارض: الملف تغيّر أثناء الحفظ، أعد المحاولة');
         if (!putRes.ok) throw new Error('فشل الحفظ في GitHub');
         state.lastSavedSnapshot = JSON.stringify(state.appData);
-        if (remoteChanged) { syncSiteTheme(state.appData.theme); syncSiteFonts(state.appData.fonts); syncSiteScrollbar(state.appData.scrollbar); renderAll(); }   // show what came from GitHub too
+        if (remoteChanged) { syncSiteTheme(state.appData.theme); syncSiteFonts(state.appData.fonts); syncSiteScrollbar(state.appData.scrollbar); syncSiteMotion(state.appData.motion); renderAll(); }   // show what came from GitHub too
         showToast('تم الحفظ في GitHub ✅ يظهر على الموقع خلال دقيقة تقريباً', 'success');
     } catch (e) {
         showToast('خطأ: ' + e.message, 'error');
