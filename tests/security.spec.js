@@ -37,7 +37,8 @@ test('values from data.json are rendered as text, never as HTML', async ({ page 
     await page.locator('#projects-container [data-action="open-project"]').first().click();
     await expect(page.locator('#modal-github-link')).toBeHidden();      // javascript: link dropped
     await expect(page.locator('#modal-live-link')).toBeHidden();
-    await expect(page.locator('main img:not(#profile-img), #project-modal img:not(#modal-image)')).toHaveCount(0);
+    // only the static images of the page (profile photo, the site QR code) — nothing injected from data.json
+    await expect(page.locator('main img:not(#profile-img):not([src="assets/img/qr-site.svg"]), #project-modal img:not(#modal-image)')).toHaveCount(0);
     await expect(page.locator('#modal-image')).toBeHidden();           // the project has no (safe) image
     await expect(page.locator('[data-path="profile.name"]')).toHaveText(PAYLOAD);
     await page.keyboard.press('Escape');

@@ -44,7 +44,8 @@ export const STATIC_TEXT = {
         load_error:'تعذّر تحميل المحتوى. تحقق من اتصالك ثم أعد المحاولة.', btn_retry:'إعادة المحاولة',
         skills_hard:'المهارات التقنية', skills_soft:'المهارات الشخصية', case_label:'دراسة حالة', open_to_work:'متاح للعمل',
         sec_testimonials:'التوصيات', sec_blog:'المقالات', blog_all:'كل المقالات', blog_read:'اقرأ المقال', blog_minutes:'د قراءة',
-        cert_verified:'موثّقة', certs_verified:'شهادة موثّقة', project_page:'صفحة المشروع', testimonial_profile:'الملف في LinkedIn'
+        cert_verified:'موثّقة', certs_verified:'شهادة موثّقة', project_page:'صفحة المشروع', testimonial_profile:'الملف في LinkedIn', sec_timeline:'المسيرة', timeline_hint:'اضغط أي محطة لعرض تفاصيلها',
+        qr_title:'امسح الرمز لزيارة موقعي', qr_sub:'للبطاقة الشخصية أو السيرة المطبوعة', qr_download:'تحميل'
     },
     en: {
         nav_home:'Home', nav_resume:'Resume', nav_portfolio:'Portfolio', nav_contact:'Contact',
@@ -72,7 +73,8 @@ export const STATIC_TEXT = {
         load_error:'Could not load the content. Check your connection and try again.', btn_retry:'Try again',
         skills_hard:'Technical Skills', skills_soft:'Soft Skills', case_label:'Case study', open_to_work:'Open to work',
         sec_testimonials:'Recommendations', sec_blog:'Articles', blog_all:'All articles', blog_read:'Read article', blog_minutes:'min read',
-        cert_verified:'Verified', certs_verified:'verified', project_page:'Project page', testimonial_profile:'LinkedIn profile'
+        cert_verified:'Verified', certs_verified:'verified', project_page:'Project page', testimonial_profile:'LinkedIn profile', sec_timeline:'Journey', timeline_hint:'Select a milestone to see its details',
+        qr_title:'Scan to visit my site', qr_sub:'For your business card or printed CV', qr_download:'Download'
     }
 };
 

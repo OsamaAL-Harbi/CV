@@ -29,7 +29,7 @@ jobs:
       - name: Committed CSS, fonts and vendor files match the sources
         run: |
           npm run build:css
-          git diff --exit-code -- assets/css assets/fonts assets/vendor
+          git diff --exit-code -- assets/css assets/fonts assets/vendor assets/img/qr-site.svg
 
       - name: Unit tests (deploy-time data scripts)
         run: npm run test:unit

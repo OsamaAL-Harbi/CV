@@ -118,7 +118,7 @@ test.describe('navigation', () => {
 
     test('CV download links point to an existing PDF', async ({ page, request }) => {
         await openSite(page);
-        const hrefs = await page.locator('a[download]').evaluateAll(as => [...new Set(as.map(a => a.getAttribute('href')))]);
+        const hrefs = await page.locator('a[data-cv-link]').evaluateAll(as => [...new Set(as.map(a => a.getAttribute('href')))]);
         expect(hrefs.length).toBeGreaterThan(0);
         for (const href of hrefs) {
             const res = await request.get(href);
@@ -141,7 +141,7 @@ test.describe('service worker', () => {
         });
         expect(sw.scope).toMatch(/\/CV\/$/);
         expect(sw.state).toBe('activated');
-        expect(sw.keys).toContain('portfolio-v8');
+        expect(sw.keys).toContain('portfolio-v9');
         expect(sw.offline).toBe(true);
     });
 

@@ -418,7 +418,7 @@ export const HIDEABLE = {
     experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات', certificates: 'الشهادات',
     workshops: 'ورش العمل', languages: 'اللغات', projects: 'المشاريع', stats: 'الأرقام في الرئيسية',
     github: 'قسم GitHub', status: 'مراقبة الأنظمة', whatsapp: 'بطاقة واتساب', vcard: 'حفظ جهة الاتصال',
-    testimonials: 'التوصيات', blog: 'المقالات'
+    testimonials: 'التوصيات', blog: 'المقالات', timeline: 'المسيرة (الخط الزمني)', qr: 'رمز QR'
 };
 
 async function manageVisibility() {

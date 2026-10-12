@@ -467,3 +467,38 @@ test.describe('blog, recommendations, project pages, verified certificates', () 
         await expect(page.locator('#testimonials-container')).toContainText('عمل متقن');
     });
 });
+
+test.describe('career timeline and QR code', () => {
+    test('timeline: every dated item oldest first, filters, and a click jumps to the card', async ({ page }) => {
+        const data = clone();
+        await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
+        await openSite(page, 'resume');
+        const { timelineEntries } = await import('../js/timeline-data.js');
+        const expected = timelineEntries(data);
+        const items = page.locator('#timeline-track .timeline-item');
+        await expect(page.locator('#timeline-section')).toBeVisible();
+        await expect(items).toHaveCount(expected.length);
+        await expect(page.locator('#timeline-track .timeline-year').first()).toHaveText(String(expected[0].start.year));
+        await page.locator('[data-action="timeline-filter"][data-filter="certificates"]').click();
+        await expect(items).toHaveCount(expected.filter(e => e.type === 'certificates').length);
+        await page.locator('[data-action="timeline-filter"][data-filter="all"]').click();
+        const last = expected.at(-1);
+        await items.last().locator('button').click();
+        const card = page.locator(`#${last.type}-container [data-index="${last.index}"]`);
+        await expect(card).toHaveClass(/timeline-flash/);
+        await expect(card).toBeInViewport();
+        await page.locator('#lang-btn').click();
+        await expect(page.locator('#timeline-title')).toContainText('Journey');
+    });
+
+    test('the QR card offers the SVG and a PNG of the site address', async ({ page }) => {
+        await openSite(page, 'contact');
+        const card = page.locator('#contact [data-section="qr"]');
+        await expect(card.locator('img')).toBeVisible();
+        expect(await card.locator('img').evaluate(img => img.naturalWidth > 0)).toBe(true);
+        await expect(card.locator('a[download]')).toHaveAttribute('href', 'assets/img/qr-site.svg');
+        const download = page.waitForEvent('download');
+        await card.locator('[data-action="download-qr-png"]').click();
+        expect((await download).suggestedFilename()).toBe('osama-alharbi-qr.png');
+    });
+});

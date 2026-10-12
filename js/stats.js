@@ -16,7 +16,7 @@ export const EVENT_LABELS = {
     cv_download: 'تحميل السيرة الذاتية', file_download: 'تحميل ملف (تلقائي من GA)', contact_email: 'نسخ البريد',
     contact_linkedin: 'فتح LinkedIn', contact_github: 'فتح GitHub', contact_whatsapp: 'محادثة واتساب',
     contact_vcard: 'حفظ جهة الاتصال', contact_message: 'كتابة رسالة', share: 'مشاركة الموقع',
-    view_project: 'فتح تفاصيل مشروع', view_case_study: 'قراءة دراسة حالة', generate_pdf: 'إنشاء PDF من الصفحة'
+    view_project: 'فتح تفاصيل مشروع', view_case_study: 'قراءة دراسة حالة', generate_pdf: 'إنشاء PDF من الصفحة', qr_download: 'تحميل رمز QR'
 };
 const DEVICE_LABELS = { desktop: 'كمبيوتر', mobile: 'جوال', tablet: 'جهاز لوحي', smart_tv: 'تلفاز' };
 
