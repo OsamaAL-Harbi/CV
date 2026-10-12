@@ -2,6 +2,18 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.9.0] — 2026-10-12
+
+### Added
+- **Scrollbar styles** (admin → tools → «شريط التمرير», `data.json → scrollbar`, `js/scrollbar.js`): brand colour
+  (default), gradient (primary → secondary), slim, bold and the system scrollbar — all in the colours from admin →
+  colours, for the page and every scrolling box (e.g. the timeline). Each option is previewed in its own scrollable
+  box and the page restyles live; cancel restores. The deploy writes the choice into `index.html` and the
+  standalone pages, and `js/early.js` applies it before first paint (known names only).
+
+### Fixed
+- Dark mode: native controls and scrollbars follow it (`color-scheme`), so no white scrollbar track on dark pages.
+
 ## [4.8.0] — 2026-10-12
 
 ### Added

@@ -4,6 +4,7 @@
 // in search and shared on its own. No JavaScript; the site's stylesheet and fonts are reused.
 import { projectPages, postPages, projectPath, postPath, BLOG_INDEX } from '../js/pages.js';
 import { renderMarkdown, plainText, readingMinutes } from '../js/markdown.js';
+import { DEFAULT_SCROLLBAR, isScrollbar } from '../js/scrollbar.js';
 
 const SITE_URL = 'https://osamaal-harbi.github.io/CV/';
 const esc = v => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -21,12 +22,12 @@ const dateText = (d, lang) => {
 
 const CSP = "default-src 'self'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data: https:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests";
 
-function page({ path, title, description, image, type = 'article', ld, body }) {
+function page({ path, title, description, image, type = 'article', ld, body, scrollbar }) {
     const url = new URL(path, SITE_URL).href;
     const img = image ? new URL(image, SITE_URL).href : new URL('assets/img/og-image.jpg', SITE_URL).href;
     const depth = '../';
     return `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-scrollbar="${isScrollbar(scrollbar) ? scrollbar : DEFAULT_SCROLLBAR}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -128,7 +129,8 @@ export function projectPage({ slug, item }, data) {
             ...(image ? { image: new URL(image, SITE_URL).href } : {}),
             author: person(data)
         },
-        body
+        body,
+        scrollbar: data?.scrollbar
     });
 }
 
@@ -174,7 +176,8 @@ export function postPage({ slug, item }, data) {
             mainEntityOfPage: new URL(path, SITE_URL).href,
             author: person(data)
         },
-        body
+        body,
+        scrollbar: data?.scrollbar
     });
 }
 
@@ -199,7 +202,8 @@ export function blogIndex(data) {
             blogPost: posts.map(({ slug, item }) => ({ '@type': 'BlogPosting', headline: ar(item.title), url: new URL(postPath(slug), SITE_URL).href, ...(item.date ? { datePublished: item.date } : {}) }))
         },
         body: `        <h1 class="text-4xl font-extrabold">المقالات <span class="text-gray-400 text-2xl" lang="en">Articles</span></h1>
-        ${posts.length ? `<ul class="space-y-4">\n${posts.map(card).join('\n')}\n        </ul>` : '<p class="text-gray-500">لا توجد مقالات بعد.</p>'}`
+        ${posts.length ? `<ul class="space-y-4">\n${posts.map(card).join('\n')}\n        </ul>` : '<p class="text-gray-500">لا توجد مقالات بعد.</p>'}`,
+        scrollbar: data?.scrollbar
     });
 }
 

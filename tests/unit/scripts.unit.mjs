@@ -344,3 +344,13 @@ test('timeline: start dates from the CV texts, oldest first, hidden things left 
     assert.deepEqual(entries.map(e => `${e.type}:${e.index}`), ['workshops:0', 'certificates:0', 'experience:0', 'education:0']);
     assert.equal(entries[2].ongoing, true);
 });
+
+test('scrollbar style: written into index.html and the standalone pages, unknown values fall back', async () => {
+    const { applyScrollbarStyle } = await import('../../scripts/assemble-site.mjs');
+    const { sitePages } = await import('../../scripts/pages.mjs');
+    const html = '<html lang="ar" data-scrollbar="brand">\n<meta id="site-scrollbar" name="site-scrollbar" content="">';
+    assert.equal(applyScrollbarStyle(html, { scrollbar: 'gradient' }), '<html lang="ar" data-scrollbar="gradient">\n<meta id="site-scrollbar" name="site-scrollbar" content="gradient">');
+    assert.match(applyScrollbarStyle(html, { scrollbar: '"><script>' }), /data-scrollbar="brand"[\s\S]*content="brand"/);
+    const page = sitePages({ scrollbar: 'slim', projects: [{ title: { ar: 'أ', en: 'A' } }] })[0].html;
+    assert.match(page, /<html lang="ar" dir="rtl" data-scrollbar="slim">/);
+});

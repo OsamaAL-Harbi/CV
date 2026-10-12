@@ -24,6 +24,26 @@ body { overflow-x: hidden; }
     transition: filter 0.8s ease;
 }
 
+/* Scrollbars (admin → tools → Scrollbar; js/scrollbar.js). Each style only sets variables on [data-scrollbar] — the
+   page's <html> or a preview box in the admin dialog — so the nearest one wins. Standard properties (Chrome 121+,
+   Firefox) use --sb-color/--sb-width; Safari and the gradient style use the ::-webkit-scrollbar rules. Native
+   controls follow light/dark mode through color-scheme, so no white track in dark mode. */
+:root { color-scheme: light; --sb-track: #eef2f7; }
+.dark { color-scheme: dark; --sb-track: #0b1120; }
+[data-scrollbar] { --sb-size: 10px; --sb-border: 2px; --sb-width: thin; --sb-thumb: rgb(var(--color-primary)); --sb-thumb-hover: rgb(var(--color-secondary)); --sb-thumb-bg: var(--sb-thumb); --sb-color: var(--sb-thumb) var(--sb-track); }
+[data-scrollbar="gradient"] { --sb-width: auto; --sb-color: auto; --sb-thumb-bg: linear-gradient(180deg, rgb(var(--color-primary)), rgb(var(--color-secondary))); --sb-thumb-bg-x: linear-gradient(90deg, rgb(var(--color-primary)), rgb(var(--color-secondary))); }
+[data-scrollbar="slim"] { --sb-size: 6px; --sb-border: 0px; --sb-thumb: rgb(148 163 184 / .55); --sb-thumb-hover: rgb(var(--color-primary)); }
+[data-scrollbar="bold"] { --sb-size: 14px; --sb-border: 3px; --sb-width: auto; --sb-thumb: rgb(var(--color-primary) / .85); --sb-thumb-hover: rgb(var(--color-primary)); }
+[data-scrollbar="classic"] { --sb-width: auto; --sb-color: auto; }
+@supports (-moz-appearance: none) { [data-scrollbar="gradient"] { --sb-width: thin; --sb-color: rgb(var(--color-primary)) var(--sb-track); } }
+[data-scrollbar], [data-scrollbar] * { scrollbar-width: var(--sb-width); scrollbar-color: var(--sb-color); }
+:where([data-scrollbar]:not([data-scrollbar="classic"]), [data-scrollbar]:not([data-scrollbar="classic"]) *)::-webkit-scrollbar { width: var(--sb-size); height: var(--sb-size); }
+:where([data-scrollbar]:not([data-scrollbar="classic"]), [data-scrollbar]:not([data-scrollbar="classic"]) *)::-webkit-scrollbar-track,
+:where([data-scrollbar]:not([data-scrollbar="classic"]), [data-scrollbar]:not([data-scrollbar="classic"]) *)::-webkit-scrollbar-corner { background: var(--sb-track); }
+:where([data-scrollbar]:not([data-scrollbar="classic"]), [data-scrollbar]:not([data-scrollbar="classic"]) *)::-webkit-scrollbar-thumb { background: var(--sb-thumb-bg); border-radius: 999px; border: var(--sb-border) solid var(--sb-track); }
+:where([data-scrollbar]:not([data-scrollbar="classic"]), [data-scrollbar]:not([data-scrollbar="classic"]) *)::-webkit-scrollbar-thumb:horizontal { background: var(--sb-thumb-bg-x, var(--sb-thumb-bg)); }
+:where([data-scrollbar]:not([data-scrollbar="classic"]), [data-scrollbar]:not([data-scrollbar="classic"]) *)::-webkit-scrollbar-thumb:hover { background: var(--sb-thumb-hover); }
+
 /* Career timeline: a vertical line on phones, a horizontal scrolling line from md up */
 .timeline-track { position: relative; display: flex; flex-direction: column; gap: .75rem; padding-inline-start: 1.75rem; }
 .timeline-track::before { content: ''; position: absolute; inset-block: .5rem; inset-inline-start: .6rem; width: 2px; background: rgb(229 231 235); }
