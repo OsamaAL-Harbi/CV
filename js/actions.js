@@ -4,8 +4,9 @@ import { showToast, track } from './utils.js';
 import { toggleLanguage } from './i18n.js';
 import { toggleMobileMenu } from './router.js';
 import { setProjectFilter, setSkillTab } from './render.js';
+import { goToTimelineItem, setTimelineFilter } from './timeline.js';
 import { closeDialog, closeProjectModal, openProjectModal } from './modal.js';
-import { closeCmdPalette, contactAction, downloadVCard, filterCmd, openCmdPalette, runCommand, sendMailto, shareProfile, triggerPrint, updateCharCounter } from './ui.js';
+import { closeCmdPalette, contactAction, downloadQrPng, downloadVCard, filterCmd, openCmdPalette, runCommand, sendMailto, shareProfile, triggerPrint, updateCharCounter } from './ui.js';
 
 // Admin code is only downloaded when an admin action is used.
 const admin = (name, ...args) => import('./admin.js').then(m => m[name](...args));
@@ -20,6 +21,8 @@ const ACTIONS = {
     'contact':               el => contactAction(el.dataset.contact),
     'set-skill-tab':         el => setSkillTab(el.dataset.tab),
     'set-filter':            el => setProjectFilter(el.dataset.filter),
+    'timeline-filter':       el => setTimelineFilter(el.dataset.filter),
+    'timeline-go':           el => goToTimelineItem(el.dataset.type, el.dataset.index),
     'open-project':          el => openProjectModal(Number(el.dataset.index)),
     'close-project-modal':   () => closeProjectModal(),
     'project-modal-backdrop': (el, e) => { if (e.target === el) closeProjectModal(); },
@@ -27,6 +30,7 @@ const ACTIONS = {
     'open-cmd':              () => openCmdPalette(),
     'cmd-backdrop':          (el, e) => { if (e.target === el) closeCmdPalette(); },
     'download-vcard':        () => downloadVCard(),
+    'download-qr-png':       () => downloadQrPng(),
     'close-case':            () => import('./github.js').then(m => m.closeCaseStudy()),
     'case-backdrop':         (el, e) => { if (e.target === el) return import('./github.js').then(m => m.closeCaseStudy()); },
     'manage-github':         () => admin('manageGithub'),

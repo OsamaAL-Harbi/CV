@@ -325,3 +325,22 @@ test('markdown: emphasis never alters link addresses', async () => {
     assert.match(html, /href="https:\/\/y\/\*"/);
     assert.match(html, /<a href="blog\/x.html"><strong>c<\/strong><\/a>/);
 });
+
+test('timeline: start dates from the CV texts, oldest first, hidden things left out', async () => {
+    const { parseStart, timelineEntries } = await import('../../js/timeline-data.js');
+    assert.deepEqual(parseStart({ ar: 'يناير 2026 - حاضر', en: 'January 2026 – Present' }), { year: 2026, month: 1 });
+    assert.deepEqual(parseStart('April 2024 (5 hours)'), { year: 2024, month: 4 });
+    assert.deepEqual(parseStart({ en: '2023 – 2024' }), { year: 2023, month: 0 });
+    assert.equal(parseStart(''), null);
+    const data = {
+        experience: [{ role: { ar: 'متدرب' }, period: { en: 'January 2026 – Present' } }, { role: { ar: 'بلا تاريخ' }, period: { en: '' } }],
+        education: [{ degree: { ar: 'بكالوريوس' }, period: { en: 'January 2026' } }],
+        certificates: [{ name: { ar: 'شهادة' }, date: 'January 2025' }, { name: { ar: 'مخفية' }, date: 'May 2020', hidden: true }],
+        workshops: [{ name: { ar: 'ورشة' }, date: { en: 'April 2024 (5 hours)' } }],
+        volunteer: [{ role: { ar: 'تطوع' }, period: { en: 'August 2025' } }],
+        visibility: { sections: ['volunteer'] }
+    };
+    const entries = timelineEntries(data);
+    assert.deepEqual(entries.map(e => `${e.type}:${e.index}`), ['workshops:0', 'certificates:0', 'experience:0', 'education:0']);
+    assert.equal(entries[2].ongoing, true);
+});

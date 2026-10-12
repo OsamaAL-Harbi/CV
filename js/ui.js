@@ -247,6 +247,26 @@ export function buildVCard(profile, lang) {
     return lines.filter(Boolean).join('\r\n') + '\r\n';
 }
 
+// QR of the site as a 1024 px PNG (for apps that do not take SVG): drawn from the static SVG on a canvas
+export async function downloadQrPng() {
+    try {
+        const img = new Image();
+        img.src = 'assets/img/qr-site.svg';
+        await img.decode();
+        const canvas = Object.assign(document.createElement('canvas'), { width: 1024, height: 1024 });
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, 0, 0, 1024, 1024);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'osama-alharbi-qr.png' });
+        document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        trackOwn('qr_download');
+    } catch {
+        showToast(state.currentLang === 'ar' ? 'تعذّر إنشاء الصورة' : 'Could not create the image', 'error');
+    }
+}
+
 export function downloadVCard() {
     const p = state.appData.profile;
     if (!p) return;

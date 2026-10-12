@@ -83,6 +83,8 @@
     <link rel="modulepreload" href="js/fonts.js">
     <link rel="modulepreload" href="js/pages.js">
     <link rel="modulepreload" href="js/markdown.js">
+    <link rel="modulepreload" href="js/timeline.js">
+    <link rel="modulepreload" href="js/timeline-data.js">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
     <!-- Styles: one prebuilt file (Tailwind + AOS + icons + self-hosted Tajawal), see npm run build:css -->
@@ -252,6 +254,7 @@
                 <p id="print-title" class="text-base text-gray-700 mt-1"></p>
                 <p id="print-contact" class="text-sm text-gray-600 mt-1"></p>
                 <p id="print-links" class="text-sm text-gray-600 mt-0.5" dir="ltr"></p>
+                <img id="print-qr" data-section="qr" src="assets/img/qr-site.svg" alt="" width="72" height="72" class="mx-auto mt-2 w-[72px] h-[72px]">
             </div>
             <div class="flex justify-between items-center mb-16" data-aos="fade-down">
                 <h2 class="text-4xl font-bold" data-lang="sec_resume">السيرة الذاتية</h2>
@@ -264,6 +267,16 @@
                     </button>
                 </div>
             </div>
+            <!-- Career timeline (js/timeline.js): every dated item on one line, oldest → newest -->
+            <section id="timeline-section" data-section="timeline" class="hidden mb-16 print-hide" aria-labelledby="timeline-title">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h3 id="timeline-title" class="text-2xl font-bold flex items-center gap-3"><i class="fas fa-route text-primary" aria-hidden="true"></i><span data-lang="sec_timeline">المسيرة</span></h3>
+                    <div id="timeline-filters" class="flex flex-wrap gap-2" role="group" aria-labelledby="timeline-title"></div>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4" data-lang="timeline_hint">اضغط أي محطة لعرض تفاصيلها</p>
+                <ol id="timeline-track" class="timeline-track"></ol>
+            </section>
+
             <div class="grid md:grid-cols-2 gap-12">
                 <!-- LEFT -->
                 <div>
@@ -481,6 +494,18 @@
                     <a href="Osama_Alharbi.pdf" download data-cv-link data-track="cv_download" class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:brightness-90 hover:scale-105 transition shadow-md flex-shrink-0">
                         <i class="fas fa-download"></i><span data-lang="btn_download_cv">تحميل PDF</span>
                     </a>
+                </div>
+                <!-- QR code of the site (assets/img/qr-site.svg, drawn at build time by scripts/build-vendor.mjs) -->
+                <div data-section="qr" class="mt-4 bg-white dark:bg-cardBg rounded-2xl p-5 flex flex-wrap items-center gap-5 border border-gray-100 dark:border-gray-700">
+                    <img src="assets/img/qr-site.svg" alt="QR — osamaal-harbi.github.io/CV" width="112" height="112" loading="lazy" decoding="async" class="w-28 h-28 rounded-lg border border-gray-200 dark:border-gray-700 bg-white p-1">
+                    <div class="flex-1 min-w-[12rem]">
+                        <p class="font-bold text-sm dark:text-white" data-lang="qr_title">امسح الرمز لزيارة موقعي</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-3" data-lang="qr_sub">للبطاقة الشخصية أو السيرة المطبوعة</p>
+                        <div class="flex gap-2">
+                            <a href="assets/img/qr-site.svg" download="osama-alharbi-qr.svg" data-track="qr_download" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold hover:scale-105 transition"><i class="fas fa-download text-primary" aria-hidden="true"></i><span>SVG</span></a>
+                            <button type="button" data-action="download-qr-png" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold hover:scale-105 transition"><i class="fas fa-download text-primary" aria-hidden="true"></i><span>PNG</span></button>
+                        </div>
+                    </div>
                 </div>
                 <!-- vCard: built from data.json in the browser -->
                 <div data-section="vcard" class="mt-4 bg-white dark:bg-cardBg rounded-2xl p-5 flex items-center justify-between gap-4 border border-gray-100 dark:border-gray-700">

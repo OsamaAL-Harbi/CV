@@ -19,6 +19,7 @@ export const state = {
     isAdmin:           false,
     activeSkillTab:    'hard',
     activeFilter:      'all',        // project filter
+    timelineFilter:    'all',        // career timeline filter
     dataLoaded:        false,
     lastSavedSnapshot: null          // in-memory copy of the last loaded/saved data (admin "restore")
 };

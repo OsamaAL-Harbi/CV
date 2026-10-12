@@ -2,6 +2,20 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.8.0] — 2026-10-12
+
+### Added
+- **Career timeline** («المسيرة», resume page, `js/timeline.js` + `js/timeline-data.js`): experience, education,
+  volunteering, certificates and workshops on one line, oldest to newest, grouped by year, from the dates already in
+  the CV (items without a year are left out). Filter by type; selecting a milestone scrolls to its card and highlights
+  it. Vertical on phones, horizontal scrolling from md up; hidden items and sections are left out; hideable from
+  admin → visibility.
+- **QR code** of the site address: generated at build time (`scripts/build-vendor.mjs`) with `qrcode-generator`
+  2.0.4 (MIT, no dependencies, devDependency only — visitors get a 5.8 KB static SVG, no library), verified to decode
+  to `https://osamaal-harbi.github.io/CV/`. Shown in the contact section with SVG and PNG (1024 px) downloads, and in
+  the printed CV header; hideable (`qr`). CI checks the committed SVG matches the build.
+- Service worker cache v9.
+
 ## [4.7.2] — 2026-10-12
 
 ### Security

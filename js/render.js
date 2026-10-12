@@ -4,6 +4,7 @@ import { escapeHTML, imageSrc, safeAssetUrl, safeUrl, showToast, skillLevel } fr
 import { t, ui } from './i18n.js';
 import { postPages, postPath } from './pages.js';
 import { readingMinutes, plainText } from './markdown.js';
+import { renderTimeline } from './timeline.js';
 
 let twInterval     = null;
 
@@ -53,6 +54,7 @@ export function renderAll() {
     renderSection('testimonials', state.appData.testimonials || [], renderTestimonialItem, WC.testimonials);
     renderPosts();
     renderVerifiedCount();
+    renderTimeline();
     hideEmptyForVisitors(['testimonials', 'posts']);
     // Projects: filters first, then filtered grid
     renderProjectFilters();
