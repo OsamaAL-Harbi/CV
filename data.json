@@ -417,5 +417,6 @@
       "testimonials",
       "blog"
     ]
-  }
+  },
+  "scrollbar": "gradient"
 }
