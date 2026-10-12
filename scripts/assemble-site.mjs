@@ -2,7 +2,7 @@
 // uploads it), so tests, scripts, sources and package files are not published. It also writes the SEO
 // settings from data.json (admin → SEO) into index.html, because link previews (WhatsApp, LinkedIn, X)
 // read the HTML without running JavaScript, writes the chosen fonts (admin → Fonts) so the first paint already
-// uses them, writes the CV itself into the page for crawlers (scripts/prerender.mjs), and refreshes the
+// uses them (and the scrollbar, motion and mouse cursor styles), writes the CV itself into the page for crawlers (scripts/prerender.mjs), and refreshes the
 // sitemap date.
 // Usage: node scripts/assemble-site.mjs _site
 import { createHash } from 'node:crypto';
@@ -12,8 +12,9 @@ import { ROOT } from './cdn-assets.mjs';
 import { fontStack } from '../js/fonts.js';
 import { DEFAULT_SCROLLBAR, isScrollbar } from '../js/scrollbar.js';
 import { DEFAULT_MOTION, isMotion } from '../js/motion.js';
+import { DEFAULT_CURSOR, isCursor } from '../js/cursor.js';
 import { applyJsonLd, applyVerification, prerenderContent } from './prerender.mjs';
-import { addToSitemap, fontsCss, sitePages } from './pages.mjs';
+import { addToSitemap, cursorCss, fontsCss, sitePages } from './pages.mjs';
 
 export const SITE_URL = 'https://osamaal-harbi.github.io/CV/';
 
@@ -91,6 +92,12 @@ export function applyMotionLevel(html, data) {
     return setMeta(html, 'id="site-motion"', motion).replace(/(<html\b[^>]*\bdata-motion=")[^"]*(")/, `$1${motion}$2`);
 }
 
+// Mouse cursor style from admin → Mouse cursor for js/early.js, and the default on <html>
+export function applyCursorStyle(html, data) {
+    const style = isCursor(data?.cursor) ? data.cursor : DEFAULT_CURSOR;
+    return setMeta(html, 'id="site-cursor"', style).replace(/(<html\b[^>]*\bdata-cursor=")[^"]*(")/, `$1${style}$2`);
+}
+
 export function touchSitemap(xml, date = new Date().toISOString().slice(0, 10)) {
     return xml.replace(/<lastmod>[^<]*<\/lastmod>/g, `<lastmod>${date}</lastmod>`);
 }
@@ -107,7 +114,7 @@ async function main() {
     const data = JSON.parse(await readFile(join(ROOT, 'data.json'), 'utf8'));
     const index = join(dest, 'index.html');
     const html = await readFile(index, 'utf8');
-    const steps = [applySeo, applyProfileImage, applyJsonLd, applyVerification, prerenderContent, applyFonts, applyScrollbarStyle, applyMotionLevel];
+    const steps = [applySeo, applyProfileImage, applyJsonLd, applyVerification, prerenderContent, applyFonts, applyScrollbarStyle, applyMotionLevel, applyCursorStyle];
     const early = await readFile(join(ROOT, 'js/early.js'), 'utf8');
     const seoHtml = inlineEarlyScript(steps.reduce((out, step) => step(out, data), html), early);
     if (seoHtml !== html) { await writeFile(index, seoHtml); console.log('seo   index.html meta tags, JSON-LD, CV content, fonts and inlined early.js'); }
@@ -119,6 +126,7 @@ async function main() {
     }
     if (pages.length) console.log(`pages ${pages.map(p => p.path).join(', ')}`);
     await writeFile(join(dest, 'assets/css/site-fonts.css'), fontsCss(fontStack(data?.fonts || {})));
+    await writeFile(join(dest, 'assets/css/site-cursor.css'), cursorCss(data));
     const today = new Date().toISOString().slice(0, 10);
     const sitemap = join(dest, 'sitemap.xml');
     await writeFile(sitemap, addToSitemap(touchSitemap(await readFile(sitemap, 'utf8'), today), pages, today));

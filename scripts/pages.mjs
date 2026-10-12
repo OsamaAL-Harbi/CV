@@ -5,6 +5,8 @@
 import { projectPages, postPages, projectPath, postPath, BLOG_INDEX } from '../js/pages.js';
 import { renderMarkdown, plainText, readingMinutes } from '../js/markdown.js';
 import { DEFAULT_SCROLLBAR, isScrollbar } from '../js/scrollbar.js';
+import { DEFAULT_CURSOR, cursorValues, isCursor } from '../js/cursor.js';
+import { deriveTheme } from '../js/color.js';
 
 const SITE_URL = 'https://osamaal-harbi.github.io/CV/';
 const esc = v => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -22,12 +24,12 @@ const dateText = (d, lang) => {
 
 const CSP = "default-src 'self'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data: https:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests";
 
-function page({ path, title, description, image, type = 'article', ld, body, scrollbar }) {
+function page({ path, title, description, image, type = 'article', ld, body, scrollbar, cursor }) {
     const url = new URL(path, SITE_URL).href;
     const img = image ? new URL(image, SITE_URL).href : new URL('assets/img/og-image.jpg', SITE_URL).href;
     const depth = '../';
     return `<!DOCTYPE html>
-<html lang="ar" dir="rtl" data-scrollbar="${isScrollbar(scrollbar) ? scrollbar : DEFAULT_SCROLLBAR}">
+<html lang="ar" dir="rtl" data-scrollbar="${isScrollbar(scrollbar) ? scrollbar : DEFAULT_SCROLLBAR}" data-cursor="${isCursor(cursor) ? cursor : DEFAULT_CURSOR}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,6 +57,7 @@ function page({ path, title, description, image, type = 'article', ld, body, scr
     <link rel="apple-touch-icon" href="${depth}assets/icons/apple-touch-icon.png">
     <link rel="stylesheet" href="${depth}assets/css/tailwind.css">
     <link rel="stylesheet" href="${depth}assets/css/site-fonts.css">
+    <link rel="stylesheet" href="${depth}assets/css/site-cursor.css">
     <script type="application/ld+json">
 ${jsonLd(ld)}
     </script>
@@ -130,7 +133,8 @@ export function projectPage({ slug, item }, data) {
             author: person(data)
         },
         body,
-        scrollbar: data?.scrollbar
+        scrollbar: data?.scrollbar,
+        cursor: data?.cursor
     });
 }
 
@@ -177,7 +181,8 @@ export function postPage({ slug, item }, data) {
             author: person(data)
         },
         body,
-        scrollbar: data?.scrollbar
+        scrollbar: data?.scrollbar,
+        cursor: data?.cursor
     });
 }
 
@@ -203,7 +208,8 @@ export function blogIndex(data) {
         },
         body: `        <h1 class="text-4xl font-extrabold">المقالات <span class="text-gray-400 text-2xl" lang="en">Articles</span></h1>
         ${posts.length ? `<ul class="space-y-4">\n${posts.map(card).join('\n')}\n        </ul>` : '<p class="text-gray-500">لا توجد مقالات بعد.</p>'}`,
-        scrollbar: data?.scrollbar
+        scrollbar: data?.scrollbar,
+        cursor: data?.cursor
     });
 }
 
@@ -228,3 +234,12 @@ export function addToSitemap(xml, pages, date) {
 }
 
 export const fontsCss = stack => `:root { --font-stack: ${stack}; }\n`;
+
+// The mouse cursor for these pages (they run no JavaScript): the chosen style in the owner's colours
+export function cursorCss(data) {
+    const style = isCursor(data?.cursor) ? data.cursor : DEFAULT_CURSOR;
+    if (style === 'classic') return '/* system cursor */\n';
+    const { light, dark } = deriveTheme(data?.theme || {});
+    const vars = c => { const v = cursorValues(style, c); return `--cursor-arrow: ${v.arrow}; --cursor-hand: ${v.hand};`; };
+    return `:root { ${vars(light)} }\n.dark { ${vars(dark)} }\n`;
+}

@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { test, expect, openSite } from './fixtures.js';
 
-// The real data.json without the owner's display settings (hidden sections, fonts, scrollbar, motion), which change
+// The real data.json without the owner's display settings (hidden sections, fonts, scrollbar, motion, cursor), which change
 // whenever they are edited in the admin panel; each test sets the ones it is about.
-const DATA = (({ visibility, fonts, scrollbar, motion, ...rest }) => rest)(JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8')));
+const DATA = (({ visibility, fonts, scrollbar, motion, cursor, ...rest }) => rest)(JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8')));
 const clone = () => structuredClone(DATA);
 const b64 = obj => Buffer.from(JSON.stringify(obj)).toString('base64');
 const state = page => page.evaluate(async () => (await import('./js/state.js')).state.appData);
@@ -425,8 +425,11 @@ test.describe('blog, recommendations, project pages, verified certificates', () 
             return hit ? route.fulfill({ body: hit.html, contentType: 'text/html' }) : route.fallback();
         });
         await page.context().route('**/assets/css/site-fonts.css', route => route.fulfill({ body: ':root{}', contentType: 'text/css' }));
+        const { cursorCss } = await import('../scripts/pages.mjs');
+        await page.context().route('**/assets/css/site-cursor.css', route => route.fulfill({ body: cursorCss(data), contentType: 'text/css' }));
         await page.goto(`./projects/${first.slug}.html`);
         await expect(page.locator('h1')).toHaveText(data.projects[first.index].title.ar);
+        if (test.info().project.name === 'desktop') expect(await page.evaluate(() => getComputedStyle(document.body).cursor)).toContain('data:image/svg+xml');
         await expect(page.locator('a[href="../#portfolio"]').first()).toBeVisible();
         await page.goto('./blog/');
         await expect(page.locator('main li')).toHaveCount(2);
@@ -594,5 +597,83 @@ test.describe('motion', () => {
         await page.locator('input[name="motion"][value="off"]').check();
         await page.locator('.swal2-confirm').click();
         expect((await state(page)).motion).toBe('off');
+    });
+});
+
+test.describe('mouse cursor', () => {
+    const attr = page => page.evaluate(() => document.documentElement.dataset.cursor);
+    const cursorOf = (page, selector) => page.evaluate(sel => getComputedStyle(document.querySelector(sel)).cursor, selector);
+    const mouse = () => test.info().project.name === 'desktop';      // Pixel 7: a touch screen, no cursor at all
+
+    test('the site colours by default: arrow, hand on links, text cursor in fields; nothing on touch screens', async ({ page }) => {
+        await page.context().route('**/data.json*', route => route.fulfill({ json: clone() }));
+        await openSite(page);
+        expect(await attr(page)).toBe('brand');
+        if (!mouse()) {
+            expect(await cursorOf(page, 'body')).toBe('auto');
+            expect(await page.locator('#cursor-follower').count()).toBe(0);
+            return;
+        }
+        const primary = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim());
+        const hex = '%23' + primary.split(' ').map(v => (+v).toString(16).padStart(2, '0')).join('');
+        await expect.poll(() => cursorOf(page, 'body')).toContain('data:image/svg+xml');
+        expect(await cursorOf(page, 'body')).toContain(hex);
+        expect(await cursorOf(page, 'body')).toMatch(/\) 2 2, auto$/);
+        expect(await cursorOf(page, 'a[href]')).toMatch(/width%3D'24'.*\) 9 2, pointer$/);
+        expect(await cursorOf(page, '#cmd-input')).toBe('text');
+        // Dark mode: redrawn in the dark-mode primary
+        await page.locator('#theme-btn').click();
+        await expect.poll(() => cursorOf(page, 'body')).not.toContain(hex);
+    });
+
+    test('data.json picks «dot»: the dot follows the mouse and the system cursor hides, except in text fields', async ({ page }) => {
+        const data = clone();
+        data.cursor = 'dot';
+        await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
+        await openSite(page);
+        await expect.poll(() => attr(page)).toBe('dot');
+        expect(await page.evaluate(() => localStorage.getItem('cursor'))).toBe('dot');
+        if (!mouse()) { expect(await page.locator('#cursor-follower').count()).toBe(0); return; }
+        await page.mouse.move(300, 300);
+        await page.mouse.move(420, 360, { steps: 4 });
+        await expect(page.locator('html')).toHaveClass(/cursor-live/);
+        await expect(page.locator('#cursor-follower')).toHaveClass(/is-on/);
+        expect(await cursorOf(page, 'body')).toBe('none');
+        expect(await cursorOf(page, '#cmd-input')).toBe('text');
+        const box = await page.locator('#theme-btn').boundingBox();
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 3 });
+        await expect(page.locator('#cursor-follower')).toHaveClass(/is-hover/);
+        await expect.poll(() => page.locator('#cursor-follower .cursor-dot').evaluate(el => el.style.transform))
+            .toBe(`translate3d(${box.x + box.width / 2}px, ${box.y + box.height / 2}px, 0px)`);
+    });
+
+    test('a tampered cached style is ignored', async ({ page }) => {
+        await page.addInitScript(() => localStorage.setItem('cursor', 'x"><img src=x>'));
+        await page.context().route('**/data.json*', route => route.fulfill({ json: clone() }));
+        await openSite(page);
+        expect(await attr(page)).toBe('brand');
+    });
+
+    test('admin shows each style in the site colours, switches live, cancel restores, apply saves', async ({ page }) => {
+        await stubGitHub(page);
+        await login(page);
+        await tool(page, 'مؤشر الفأرة');
+        await expect(page.locator('.swal2-popup input[name="cursor"]')).toHaveCount(5);
+        await expect(page.locator('[data-cursor-sample="gradient"] img')).toHaveCount(2);
+        await page.locator('input[name="cursor"][value="ring"]').check();
+        expect(await attr(page)).toBe('ring');
+        if (mouse()) {
+            await page.mouse.move(200, 200);
+            await page.mouse.move(260, 240, { steps: 3 });
+            await expect(page.locator('#cursor-follower')).toHaveClass(/is-on/);
+        }
+        await page.locator('.swal2-cancel').click();
+        await expect.poll(() => attr(page)).toBe('brand');
+        await expect(page.locator('#cursor-follower')).toHaveCount(0);
+        await tool(page, 'مؤشر الفأرة');
+        await page.locator('input[name="cursor"][value="classic"]').check();
+        await page.locator('.swal2-confirm').click();
+        expect((await state(page)).cursor).toBe('classic');
+        if (mouse()) expect(await cursorOf(page, 'body')).toBe('auto');
     });
 });

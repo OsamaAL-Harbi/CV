@@ -104,6 +104,31 @@ body { overflow-x: hidden; }
 :where([data-scrollbar]:not([data-scrollbar="classic"]), [data-scrollbar]:not([data-scrollbar="classic"]) *)::-webkit-scrollbar-thumb:horizontal { background: var(--sb-thumb-bg-x, var(--sb-thumb-bg)); }
 :where([data-scrollbar]:not([data-scrollbar="classic"]), [data-scrollbar]:not([data-scrollbar="classic"]) *)::-webkit-scrollbar-thumb:hover { background: var(--sb-thumb-hover); }
 
+/* Mouse cursor (admin → tools → «مؤشر الفأرة»; js/cursor.js builds the images in the site's colours). Mouse and
+   trackpad only. Text fields keep the text cursor; without JavaScript the variables are unset and the system cursor
+   shows. «dot» hides the system cursor only once its dot is following the pointer (.cursor-live). */
+@media (hover: hover) and (pointer: fine) {
+    html:not([data-cursor="classic"]) { cursor: var(--cursor-arrow, auto); }
+    html:not([data-cursor="classic"]) :is(a[href], button:not(:disabled), [role="button"], summary, label, select, [data-action], .cursor-pointer,
+        input:is([type="checkbox"], [type="radio"], [type="color"], [type="range"], [type="submit"], [type="button"])) { cursor: var(--cursor-hand, pointer); }
+    html:not([data-cursor="classic"]) :is(input:not([type="checkbox"], [type="radio"], [type="color"], [type="range"], [type="submit"], [type="button"]), textarea, [contenteditable="true"], .editable-active) { cursor: text; }
+    html.cursor-live[data-cursor="dot"], html.cursor-live[data-cursor="dot"] :not(input, textarea, [contenteditable="true"], .editable-active) { cursor: none !important; }
+}
+#cursor-follower { position: fixed; inset: 0; pointer-events: none; z-index: 2147483647; opacity: 0; transition: opacity .2s; }
+#cursor-follower.is-on { opacity: 1; }
+#cursor-follower.is-text { opacity: 0; }
+#cursor-follower > span { position: absolute; top: 0; left: 0; will-change: transform; }
+.cursor-ring > span { display: block; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 999px; border: 2px solid rgb(var(--color-primary) / .55);
+    transition: width .25s, height .25s, margin .25s, background-color .25s, border-color .25s, scale .15s; }
+#cursor-follower.is-hover .cursor-ring > span { width: 52px; height: 52px; margin: -26px 0 0 -26px; background: rgb(var(--color-primary) / .1); border-color: rgb(var(--color-primary) / .8); }
+#cursor-follower.is-down .cursor-ring > span { scale: .8; }
+.cursor-dot { display: none; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 999px; background: rgb(var(--color-primary)); box-shadow: 0 0 0 1.5px #fff; }
+html[data-cursor="dot"] .cursor-dot { display: block; }
+html[data-cursor="dot"] #cursor-follower.is-hover .cursor-dot { background: rgb(var(--color-secondary)); }
+@media (prefers-reduced-motion: reduce) { .cursor-ring > span { transition: none; } }
+html[data-motion="off"] .cursor-ring > span { transition: none; }
+@media print { #cursor-follower { display: none; } }
+
 /* Career timeline: a vertical line on phones, a horizontal scrolling line from md up */
 .timeline-track { position: relative; display: flex; flex-direction: column; gap: .75rem; padding-inline-start: 1.75rem; }
 .timeline-track::before { content: ''; position: absolute; inset-block: .5rem; inset-inline-start: .6rem; width: 2px; background: rgb(229 231 235); }

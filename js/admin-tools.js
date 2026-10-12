@@ -7,6 +7,7 @@ import { syncSiteTheme } from './color.js';
 import { verificationToken } from './seo.js';
 import { SCROLLBARS, applyScrollbar, syncSiteScrollbar, DEFAULT_SCROLLBAR } from './scrollbar.js';
 import { MOTIONS, DEFAULT_MOTION, applyMotion, syncSiteMotion } from './motion.js';
+import { CURSORS, DEFAULT_CURSOR, applyCursor, cursorImages, cursorValues, pageColours, syncSiteCursor } from './cursor.js';
 import { DEFAULT_FONTS, FONTS, applyFonts, syncSiteFonts } from './fonts.js';
 import { diffHTML, editItem, fromBase64Utf8, ghApi, manageProfile, putRepoFile, readAsBase64 } from './admin.js';
 
@@ -81,6 +82,7 @@ export async function openHistory() {
                     syncSiteFonts(state.appData.fonts);
                     syncSiteScrollbar(state.appData.scrollbar);
                     syncSiteMotion(state.appData.motion);
+                    syncSiteCursor(state.appData.cursor);
                     renderAll();
                     Swal.close();
                     showToast(`استُرجعت النسخة ${chosen.sha.slice(0, 7)} في المحرر — راجعها ثم اضغط «حفظ» لنشرها`, 'success');
@@ -556,6 +558,54 @@ async function manageScrollbar() {
     showToast('تم تطبيق شكل شريط التمرير — اضغط «حفظ» لنشره ✅', 'success');
 }
 
+// ─── Mouse cursor: each option drawn in the site's colours, with a box to try it; the page switches live ───
+async function manageCursor() {
+    await loadVendor('swal');
+    const current = state.appData.cursor || DEFAULT_CURSOR;
+    const colours = pageColours();
+    const sample = id => {
+        if (id === 'classic') return '<span class="text-[11px] text-gray-400">كما في جهازك</span>';
+        const { arrow, hand } = cursorImages(id, colours);
+        const ring = '<span class="inline-block w-7 h-7 rounded-full border-2 border-primary/60"></span>';
+        const pics = id === 'dot' ? '<span class="inline-block w-2 h-2 rounded-full bg-primary"></span>' : `<img src="${arrow}" alt="" width="19" height="26"><img src="${hand}" alt="" width="24" height="27">`;
+        return `${pics}${id === 'ring' || id === 'dot' ? ring : ''}`;
+    };
+    const card = c => `
+        <label class="block p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-gray-50 dark:has-[:checked]:bg-gray-800">
+            <span class="flex items-center gap-2 mb-1">
+                <input type="radio" name="cursor" value="${c.id}" class="w-4 h-4" ${current === c.id ? 'checked' : ''}>
+                <span class="text-sm font-bold">${escapeHTML(c.label)}</span>
+            </span>
+            <span class="block text-[11px] text-gray-500 mb-2">${escapeHTML(c.desc)}</span>
+            <span class="flex items-center justify-center gap-3 h-14 rounded-lg bg-white dark:bg-darkBg border border-gray-200" data-cursor-sample="${c.id}">${sample(c.id)}</span>
+        </label>`;
+    const { value } = await Swal.fire({
+        title: 'مؤشر الفأرة',
+        width: '820px',
+        html: `<div class="text-right space-y-4" dir="rtl">
+            <p class="text-xs text-gray-500">يتبع ألوان الموقع (أدوات ← ألوان الموقع) والوضع الليلي. عند الاختيار يتغيّر المؤشر في الموقع كله مباشرة، فحرّك الفأرة فوق الأزرار والروابط لتجربته. شاشات اللمس لا تتأثر.</p>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">${CURSORS.map(card).join('')}</div>
+            <a href="#cursor-try" class="inline-block px-3 py-2 rounded-lg bg-gray-800 text-white text-xs font-bold" data-cursor-try>رابط للتجربة</a>
+        </div>`,
+        showCancelButton: true, confirmButtonText: 'تطبيق', cancelButtonText: 'إلغاء', focusConfirm: false,
+        didOpen: popup => {
+            // Hovering a sample box shows that style's arrow there, whatever is picked
+            popup.querySelectorAll('[data-cursor-sample]').forEach(box => {
+                const id = box.dataset.cursorSample;
+                if (id === 'classic') box.style.cursor = 'auto';
+                else box.style.cursor = cursorValues(id, colours).arrow;
+            });
+            popup.querySelector('[data-cursor-try]').addEventListener('click', e => e.preventDefault());
+            popup.addEventListener('change', e => { if (e.target.name === 'cursor') applyCursor(e.target.value); });
+        },
+        preConfirm: () => document.querySelector('input[name="cursor"]:checked')?.value || DEFAULT_CURSOR
+    });
+    if (!value) { syncSiteCursor(state.appData.cursor); return; }   // cancel restores the cursor from before
+    if (value === DEFAULT_CURSOR) delete state.appData.cursor; else state.appData.cursor = value;
+    syncSiteCursor(state.appData.cursor);
+    showToast('تم تطبيق مؤشر الفأرة — اضغط «حفظ» لنشره ✅', 'success');
+}
+
 // ─── Motion level: lively / subtle / off, applied live; «replay» plays the hero entrance again ───
 async function manageMotion() {
     await loadVendor('swal');
@@ -682,6 +732,7 @@ const TOOLS = [
     { action: 'manage-fonts',        icon: 'fa-font',        label: 'الخطوط',               run: manageFonts },
     { action: 'manage-motion',       icon: 'fa-magic',       label: 'الحركة والتأثيرات',    run: manageMotion },
     { action: 'manage-scrollbar',    icon: 'fa-arrows-alt-v', label: 'شريط التمرير',        run: manageScrollbar },
+    { action: 'manage-cursor',       icon: 'fa-mouse-pointer', label: 'مؤشر الفأرة',         run: manageCursor },
     { action: 'manage-seo',          icon: 'fa-magnifying-glass', label: 'SEO والمشاركة',   run: manageSeo },
     { action: 'upload-photo',        icon: 'fa-camera',      label: 'رفع الصورة الشخصية',   run: uploadProfilePhoto },
     { action: 'open-checker',        icon: 'fa-list-check',  label: 'مدقق المحتوى والترجمة', run: openChecker },

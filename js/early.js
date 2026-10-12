@@ -38,6 +38,12 @@
         var mv = (mvMeta && mvMeta.content) || localStorage.getItem('motion');
         if (mv && /^(lively|subtle|off)$/.test(mv)) root.setAttribute('data-motion', mv);
     } catch (e) { /* storage blocked: default motion */ }
+    // Mouse cursor style (admin → Mouse cursor): same order; js/cursor.js draws it in the site's colours
+    try {
+        var cuMeta = document.getElementById('site-cursor');
+        var cu = (cuMeta && cuMeta.content) || localStorage.getItem('cursor');
+        if (cu && /^(brand|gradient|ring|dot|classic)$/.test(cu)) root.setAttribute('data-cursor', cu);
+    } catch (e) { /* storage blocked: default cursor */ }
     var fromUrl = /[?&]lang=(ar|en)(&|$)/.exec(location.search);
     if (fromUrl) lang = fromUrl[1];
     if (lang !== 'en') lang = 'ar';

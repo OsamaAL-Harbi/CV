@@ -352,7 +352,7 @@ test('scrollbar style: written into index.html and the standalone pages, unknown
     assert.equal(applyScrollbarStyle(html, { scrollbar: 'gradient' }), '<html lang="ar" data-scrollbar="gradient">\n<meta id="site-scrollbar" name="site-scrollbar" content="gradient">');
     assert.match(applyScrollbarStyle(html, { scrollbar: '"><script>' }), /data-scrollbar="brand"[\s\S]*content="brand"/);
     const page = sitePages({ scrollbar: 'slim', projects: [{ title: { ar: 'أ', en: 'A' } }] })[0].html;
-    assert.match(page, /<html lang="ar" dir="rtl" data-scrollbar="slim">/);
+    assert.match(page, /<html lang="ar" dir="rtl" data-scrollbar="slim" data-cursor="brand">/);
 });
 
 test('motion level: written into index.html, unknown values fall back to lively', async () => {
@@ -360,4 +360,22 @@ test('motion level: written into index.html, unknown values fall back to lively'
     const html = '<html lang="ar" data-motion="lively">\n<meta id="site-motion" name="site-motion" content="">';
     assert.equal(applyMotionLevel(html, { motion: 'off' }), '<html lang="ar" data-motion="off">\n<meta id="site-motion" name="site-motion" content="off">');
     assert.match(applyMotionLevel(html, { motion: 'x"><b>' }), /data-motion="lively"[\s\S]*content="lively"/);
+});
+
+test('mouse cursor: written into index.html and the standalone pages in the owner\'s colours, unknown values fall back', async () => {
+    const { applyCursorStyle } = await import('../../scripts/assemble-site.mjs');
+    const { cursorCss, sitePages } = await import('../../scripts/pages.mjs');
+    const { cursorValues } = await import('../../js/cursor.js');
+    const html = '<html lang="ar" data-cursor="brand">\n<meta id="site-cursor" name="site-cursor" content="">';
+    assert.equal(applyCursorStyle(html, { cursor: 'ring' }), '<html lang="ar" data-cursor="ring">\n<meta id="site-cursor" name="site-cursor" content="ring">');
+    assert.match(applyCursorStyle(html, { cursor: '"><script>' }), /data-cursor="brand"[\s\S]*content="brand"/);
+    assert.match(sitePages({ cursor: 'dot', projects: [{ title: { ar: 'أ', en: 'A' } }] })[0].html, /data-cursor="dot"[\s\S]*assets\/css\/site-cursor\.css/);
+    // The theme's light-mode primary (slate #334155 keeps its contrast, so it is used as is), white outline
+    const css = cursorCss({ theme: { primary: '#334155', secondary: '#0284c7' } });
+    assert.match(css, /^:root \{ --cursor-arrow: url\("data:image\/svg\+xml,[^"]*%23334155[^"]*"\) 2 2, auto; --cursor-hand: url\("[^"]*"\) 9 2, pointer; \}/);
+    assert.match(cursorCss({ cursor: 'gradient', theme: { primary: '#334155', secondary: '#0284c7' } }), /linearGradient/);
+    assert.equal(cursorCss({ cursor: 'classic' }), '/* system cursor */\n');
+    // Colours that are not #rrggbb never reach the image
+    const { arrow } = cursorValues('brand', { primary: "red'/><script>", secondary: '#000' });
+    assert.ok(arrow.includes('%232563eb') && !/script/i.test(decodeURIComponent(arrow)));
 });

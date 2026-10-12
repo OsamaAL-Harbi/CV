@@ -16,6 +16,7 @@ import { syncSiteTheme } from './js/color.js';
 import { syncSiteFonts } from './js/fonts.js';
 import { syncSiteScrollbar } from './js/scrollbar.js';
 import { initMotion, markReady, syncSiteMotion } from './js/motion.js';
+import { initCursor, syncSiteCursor } from './js/cursor.js';
 
 // Older versions kept the token (and a data backup) in localStorage forever.
 function purgeLegacyAdminStorage() {
@@ -34,6 +35,7 @@ async function loadContent() {
         syncSiteFonts(state.appData.fonts);
         syncSiteScrollbar(state.appData.scrollbar);
         syncSiteMotion(state.appData.motion);
+        syncSiteCursor(state.appData.cursor);
         renderAll();
         setSmartGreeting();
         initStatsObserver();
@@ -69,6 +71,7 @@ function boot() {
     setupScrollTop();
     setupTilt();
     initMotion();
+    initCursor();
     checkLinkedInReferrer();
 
     purgeLegacyAdminStorage();
