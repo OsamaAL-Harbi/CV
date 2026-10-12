@@ -25,6 +25,14 @@ All notable changes to this site. Format: [Keep a Changelog](https://keepachange
 - JSON-LD credentials use the verification link (`url`) and the credential ID (`identifier`).
 - The deploy writes `assets/css/site-fonts.css` so the standalone pages use the fonts chosen in admin → Fonts.
 - Service worker cache v8 (adds `js/pages.js` and `js/markdown.js`).
+- Lighthouse CI measures the deploy output (`assemble-site.mjs` → `serve.mjs _site`), i.e. the page visitors get with
+  the chosen fonts and prerendered CV, instead of the raw repository page (which loads the default font first and
+  then the chosen one).
+- Faster first paint of the home section: it no longer fades in with AOS (it stayed transparent until scripts
+  ran), and the app does not rewrite profile texts the deploy already wrote, so the summary paints once
+  (Largest Contentful Paint ≈ 1 s on a throttled phone instead of after the loading screen).
+- Tests no longer depend on the owner's display settings in `data.json` (hidden sections, fonts, uploaded
+  certificate images and links); each test sets the ones it is about.
 
 ## [4.6.0] — 2026-10-11
 

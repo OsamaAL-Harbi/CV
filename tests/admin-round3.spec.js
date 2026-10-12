@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { test, expect, openSite } from './fixtures.js';
 
-const DATA = JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8'));
+// The real data.json without the owner's display settings (hidden sections, fonts), which change whenever they are
+// edited in the admin panel; each test sets the ones it is about.
+const DATA = (({ visibility, fonts, ...rest }) => rest)(JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8')));
 const clone = () => structuredClone(DATA);
 const b64 = obj => Buffer.from(JSON.stringify(obj)).toString('base64');
 const state = page => page.evaluate(async () => (await import('./js/state.js')).state.appData);

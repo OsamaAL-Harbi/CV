@@ -1,12 +1,14 @@
 // Minimal static server that mounts the repository at /CV/ and gzips text, like GitHub Pages does.
 // Usage: node scripts/serve.mjs   →   http://localhost:4173/CV/
+//        node scripts/serve.mjs _site   →   serves the deploy output of scripts/assemble-site.mjs instead
 import { createServer } from 'node:http';
 import { gzipSync } from 'node:zlib';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT   = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const REPO   = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const ROOT   = process.argv[2] ? resolve(REPO, process.argv[2]) : REPO;
 const PREFIX = '/CV/';
 const PORT   = Number(process.env.PORT) || 4173;
 const TYPES  = {
@@ -14,7 +16,7 @@ const TYPES  = {
     '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml',
     '.png': 'image/png', '.ico': 'image/x-icon', '.pdf': 'application/pdf', '.txt': 'text/plain; charset=utf-8',
     '.xml': 'application/xml; charset=utf-8', '.webmanifest': 'application/manifest+json',
-    '.woff2': 'font/woff2', '.jpg': 'image/jpeg'
+    '.woff2': 'font/woff2', '.jpg': 'image/jpeg', '.webp': 'image/webp'
 };
 
 createServer(async (req, res) => {

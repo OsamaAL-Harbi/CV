@@ -14,6 +14,9 @@ function maliciousData() {
     data.projects[0].technologies.push("x');window.__xss=1;('", PAYLOAD);
     data.projects[0].link = 'javascript:window.__xss=5';
     data.projects[0].liveUrl = 'javascript:window.__xss=6';
+    // only the unsafe images below (the real data may have uploaded, safe ones)
+    data.projects.forEach(p => delete p.image);
+    data.certificates.forEach(c => delete c.image);
     data.projects[0].image = '"><img src=x onerror=window.__xss=7>';
     data.certificates[0].image = 'javascript:window.__xss=8';
     data.availability = { enabled: true, status: { ar: PAYLOAD, en: PAYLOAD }, roles: { ar: PAYLOAD } };

@@ -85,6 +85,7 @@ test.describe('content rendering', () => {
 
     test('certificates show a verification link only for https URLs', async ({ page }) => {
         const data = clone();
+        data.certificates.forEach(c => { c.url = ''; delete c.image; });   // only the two links below (an image is a link too)
         data.certificates[0].url = 'https://www.credly.com/badges/example';
         data.certificates[1].url = 'javascript:alert(1)';
         await page.route('**/data.json*', route => route.fulfill({ json: data }));
