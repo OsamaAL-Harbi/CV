@@ -418,5 +418,6 @@
       "blog"
     ]
   },
-  "scrollbar": "gradient"
+  "scrollbar": "gradient",
+  "cursor": "ring"
 }
