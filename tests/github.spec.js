@@ -169,6 +169,9 @@ test.describe('admin GitHub page', () => {
 
     test('monitoring page accepts https sites only', async ({ page }) => {
         await page.route('https://api.github.com/**', route => route.fulfill({ json: { full_name: 'OsamaAL-Harbi/CV' } }));
+        // One monitored site to start from, whatever the owner has added in data.json since
+        const data = { ...structuredClone(DATA), monitor: [{ name: 'Portfolio (GitHub Pages)', url: 'https://osamaal-harbi.github.io/CV/' }] };
+        await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
         await openSite(page);
         for (let i = 0; i < 3; i++) await page.locator('#secret-trigger').click();
         await page.locator('#token-input').fill('github_pat_TEST_ONLY');
