@@ -134,7 +134,7 @@ async function keepDeployed() {
         const data = JSON.parse(await readFile(join(OUT, 'github.json'), 'utf8'));
         await mkdir(join(OUT, 'readme'), { recursive: true });
         for (const repo of data.repos || []) {
-            if (!repo.readme) continue;
+            if (!repo.readme || !/^[A-Za-z0-9_.-]+$/.test(String(repo.name)) || String(repo.name).includes('..')) continue;
             const r = await fetch(`${SITE_URL}generated/readme/${encodeURIComponent(repo.name)}.html`);
             if (r.ok) await writeFile(join(OUT, 'readme', `${repo.name}.html`), await r.text());
         }

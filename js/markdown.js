@@ -14,17 +14,19 @@ export function safeLink(url) {
 }
 
 function inline(text) {
-    // code spans first, so their content is not formatted; placeholders keep them out of the other rules
-    const codes = [];
+    // Code spans and links become placeholders first, so emphasis never touches code or a link's address
+    const codes = [], links = [];
+    const emphasis = t => t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
     let s = esc(text).replace(/`([^`]+)`/g, (_, c) => `\u0000${codes.push(c) - 1}\u0000`);
     s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, label, href) => {
         const url = safeLink(href.replace(/&amp;/g, '&'));
         if (!url) return label;
         const external = /^https:/i.test(url);
-        return `<a href="${esc(url)}"${external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${label}</a>`;
+        return `\u0001${links.push(`<a href="${esc(url)}"${external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${emphasis(label)}</a>`) - 1}\u0001`;
     });
-    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
-    return s.replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${codes[i]}</code>`);
+    return emphasis(s)
+        .replace(/\u0001(\d+)\u0001/g, (_, i) => links[i])
+        .replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${codes[i]}</code>`);
 }
 
 export function renderMarkdown(source) {

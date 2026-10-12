@@ -91,12 +91,14 @@ function projectBlock(item, lang) {
     const pick = lang === 'ar' ? ar : en;
     const text = v => esc(pick(v)).replace(/\n+/g, '<br>');
     const link = https(item.link), live = https(item.liveUrl);
+    // Arabic block: title h1, sections h2; English block: title h2, sections h3 (headings never skip a level)
+    const t = lang === 'ar' ? 1 : 2, h = t + 1;
     return `        <article lang="${lang}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}" class="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 md:p-8 space-y-5">
-            <h${lang === 'ar' ? 1 : 2} class="text-3xl font-extrabold text-gray-900">${esc(pick(item.title))}</h${lang === 'ar' ? 1 : 2}>
+            <h${t} class="text-3xl font-extrabold text-gray-900">${esc(pick(item.title))}</h${t}>
             ${item.desc ? `<p class="text-gray-600 leading-relaxed">${text(item.desc)}</p>` : ''}
-            ${item.technologies?.length ? `<section><h3 class="font-bold text-sm mb-3">${L.tech}</h3><div class="flex flex-wrap gap-2">${chips(item.technologies)}</div></section>` : ''}
-            ${has(item.details?.challenges, lang) || has(item.details?.challenges, 'ar') ? `<section><h3 class="font-bold text-sm mb-2">${L.challenges}</h3><p class="text-gray-600 text-sm leading-relaxed bg-yellow-50 p-3 rounded-xl border border-yellow-100">${text(item.details.challenges)}</p></section>` : ''}
-            ${has(item.details?.results, lang) || has(item.details?.results, 'ar') ? `<section><h3 class="font-bold text-sm mb-2">${L.results}</h3><p class="text-gray-600 text-sm leading-relaxed bg-green-50 p-3 rounded-xl border border-green-100">${text(item.details.results)}</p></section>` : ''}
+            ${item.technologies?.length ? `<section><h${h} class="font-bold text-sm mb-3">${L.tech}</h${h}><div class="flex flex-wrap gap-2">${chips(item.technologies)}</div></section>` : ''}
+            ${has(item.details?.challenges, lang) || has(item.details?.challenges, 'ar') ? `<section><h${h} class="font-bold text-sm mb-2">${L.challenges}</h${h}><p class="text-gray-600 text-sm leading-relaxed bg-yellow-50 p-3 rounded-xl border border-yellow-100">${text(item.details.challenges)}</p></section>` : ''}
+            ${has(item.details?.results, lang) || has(item.details?.results, 'ar') ? `<section><h${h} class="font-bold text-sm mb-2">${L.results}</h${h}><p class="text-gray-600 text-sm leading-relaxed bg-green-50 p-3 rounded-xl border border-green-100">${text(item.details.results)}</p></section>` : ''}
             ${link || live ? `<p class="flex flex-wrap gap-3 pt-2">${link ? `<a href="${esc(link)}" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm font-bold">GitHub</a>` : ''}${live ? `<a href="${esc(live)}" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-primary text-white text-sm font-bold">${L.live}</a>` : ''}</p>` : ''}
             <p><a href="../#portfolio" class="text-sm font-bold text-primary hover:underline">${L.back}</a></p>
         </article>`;

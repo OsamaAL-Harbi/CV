@@ -188,3 +188,13 @@ test.describe('admin GitHub page', () => {
         ]);
     });
 });
+
+test('repository numbers from a tampered github.json cannot inject markup', async ({ page }) => {
+    const gh = structuredClone(GH);
+    gh.repos[0].stars = '"><img id="pwn" src=x>';
+    gh.repos[0].forks = '"><b id="pwn2">';
+    await serve(page, withSettings(), { gh });
+    await openSite(page, 'portfolio');
+    await expect(page.locator('#github-section')).toBeVisible();
+    await expect(page.locator('#pwn, #pwn2')).toHaveCount(0);
+});

@@ -46,16 +46,19 @@ export function applySeo(html, data) {
     return html;
 }
 
+// https URLs without quotes, angle brackets, backslashes or spaces, or a plain path on this site
 const absolute = path => {
     const v = String(path || '');
-    if (/^https:\/\//.test(v)) return v;
+    if (/^https:\/\/[^\s"'<>\\]+$/.test(v)) return v;
     return /^[\w\-./]+$/.test(v) && !v.includes('..') ? new URL(v, SITE_URL).href : '';
 };
 
 // Schema.org Person image: the profile photo uploaded in the admin panel, when there is one
 export function applyProfileImage(html, data) {
     const img = absolute(data?.profile?.image);
-    return img ? html.replace(/(<script type="application\/ld\+json">[\s\S]*?"image": ")[^"]*(")/, (_, a, b) => `${a}${img}${b}`) : html;
+    // JSON-encoded (and "<" escaped) so no value can end the string or the script element
+    const value = JSON.stringify(img).slice(1, -1).replace(/</g, '\\u003c');
+    return img ? html.replace(/(<script type="application\/ld\+json">[\s\S]*?"image": ")[^"]*(")/, (_, a, b) => `${a}${value}${b}`) : html;
 }
 
 // Font stack from admin → Fonts for js/early.js (always written, so a stale cached stack never wins)
