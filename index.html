@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="motion-safe:scroll-smooth">
+<html lang="ar" dir="rtl" class="motion-safe:scroll-smooth" data-scrollbar="brand">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,7 @@
     <title>أسامة الحربي | Portfolio</title>
     <!-- Fonts from admin → Fonts, written here at deploy time (scripts/assemble-site.mjs) so js/early.js applies them before first paint -->
     <meta id="site-fonts" name="site-fonts" content="">
+    <meta id="site-scrollbar" name="site-scrollbar" content="">
     <!-- Applies saved theme/language before first paint (no inline script: CSP) -->
     <script src="js/early.js"></script>
 
@@ -85,6 +86,7 @@
     <link rel="modulepreload" href="js/markdown.js">
     <link rel="modulepreload" href="js/timeline.js">
     <link rel="modulepreload" href="js/timeline-data.js">
+    <link rel="modulepreload" href="js/scrollbar.js">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
     <!-- Styles: one prebuilt file (Tailwind + AOS + icons + self-hosted Tajawal), see npm run build:css -->

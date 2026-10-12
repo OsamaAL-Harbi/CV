@@ -502,3 +502,43 @@ test.describe('career timeline and QR code', () => {
         expect((await download).suggestedFilename()).toBe('osama-alharbi-qr.png');
     });
 });
+
+test.describe('scrollbar style', () => {
+    const sb = page => page.evaluate(() => document.documentElement.dataset.scrollbar);
+
+    test('brand style by default; data.json picks another; dark mode gets dark native controls', async ({ page }) => {
+        await openSite(page);
+        expect(await sb(page)).toBe('brand');
+        const data = clone();
+        data.scrollbar = 'gradient';
+        await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
+        await page.reload();
+        await expect.poll(() => sb(page)).toBe('gradient');
+        expect(await page.evaluate(() => localStorage.getItem('scrollbar'))).toBe('gradient');
+        await page.locator('#theme-btn').click();
+        await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)).toMatch(/dark/);
+    });
+
+    test('a tampered cached style is ignored', async ({ page }) => {
+        await page.addInitScript(() => localStorage.setItem('scrollbar', 'x"><img src=x>'));
+        await page.context().route('**/data.json*', route => route.fulfill({ json: clone() }));
+        await openSite(page);
+        expect(await sb(page)).toBe('brand');
+    });
+
+    test('admin previews each style live, cancel restores, apply saves', async ({ page }) => {
+        await stubGitHub(page);
+        await login(page);
+        await tool(page, 'شريط التمرير');
+        await expect(page.locator('.swal2-popup [data-scrollbar]')).toHaveCount(5);
+        await page.locator('input[name="scrollbar"][value="bold"]').check();
+        expect(await sb(page)).toBe('bold');
+        await page.locator('.swal2-cancel').click();
+        await expect.poll(() => sb(page)).toBe('brand');
+        await tool(page, 'شريط التمرير');
+        await page.locator('input[name="scrollbar"][value="slim"]').check();
+        await page.locator('.swal2-confirm').click();
+        expect((await state(page)).scrollbar).toBe('slim');
+        expect(await sb(page)).toBe('slim');
+    });
+});

@@ -5,6 +5,7 @@ import { escapeHTML, loadVendor, safeAssetUrl, showToast } from './utils.js';
 import { renderAll } from './render.js';
 import { syncSiteTheme } from './color.js';
 import { verificationToken } from './seo.js';
+import { SCROLLBARS, applyScrollbar, syncSiteScrollbar, DEFAULT_SCROLLBAR } from './scrollbar.js';
 import { DEFAULT_FONTS, FONTS, applyFonts, syncSiteFonts } from './fonts.js';
 import { diffHTML, editItem, fromBase64Utf8, ghApi, manageProfile, putRepoFile, readAsBase64 } from './admin.js';
 
@@ -77,6 +78,7 @@ export async function openHistory() {
                     state.appData = structuredClone(chosen.data);
                     syncSiteTheme(state.appData.theme);
                     syncSiteFonts(state.appData.fonts);
+                    syncSiteScrollbar(state.appData.scrollbar);
                     renderAll();
                     Swal.close();
                     showToast(`استُرجعت النسخة ${chosen.sha.slice(0, 7)} في المحرر — راجعها ثم اضغط «حفظ» لنشرها`, 'success');
@@ -520,6 +522,38 @@ async function manageFonts() {
     showToast('تم تطبيق الخط — اضغط «حفظ» لنشره ✅', 'success');
 }
 
+// ─── Scrollbar style: each option previewed in its own scrollable box, the page restyled live ───
+async function manageScrollbar() {
+    await loadVendor('swal');
+    const current = state.appData.scrollbar || DEFAULT_SCROLLBAR;
+    const filler = Array.from({ length: 12 }, (_, i) => `<p class="py-0.5">${i + 1}. ${i % 2 ? 'Scroll me' : 'مرّر هنا للتجربة'}</p>`).join('');
+    const card = s => `
+        <label class="block p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-gray-50 dark:has-[:checked]:bg-gray-800">
+            <span class="flex items-center gap-2 mb-2">
+                <input type="radio" name="scrollbar" value="${s.id}" class="w-4 h-4" ${current === s.id ? 'checked' : ''}>
+                <span class="text-sm font-bold">${escapeHTML(s.label)}</span>
+            </span>
+            <span class="block text-[11px] text-gray-500 mb-2">${escapeHTML(s.desc)}</span>
+            <span data-scrollbar="${s.id}" class="block h-24 overflow-y-scroll rounded-lg border border-gray-200 bg-white dark:bg-darkBg p-2 text-xs text-gray-500" tabindex="0">${filler}</span>
+        </label>`;
+    const picked = () => document.querySelector('input[name="scrollbar"]:checked')?.value || DEFAULT_SCROLLBAR;
+    const { value } = await Swal.fire({
+        title: 'شكل شريط التمرير',
+        width: '820px',
+        html: `<div class="text-right space-y-4" dir="rtl">
+            <p class="text-xs text-gray-500">يتبع ألوان الموقع (أدوات ← ألوان الموقع) والوضع الليلي. جرّب التمرير داخل كل بطاقة، والموقع خلفك يتغيّر مباشرة عند الاختيار.</p>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">${SCROLLBARS.map(card).join('')}</div>
+        </div>`,
+        showCancelButton: true, confirmButtonText: 'تطبيق', cancelButtonText: 'إلغاء', focusConfirm: false,
+        didOpen: popup => popup.addEventListener('change', e => { if (e.target.name === 'scrollbar') applyScrollbar(e.target.value); }),
+        preConfirm: picked
+    });
+    if (!value) { syncSiteScrollbar(state.appData.scrollbar); return; }   // cancel restores the style from before
+    if (value === DEFAULT_SCROLLBAR) delete state.appData.scrollbar; else state.appData.scrollbar = value;
+    syncSiteScrollbar(state.appData.scrollbar);
+    showToast('تم تطبيق شكل شريط التمرير — اضغط «حفظ» لنشره ✅', 'success');
+}
+
 // ─── 9. SEO: title, description and share image per language ───
 async function manageSeo() {
     const seo = state.appData.seo || {};
@@ -607,6 +641,7 @@ const TOOLS = [
     { action: 'manage-visibility',   icon: 'fa-eye-slash',   label: 'إظهار وإخفاء الأقسام', run: manageVisibility },
     { action: 'manage-availability', icon: 'fa-briefcase',   label: 'متاح للعمل',            run: manageAvailability },
     { action: 'manage-fonts',        icon: 'fa-font',        label: 'الخطوط',               run: manageFonts },
+    { action: 'manage-scrollbar',    icon: 'fa-arrows-alt-v', label: 'شريط التمرير',        run: manageScrollbar },
     { action: 'manage-seo',          icon: 'fa-magnifying-glass', label: 'SEO والمشاركة',   run: manageSeo },
     { action: 'upload-photo',        icon: 'fa-camera',      label: 'رفع الصورة الشخصية',   run: uploadProfilePhoto },
     { action: 'open-checker',        icon: 'fa-list-check',  label: 'مدقق المحتوى والترجمة', run: openChecker },

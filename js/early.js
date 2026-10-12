@@ -26,6 +26,12 @@
         if (!stack) stack = localStorage.getItem('font_stack');
         if (stack && valid.test(stack)) root.style.setProperty('--font-stack', stack);
     } catch (e) { /* storage blocked: default font */ }
+    // Scrollbar style (admin → Scrollbar): written into the page at deploy, else the cached choice; known names only
+    try {
+        var sbMeta = document.getElementById('site-scrollbar');
+        var sb = (sbMeta && sbMeta.content) || localStorage.getItem('scrollbar');
+        if (sb && /^(brand|gradient|slim|bold|classic)$/.test(sb)) root.setAttribute('data-scrollbar', sb);
+    } catch (e) { /* storage blocked: default scrollbar */ }
     var fromUrl = /[?&]lang=(ar|en)(&|$)/.exec(location.search);
     if (fromUrl) lang = fromUrl[1];
     if (lang !== 'en') lang = 'ar';

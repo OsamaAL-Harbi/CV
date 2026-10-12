@@ -14,6 +14,7 @@ import { initTheme, initParticles, setupSecretTrigger, setupCmdPalette, register
 import { setupActions } from './js/actions.js';
 import { syncSiteTheme } from './js/color.js';
 import { syncSiteFonts } from './js/fonts.js';
+import { syncSiteScrollbar } from './js/scrollbar.js';
 
 // Older versions kept the token (and a data backup) in localStorage forever.
 function purgeLegacyAdminStorage() {
@@ -30,6 +31,7 @@ async function loadContent() {
         state.lastSavedSnapshot = JSON.stringify(state.appData);
         syncSiteTheme(state.appData.theme);
         syncSiteFonts(state.appData.fonts);
+        syncSiteScrollbar(state.appData.scrollbar);
         renderAll();
         setSmartGreeting();
         initStatsObserver();
