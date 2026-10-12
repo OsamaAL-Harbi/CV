@@ -2,6 +2,16 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.7.1] — 2026-10-12
+
+### Changed
+- First paint is lighter with the heavier font families (e.g. IBM Plex Sans Arabic): the medium weight (500) is no
+  longer bundled — `font-medium` falls back to regular — so each script needs one font file fewer before first paint.
+- The deploy inlines `js/early.js` into `index.html` and allows exactly that script in the CSP by its sha256 hash,
+  saving a network round trip before first paint.
+- Lighthouse CI runs 5 times (median), so a cold first run cannot decide the result; the 0.9 minimum is unchanged.
+  Locally: performance 94–98 over 5 runs (was 84–92 with the same fonts).
+
 ## [4.7.0] — 2026-10-11
 
 ### Added
