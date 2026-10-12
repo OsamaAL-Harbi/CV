@@ -414,7 +414,8 @@
   },
   "visibility": {
     "sections": [
-      "testimonials"
+      "testimonials",
+      "blog"
     ]
   }
 }
