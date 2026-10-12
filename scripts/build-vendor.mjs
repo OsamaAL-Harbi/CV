@@ -77,7 +77,7 @@ console.log(`assets/vendor/aos.js: aos@${aosVersion}`);
 // content has no Cyrillic/Greek/Vietnamese text); English families need latin only. A visitor downloads the
 // faces of the chosen families only, and only for the scripts on the page (unicode-range).
 const { FONTS } = await import('../js/fonts.js');
-const WEIGHTS = [400, 500, 700, 800];          // font-normal/medium/bold/extrabold in the markup
+const WEIGHTS = [400, 700, 800];            // regular / bold / extrabold; font-medium (500) falls back to 400, one font file fewer per script on first paint
 await mkdir(join(ROOT, 'assets/fonts'), { recursive: true });
 const faces = [], credits = [];
 const fontFamilies = [...FONTS.ar.map(f => ({ ...f, subsets: ['arabic', 'latin'] })), ...FONTS.en.filter(f => f.pkg).map(f => ({ ...f, subsets: ['latin'] }))];

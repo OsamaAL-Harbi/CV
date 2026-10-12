@@ -270,3 +270,17 @@ test('sitePages: project and article pages with their own meta, JSON-LD and site
     assert.match(xml, /<loc>https:\/\/osamaal-harbi.github.io\/CV\/blog\/post.html<\/loc>\s*<lastmod>2026-10-01<\/lastmod>/);
     assert.equal(sitePages({}).length, 0);
 });
+
+test('inlineEarlyScript: inlines js/early.js and allows exactly it by hash in the CSP', async () => {
+    const { inlineEarlyScript } = await import('../../scripts/assemble-site.mjs');
+    const { createHash } = await import('node:crypto');
+    const html = `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.example/; style-src 'self'">\n<script src="js/early.js"></script>`;
+    const code = '(function () { document.documentElement.lang = "ar"; })();\n';
+    const out = inlineEarlyScript(html, code);
+    const hash = createHash('sha256').update(code).digest('base64');
+    assert.ok(out.includes(`script-src 'self' 'sha256-${hash}' https://cdn.example/`));
+    assert.ok(out.includes(`<script>${code}</script>`));
+    assert.ok(!out.includes('src="js/early.js"'));
+    assert.equal(inlineEarlyScript(html, 'x("</script>")'), html);      // never breaks out of the tag
+    assert.equal(inlineEarlyScript('<p></p>', code), '<p></p>');
+});

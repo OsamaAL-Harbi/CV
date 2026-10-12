@@ -5,6 +5,7 @@
 // uses them, writes the CV itself into the page for crawlers (scripts/prerender.mjs), and refreshes the
 // sitemap date.
 // Usage: node scripts/assemble-site.mjs _site
+import { createHash } from 'node:crypto';
 import { cp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ROOT } from './cdn-assets.mjs';
@@ -62,6 +63,17 @@ export function applyFonts(html, data) {
     return setMeta(html, 'id="site-fonts"', fontStack(data?.fonts || {}));
 }
 
+// js/early.js inlined into the page: it runs before first paint, so as a separate file it cost a network round
+// trip before anything showed. The CSP allows exactly this script by its sha256 hash, nothing else inline.
+export function inlineEarlyScript(html, code) {
+    const tag = '<script src="js/early.js"></script>';
+    if (!html.includes(tag) || code.includes('</script')) return html;
+    const hash = `'sha256-${createHash('sha256').update(code).digest('base64')}'`;
+    return html
+        .replace(/(<meta http-equiv="Content-Security-Policy" content="[^"]*?script-src 'self')/, `$1 ${hash}`)
+        .replace(tag, () => `<script>${code}</script>`);
+}
+
 export function touchSitemap(xml, date = new Date().toISOString().slice(0, 10)) {
     return xml.replace(/<lastmod>[^<]*<\/lastmod>/g, `<lastmod>${date}</lastmod>`);
 }
@@ -79,8 +91,9 @@ async function main() {
     const index = join(dest, 'index.html');
     const html = await readFile(index, 'utf8');
     const steps = [applySeo, applyProfileImage, applyJsonLd, applyVerification, prerenderContent, applyFonts];
-    const seoHtml = steps.reduce((out, step) => step(out, data), html);
-    if (seoHtml !== html) { await writeFile(index, seoHtml); console.log('seo   index.html meta tags, JSON-LD, CV content and fonts from data.json'); }
+    const early = await readFile(join(ROOT, 'js/early.js'), 'utf8');
+    const seoHtml = inlineEarlyScript(steps.reduce((out, step) => step(out, data), html), early);
+    if (seoHtml !== html) { await writeFile(index, seoHtml); console.log('seo   index.html meta tags, JSON-LD, CV content, fonts and inlined early.js'); }
     // One page per project and per blog post (scripts/pages.mjs), listed in the sitemap
     const pages = sitePages(data);
     for (const page of pages) {

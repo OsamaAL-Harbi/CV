@@ -4,7 +4,7 @@
       "startServerCommand": "node scripts/assemble-site.mjs _site && node scripts/serve.mjs _site",
       "startServerReadyPattern": "Serving",
       "url": ["http://localhost:4173/CV/"],
-      "numberOfRuns": 3,
+      "numberOfRuns": 5,
       "settings": {
         "blockedUrlPatterns": ["*googletagmanager.com*", "*google-analytics.com*", "*clarity.ms*"]
       }
