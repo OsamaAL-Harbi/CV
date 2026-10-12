@@ -373,6 +373,10 @@
     {
       "name": "Osama-Links",
       "url": "https://osama-links.netlify.app/"
+    },
+    {
+      "name": "saudi-tech-monitor",
+      "url": "https://saudi-tech-ai-monitor.lovable.app"
     }
   ],
   "theme": {
