@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { test, expect, openSite } from './fixtures.js';
 
-// The real data.json without the owner's display settings (hidden sections, fonts), which change whenever they are
-// edited in the admin panel; each test sets the ones it is about.
-const DATA = (({ visibility, fonts, ...rest }) => rest)(JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8')));
+// The real data.json without the owner's display settings (hidden sections, fonts, scrollbar, motion), which change
+// whenever they are edited in the admin panel; each test sets the ones it is about.
+const DATA = (({ visibility, fonts, scrollbar, motion, ...rest }) => rest)(JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8')));
 const clone = () => structuredClone(DATA);
 const b64 = obj => Buffer.from(JSON.stringify(obj)).toString('base64');
 const state = page => page.evaluate(async () => (await import('./js/state.js')).state.appData);
@@ -507,10 +507,12 @@ test.describe('scrollbar style', () => {
     const sb = page => page.evaluate(() => document.documentElement.dataset.scrollbar);
 
     test('brand style by default; data.json picks another; dark mode gets dark native controls', async ({ page }) => {
+        await page.context().route('**/data.json*', route => route.fulfill({ json: clone() }));
         await openSite(page);
         expect(await sb(page)).toBe('brand');
         const data = clone();
         data.scrollbar = 'gradient';
+        await page.context().unroute('**/data.json*');
         await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
         await page.reload();
         await expect.poll(() => sb(page)).toBe('gradient');
