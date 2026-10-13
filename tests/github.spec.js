@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs';
 import { test, expect, openSite } from './fixtures.js';
 
 const read = name => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8');
-const DATA = JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8'));
+// The real data.json without the sections the owner has hidden in the admin panel (they change with every edit)
+const DATA = (({ visibility, ...rest }) => rest)(JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8')));
 const GH = JSON.parse(read('github.json'));
 const STATUS = JSON.parse(read('status.json'));
 
