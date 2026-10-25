@@ -420,14 +420,6 @@
       "google": "8Y1B4oYaT6N9zb7qRBTLNGSOYvK11SgGS_KIRJEREmo"
     }
   },
-  "visibility": {
-    "sections": [
-      "status",
-      "testimonials",
-      "blog",
-      "timeline"
-    ]
-  },
   "scrollbar": "gradient",
   "cursor": "ring"
 }
