@@ -96,6 +96,7 @@ test.describe('content rendering', () => {
     });
 
     test('printing includes both skill groups, then the tabs come back', async ({ page }) => {
+        await page.route('**/data.json*', route => route.fulfill({ json: (({ skillsStyle, ...rest }) => rest)(clone()) }));   // bars, whatever the owner picked
         await openSite(page, 'resume');
         const hard = DATA.skills.filter(s => s.category === 'hard').length;
         const soft = DATA.skills.filter(s => s.category === 'soft').length;

@@ -2,6 +2,47 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.12.0] — 2026-11-02
+
+Full review: bugs, security and accessibility, plus new features.
+
+### Added
+- **Certificates in progress or planned** (admin → certificate → Status): labelled «قيد الدراسة / In progress» or «مخطط لها / Planned», with the date shown as the target date. They are left out of the certificates count, the career timeline, the verified count and the schema.org credentials.
+- **Skills display** (admin → tools → «عرض المهارات», `data.json → skillsStyle`): percentage bars (default), four levels (Beginner / Intermediate / Advanced / Expert with dots, no numbers), or plain tags. It applies to print and the PDF too, with a live preview; cancel restores the previous style.
+- **«احجز مكالمة / Book a call»** in the «متاح للعمل» badge when a booking page (Calendly, Google Calendar appointments…) is set in admin → متاح للعمل (https links only).
+- **English hint**: visitors whose browser is not set to Arabic see a small bar, once, that offers the English version. Switching or closing is remembered, and it moves the back-to-top button out of its way.
+- **404.html for /CV/**: a bilingual "page not found" page with links back, under a strict CSP.
+
+### Fixed
+- **"Generate PDF" produced blank cards** for every section not yet scrolled to: the scroll-reveal class hid them in html2canvas's copy.
+- The **project editor** copied Arabic into empty English fields on save, so a missing translation became Arabic shown as English.
+- The **skip link** opened the 404 view; it now only moves focus to the content (and `#main` shows the home page).
+- **Page titles**:
+  - the tab kept the repository name after a case study closed;
+  - a language switch did not translate the title on the 404 view or of an open case study;
+  - the not-found view is now `noindex`.
+- **Home stats** counted sections that are hidden, and said "1 Projects".
+- **Colour contrast (WCAG AA)** on every page, in both themes:
+  - dark-mode coloured text now needs 4.5:1 on cards as well;
+  - filled buttons in dark mode get their own shade (white text ≥ 4.5:1, `--primary-btn-dark`), with the admin contrast report gaining two rows;
+  - grey labels, the footer, the location, the orange organisation names and the red PDF button were darkened or lightened.
+- The local dev server (`scripts/serve.mjs`) could serve a sibling folder whose name starts with the site's folder name.
+
+### Security
+- Status alerts only trust issues opened by the workflow itself (anyone could open an issue or PR with the marker to silence an alert).
+- Workflows:
+  - permissions are granted per job;
+  - checkouts no longer keep the token, so `npm ci` install scripts cannot read it.
+- CSP:
+  - `connect-src` narrowed from `*.google.com` to `www.google.com`;
+  - `base-uri 'none'`.
+- No analytics scripts load in an admin session.
+- Published README HTML files start with a CSP that blocks everything, in case they are opened directly.
+
+### Changed
+- Tests run with the browser locale `ar-SA`; the English hint has its own `en-US` tests.
+- Service worker cache v13.
+
 ## [4.11.0] — 2026-10-12
 
 ### Added

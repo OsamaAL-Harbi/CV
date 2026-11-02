@@ -85,6 +85,13 @@ export function skillLevel(skill) {
     return Number.isFinite(n) ? Math.min(100, Math.max(0, Math.round(n))) : 0;
 }
 
+// How skills are shown (admin → tools → «عرض المهارات», data.json → skillsStyle): percentage bars (default), a
+// four-step level, or plain tags without any level
+export const SKILL_STYLES = ['bars', 'levels', 'tags'];
+export const skillStyle = data => (SKILL_STYLES.includes(data?.skillsStyle) ? data.skillsStyle : 'bars');
+// 1 Beginner (< 40%), 2 Intermediate (< 65%), 3 Advanced (< 85%), 4 Expert
+export const skillStep = level => (level < 40 ? 1 : level < 65 ? 2 : level < 85 ? 3 : 4);
+
 export function setDeepValue(obj, path, value) {
     const keys = path.split('.');
     let cur = obj;

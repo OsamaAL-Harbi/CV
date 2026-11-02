@@ -14,7 +14,7 @@
     try {
         var vars = JSON.parse(localStorage.getItem('theme_vars') || 'null');
         for (var k in vars) {
-            if (/^--(primary|secondary)-(light|dark)$/.test(k) && /^\d{1,3} \d{1,3} \d{1,3}$/.test(vars[k])) root.style.setProperty(k, vars[k]);
+            if (/^--(primary|secondary)-(light|dark)$|^--primary-btn-dark$/.test(k) && /^\d{1,3} \d{1,3} \d{1,3}$/.test(vars[k])) root.style.setProperty(k, vars[k]);
         }
     } catch (e) { /* storage blocked or bad value: default colours */ }
     // Fonts picked in the admin panel: written into the page at deploy time, else the copy cached by js/fonts.js.

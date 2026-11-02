@@ -11,7 +11,16 @@ import { closeCmdPalette, contactAction, downloadQrPng, downloadVCard, filterCmd
 // Admin code is only downloaded when an admin action is used.
 const admin = (name, ...args) => import('./admin.js').then(m => m[name](...args));
 
+// The skip link moves focus to the content without touching the address: #main is not a page of the router
+function skipToContent(el, e) {
+    e.preventDefault();
+    const main = document.getElementById('main');
+    main?.focus({ preventScroll: true });
+    main?.scrollIntoView({ block: 'start' });
+}
+
 const ACTIONS = {
+    'skip-to-content':       skipToContent,
     'toggle-language':       () => toggleLanguage(),
     'toggle-menu':           () => toggleMobileMenu(),
     'share':                 () => shareProfile(),

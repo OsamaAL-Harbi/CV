@@ -33,7 +33,7 @@ export function showLangHint() {
         <button type="button" data-hint="switch" class="shrink-0 rounded-lg bg-white text-gray-900 font-bold px-3 py-1.5 hover:bg-gray-100">Switch to English</button>
         <button type="button" data-hint="close" aria-label="Dismiss" class="shrink-0 w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center"><i class="fas fa-times" aria-hidden="true"></i></button>`;
 
-    const close = () => { bar.remove(); window.removeEventListener('langchange', onChange); };
+    const close = () => { bar.remove(); document.body.classList.remove('has-lang-hint'); window.removeEventListener('langchange', onChange); };
     const onChange = () => close();                       // switched with the header button instead
     bar.addEventListener('click', e => {
         const action = e.target.closest('[data-hint]')?.dataset.hint;
@@ -44,4 +44,5 @@ export function showLangHint() {
     });
     window.addEventListener('langchange', onChange);
     document.body.appendChild(bar);
+    document.body.classList.add('has-lang-hint');      // lifts the back-to-top button above the bar
 }

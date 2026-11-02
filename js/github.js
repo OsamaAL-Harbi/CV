@@ -8,6 +8,7 @@ import { escapeHTML, safeUrl, track } from './utils.js';
 import { ui } from './i18n.js';
 import { closeDialog, isDialogOpen, openDialog } from './modal.js';
 import { sanitizeReadme } from './sanitize.js';
+import { updateMetaTags } from './router.js';
 
 const cache = {};
 let started = false;
@@ -331,7 +332,10 @@ export async function openCaseStudy(name) {
         openDialog(modal, {
             focus: modal.querySelector('[data-action="close-case"]'),
             restoreFocus: () => document.querySelector(`#github-repos a[href="#portfolio/${CSS.escape(encodeURIComponent(repo.name))}"]`)?.focus(),
-            onClose: () => { if (location.hash.startsWith('#portfolio/')) history.replaceState(history.state, '', '#portfolio'); }
+            onClose: () => {
+                if (location.hash.startsWith('#portfolio/')) history.replaceState(history.state, '', '#portfolio');
+                updateMetaTags('portfolio');           // the tab title was the repository's
+            }
         });
     }
     document.title = `${repo.name} | ${ar() ? 'أسامة الحربي' : 'Osama Al-Harbi'}`;

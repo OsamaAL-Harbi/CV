@@ -9,11 +9,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Brand colours. Defaults — light: #2563eb (4.5:1+ with white text and on white), dark: #3b82f6 (5:1 on #0b1120),
+/* Brand colours. Defaults — light: #2563eb (4.5:1+ with white text and on white), dark: #60a5fa (4.5:1+ on the page and cards; filled buttons #2563eb),
    secondary #8b5cf6. A theme picked in the admin panel sets --primary-light/-dark and --secondary-light/-dark
    (js/color.js derives them so every pair keeps its contrast). */
 :root { --color-primary: var(--primary-light, 37 99 235); --color-secondary: var(--secondary-light, 139 92 246); }
-.dark { --color-primary: var(--primary-dark, 59 130 246); --color-secondary: var(--secondary-dark, 139 92 246); }
+.dark { --color-primary: var(--primary-dark, 96 165 250); --color-secondary: var(--secondary-dark, 139 92 246); --color-primary-btn: var(--primary-btn-dark, 37 99 235); }
+/* Filled buttons in dark mode: the light primary that suits coloured text on dark backgrounds is too light for white
+   button text, so they use their own shade (js/color.js → dark.button: white text ≥ 4.5:1) */
+.dark .bg-primary { background-color: rgb(var(--color-primary-btn) / var(--tw-bg-opacity, 1)); }
 
 /* ─── Custom styles (moved from the inline <style> in index.html) ─── */
 body { overflow-x: hidden; }
@@ -206,6 +209,7 @@ html[dir="ltr"] #mobile-menu.closed { transform: translateX(-100%); }
 
 /* Scroll top */
 #scrollTopBtn { opacity:0; pointer-events:none; transition:0.3s; }
+body.has-lang-hint #scrollTopBtn { bottom: 6.5rem; }
 #scrollTopBtn.show { opacity:1; pointer-events:all; }
 
 /* Project filter buttons */

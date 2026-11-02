@@ -1,10 +1,11 @@
 // Render engine: builds every section from data.json (all values escaped).
 import { state } from './state.js';
-import { escapeHTML, imageSrc, safeAssetUrl, safeUrl, showToast, skillLevel } from './utils.js';
+import { escapeHTML, imageSrc, safeAssetUrl, safeUrl, showToast, skillLevel, skillStep, skillStyle } from './utils.js';
 import { t, ui } from './i18n.js';
 import { postPages, postPath } from './pages.js';
 import { readingMinutes, plainText } from './markdown.js';
 import { renderTimeline } from './timeline.js';
+import { isEarned } from './timeline-data.js';
 
 let twInterval     = null;
 
@@ -171,6 +172,13 @@ function renderAvailability() {
     if (!a?.enabled) return;
     document.getElementById('availability-status').textContent = t(a.status) || ui('open_to_work');
     document.getElementById('availability-details').textContent = [t(a.roles), t(a.cities), t(a.types)].filter(Boolean).join(' · ');
+    // Optional booking page (Calendly, Google Calendar appointment schedule…): https links only
+    const book = document.getElementById('availability-book');
+    const url = safeUrl(a.booking);
+    if (book) {
+        book.classList.toggle('hidden', !url);
+        book.href = url || '#';
+    }
 }
 
 // ─── Home stats (computed from data.json instead of hard-coded numbers) ───
@@ -181,7 +189,7 @@ export function computeStats(data) {
         .flatMap(text => String(text || '').match(/\b(?:19|20)\d{2}\b/g) || [])
         .map(Number);
     return {
-        certificates:   shownOnly(data.certificates).length,
+        certificates:   shownOnly(data.certificates).filter(isEarned).length,
         volunteerHours: shownOnly(data.volunteer).reduce((sum, v) => sum + (Number.parseInt(v.hours, 10) || 0), 0),
         projects:       shownOnly(data.projects).length,
         graduationYear: years.length ? Math.max(...years) : 0
@@ -194,6 +202,12 @@ function renderStats() {
         const value = stats[el.dataset.stat] ?? 0;
         el.dataset.target = String(value);
         el.closest('.stat-card')?.classList.toggle('hidden', value === 0);
+        // "1 Project", not "1 Projects"
+        const label = el.closest('.stat-card')?.querySelector('[data-lang^="stat_certs"], [data-lang^="stat_projects"]');
+        if (label) {
+            const key = label.dataset.lang.replace(/_one$/, '') + (value === 1 ? '_one' : '');
+            if (key !== label.dataset.lang) { label.dataset.lang = key; label.textContent = ui(key); }
+        }
         // The real number is in the page right away; it counts up from 0 when scrolled into view
         if (!el.dataset.counting) el.textContent = String(value);
     });
@@ -238,25 +252,29 @@ function renderVolunteerItem(item) {
     ].filter(Boolean).join('');
     return `
         <h3 class="text-xl font-bold dark:text-white hover:text-orange-600 transition">${escapeHTML(t(item.role))}</h3>
-        <p class="text-orange-600 dark:text-orange-400 font-medium text-sm mb-2">${escapeHTML(t(item.organization))}</p>
+        <p class="text-orange-700 dark:text-orange-400 font-medium text-sm mb-2">${escapeHTML(t(item.organization))}</p>
         ${badges ? `<div class="flex flex-wrap gap-2 mb-3">${badges}</div>` : ''}
         ${renderDescription(item.description)}`;
 }
 
 function renderCertItem(item) {
-    const verify = safeUrl(item.url);
+    const earned = isEarned(item);
+    const verify = earned ? safeUrl(item.url) : '';
     const date   = localDate(item.date);
+    const status = earned ? '' : `<span class="cert-status inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${item.status === 'planned'
+        ? 'bg-gray-100 text-gray-700 border border-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
+        : 'bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-800'}"><i class="fas ${item.status === 'planned' ? 'fa-flag' : 'fa-hourglass-half'}" aria-hidden="true"></i>${escapeHTML(ui(item.status === 'planned' ? 'cert_planned' : 'cert_in_progress'))}</span>`;
     const image  = imageSrc(item.image, state.previewImages);
     return `
         ${image
             ? `<a href="${escapeHTML(safeAssetUrl(item.image))}" target="_blank" rel="noopener" class="flex-shrink-0 print-hide" aria-label="${escapeHTML(`${state.currentLang === 'ar' ? 'صورة الشهادة' : 'Certificate image'}: ${t(item.name)}`)}">
                    <img src="${escapeHTML(image)}" alt="" width="56" height="56" loading="lazy" decoding="async" class="w-14 h-14 object-cover rounded-lg border border-gray-200 dark:border-gray-700"></a>`
-            : `<div class="text-2xl ${verify ? 'text-green-600 dark:text-green-400' : 'text-secondary'} flex-shrink-0" aria-hidden="true"><i class="fas ${verify ? 'fa-award' : 'fa-certificate'}"></i></div>`}
+            : `<div class="text-2xl ${verify ? 'text-green-600 dark:text-green-400' : earned ? 'text-secondary' : 'text-gray-400'} flex-shrink-0" aria-hidden="true"><i class="fas ${verify ? 'fa-award' : earned ? 'fa-certificate' : 'fa-book-open'}"></i></div>`}
         <div class="flex-1 min-w-0">
             <h4 class="font-bold text-sm dark:text-white flex flex-wrap items-center gap-x-2 gap-y-1">${escapeHTML(t(item.name))}
-                ${verify ? `<span class="cert-verified inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"><i class="fas fa-check-circle" aria-hidden="true"></i>${escapeHTML(ui('cert_verified'))}</span>` : ''}</h4>
+                ${status}${verify ? `<span class="cert-verified inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"><i class="fas fa-check-circle" aria-hidden="true"></i>${escapeHTML(ui('cert_verified'))}</span>` : ''}</h4>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${escapeHTML(t(item.issuer))}${item.credential ? ` · <span dir="ltr" class="font-mono">${escapeHTML(item.credential)}</span>` : ''}</p>
-            ${date ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${escapeHTML(date)}</p>` : ''}
+            ${date ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${earned ? '' : `${escapeHTML(ui('cert_target'))}: `}${escapeHTML(date)}</p>` : ''}
         </div>
         ${verify ? `<a href="${escapeHTML(verify)}" target="_blank" rel="noopener noreferrer"
                       class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/40 text-xs font-bold text-primary hover:bg-primary hover:text-white transition print-hide"
@@ -268,7 +286,7 @@ function renderCertItem(item) {
 function renderVerifiedCount() {
     const el = document.getElementById('certs-verified');
     if (!el) return;
-    const n = shownOnly(state.appData.certificates).filter(c => safeUrl(c.url)).length;
+    const n = shownOnly(state.appData.certificates).filter(c => isEarned(c) && safeUrl(c.url)).length;
     el.classList.toggle('hidden', n === 0);
     el.textContent = `${n} ${ui('certs_verified')}`;
 }
@@ -473,10 +491,29 @@ export function setSkillTab(tab) {
     renderSkills(state.activeSkillTab);
 }
 
-function skillRow(skill, allSkills, barColor) {
+function skillRow(skill, allSkills, barColor, style = 'bars') {
     const realIdx = allSkills.indexOf(skill);
     const level   = skillLevel(skill);
     const name    = t(skill);
+    if (style === 'tags') {
+        return `
+        <span class="skill-item relative group sortable-item inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-white dark:bg-cardBg border border-gray-200 dark:border-gray-700 dark:text-white${skill.hidden ? ' item-hidden' : ''}" data-real-index="${realIdx}">
+            ${renderAdminButtons('skills', realIdx, skill)}${escapeHTML(name)}
+        </span>`;
+    }
+    if (style === 'levels') {
+        const step = skillStep(level);
+        const dots = [1, 2, 3, 4].map(i => `<span class="w-2.5 h-2.5 rounded-full ${i <= step ? barColor : 'bg-gray-200 dark:bg-gray-700'}"></span>`).join('');
+        return `
+        <div class="skill-item relative group sortable-item flex items-center justify-between gap-3 py-1${skill.hidden ? ' item-hidden' : ''}" data-real-index="${realIdx}">
+            ${renderAdminButtons('skills', realIdx, skill)}
+            <span class="text-sm font-bold dark:text-white">${escapeHTML(name)}</span>
+            <span class="flex items-center gap-2 shrink-0">
+                <span class="text-xs font-bold text-gray-600 dark:text-gray-300">${escapeHTML(ui(`skill_step_${step}`))}</span>
+                <span class="flex gap-1" aria-hidden="true">${dots}</span>
+            </span>
+        </div>`;
+    }
     return `
         <div class="skill-item relative group sortable-item${skill.hidden ? ' item-hidden' : ''}" data-real-index="${realIdx}">
             ${renderAdminButtons('skills', realIdx, skill)}
@@ -501,13 +538,19 @@ export function renderSkills(tab = 'hard', { instant = false } = {}) {
     const container = document.getElementById('skills-container');
     if (!container) return;
     const allSkills = state.appData.skills || [];
+    const style = skillStyle(state.appData);
+    container.dataset.skillsStyle = style;
+    container.classList.toggle('space-y-3', style !== 'tags');
+    container.classList.toggle('flex', style === 'tags');
+    container.classList.toggle('flex-wrap', style === 'tags');
+    container.classList.toggle('gap-2', style === 'tags');
     if (tab === 'all') {
         container.innerHTML = ['hard', 'soft'].map(cat => {
-            const rows = allSkills.filter(s => s.category === cat && isShown(s)).map(s => skillRow(s, allSkills, BAR_COLOR[cat])).join('');
-            return rows ? `<h4 class="text-sm font-bold text-gray-500 dark:text-gray-400 pt-2">${escapeHTML(ui(`skills_${cat}`))}</h4>${rows}` : '';
+            const rows = allSkills.filter(s => s.category === cat && isShown(s)).map(s => skillRow(s, allSkills, BAR_COLOR[cat], style)).join('');
+            return rows ? `<h4 class="w-full text-sm font-bold text-gray-500 dark:text-gray-400 pt-2">${escapeHTML(ui(`skills_${cat}`))}</h4>${rows}` : '';
         }).join('');
     } else {
-        container.innerHTML = allSkills.filter(s => s.category === tab && isShown(s)).map(s => skillRow(s, allSkills, BAR_COLOR[tab])).join('');
+        container.innerHTML = allSkills.filter(s => s.category === tab && isShown(s)).map(s => skillRow(s, allSkills, BAR_COLOR[tab], style)).join('');
     }
     if (instant || prefersReducedMotion()) animateSkillBars();
     else setTimeout(animateSkillBars, 80);

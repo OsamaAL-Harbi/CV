@@ -391,3 +391,19 @@ test('mouse cursor: written into index.html and the standalone pages in the owne
     const { arrow } = cursorValues('brand', { primary: "red'/><script>", secondary: '#000' });
     assert.ok(arrow.includes('%232563eb') && !/script/i.test(decodeURIComponent(arrow)));
 });
+
+test('certificates still being studied: not schema.org credentials, not timeline milestones, labelled in the page', async () => {
+    const { personJsonLd, prerenderContent } = await import('../../scripts/prerender.mjs');
+    const { timelineEntries, isEarned } = await import('../../js/timeline-data.js');
+    const data = { certificates: [
+        { name: { ar: 'أ', en: 'A' }, date: 'May 2025' },
+        { name: { ar: 'ب', en: 'CCNA' }, date: 'June 2026', status: 'in-progress' },
+        { name: { ar: 'ج', en: 'AZ-900' }, date: 'December 2026', status: 'planned' }
+    ] };
+    assert.deepEqual(data.certificates.map(isEarned), [true, false, false]);
+    assert.deepEqual(personJsonLd({}, data).hasCredential.map(c => c.name), ['A']);
+    assert.deepEqual(timelineEntries(data).map(e => e.index), [0]);
+    const html = prerenderContent('<div id="certificates-container"></div>', data);
+    assert.match(html, /قيد الدراسة/);
+    assert.match(html, /مخطط لها/);
+});

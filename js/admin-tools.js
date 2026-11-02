@@ -1,7 +1,7 @@
 // Admin tools loaded on demand from js/admin.js: data.json history and restore, image upload with crop and
 // WebP, content and translation checks, hidden sections, "open to work" and SEO settings.
 import { state } from './state.js';
-import { escapeHTML, loadVendor, safeAssetUrl, showToast } from './utils.js';
+import { escapeHTML, loadVendor, safeAssetUrl, showToast, skillStyle } from './utils.js';
 import { renderAll } from './render.js';
 import { syncSiteTheme } from './color.js';
 import { verificationToken } from './seo.js';
@@ -464,6 +464,9 @@ async function manageAvailability() {
             ${pair('roles', 'المجالات', { ar: 'الدعم التقني، الشبكات، التحول الرقمي', en: 'IT Support, Networking, Digital Transformation' })}
             ${pair('cities', 'المدن', { ar: 'الرياض، المدينة المنورة', en: 'Riyadh, Madinah' })}
             ${pair('types', 'نوع العمل', { ar: 'دوام كامل، عن بُعد', en: 'Full-time, Remote' })}
+            <label class="block text-xs text-gray-500">رابط حجز مكالمة (اختياري) — صفحة مواعيد Calendly أو Google Calendar، يظهر زر «احجز مكالمة» في الشارة
+                <input class="swal2-input m-0 mt-1 w-full" dir="ltr" id="av-booking" type="url" value="${escapeHTML(a.booking || '')}" placeholder="https://calendly.com/...">
+            </label>
         </div>`,
         showCancelButton: true, confirmButtonText: 'تطبيق', cancelButtonText: 'إلغاء', focusConfirm: false,
         preConfirm: () => {
@@ -473,6 +476,9 @@ async function manageAvailability() {
                 out[key] = { ...(out[key] || {}), [lang]: el.value.trim() };
             });
             if (out.enabled && !out.status.ar && !out.status.en) { out.status = { ar: 'متاح للعمل', en: 'Open to work' }; }
+            const booking = document.getElementById('av-booking').value.trim();
+            if (booking && !/^https:\/\/[^\s"<>]+$/.test(booking)) { Swal.showValidationMessage('رابط الحجز يجب أن يبدأ بـ https://'); return false; }
+            if (booking) out.booking = booking;
             return out;
         }
     });
@@ -606,6 +612,42 @@ async function manageCursor() {
     showToast('تم تطبيق مؤشر الفأرة — اضغط «حفظ» لنشره ✅', 'success');
 }
 
+// ─── How skills are shown: percentage bars, levels, or tags; the resume shows the choice live ───
+const SKILL_STYLE_OPTIONS = [
+    { id: 'bars',   label: 'أشرطة بالنسبة المئوية (الافتراضي)', desc: 'شريط لكل مهارة مع النسبة، كما هو الآن' },
+    { id: 'levels', label: 'مستويات',                           desc: 'مبتدئ / متوسط / متقدم / خبير مع أربع نقاط، دون أرقام (أقل من 40% مبتدئ، أقل من 65% متوسط، أقل من 85% متقدم)' },
+    { id: 'tags',   label: 'وسوم فقط',                          desc: 'أسماء المهارات دون أي مستوى — مناسب إذا كانت النسب لا تعكس خبرتك' }
+];
+async function manageSkillsStyle() {
+    await loadVendor('swal');
+    const before = state.appData.skillsStyle;
+    const current = skillStyle(state.appData);
+    const apply = id => { if (id === 'bars') delete state.appData.skillsStyle; else state.appData.skillsStyle = id; renderAll(); };
+    const option = o => `
+        <label class="flex items-start gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-gray-50 dark:has-[:checked]:bg-gray-800">
+            <input type="radio" name="skills-style" value="${o.id}" class="w-4 h-4 mt-1 shrink-0" ${current === o.id ? 'checked' : ''}>
+            <span><span class="block text-sm font-bold">${escapeHTML(o.label)}</span><span class="block text-xs text-gray-500 mt-0.5">${escapeHTML(o.desc)}</span></span>
+        </label>`;
+    const { value } = await Swal.fire({
+        title: 'عرض المهارات',
+        width: '640px',
+        html: `<div class="text-right space-y-3" dir="rtl">
+            ${SKILL_STYLE_OPTIONS.map(option).join('')}
+            <p class="text-xs text-gray-500">يتغيّر قسم المهارات في السيرة الذاتية مباشرة عند الاختيار، ويُطبَّق كذلك على الطباعة وملف PDF.</p>
+        </div>`,
+        showCancelButton: true, confirmButtonText: 'تطبيق', cancelButtonText: 'إلغاء', focusConfirm: false,
+        didOpen: popup => popup.addEventListener('change', e => { if (e.target.name === 'skills-style') apply(e.target.value); }),
+        preConfirm: () => document.querySelector('input[name="skills-style"]:checked')?.value || 'bars'
+    });
+    if (!value) {                                   // cancel restores the style from before
+        if (before) state.appData.skillsStyle = before; else delete state.appData.skillsStyle;
+        renderAll();
+        return;
+    }
+    apply(value);
+    showToast('تم تطبيق طريقة عرض المهارات — اضغط «حفظ» لنشرها ✅', 'success');
+}
+
 // ─── Motion level: lively / subtle / off, applied live; «replay» plays the hero entrance again ───
 async function manageMotion() {
     await loadVendor('swal');
@@ -732,6 +774,7 @@ const TOOLS = [
     { action: 'manage-fonts',        icon: 'fa-font',        label: 'الخطوط',               run: manageFonts },
     { action: 'manage-motion',       icon: 'fa-magic',       label: 'الحركة والتأثيرات',    run: manageMotion },
     { action: 'manage-scrollbar',    icon: 'fa-arrows-alt-v', label: 'شريط التمرير',        run: manageScrollbar },
+    { action: 'manage-skills-style', icon: 'fa-chart-bar',   label: 'عرض المهارات',         run: manageSkillsStyle },
     { action: 'manage-cursor',       icon: 'fa-mouse-pointer', label: 'مؤشر الفأرة',         run: manageCursor },
     { action: 'manage-seo',          icon: 'fa-magnifying-glass', label: 'SEO والمشاركة',   run: manageSeo },
     { action: 'upload-photo',        icon: 'fa-camera',      label: 'رفع الصورة الشخصية',   run: uploadProfilePhoto },

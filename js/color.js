@@ -71,12 +71,14 @@ const LIGHT_RULES = {
     secondary: c => contrast(c, WHITE) >= 3 && contrast(c, PAGE_LIGHT) >= 3
 };
 const DARK_RULES = {
-    // text on the dark page and cards; white button text still readable
-    primary:   c => contrast(c, PAGE_DARK) >= 4.5 && contrast(c, CARD_DARK) >= 3 && contrast(WHITE, c) >= 3,
+    // coloured text on the dark page and on cards
+    primary:   c => contrast(c, PAGE_DARK) >= 4.5 && contrast(c, CARD_DARK) >= 4.5,
+    // filled buttons (.bg-primary) in dark mode: white text on it, and still a visible shape on the page
+    button:    c => contrast(WHITE, c) >= 4.5 && contrast(c, PAGE_DARK) >= 3,
     secondary: c => contrast(c, PAGE_DARK) >= 3 && contrast(c, CARD_DARK) >= 3
 };
 // Fallback when every rule cannot hold at once: the most important one alone
-const DARK_FALLBACK = { primary: c => contrast(c, PAGE_DARK) >= 4.5, secondary: c => contrast(c, PAGE_DARK) >= 3 };
+const DARK_FALLBACK = { primary: c => contrast(c, PAGE_DARK) >= 4.5, button: c => contrast(WHITE, c) >= 4.5, secondary: c => contrast(c, PAGE_DARK) >= 3 };
 
 export function deriveTheme(theme = {}) {
     const chosen = {
@@ -88,11 +90,13 @@ export function deriveTheme(theme = {}) {
         out.light[key] = fitLightness(chosen[key], LIGHT_RULES[key]) || '#1e3a8a';
         out.dark[key]  = fitLightness(chosen[key], DARK_RULES[key]) || fitLightness(chosen[key], DARK_FALLBACK[key]) || '#93c5fd';
     }
+    out.dark.button = fitLightness(chosen.primary, DARK_RULES.button) || fitLightness(chosen.primary, DARK_FALLBACK.button) || '#1e3a8a';
     out.report = [
         { id: 'light-button', label: 'نص أبيض على الأزرار (فاتح)',   ratio: contrast(WHITE, out.light.primary),         min: 4.5 },
         { id: 'light-text',   label: 'النصوص الملوّنة على الصفحة (فاتح)', ratio: contrast(out.light.primary, PAGE_LIGHT),  min: 4.5 },
         { id: 'dark-text',    label: 'النصوص الملوّنة على الصفحة (داكن)', ratio: contrast(out.dark.primary, PAGE_DARK),    min: 4.5 },
-        { id: 'dark-button',  label: 'نص أبيض على الأزرار (داكن)',   ratio: contrast(WHITE, out.dark.primary),          min: 3 },
+        { id: 'dark-cards',   label: 'النصوص الملوّنة على البطاقات (داكن)', ratio: contrast(out.dark.primary, CARD_DARK),  min: 4.5 },
+        { id: 'dark-button',  label: 'نص أبيض على الأزرار (داكن)',   ratio: contrast(WHITE, out.dark.button),           min: 4.5 },
         { id: 'secondary',    label: 'اللون الثانوي (أيقونات وتدرّجات)', ratio: Math.min(contrast(out.light.secondary, WHITE), contrast(out.dark.secondary, PAGE_DARK)), min: 3 }
     ].map(r => ({ ...r, pass: r.ratio >= r.min }));
     return out;
@@ -116,6 +120,7 @@ export function themeVars(derived) {
     return {
         '--primary-light': triplet(derived.light.primary),
         '--primary-dark': triplet(derived.dark.primary),
+        '--primary-btn-dark': triplet(derived.dark.button),
         '--secondary-light': triplet(derived.light.secondary),
         '--secondary-dark': triplet(derived.dark.secondary)
     };
@@ -132,7 +137,7 @@ export function applyTheme(theme) {
 }
 
 export function clearTheme() {
-    ['--primary-light', '--primary-dark', '--secondary-light', '--secondary-dark'].forEach(k => document.documentElement.style.removeProperty(k));
+    ['--primary-light', '--primary-dark', '--primary-btn-dark', '--secondary-light', '--secondary-dark'].forEach(k => document.documentElement.style.removeProperty(k));
 }
 
 // Applies data.json → theme (or the defaults) and caches it so js/early.js paints it from the start.

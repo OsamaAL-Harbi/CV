@@ -84,6 +84,7 @@ test.describe('case study', () => {
         const modal = page.locator('#case-modal');
         await expect(modal).toBeVisible();
         await expect(page).toHaveURL(/#portfolio\/jobmatch$/);
+        await expect(page).toHaveTitle(/^jobmatch \|/);
         const body = page.locator('#case-body');
         await expect(body.locator('h1')).toHaveText('JobMatch');
         await expect(body.locator('script, style, iframe, form, input, svg')).toHaveCount(0);
@@ -104,6 +105,7 @@ test.describe('case study', () => {
         await page.keyboard.press('Escape');
         await expect(modal).toBeHidden();
         await expect(page).toHaveURL(/#portfolio$/);
+        await expect(page).not.toHaveTitle(/jobmatch/);               // back to the portfolio's own title
 
         await page.goto('./#portfolio/jobmatch');
         await expect(modal).toBeVisible();
