@@ -8,10 +8,14 @@ import { join } from 'node:path';
 import { ROOT } from './cdn-assets.mjs';
 
 const MARKER = url => `<!-- status-alert:${url} -->`;
+const BOT = 'github-actions[bot]';
 
 export function planAlerts(sensors, openIssues) {
     const byUrl = new Map();
     for (const issue of openIssues) {
+        // Only the workflow's own issues count: anyone can open an issue (or PR) that carries the marker, which
+        // would otherwise silence a real alert or get closed by the bot
+        if (issue.pull_request || issue.user?.login !== BOT) continue;
         const url = issue.body?.match(/<!-- status-alert:(\S+) -->/)?.[1];
         if (url) byUrl.set(url, issue);
     }

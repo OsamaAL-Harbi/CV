@@ -134,10 +134,18 @@ test('planAlerts opens one issue per outage and closes it on recovery', async ()
         { name: 'B', url: 'https://b.example/', state: 'down', code: 503 },
         { name: 'C', url: 'https://c.example/', state: 'up', code: 200, ms: 90 }
     ];
-    const open = [{ number: 7, body: 'x <!-- status-alert:https://b.example/ -->' }, { number: 8, body: '<!-- status-alert:https://c.example/ -->' }, { number: 9, body: 'unrelated' }];
+    const bot = { login: 'github-actions[bot]' };
+    const open = [{ number: 7, user: bot, body: 'x <!-- status-alert:https://b.example/ -->' }, { number: 8, user: bot, body: '<!-- status-alert:https://c.example/ -->' }, { number: 9, user: bot, body: 'unrelated' }];
     const plan = planAlerts(sensors, open);
     assert.deepEqual(plan.open.map(s => s.name), ['A']);              // B already has an open issue
     assert.deepEqual(plan.close.map(c => c.issue.number), [8]);       // C recovered
+    // Anyone can open an issue or a PR carrying the marker: neither silences a real alert or gets closed by the bot
+    const forged = [{ number: 10, user: { login: 'someone' }, body: '<!-- status-alert:https://a.example/ -->' },
+        { number: 11, user: bot, pull_request: {}, body: '<!-- status-alert:https://a.example/ --> <!-- status-alert:https://c.example/ -->' },
+        { number: 12, user: { login: 'someone' }, body: '<!-- status-alert:https://c.example/ -->' }];
+    const plan2 = planAlerts(sensors, forged);
+    assert.deepEqual(plan2.open.map(s => s.name), ['A', 'B']);
+    assert.deepEqual(plan2.close, []);
     const issue = issueFor(sensors[0], 'OsamaAL-Harbi', '2026-10-11T03:23:00Z');
     assert.match(issue.body, /^@OsamaAL-Harbi /);
     assert.match(issue.body, /<!-- status-alert:https:\/\/a\.example\/ -->$/);
@@ -285,15 +293,19 @@ test('inlineEarlyScript: inlines js/early.js and allows exactly it by hash in th
     assert.equal(inlineEarlyScript('<p></p>', code), '<p></p>');
 });
 
-test('offline.html: strict CSP whose style hash matches its inline <style>', async () => {
+test('offline.html and 404.html: strict CSP whose style hash matches the inline <style>, and published', async () => {
     const { readFile } = await import('node:fs/promises');
     const { createHash } = await import('node:crypto');
-    const html = await readFile(new URL('../../offline.html', import.meta.url), 'utf8');
-    const style = html.match(/<style>([\s\S]*?)<\/style>/)[1];
-    const csp = html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
-    assert.match(csp, /default-src 'none'/);
-    assert.ok(csp.includes(`'sha256-${createHash('sha256').update(style).digest('base64')}'`), 'update the style hash in offline.html');
-    assert.ok(!/<script/i.test(html));
+    const { PUBLIC } = await import('../../scripts/assemble-site.mjs');
+    for (const file of ['offline.html', '404.html']) {
+        const html = await readFile(new URL(`../../${file}`, import.meta.url), 'utf8');
+        const style = html.match(/<style>([\s\S]*?)<\/style>/)[1];
+        const csp = html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
+        assert.match(csp, /default-src 'none'/);
+        assert.ok(csp.includes(`'sha256-${createHash('sha256').update(style).digest('base64')}'`), `update the style hash in ${file}`);
+        assert.ok(!/<script/i.test(html));
+        assert.ok(PUBLIC.includes(file), `${file} is published`);
+    }
 });
 
 test('project pages: headings never skip a level (h1 → h2, then English h2 → h3)', async () => {
