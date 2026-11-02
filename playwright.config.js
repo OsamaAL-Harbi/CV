@@ -13,6 +13,7 @@ export default defineConfig({
     use: {
         baseURL: `http://localhost:${PORT}/CV/`,
         serviceWorkers: 'allow',
+        locale: 'ar-SA',                 // the site's audience; tests/features.spec.js covers other browser languages
         trace: 'retain-on-failure'
     },
     projects: [
