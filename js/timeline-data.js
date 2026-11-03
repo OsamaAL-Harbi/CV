@@ -12,6 +12,11 @@ export const TIMELINE_TYPES = {
     workshops:    { icon: 'fa-chalkboard-teacher', color: 'bg-amber-600',   title: i => i.name,   org: i => i.organizer,    when: i => i.date,   label: 'sec_workshops' }
 };
 
+// Certificates can be marked as still being studied for (admin → certificate → Status): those are shown as such
+// and left out of counts, the timeline and the schema.org credentials
+export const CERT_STATUSES = ['in-progress', 'planned'];
+export const isEarned = cert => !CERT_STATUSES.includes(cert?.status);
+
 // The English text is parsed (the Arabic one is the same date in Arabic); a plain string is used as is.
 export function parseStart(value) {
     const text = String(value && typeof value === 'object' ? (value.en || value.ar || '') : value || '');
@@ -31,6 +36,7 @@ export function timelineEntries(data) {
         if (off.has(type)) continue;
         (data?.[type] || []).forEach((item, index) => {
             if (!item || item.hidden) return;
+            if (type === 'certificates' && !isEarned(item)) return;   // not a milestone yet
             const start = parseStart(def.when(item));
             if (!start) return;
             out.push({ type, index, item, start, ongoing: isOngoing(def.when(item)), order: out.length });

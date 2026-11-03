@@ -1,7 +1,7 @@
 // Localisation: bilingual values, static UI strings and RTL/LTR switching.
 import { state } from './state.js';
 import { local } from './storage.js';
-import { updateMetaTags } from './router.js';
+import { refreshMeta } from './router.js';
 import { renderAll, setSmartGreeting } from './render.js';
 
 export const SITE_URL = 'https://osamaal-harbi.github.io/CV/';
@@ -31,7 +31,7 @@ export const STATIC_TEXT = {
         contact_message_label:'الرسالة', contact_mailto_note:'سيفتح تطبيق الإيميل على جهازك',
         contact_cv_title:'هل تريد مراجعة سيرتي الذاتية أولاً؟', contact_cv_sub:'تحميل مباشر — PDF جاهز',
         tab_hard:'تقنية', tab_soft:'شخصية',
-        stat_certs:'شهادات مهنية', stat_volunteer:'ساعة تطوع',
+        stat_certs:'شهادات مهنية', stat_certs_one:'شهادة مهنية', stat_projects_one:'مشروع', stat_volunteer:'ساعة تطوع',
         stat_projects:'مشاريع', stat_graduation:'سنة التخرج',
         not_found_title:'الصفحة غير موجودة', not_found_desc:'يبدو أن الرابط الذي طلبته غير موجود',
         not_found_btn:'العودة للرئيسية',
@@ -44,7 +44,7 @@ export const STATIC_TEXT = {
         load_error:'تعذّر تحميل المحتوى. تحقق من اتصالك ثم أعد المحاولة.', btn_retry:'إعادة المحاولة',
         skills_hard:'المهارات التقنية', skills_soft:'المهارات الشخصية', case_label:'دراسة حالة', open_to_work:'متاح للعمل',
         sec_testimonials:'التوصيات', sec_blog:'المقالات', blog_all:'كل المقالات', blog_read:'اقرأ المقال', blog_minutes:'د قراءة',
-        cert_verified:'موثّقة', certs_verified:'شهادة موثّقة', project_page:'صفحة المشروع', testimonial_profile:'الملف في LinkedIn', sec_timeline:'المسيرة', timeline_hint:'اضغط أي محطة لعرض تفاصيلها',
+        cert_verified:'موثّقة', skill_step_1:'مبتدئ', skill_step_2:'متوسط', skill_step_3:'متقدم', skill_step_4:'خبير', btn_book_call:'احجز مكالمة', cert_in_progress:'قيد الدراسة', cert_planned:'مخطط لها', cert_target:'الموعد المتوقع', certs_verified:'شهادة موثّقة', project_page:'صفحة المشروع', testimonial_profile:'الملف في LinkedIn', sec_timeline:'المسيرة', timeline_hint:'اضغط أي محطة لعرض تفاصيلها',
         qr_title:'امسح الرمز لزيارة موقعي', qr_sub:'للبطاقة الشخصية أو السيرة المطبوعة', qr_download:'تحميل'
     },
     en: {
@@ -60,7 +60,7 @@ export const STATIC_TEXT = {
         contact_message_label:'Message', contact_mailto_note:'Your email app will open with the message',
         contact_cv_title:'Want to review my CV first?', contact_cv_sub:'Direct download — PDF ready',
         tab_hard:'Technical', tab_soft:'Soft Skills',
-        stat_certs:'Certifications', stat_volunteer:'Volunteer Hours',
+        stat_certs:'Certifications', stat_certs_one:'Certification', stat_projects_one:'Project', stat_volunteer:'Volunteer Hours',
         stat_projects:'Projects', stat_graduation:'Graduation Year',
         not_found_title:'Page Not Found', not_found_desc:'The link you requested does not exist',
         not_found_btn:'Back to Home',
@@ -73,7 +73,7 @@ export const STATIC_TEXT = {
         load_error:'Could not load the content. Check your connection and try again.', btn_retry:'Try again',
         skills_hard:'Technical Skills', skills_soft:'Soft Skills', case_label:'Case study', open_to_work:'Open to work',
         sec_testimonials:'Recommendations', sec_blog:'Articles', blog_all:'All articles', blog_read:'Read article', blog_minutes:'min read',
-        cert_verified:'Verified', certs_verified:'verified', project_page:'Project page', testimonial_profile:'LinkedIn profile', sec_timeline:'Journey', timeline_hint:'Select a milestone to see its details',
+        cert_verified:'Verified', skill_step_1:'Beginner', skill_step_2:'Intermediate', skill_step_3:'Advanced', skill_step_4:'Expert', btn_book_call:'Book a call', cert_in_progress:'In progress', cert_planned:'Planned', cert_target:'Target', certs_verified:'verified', project_page:'Project page', testimonial_profile:'LinkedIn profile', sec_timeline:'Journey', timeline_hint:'Select a milestone to see its details',
         qr_title:'Scan to visit my site', qr_sub:'For your business card or printed CV', qr_download:'Download'
     }
 };
@@ -129,7 +129,5 @@ export function toggleLanguage() {
     updateStaticText();
     setSmartGreeting();               // the greeting stayed in the previous language
     window.dispatchEvent(new Event('langchange'));   // lazily loaded parts (js/github.js) re-render
-    // Re-apply meta for current page
-    const hash = window.location.hash.replace('#', '') || 'home';
-    updateMetaTags(hash);
+    refreshMeta();                    // title and description of the current address, in the new language
 }

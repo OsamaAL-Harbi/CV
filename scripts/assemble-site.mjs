@@ -19,7 +19,7 @@ import { addToSitemap, cursorCss, fontsCss, sitePages } from './pages.mjs';
 export const SITE_URL = 'https://osamaal-harbi.github.io/CV/';
 
 export const PUBLIC = [
-    'index.html', 'offline.html', 'script.js', 'sw.js', 'data.json', 'manifest.json',
+    'index.html', 'offline.html', '404.html', 'script.js', 'sw.js', 'data.json', 'manifest.json',
     'robots.txt', 'sitemap.xml', '.nojekyll', 'Osama_Alharbi.pdf',
     'oauth.html', 'assets', 'js', 'images', 'cv', 'generated'
 ];

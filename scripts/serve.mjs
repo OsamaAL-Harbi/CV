@@ -4,7 +4,7 @@
 import { createServer } from 'node:http';
 import { gzipSync } from 'node:zlib';
 import { readFile, stat } from 'node:fs/promises';
-import { extname, join, normalize, resolve } from 'node:path';
+import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO   = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -24,7 +24,7 @@ createServer(async (req, res) => {
     if (pathname === '/' || pathname === '/CV') { res.writeHead(301, { Location: PREFIX }).end(); return; }
     if (!pathname.startsWith(PREFIX)) { res.writeHead(404).end('Not found'); return; }
     let file = normalize(join(ROOT, decodeURIComponent(pathname.slice(PREFIX.length))));
-    if (!file.startsWith(ROOT)) { res.writeHead(403).end(); return; }
+    if (file !== ROOT && !file.startsWith(ROOT + sep)) { res.writeHead(403).end(); return; }
     try {
         if ((await stat(file)).isDirectory()) file = join(file, 'index.html');
         let body = await readFile(file);

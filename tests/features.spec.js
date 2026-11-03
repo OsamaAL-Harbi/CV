@@ -96,6 +96,7 @@ test.describe('content rendering', () => {
     });
 
     test('printing includes both skill groups, then the tabs come back', async ({ page }) => {
+        await page.route('**/data.json*', route => route.fulfill({ json: (({ skillsStyle, ...rest }) => rest)(clone()) }));   // bars, whatever the owner picked
         await openSite(page, 'resume');
         const hard = DATA.skills.filter(s => s.category === 'hard').length;
         const soft = DATA.skills.filter(s => s.category === 'soft').length;
@@ -195,4 +196,44 @@ test('WhatsApp card opens wa.me with the number from data.json and a greeting', 
     await page.reload();
     await expect(page.locator('#loading-screen')).toBeHidden();
     await expect(card).toBeHidden();
+});
+
+test.describe('English hint for browsers not set to Arabic', () => {
+    test.use({ locale: 'en-US' });
+    const hint = page => page.locator('#lang-hint');
+
+    test('offers English once; switching is remembered', async ({ page }) => {
+        await openSite(page);
+        await expect(hint(page)).toBeVisible({ timeout: 5000 });
+        await expect(hint(page)).toContainText('also available in English');
+        await hint(page).getByRole('button', { name: 'Switch to English' }).click();
+        await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+        await expect(hint(page)).toHaveCount(0);
+        await page.reload();
+        await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+        await page.waitForTimeout(2000);
+        await expect(hint(page)).toHaveCount(0);
+    });
+
+    test('closing it keeps Arabic and it does not come back', async ({ page }) => {
+        await openSite(page);
+        await hint(page).getByRole('button', { name: 'Dismiss' }).click();
+        await expect(hint(page)).toHaveCount(0);
+        await expect(page.locator('html')).toHaveAttribute('lang', 'ar');
+        await page.reload();
+        await page.waitForTimeout(2000);
+        await expect(hint(page)).toHaveCount(0);
+    });
+
+    test('not shown when the link asks for a language', async ({ page }) => {
+        await page.goto('./?lang=ar');
+        await page.waitForTimeout(2500);
+        await expect(hint(page)).toHaveCount(0);
+    });
+});
+
+test('no English hint for an Arabic browser', async ({ page }) => {
+    await openSite(page);                       // playwright.config.js: locale ar-SA
+    await page.waitForTimeout(2500);
+    await expect(page.locator('#lang-hint')).toHaveCount(0);
 });

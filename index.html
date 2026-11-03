@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/particles.js@2.0.0/ https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/ https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/ https://cdn.jsdelivr.net/npm/jspdf@2.5.1/ https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/ https://www.googletagmanager.com/gtag/ https://www.clarity.ms/ https://scripts.clarity.ms/; style-src 'self' https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/ 'sha256-UP0QZg7irvSMvOBz9mH2PIIE28+57UiavRfeVea0l3g='; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://api.github.com https://analyticsdata.googleapis.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com https://*.clarity.ms https://c.bing.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/particles.js@2.0.0/ https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/ https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/ https://cdn.jsdelivr.net/npm/jspdf@2.5.1/ https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/ https://www.googletagmanager.com/gtag/ https://www.clarity.ms/ https://scripts.clarity.ms/; style-src 'self' https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/ 'sha256-UP0QZg7irvSMvOBz9mH2PIIE28+57UiavRfeVea0l3g='; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://api.github.com https://analyticsdata.googleapis.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com https://*.clarity.ms https://c.bing.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>أسامة الحربي | Portfolio</title>
     <!-- Fonts from admin → Fonts, written here at deploy time (scripts/assemble-site.mjs) so js/early.js applies them before first paint -->
@@ -90,6 +90,7 @@
     <link rel="modulepreload" href="js/timeline-data.js">
     <link rel="modulepreload" href="js/scrollbar.js">
     <link rel="modulepreload" href="js/cursor.js">
+    <link rel="modulepreload" href="js/lang-hint.js">
     <link rel="modulepreload" href="js/motion.js">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
@@ -107,7 +108,7 @@
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-darkBg dark:text-gray-100 font-sans transition-colors duration-300 min-h-screen flex flex-col">
 
-    <a href="#main" class="skip-link" data-lang="skip_link">تخطَّ إلى المحتوى</a>
+    <a href="#main" class="skip-link" data-action="skip-to-content" data-lang="skip_link">تخطَّ إلى المحتوى</a>
     <div id="scroll-progress" class="fixed top-0 inset-x-0 h-0.5 z-[60] bg-gradient-to-r from-primary to-secondary origin-left rtl:origin-right print-hide" aria-hidden="true"></div>
 
     <noscript>
@@ -203,6 +204,7 @@
                     <p id="availability-badge" class="hidden mx-auto mb-4 w-fit max-w-full flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-4 py-2 rounded-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-sm text-green-800 dark:text-green-300">
                         <span class="w-2.5 h-2.5 rounded-full bg-green-500 motion-safe:animate-pulse" aria-hidden="true"></span>
                         <b id="availability-status"></b><span id="availability-details" class="text-green-700 dark:text-green-400"></span>
+                        <a id="availability-book" href="#" target="_blank" rel="noopener noreferrer" data-track="book_call" class="hidden inline-flex items-center gap-1 font-bold underline underline-offset-2 hover:no-underline"><i class="fas fa-calendar-check" aria-hidden="true"></i><span data-lang="btn_book_call">احجز مكالمة</span></a>
                     </p>
                     <p id="smart-greeting" class="hero-rise text-primary font-bold mb-2 text-lg">مرحباً</p>
                     <h1 class="hero-rise hero-d1 text-5xl md:text-7xl font-extrabold mb-4 tracking-tight leading-tight" data-path="profile.name"></h1>
@@ -211,7 +213,7 @@
                         <span id="typewriter" aria-hidden="true"></span><span class="motion-safe:animate-pulse text-primary" aria-hidden="true">|</span>
                     </p>
                     <p class="hero-rise hero-d3 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto text-lg leading-relaxed mb-3" data-path="profile.summary"></p>
-                    <p class="hero-rise hero-d4 text-sm text-gray-400 mb-10 flex items-center justify-center gap-2">
+                    <p class="hero-rise hero-d4 text-sm text-gray-500 dark:text-gray-400 mb-10 flex items-center justify-center gap-2">
                         <i class="fas fa-map-marker-alt text-primary"></i>
                         <span id="profile-location"></span>
                     </p>
@@ -232,21 +234,21 @@
 
                     <!-- Stats -->
                     <div id="stats-section" data-section="stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto" data-aos="fade-up">
-                        <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
+                        <div data-section="certificates" class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
                             <div class="text-3xl font-extrabold text-primary mb-1"><span class="stat-number" data-stat="certificates" data-target="0">0</span></div>
-                            <p class="text-xs text-gray-500 font-medium" data-lang="stat_certs">شهادات مهنية</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium" data-lang="stat_certs">شهادات مهنية</p>
                         </div>
-                        <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
+                        <div data-section="volunteer" class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
                             <div class="text-3xl font-extrabold text-orange-600 dark:text-orange-500 mb-1"><span class="stat-number" data-stat="volunteerHours" data-target="0">0</span></div>
-                            <p class="text-xs text-gray-500 font-medium" data-lang="stat_volunteer">ساعة تطوع</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium" data-lang="stat_volunteer">ساعة تطوع</p>
                         </div>
-                        <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
+                        <div data-section="projects" class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
                             <div class="text-3xl font-extrabold text-green-600 dark:text-green-500 mb-1"><span class="stat-number" data-stat="projects" data-target="0">0</span></div>
-                            <p class="text-xs text-gray-500 font-medium" data-lang="stat_projects">مشاريع</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium" data-lang="stat_projects">مشاريع</p>
                         </div>
-                        <div class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
+                        <div data-section="education" class="stat-card bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm text-center">
                             <div class="text-3xl font-extrabold text-secondary mb-1"><span class="stat-number" data-stat="graduationYear" data-target="0">0</span></div>
-                            <p class="text-xs text-gray-500 font-medium" data-lang="stat_graduation">سنة التخرج</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium" data-lang="stat_graduation">سنة التخرج</p>
                         </div>
                     </div>
                 </div>
@@ -265,7 +267,7 @@
             <div class="flex justify-between items-center mb-16" data-aos="fade-down">
                 <h2 class="text-4xl font-bold" data-lang="sec_resume">السيرة الذاتية</h2>
                 <div class="flex gap-2 print-hide">
-                    <a href="Osama_Alharbi.pdf" download data-cv-link data-track="cv_download" class="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 border border-red-200 dark:border-red-800 rounded-xl text-xs font-bold hover:scale-105 transition">
+                    <a href="Osama_Alharbi.pdf" download data-cv-link data-track="cv_download" class="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl text-xs font-bold hover:scale-105 transition">
                         <i class="fas fa-file-pdf"></i><span data-lang="btn_download_cv">تحميل PDF</span>
                     </a>
                     <button data-action="print" class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold hover:scale-105 transition">
@@ -439,25 +441,25 @@
                 <div class="text-center mb-10">
                     <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-primary text-2xl"><i class="fas fa-envelope-open-text"></i></div>
                     <h2 class="text-3xl font-bold mb-2" data-lang="contact_title">تواصل معي</h2>
-                    <p class="text-gray-500 text-sm" id="contact-location-display"></p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm" id="contact-location-display"></p>
                 </div>
                 <!-- Contact cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                     <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-primary transition-all cursor-pointer text-center" data-action="contact" data-contact="email" role="button" tabindex="0">
                         <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center mx-auto mb-3 text-primary text-xl group-hover:scale-110 transition-transform"><i class="fas fa-envelope"></i></div>
-                        <p class="text-xs text-gray-400 mb-1" data-lang="contact_email_label">البريد الإلكتروني</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1" data-lang="contact_email_label">البريد الإلكتروني</p>
                         <p id="contact-email-display" class="font-bold text-xs dark:text-white truncate"></p>
                         <span class="inline-block mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity" data-lang="contact_click_copy">انقر للنسخ</span>
                     </div>
                     <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-blue-500 transition-all cursor-pointer text-center" data-action="contact" data-contact="linkedin" role="button" tabindex="0">
                         <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center mx-auto mb-3 text-blue-600 text-xl group-hover:scale-110 transition-transform"><i class="fab fa-linkedin"></i></div>
-                        <p class="text-xs text-gray-400 mb-1">LinkedIn</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">LinkedIn</p>
                         <p class="font-bold text-sm dark:text-white">Osama Al-Harbi</p>
                         <span class="inline-block mt-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" data-lang="contact_open">فتح الملف</span>
                     </div>
                     <div class="contact-card group bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-gray-500 transition-all cursor-pointer text-center" data-action="contact" data-contact="github" role="button" tabindex="0">
                         <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-3 text-gray-700 dark:text-gray-300 text-xl group-hover:scale-110 transition-transform"><i class="fab fa-github"></i></div>
-                        <p class="text-xs text-gray-400 mb-1">GitHub</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">GitHub</p>
                         <p class="font-bold text-sm dark:text-white">OsamaAL-Harbi</p>
                         <span class="inline-block mt-2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" data-lang="contact_open">فتح الملف</span>
                     </div>
@@ -542,7 +544,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="text-center py-8 text-xs text-gray-500 border-t border-gray-200 dark:border-gray-800 print-hide">
+    <footer class="text-center py-8 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 print-hide">
         <p id="secret-trigger" class="select-none inline-block px-4 py-2">
             &copy; <span id="year"></span> Osama Al-Harbi. Built with ❤️ & Code.
         </p>

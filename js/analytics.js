@@ -18,6 +18,8 @@
         document.head.appendChild(s);
     }
     function start() {
+        // Not in an admin session: no third-party script shares the page with the GitHub token
+        try { if (sessionStorage.getItem('gh_token')) return; } catch (e) { /* storage blocked: no admin session */ }
         load('https://www.googletagmanager.com/gtag/js?id=' + GA_ID);
         load('https://www.clarity.ms/tag/' + CLARITY_ID);
     }

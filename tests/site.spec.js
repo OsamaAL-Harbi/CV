@@ -141,7 +141,7 @@ test.describe('service worker', () => {
         });
         expect(sw.scope).toMatch(/\/CV\/$/);
         expect(sw.state).toBe('activated');
-        expect(sw.keys).toContain('portfolio-v12');
+        expect(sw.keys).toContain('portfolio-v13');
         expect(sw.offline).toBe(true);
     });
 
@@ -179,6 +179,19 @@ test.describe('service worker', () => {
 test.describe('command palette', () => {
     test('generates a PDF, loading jsPDF and html2canvas only then', async ({ page, isMobile, consoleErrors }) => {
         test.skip(isMobile, 'keyboard shortcut (Ctrl+K) is a desktop feature');
+        // Look into the copy html2canvas draws: cards that were never scrolled to must not be invisible there
+        await page.addInitScript(() => {
+            let real;
+            Object.defineProperty(window, 'html2canvas', {
+                configurable: true,
+                get: () => real && ((el, opts = {}) => real(el, { ...opts, onclone: async (doc, ...rest) => {
+                    await opts.onclone?.(doc, ...rest);
+                    window.__pdfCards = [...doc.querySelectorAll('#experience-container > div, #skills-container > div')]
+                        .map(card => doc.defaultView.getComputedStyle(card).opacity);
+                } })),
+                set: fn => { real = fn; }
+            });
+        });
         await openSite(page);
         expect(await page.evaluate(() => typeof window.jspdf)).toBe('undefined');
         await page.keyboard.press('Control+k');
@@ -187,6 +200,9 @@ test.describe('command palette', () => {
         const download = page.waitForEvent('download', { timeout: 30_000 });
         await page.locator('#cmd-list [data-action="run-command"]:visible').first().click();
         expect((await download).suggestedFilename()).toMatch(/_CV\.pdf$/);
+        const cards = await page.evaluate(() => window.__pdfCards);
+        expect(cards.length).toBeGreaterThan(3);
+        expect(cards.every(o => o === '1')).toBe(true);
         // html2canvas cannot draw CSS-mask icons; its copy of the page gets real images instead
         const icons = await page.evaluate(async () => {
             const { inlineIconsForCanvas } = await import('./js/ui.js');

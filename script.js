@@ -17,6 +17,7 @@ import { syncSiteFonts } from './js/fonts.js';
 import { syncSiteScrollbar } from './js/scrollbar.js';
 import { initMotion, markReady, syncSiteMotion } from './js/motion.js';
 import { initCursor, syncSiteCursor } from './js/cursor.js';
+import { showLangHint } from './js/lang-hint.js';
 
 // Older versions kept the token (and a data backup) in localStorage forever.
 function purgeLegacyAdminStorage() {
@@ -49,6 +50,7 @@ async function loadContent() {
         updateStaticText();
         document.getElementById('loading-screen').classList.add('hidden');
         markReady();
+        setTimeout(showLangHint, 1500);   // after the first paint, never in its way
     }
 }
 

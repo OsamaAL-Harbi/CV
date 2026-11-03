@@ -6,6 +6,7 @@
 // Everything is escaped; hidden sections and items (admin → visibility) are left out.
 import { verificationToken } from '../js/seo.js';
 import { postPages, postPath } from '../js/pages.js';
+import { isEarned } from '../js/timeline-data.js';
 
 const SITE_URL = 'https://osamaal-harbi.github.io/CV/';
 
@@ -46,7 +47,7 @@ export function prerenderContent(html, data) {
         experience:   x => item(ar(x.role), joinMeta(x.company, x.period), desc(x.description)),
         education:    x => item(ar(x.degree), joinMeta(x.institution, x.period), desc(x.description)),
         volunteer:    x => item(ar(x.role), joinMeta(x.organization, x.period, x.hours ? `${x.hours} ساعة` : ''), desc(x.description)),
-        certificates: x => item(ar(x.name), joinMeta(x.issuer, x.date)),
+        certificates: x => item(ar(x.name), joinMeta(x.issuer, x.date, isEarned(x) ? '' : (x.status === 'planned' ? 'مخطط لها' : 'قيد الدراسة'))),
         workshops:    x => item(ar(x.name), joinMeta(x.organizer, x.date)),
         languages:    x => item(ar(x.name), ar(x.level)),
         projects:     x => item(ar(x.title), (x.technologies || []).join('، '), desc(x.desc)),
@@ -80,7 +81,7 @@ export function personJsonLd(base, data) {
     if (skills.length) person.knowsAbout = skills;
     const langs = shown(data, 'languages').map(l => en(l.name)).filter(Boolean);
     if (langs.length) person.knowsLanguage = langs;
-    const certs = shown(data, 'certificates').filter(c => c.name);
+    const certs = shown(data, 'certificates').filter(c => c.name && isEarned(c));
     if (certs.length) person.hasCredential = certs.map(c => ({
         '@type': 'EducationalOccupationalCredential',
         name: en(c.name),

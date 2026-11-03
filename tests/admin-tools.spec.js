@@ -21,7 +21,7 @@ test.describe('theme colours', () => {
         await login(page);
         const before = await cssVar(page, '--color-primary');
         await page.locator('#admin-toolbar [data-action="manage-theme"]').click();
-        await expect(page.locator('#th-report li')).toHaveCount(5);
+        await expect(page.locator('#th-report li')).toHaveCount(6);
         await page.locator('[data-th-preset="1"]').click();                       // emerald / sky
         await expect.poll(() => cssVar(page, '--color-primary')).not.toBe(before);  // previewed on the page
         await expect(page.locator('#th-report')).not.toContainText('✗');

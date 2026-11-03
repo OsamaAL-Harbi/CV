@@ -16,6 +16,10 @@ const OUT = join(ROOT, 'generated');
 const API = 'https://api.github.com';
 const MAX_REPOS = 12;
 const MAX_README_BYTES = 300_000;
+// README HTML is fetched by the site and sanitized there (js/sanitize.js drops this tag); opened directly as a page
+// of the site, it runs nothing
+export const README_CSP = '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src https: data:; style-src \'unsafe-inline\'">\n';
+const withCsp = html => (html.startsWith(README_CSP) ? html : README_CSP + html);
 const ACTIVITY_LIMIT = 8;
 
 const QUERY = `query($login: String!) {
@@ -136,7 +140,7 @@ async function keepDeployed() {
         for (const repo of data.repos || []) {
             if (!repo.readme || !/^[A-Za-z0-9_.-]+$/.test(String(repo.name)) || String(repo.name).includes('..')) continue;
             const r = await fetch(`${SITE_URL}generated/readme/${encodeURIComponent(repo.name)}.html`);
-            if (r.ok) await writeFile(join(OUT, 'readme', `${repo.name}.html`), await r.text());
+            if (r.ok) await writeFile(join(OUT, 'readme', `${repo.name}.html`), withCsp(await r.text()));
         }
         console.log('kept the deployed github.json');
     } catch (err) {
@@ -169,7 +173,7 @@ export async function main() {
                 const r = await gh(`/repos/${login}/${repo.name}/readme`, token, { headers: { Accept: 'application/vnd.github.html+json' } });
                 const html = await r.text();
                 if (html.length > MAX_README_BYTES) { console.log(`README of ${repo.name} is too large, skipped`); continue; }
-                await writeFile(join(OUT, 'readme', `${repo.name}.html`), html);
+                await writeFile(join(OUT, 'readme', `${repo.name}.html`), withCsp(html));
                 repo.readme = true;
             } catch { repo.readme = false; }   // a repository without README is fine
         }

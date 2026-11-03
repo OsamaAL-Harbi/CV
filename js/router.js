@@ -29,12 +29,25 @@ export const PAGE_META = {
 export function handleHash() {
     const hash   = decodeHash(window.location.hash.replace('#', '').trim());
     const [page, sub] = hash.split(/\/(.*)/s);
-    const pageId = VALID_PAGES.includes(page) ? page : (hash === '' ? 'home' : null);
+    const pageId = VALID_PAGES.includes(page) ? page : (hash === '' || hash === 'main' ? 'home' : null);
     // Opening/closing a case study keeps the portfolio where it was (no re-render, no scroll to top)
     if (pageId && !(pageId === 'portfolio' && currentPage === 'portfolio')) showPage(pageId, false);
     else if (!pageId && hash !== '') { show404(); return; }
     if (pageId !== 'portfolio') return;
     import('./github.js').then(m => (sub ? m.openCaseStudy(sub) : m.closeCaseStudy())).catch(() => {});
+}
+
+// Title and description for the address as it is now, in the current language (after a language switch):
+// a 404 address keeps the 404 title, an open case study keeps its repository name
+export function refreshMeta() {
+    const hash = decodeHash(window.location.hash.replace('#', '').trim());
+    const [page, sub] = hash.split(/\/(.*)/s);
+    const id = hash === '' || hash === 'main' ? 'home' : VALID_PAGES.includes(page) ? page : 'not-found';
+    updateMetaTags(id);
+    const caseOpen = document.getElementById('case-modal') && !document.getElementById('case-modal').classList.contains('hidden');
+    if (id === 'portfolio' && sub && caseOpen) {
+        document.title = `${sub} | ${state.currentLang === 'ar' ? 'أسامة الحربي' : 'Osama Al-Harbi'}`;
+    }
 }
 
 function decodeHash(value) {
@@ -168,6 +181,8 @@ export function updateMetaTags(pageId) {
     }
 
     document.title = meta.title;
+    // The not-found view is never a page to index (only crawlers that run JavaScript see this)
+    document.querySelector('meta[name="robots"]')?.setAttribute('content', pageId === 'not-found' ? 'noindex, follow' : 'index, follow');
 
     const setMeta = (id, val) => { const el = document.getElementById(id); if (el) el.setAttribute('content', val); };
     setMeta('meta-description', meta.desc);

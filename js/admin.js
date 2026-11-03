@@ -202,7 +202,7 @@ const SECTION_NAMES = {
     profile: 'الملف الشخصي', experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات',
     projects: 'المشاريع', certificates: 'الشهادات', workshops: 'ورش العمل', languages: 'اللغات',
     github: 'GitHub', monitor: 'المراقبة', theme: 'ألوان الموقع', analytics: 'الإحصائيات',
-    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة', fonts: 'الخطوط', testimonials: 'التوصيات', posts: 'المقالات', scrollbar: 'شريط التمرير', motion: 'الحركة والتأثيرات', cursor: 'مؤشر الفأرة'
+    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة', fonts: 'الخطوط', testimonials: 'التوصيات', posts: 'المقالات', scrollbar: 'شريط التمرير', motion: 'الحركة والتأثيرات', cursor: 'مؤشر الفأرة', skillsStyle: 'عرض المهارات'
 };
 
 // Which sections differ from the last loaded/saved version, e.g. ["الخبرات (+1)", "الملف الشخصي"].
@@ -346,7 +346,8 @@ const SCHEMAS = {
         { key: 'issuer',     label: 'الجهة المانحة / Issuer' },
         { key: 'credential', label: 'Credential ID', simple: true },
         { key: 'url',        label: 'رابط التحقق / Verification URL (https://)', simple: true },
-        { key: 'date',       label: 'التاريخ / Date', simple: true },
+        { key: 'date',       label: 'التاريخ / Date (أو الموعد المتوقع / or target date)', simple: true },
+        { key: 'status',     label: 'الحالة / Status', simple: true, options: { '': 'حاصل عليها / Earned', 'in-progress': 'قيد الدراسة / In progress', planned: 'مخطط لها / Planned' } },
         { key: 'image',      label: 'صورة الشهادة (اختياري)', simple: true, upload: 'certificate' }
     ],
     workshops: [
@@ -552,11 +553,12 @@ async function manageProjectItem(index = null, draft = null) {
     const saved  = isEdit ? (state.appData.projects || [])[index] : {};
     const item   = draft ? { ...saved, ...draft } : saved;
 
-    // Helper: extract bilingual string
+    // Helper: one language of a bilingual string. A missing translation stays empty (the site falls back to the
+    // other language by itself); copying Arabic into the English field would save it as if it were English.
     const bv = (obj, lang) => {
         if (!obj) return '';
-        if (typeof obj === 'object') return obj[lang] || obj.ar || '';
-        return String(obj);
+        if (typeof obj === 'object') return obj[lang] || '';
+        return lang === 'ar' ? String(obj) : '';
     };
 
     const techVal   = Array.isArray(item.technologies) ? item.technologies.join(', ') : (item.technologies || '');
@@ -576,10 +578,7 @@ async function manageProjectItem(index = null, draft = null) {
             const rawTech = document.getElementById('pj-tech')?.value || '';
             const techs   = rawTech.split(',').map(t => t.trim()).filter(Boolean);
             return {
-                title: {
-                    ar: titleAr || titleEn,
-                    en: titleEn || titleAr
-                },
+                title: { ar: titleAr, en: titleEn },
                 desc: {
                     ar: document.getElementById('pj-desc-ar')?.value.trim() || '',
                     en: document.getElementById('pj-desc-en')?.value.trim() || ''

@@ -137,6 +137,7 @@ export function inlineIconsForCanvas(doc) {
 function prepareCanvasCopy(doc) {
     doc.body.classList.remove('admin-mode');
     doc.querySelectorAll('[data-aos]').forEach(el => el.classList.add('aos-animate'));
+    doc.querySelectorAll('.reveal').forEach(el => el.classList.remove('reveal', 'reveal-in'));   // cards not yet scrolled to (js/motion.js)
     doc.querySelectorAll('.print-hide').forEach(el => el.remove());
     doc.getElementById('print-header')?.classList.remove('hidden');
     return inlineIconsForCanvas(doc);
