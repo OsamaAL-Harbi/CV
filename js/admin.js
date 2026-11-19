@@ -14,7 +14,9 @@ import { syncSiteMotion } from './motion.js';
 
 let githubInfo     = { token: '', repo: '' };
 
-const SESSION_DURATION   = 60 * 60 * 1000;
+// The GitHub token lives at most 30 minutes in this tab, and 15 minutes without any click or key press end it sooner
+const SESSION_DURATION   = 30 * 60 * 1000;
+const IDLE_LIMIT         = 15 * 60 * 1000;
 
 const REPO_PATTERN       = /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/;
 
@@ -28,19 +30,39 @@ function readSession() {
     };
 }
 
+const lastActive = () => Number(session.get(SESSION_KEYS.lastActive)) || Number(session.get(SESSION_KEYS.loginTime)) || 0;
+
 function isSessionExpired(loginTime) {
-    return !loginTime || Date.now() - loginTime > SESSION_DURATION;
+    const now = Date.now();
+    return !loginTime || now - loginTime > SESSION_DURATION || now - lastActive() > IDLE_LIMIT;
+}
+
+// Any click or key press counts as activity (written at most every 20 seconds)
+let lastMark = 0;
+function markActive() {
+    const now = Date.now();
+    if (!session.get(SESSION_KEYS.token) || now - lastMark < 20_000) return;
+    lastMark = now;
+    session.set(SESSION_KEYS.lastActive, String(now));
+}
+let activityWatched = false;
+function watchActivity() {
+    if (activityWatched) return;
+    activityWatched = true;
+    ['pointerdown', 'keydown'].forEach(type => document.addEventListener(type, markActive, { capture: true, passive: true }));
 }
 
 function clearSession() {
     Object.values(SESSION_KEYS).forEach(k => session.remove(k));
     githubInfo = { token: '', repo: '' };
-    if (sessionTimer) { clearTimeout(sessionTimer); sessionTimer = null; }
+    if (sessionTimer) { clearInterval(sessionTimer); sessionTimer = null; }
 }
 
-function scheduleSessionExpiry(loginTime) {
-    if (sessionTimer) clearTimeout(sessionTimer);
-    sessionTimer = setTimeout(expireSession, Math.max(0, loginTime + SESSION_DURATION - Date.now()));
+// Checked every 20 seconds: the 30-minute limit and the 15 idle minutes
+function scheduleSessionExpiry() {
+    if (sessionTimer) clearInterval(sessionTimer);
+    watchActivity();
+    sessionTimer = setInterval(() => { if (isSessionExpired(readSession().loginTime)) expireSession(); }, 20_000);
 }
 
 // Drops the token but keeps unsaved edits on the page: logging in again resumes where you were.
@@ -56,7 +78,7 @@ export function checkSession() {
     if (isSessionExpired(loginTime)) { expireSession(); return; }
     githubInfo.repo  = repo;
     githubInfo.token = token;
-    scheduleSessionExpiry(loginTime);
+    scheduleSessionExpiry();
     enableAdminMode();
 }
 
@@ -128,9 +150,10 @@ export async function authenticateAndEdit() {
     session.set(SESSION_KEYS.token, token);
     session.set(SESSION_KEYS.repo, repo);
     session.set(SESSION_KEYS.loginTime, String(loginTime));
+    session.set(SESSION_KEYS.lastActive, String(loginTime));
     local.set('saved_repo', repo);   // repo name only, not secret
     githubInfo.repo = repo; githubInfo.token = token;
-    scheduleSessionExpiry(loginTime);
+    scheduleSessionExpiry();
     closeDialog(document.getElementById('admin-modal'));
     enableAdminMode();
     showToast('تم تفعيل وضع المدير 🚀', 'success');

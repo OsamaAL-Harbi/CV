@@ -1,0 +1,21 @@
+# Weekly update PRs for the build/test tools (npm devDependencies) and the GitHub Actions the workflows use.
+# Actions are pinned to commit SHAs in the workflows; Dependabot keeps those pins (and their "# vN" comments) current.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: sunday
+    open-pull-requests-limit: 5
+    groups:
+      dev-tools:
+        patterns: ['*']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: sunday
+    groups:
+      actions:
+        patterns: ['*']

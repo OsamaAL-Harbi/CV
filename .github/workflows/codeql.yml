@@ -1,0 +1,39 @@
+name: CodeQL
+
+# Static security analysis of the site's JavaScript (XSS, injection, unsafe URLs…) on every pull request, on main
+# and once a week. Findings appear under Security → Code scanning. Free for public repositories.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '41 4 * * 0'          # Sundays 04:41 UTC
+
+permissions: {}
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write      # upload the results to Code scanning
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
+        with:
+          languages: javascript-typescript, actions
+          queries: security-extended
+          config: |
+            paths-ignore:
+              - assets/vendor
+              - assets/css
+              - node_modules
+              - tests
+      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4

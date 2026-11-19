@@ -25,5 +25,5 @@ export const state = {
 };
 
 // The GitHub token lives in sessionStorage only: it disappears when the tab closes.
-export const SESSION_KEYS = { token: 'gh_token', repo: 'gh_repo', loginTime: 'gh_login_time' };
+export const SESSION_KEYS = { token: 'gh_token', repo: 'gh_repo', loginTime: 'gh_login_time', lastActive: 'gh_last_active' };
 export const DEFAULT_REPO = 'OsamaAL-Harbi/CV';

@@ -82,13 +82,25 @@ test.describe('admin session', () => {
         expect(await page.evaluate(() => sessionStorage.getItem('gh_token'))).toBeNull();
     });
 
-    test('expires the session after one hour', async ({ page }) => {
+    test('expires the session after 30 minutes', async ({ page }) => {
         await login(page);
-        await page.evaluate(() => sessionStorage.setItem('gh_login_time', String(Date.now() - 2 * 60 * 60 * 1000)));
+        await page.evaluate(() => sessionStorage.setItem('gh_login_time', String(Date.now() - 31 * 60 * 1000)));
         await page.reload();
         await expect(page.locator('#loading-screen')).toBeHidden();
         await expect.poll(() => page.evaluate(() => sessionStorage.getItem('gh_token'))).toBeNull();
         await expect(page.locator('#admin-toolbar')).toBeHidden();
+    });
+
+    test('15 minutes without a click or key press end the session; activity keeps it', async ({ page }) => {
+        await page.clock.install();
+        await login(page);
+        await page.clock.fastForward('10:00');
+        await page.locator('#year').click();                            // activity
+        await page.clock.fastForward('10:00');
+        expect(await page.evaluate(() => sessionStorage.getItem('gh_token'))).not.toBeNull();
+        await page.clock.fastForward('15:30');                           // idle
+        await expect.poll(() => page.evaluate(() => sessionStorage.getItem('gh_token'))).toBeNull();
+        await expect(page.locator('#admin-modal')).toBeVisible();
     });
 
     test('when the session expires, unsaved edits stay and the login dialog reopens', async ({ page }) => {
