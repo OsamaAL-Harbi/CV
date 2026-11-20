@@ -8,6 +8,11 @@ updates:
       interval: weekly
       day: sunday
     open-pull-requests-limit: 5
+    # Major versions change APIs and config formats (Tailwind 4, Font Awesome 7 broke the build in #22):
+    # those are upgraded by hand, with the code changes they need, not in the weekly group
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
     groups:
       dev-tools:
         patterns: ['*']
