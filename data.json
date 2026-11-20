@@ -436,7 +436,8 @@
       "date": "November 2026",
       "url": "",
       "status": "",
-      "image": "images/certificates/professional-membership-it-specialist-202611201133.webp"
+      "image": "images/certificates/professional-membership-it-specialist-202611201133.webp",
+      "badge": ""
     },
     {
       "name": {
@@ -672,7 +673,6 @@
   },
   "scrollbar": "gradient",
   "cursor": "ring",
-  "skillsStyle": "tags",
   "cvVersions": [
     {
       "label": {
@@ -881,5 +881,6 @@
         "Saudi Digital Academy"
       ]
     }
-  ]
+  ],
+  "skillsStyle": "levels"
 }
