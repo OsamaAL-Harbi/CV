@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { test, expect, openSite } from './fixtures.js';
 
 // The real data.json without the owner's display settings, which change whenever they are edited in the admin panel
-const DATA = (({ visibility, fonts, scrollbar, motion, cursor, skillsStyle, ...rest }) => rest)(JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8')));
+const DATA = (({ visibility, fonts, scrollbar, motion, cursor, skillsStyle, cvVersions, ...rest }) => rest)(JSON.parse(readFileSync(new URL('../data.json', import.meta.url), 'utf8')));
 const clone = () => structuredClone(DATA);
 const b64 = obj => Buffer.from(JSON.stringify(obj)).toString('base64');
 const state = page => page.evaluate(async () => (await import('./js/state.js')).state.appData);

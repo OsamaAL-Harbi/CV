@@ -5,22 +5,22 @@
       "en": "Osama Abdulaziz Al-Harbi"
     },
     "title": {
-      "ar": "خريج تقنية المعلومات",
-      "en": "Information Technology Graduate"
+      "ar": "أخصائي دعم فني وعمليات شبكات (NOC) · تحول رقمي",
+      "en": "IT Support & NOC Specialist · Digital Transformation"
     },
     "summary": {
-      "ar": "خريج تقنية معلومات ومتخصص في التحول الرقمي وهندسة الشبكات، أسعى لتوظيف مهاراتي في إدارة شبكات TCP/IP، تحليل سير العمل، ودعم أتمتة العمليات لضمان كفاءة البنية التحتية واستمرارية الخدمات. أمتلك معرفة متينة في قواعد بيانات SQL وتطوير الأنظمة، مدعومة بشهدات مهنية في الأمن السيبراني من IBM وISC2، ومهارات عملية في مراقبة الأنظمة وإدارة خدمات تقنية المعلومات (ITSM).",
-      "en": "Information Technology professional specializing in Digital Transformation, Cisco Networking. Skilled in workflow analysis, process automation, TCP/IP network management, and system monitoring using PRTG. Holds professional cybersecurity certifications from IBM and ISC2, with a strong foundation in SQL databases and system development."
+      "ar": "أخصائي تقنية معلومات يجمع بين تشغيل الشبكات والتحول الرقمي، خريج الجامعة الإسلامية بالمدينة المنورة. تدرّبت على شبكة الجامعة الحية: معالجة الأعطال ميدانياً، والتشخيص عبر Console وCLI على أجهزة Cisco، والمراقبة بـ PRTG وSolarWinds، وإدارة دورة حياة التذاكر وفق ITIL. وفي التحول الرقمي حلّلت مسارات العمل لنظامين وشاركت في إعداد وثائق قياس النضج الرقمي. لا أكتفي بإصلاح العطل؛ أوثّق سببه وطريقة معالجته وأقترح تحسيناً حتى لا يتكرر. هدفي القادم: CCNA.",
+      "en": "IT specialist combining network operations and digital transformation, and a graduate of the Islamic University of Madinah. I trained on the live campus network: resolving outages on site, troubleshooting Cisco devices via console and CLI, monitoring with PRTG and SolarWinds, and running the ticket lifecycle the ITIL way. In digital transformation I analyzed workflows for two systems and helped prepare digital-maturity documentation. I don't just fix the fault; I document its cause and the fix, and suggest an improvement so it doesn't recur. Next goal: CCNA."
     },
     "location": {
-      "ar": "المدينة المنورة، المملكة العربية السعودية",
-      "en": "Madinah, Saudi Arabia"
+      "ar": "المدينة المنورة · مستعد للانتقال لجميع مناطق المملكة",
+      "en": "Madinah · open to relocating anywhere in Saudi Arabia"
     },
     "email": "osamafcv214@gmail.com",
     "phone": "+966537820694",
     "linkedin": "https://www.linkedin.com/in/osama-alharbi-it/",
     "github": "https://github.com/OsamaAL-Harbi",
-    "cv": "cv/Osama_AlHarbi_CV.pdf",
+    "cv": "cv/Osama_AlHarbi_CV_EN.pdf",
     "image": "images/profile-202610102128.webp",
     "nationality": {
       "ar": "سعودي",
@@ -42,46 +42,28 @@
         "en": "January 2026"
       },
       "description": {
-        "ar": "تخرج في تقنية المعلومات مع التركيز على الشبكات وقواعد البيانات وتطوير الأنظمة والأمن السيبراني.",
-        "en": "Graduated in Information Technology with focus on networking, databases, systems development, and cybersecurity."
+        "ar": "المعدل: 3.78 من 5.00.\nتركيز على الشبكات وإدارة الأنظمة وأمن الشبكات وقواعد البيانات.\nمشروع التخرج: «صوت الطالب»، منصة ويب لإدارة شكاوى الطلاب وأتمتة إجراءاتها (HTML5 وCSS3 وJavaScript وPHP وMySQL) مع صلاحيات متعددة المستويات.\nمقررات ذات صلة: الشبكات المتقدمة، أمن الشبكات، إدارة البنية التحتية لتقنية المعلومات، أمن المعلومات، الحوسبة السحابية، قواعد البيانات، تقنيات التحول الرقمي.",
+        "en": "GPA: 3.78 / 5.00.\nFocus on networking, systems administration, network security and databases.\nGraduation project: \"Student Voice\", a web platform that manages and automates student complaints (HTML5, CSS3, JavaScript, PHP, MySQL) with multi-level permissions.\nRelevant courses: Advanced Networks, Network Security, IT Infrastructure Management, Information Security, Cloud Computing, Databases, Digital Transformation Technologies."
       }
     }
   ],
   "experience": [
     {
       "role": {
-        "ar": "متدرب تحول رقمي",
-        "en": "Digital Transformation Trainee"
+        "ar": "أخصائي تحول رقمي (برنامج تمهير)",
+        "en": "Digital Transformation Specialist (Tamheer)"
       },
       "company": {
-        "ar": "عمادة تقنية المعلومات والتعليم الإلكتروني - الجامعة الإسلامية بالمدينة المنورة",
-        "en": "Deanship of IT & E-Learning - Islamic University of Madinah"
+        "ar": "الإدارة العامة للتحول الرقمي - الجامعة الإسلامية بالمدينة المنورة",
+        "en": "General Administration for Digital Transformation - Islamic University of Madinah"
       },
       "period": {
-        "ar": "يناير 2026 - حاضر",
-        "en": "January 2026 – Present"
+        "ar": "مايو 2026 - نوفمبر 2026",
+        "en": "May 2026 – November 2026"
       },
       "description": {
-        "ar": "تحليل ومراجعة تقارير قياس التحول الرقمي الصادرة عن هيئة الحكومة الرقمية. تطوير وتدقيق الأدلة التقنية لمعايير النضج الرقمي الوطنية. الإشراف على إصدار التقارير الدورية لحوكمة البيانات. إدارة منصة رقمي وتسجيل الخدمات الرقمية.",
-        "en": "Analyzed Digital Transformation Measurement reports from the Digital Government Authority (DGA). Developed and audited technical evidence for national Digital Maturity standards. Oversaw periodic reports for data governance. Managed digital services registration via 'Raqmi' portal."
-      }
-    },
-    {
-      "role": {
-        "ar": "متدرب إدارة الجودة الشاملة (تعاوني)",
-        "en": "TQM CO-OP Trainee"
-      },
-      "company": {
-        "ar": "عمادة تقنية المعلومات والتعليم الإلكتروني - الجامعة الإسلامية بالمدينة المنورة",
-        "en": "Deanship of IT & E-Learning - Islamic University of Madinah"
-      },
-      "period": {
-        "ar": "يونيو 2025 - أغسطس 2025",
-        "en": "June 2025 – August 2025"
-      },
-      "description": {
-        "ar": "تقديم الدعم الفني والتشغيلي في بيئة تقنية المعلومات الجامعية. مراجعة إجراءات التشغيل وتوثيق الأنظمة. المساعدة في تحديد مشكلات الأنظمة وفجوات الخدمة. دعم قياس الأداء وحساب مؤشرات KPI. استخدام Microsoft Visio لتحليل سير العمل.",
-        "en": "Provided technical and operational support in a university IT environment. Reviewed IT procedures and system documentation. Assisted in identifying system issues and service gaps. Supported KPI calculation for service uptime. Utilized Microsoft Visio to analyse workflows."
+        "ar": "إعداد أكثر من 15 مستنداً تقنياً وإدارياً، ومراجعة وتحديث أكثر من 30 مستنداً للخدمات والأنظمة التقنية.\nتحليل مسارات العمل وخطوات التشغيل لنظامين جامعيين وتحديد فرص تحسين الإجراءات، ومراجعة متطلبات الأعمال ووثائق المشاريع مع أصحاب المصلحة.\nالمشاركة في إنجاز متطلبات دورة قياس التحول الرقمي لعام 2026م، وإعداد تقارير تحليلية تدعم المتابعة التشغيلية واتخاذ القرار.\nتقييم 4 مبادرات ابتكار، ومتابعة دورة حياة 3 مشاريع تقنية تشغيلية باستخدام مؤشرات الأداء (KPIs).\nالتنسيق مع نحو 4 إدارات لجمع المعلومات التقنية والإدارية والتحقق منها وتوثيقها، ودعم الحوكمة والامتثال وإدارة البيانات.\nحصلت على شهادة شكر وتقدير من الإدارة عند ختام التدريب. الأدوات: Microsoft 365 (Word وExcel).",
+        "en": "Prepared 15+ technical and administrative documents, and reviewed and updated 30+ documents for IT services and systems.\nAnalyzed workflows and operating steps for two university systems, identified process-improvement opportunities, and reviewed business requirements and project documents with stakeholders.\nContributed to the 2026 Digital Transformation Measurement (Qiyas) cycle and prepared analytical reports for operational monitoring and decision-making.\nEvaluated 4 innovation initiatives and tracked the lifecycle of 3 operational IT projects using KPIs.\nWorked with about 4 departments to collect, verify and document technical and administrative information, supporting governance, compliance and data management.\nReceived a certificate of appreciation from the administration at the end of the training. Tools: Microsoft 365 (Word, Excel)."
       }
     },
     {
@@ -90,16 +72,52 @@
         "en": "Networking Trainee"
       },
       "company": {
-        "ar": "قسم الشبكات - عمادة تقنية المعلومات والتعليم الإلكتروني - الجامعة الإسلامية بالمدينة المنورة",
-        "en": "Networks Department - Deanship of Information Technology and E-Learning - Islamic University of Madinah"
+        "ar": "قسم الشبكات وأمن المعلومات - عمادة تقنية المعلومات - الجامعة الإسلامية بالمدينة المنورة",
+        "en": "Networks & Information Security Dept. - Deanship of IT - Islamic University of Madinah"
       },
       "period": {
-        "ar": "",
-        "en": ""
+        "ar": "يونيو 2026 - أكتوبر 2026",
+        "en": "June 2026 – October 2026"
       },
       "description": {
-        "ar": "تكوين والتحقق من 4 شبكات محلية افتراضية (VLANs)، عنونة IP، وتقسيم الشبكات الفرعية (/26 subnet segmentation).\n\nإعداد وترميز ربط 802.1Q (802.1Q trunking) وتوجيه البيانات بين شبكات VLANs باستخدام تقنية (Router-on-a-Stick).\n\nتنفيذ عمليات التحقق من إعدادات سيسكو (Cisco configuration verification)، اختبار الاتصال، واستكشاف الأخطاء وإصلاحها باستخدام أوامر (Ping و show).\n\nتكوين واستخدام نظام مراقبة الشبكات (PRTG Network Monitor) مع مستشعرات Ping، WMI، وSNMP لمراقبة استهلاك المعالج، الذاكرة، الأقراص، أوقات الاستجابة، وفقدان الحزم لـ 11 مستشعراً.\n\nتطبيق مفاهيم إدارة خدمات تقنية المعلومات (ITSM) باستخدام ManageEngine ServiceDesk Plus، بما في ذلك إدارة الحوادث، تتبع دورة حياة التذاكر، الأولويات، ومستويات جودة الخدمة (SLA).",
-        "en": "Configured and verified four Virtual Local Area Networks (VLANs), IP addressing, and /26 subnet segmentation.\n\nSet up and configured 802.1Q trunking and inter-VLAN routing using the \"Router-on-a-Stick\" technique.\n\nPerformed Cisco configuration verification, connectivity testing, and troubleshooting using Ping and \"show\" commands.\n\nConfigured and utilized PRTG Network Monitor with Ping, WMI, and SNMP sensors to monitor CPU, memory, and disk usage, as well as response times and packet loss across 11 sensors.\n\nApplied IT Service Management (ITSM) concepts using ManageEngine ServiceDesk Plus, including incident management, ticket lifecycle tracking, prioritization, and Service Level Agreements (SLAs)."
+        "ar": "5 زيارات ميدانية لمعالجة بلاغات توقف على شبكة الجامعة: تشخيص مشاكل الطاقة، ومعالجة مبدلات (Switches) في وضع Stack، واستبدال وحدات SFP والكابلات التالفة.\nتشخيص أعطال أجهزة Cisco عبر منفذ Console وسطر الأوامر (CLI) بأوامر show وping وtraceroute.\nتجهيز المبدلات ونقاط الوصول اللاسلكية للتركيب، وتركيب كابلات RJ-45 واختبارها.\nمعمل Cisco Packet Tracer: تقسيم شبكة ‎/24 إلى أربع شبكات ‎/26 مع 4 VLANs وTrunk (802.1Q) وInter-VLAN Routing، وربط 3 مواقع بالتوجيه الثابت ثم OSPF مع اختبار المسار البديل، وتطبيق STP وEtherChannel.\nتثبيت PRTG ومراقبة جهاز اختبار عبر WMI بـ 11 حساساً، وتنفيذ دورة حياة تذكرة كاملة في ManageEngine ServiceDesk Plus.\nدراسة سيناريو سياسات الوصول في Aruba ClearPass (802.1X وMAB وGuest Portal) وبنية DDI (DNS وDHCP وIPAM)، والتدرّب على SolarWinds.",
+        "en": "Resolved outages on the live campus network in 5 on-site visits: diagnosed power faults, fixed stacked switches, and replaced faulty SFP modules and cables.\nTroubleshot Cisco devices through the console port and CLI using show, ping and traceroute.\nPrepared switches and wireless access points for deployment; terminated and tested RJ-45 cabling.\nCisco Packet Tracer lab: subnetted a /24 into four /26 networks with 4 VLANs, 802.1Q trunking and inter-VLAN routing; connected 3 sites with static routing, then OSPF with failover testing; applied STP and EtherChannel.\nInstalled PRTG and monitored a test device over WMI with 11 sensors, and ran a full ticket lifecycle in ManageEngine ServiceDesk Plus.\nStudied an Aruba ClearPass access-policy scenario (802.1X, MAB, guest portal) and DDI architecture (DNS, DHCP, IPAM), and trained on SolarWinds."
+      }
+    },
+    {
+      "role": {
+        "ar": "متدرب إدارة التحول الرقمي (تطوعي)",
+        "en": "Digital Transformation Trainee (Volunteer)"
+      },
+      "company": {
+        "ar": "عمادة تقنية المعلومات والتعليم الإلكتروني - الجامعة الإسلامية بالمدينة المنورة",
+        "en": "Deanship of IT & E-Learning - Islamic University of Madinah"
+      },
+      "period": {
+        "ar": "يناير 2026 - مايو 2026",
+        "en": "January 2026 – May 2026"
+      },
+      "description": {
+        "ar": "إعداد ومراجعة وثائق الامتثال الخاصة بمتطلبات النضج الرقمي الوطني، وتدقيق الأدلة التقنية لمعاييرها.\nمراقبة الالتزام بسياسات حوكمة البيانات من خلال إصدار تقارير دورية لضمان الاستدامة والرقابة المؤسسية.\nالتعاون مع الفرق التقنية لمراجعة الوثائق والتأكد من اكتمال التوثيق الفني للتقييمات، وتسجيل الخدمات الرقمية في منصة «رقمي».",
+        "en": "Prepared and reviewed compliance documents for national digital maturity requirements, and audited the technical evidence for its standards.\nMonitored adherence to data governance policies by issuing periodic reports to support sustainability and institutional oversight.\nWorked with technical teams to review documents and ensure the technical documentation for assessments was complete, and registered digital services on the Raqmi portal."
+      }
+    },
+    {
+      "role": {
+        "ar": "متدرب إدارة الجودة الشاملة (تدريب تعاوني)",
+        "en": "Total Quality Management Trainee (Co-op)"
+      },
+      "company": {
+        "ar": "عمادة تقنية المعلومات والتعليم الإلكتروني - الجامعة الإسلامية بالمدينة المنورة",
+        "en": "Deanship of IT & E-Learning - Islamic University of Madinah"
+      },
+      "period": {
+        "ar": "يوليو 2025 - أغسطس 2025",
+        "en": "July 2025 – August 2025"
+      },
+      "description": {
+        "ar": "مراقبة الخدمات الرقمية ومؤشرات الأداء التشغيلي، وجمع بيانات مؤشرات الأداء الرئيسية (KPIs) وتحليلها لإعداد التقارير.\nمراجعة الإجراءات التشغيلية ووثائق الخدمة، والمشاركة في رسم خرائط العمليات وتوثيق سير العمل (Microsoft Visio).\nدعم مبادرات تحسين جودة الخدمة والامتثال، والمساعدة في تقارير الأداء وأنشطة التحسين المستمر.",
+        "en": "Monitored digital services and operational performance indicators, and collected and analyzed KPI data for reporting.\nReviewed operating procedures and service documents, and took part in process mapping and workflow documentation (Microsoft Visio).\nSupported service quality and compliance improvement initiatives, and helped prepare performance reports and continuous improvement activities."
       }
     }
   ],
@@ -110,8 +128,8 @@
         "en": "Technical Volunteer"
       },
       "organization": {
-        "ar": "عمادة تقنية المعلومات - الجامعة الإسلامية (بوابة المتطوعين الوطنية)",
-        "en": "Deanship of IT - Islamic University (National Volunteer Portal)"
+        "ar": "عمادة تقنية المعلومات - الجامعة الإسلامية (المنصة الوطنية للعمل التطوعي)",
+        "en": "Deanship of IT - Islamic University of Madinah (National Volunteering Platform)"
       },
       "period": {
         "ar": "أغسطس 2025",
@@ -119,62 +137,158 @@
       },
       "hours": "96",
       "description": {
-        "ar": "96 ساعة تطوعية معتمدة تركزت على تطبيق التدريب التعاوني للبرامج والأنظمة التقنية. دعم مبادرات المركز الوطني لقطاع غير الربحي.",
-        "en": "Completed 96 certified volunteer hours focused on implementing cooperative training for technical programs and systems. Supported the National Center for Non-Profit Sector's initiatives."
+        "ar": "أكملت 96 ساعة تطوعية معتمدة في عمادة تقنية المعلومات عبر المنصة الوطنية للعمل التطوعي.\nدعمت الأنظمة التقنية والخدمات الرقمية، وساعدت في أنشطة التدريب والتأهيل.",
+        "en": "Completed 96 certified volunteer hours at the Deanship of IT through the National Volunteering Platform.\nSupported technical systems and digital services, and assisted with training activities."
       }
     }
   ],
   "skills": [
     {
-      "ar": "بروتوكولات الشبكات (TCP/IP)",
-      "en": "Network Protocols (TCP/IP)",
+      "ar": "دعم الشبكات وحل الأعطال",
+      "en": "Network Support & Troubleshooting",
+      "level": 60,
+      "category": "hard"
+    },
+    {
+      "ar": "مراقبة الشبكات و NOC (PRTG وSolarWinds)",
+      "en": "NOC & Network Monitoring (PRTG, SolarWinds)",
+      "level": 55,
+      "category": "hard"
+    },
+    {
+      "ar": "سطر أوامر Cisco IOS",
+      "en": "Cisco IOS CLI",
+      "level": 65,
+      "category": "hard"
+    },
+    {
+      "ar": "بروتوكولات TCP/IP وتقسيم الشبكات",
+      "en": "TCP/IP & Subnetting",
       "level": 75,
       "category": "hard"
     },
     {
-      "ar": "أنظمة التشغيل (Win & Linux)",
-      "en": "Operating Systems (Win & Linux)",
+      "ar": "VLANs و802.1Q والتوجيه بينها",
+      "en": "VLANs, 802.1Q & Inter-VLAN Routing",
+      "level": 60,
+      "category": "hard"
+    },
+    {
+      "ar": "التوجيه الثابت وOSPF",
+      "en": "Static Routing & OSPF",
+      "level": 55,
+      "category": "hard"
+    },
+    {
+      "ar": "STP وEtherChannel",
+      "en": "STP & EtherChannel (LACP)",
+      "level": 55,
+      "category": "hard"
+    },
+    {
+      "ar": "DNS وDHCP وIPAM",
+      "en": "DNS, DHCP & IPAM (DDI)",
+      "level": 50,
+      "category": "hard"
+    },
+    {
+      "ar": "التحكم بالوصول ClearPass ‏(802.1X وMAB)",
+      "en": "Network Access Control – ClearPass (802.1X, MAB)",
+      "level": 40,
+      "category": "hard"
+    },
+    {
+      "ar": "إدارة خدمات تقنية المعلومات (ITIL 4 وServiceDesk Plus)",
+      "en": "IT Service Management (ITIL 4, ServiceDesk Plus)",
+      "level": 55,
+      "category": "hard"
+    },
+    {
+      "ar": "إدارة الحوادث والتذاكر",
+      "en": "Incident & Ticket Management",
+      "level": 55,
+      "category": "hard"
+    },
+    {
+      "ar": "أنظمة Windows وLinux",
+      "en": "Windows & Linux Fundamentals",
       "level": 80,
       "category": "hard"
     },
     {
-      "ar": "Microsoft Office",
-      "en": "Microsoft Office",
-      "level": 90,
+      "ar": "المبدلات ونقاط الوصول ووحدات SFP وكابلات RJ-45",
+      "en": "Switches, Access Points, SFP & RJ-45 Cabling",
+      "level": 60,
       "category": "hard"
     },
     {
-      "ar": "SQL & MySQL",
+      "ar": "قواعد البيانات SQL وMySQL",
       "en": "SQL & MySQL",
       "level": 75,
       "category": "hard"
     },
     {
-      "ar": "HTML5 & CSS3",
+      "ar": "أساسيات الحوسبة السحابية (AWS)",
+      "en": "Cloud Fundamentals (AWS)",
+      "level": 45,
+      "category": "hard"
+    },
+    {
+      "ar": "التحول الرقمي وتحليل الإجراءات",
+      "en": "Digital Transformation & Process Analysis",
+      "level": 70,
+      "category": "hard"
+    },
+    {
+      "ar": "جمع المتطلبات وتوثيق سير العمل",
+      "en": "Requirements Gathering & Workflow Documentation",
+      "level": 70,
+      "category": "hard"
+    },
+    {
+      "ar": "التوثيق التقني وإعداد التقارير",
+      "en": "Technical Documentation & Reporting",
+      "level": 85,
+      "category": "hard"
+    },
+    {
+      "ar": "مؤشرات الأداء وحوكمة البيانات",
+      "en": "KPIs & Data Governance",
+      "level": 60,
+      "category": "hard"
+    },
+    {
+      "ar": "Microsoft 365 ‏(Word وExcel)",
+      "en": "Microsoft 365 (Word, Excel)",
+      "level": 90,
+      "category": "hard"
+    },
+    {
+      "ar": "HTML5 وCSS3",
       "en": "HTML5 & CSS3",
       "level": 70,
       "category": "hard"
     },
     {
-      "ar": "التوثيق التقني",
-      "en": "Technical Documentation",
-      "level": 85,
-      "category": "hard"
-    },
-    {
-      "ar": "حل المشكلات والتفكير النقدي",
-      "en": "Problem-Solving & Critical Thinking",
+      "ar": "حل المشكلات والتفكير التحليلي",
+      "en": "Problem Solving & Analytical Thinking",
       "level": 85,
       "category": "soft"
     },
     {
-      "ar": "الانتباه للتفاصيل",
+      "ar": "الدقة والاهتمام بالتفاصيل",
       "en": "Attention to Detail",
       "level": 90,
       "category": "soft"
     },
     {
-      "ar": "العمل الجماعي والتعاون",
+      "ar": "التواصل والتنسيق مع أصحاب المصلحة",
+      "en": "Stakeholder Communication & Coordination",
+      "level": 80,
+      "category": "soft"
+    },
+    {
+      "ar": "العمل الجماعي",
       "en": "Teamwork & Collaboration",
       "level": 85,
       "category": "soft"
@@ -190,36 +304,6 @@
       "en": "Proactivity & Initiative",
       "level": 85,
       "category": "soft"
-    },
-    {
-      "ar": "Cisco Networking & Switching",
-      "en": "Cisco Networking & Switching",
-      "level": 65,
-      "category": "hard"
-    },
-    {
-      "ar": "إعداد وتوجيه شبكات VLAN",
-      "en": "VLANs & Inter-VLAN Routing",
-      "level": 60,
-      "category": "hard"
-    },
-    {
-      "ar": "مراقبة الشبكات والأنظمة (PRTG)",
-      "en": "Network Monitoring (PRTG & SNMP)",
-      "level": 40,
-      "category": "hard"
-    },
-    {
-      "ar": "استكشاف أخطاء الشبكات وإصلاحها",
-      "en": "Network Troubleshooting",
-      "level": 30,
-      "category": "hard"
-    },
-    {
-      "ar": "إدارة خدمات تقنية المعلومات (ITSM)",
-      "en": "IT Service Management (ITSM)",
-      "level": 20,
-      "category": "hard"
     }
   ],
   "projects": [
@@ -233,11 +317,11 @@
         "en": "Graduation Project: Automated workflow system to transition manual administrative procedures into a digital platform with a multi-tier authorization framework."
       },
       "technologies": [
-        "SQL",
-        "MySQL",
         "HTML5",
         "CSS3",
-        "JavaScript"
+        "JavaScript",
+        "PHP",
+        "MySQL"
       ],
       "details": {
         "challenges": {
@@ -251,17 +335,165 @@
       },
       "link": "#",
       "liveUrl": ""
+    },
+    {
+      "title": {
+        "ar": "مختبر التوجيه الاحتياطي OSPF (3 مواقع)",
+        "en": "OSPF Failover Lab (3 sites)"
+      },
+      "desc": {
+        "ar": "شبكة Cisco من 3 مواقع مربوطة بالتوجيه الثابت ثم OSPF، مع اختبار تحويل المسار تلقائياً عند انقطاع رابط.",
+        "en": "A 3-site Cisco network connected with static routes, then OSPF, with automatic rerouting tested after a link failure."
+      },
+      "technologies": [
+        "Cisco Packet Tracer",
+        "OSPF",
+        "Static Routing",
+        "Cisco IOS"
+      ],
+      "details": {
+        "challenges": {
+          "ar": "ضمان استمرار الاتصال بين المواقع عند تعطل أحد الروابط دون تدخل يدوي.",
+          "en": "Keeping the sites connected when a link fails, without manual intervention."
+        },
+        "results": {
+          "ar": "تحقّقت من أن OSPF يعيد توجيه الحركة عبر المسار البديل بعد قطع الرابط.",
+          "en": "Verified that OSPF rerouted traffic over the backup path after the link was cut."
+        }
+      },
+      "link": "#",
+      "liveUrl": ""
+    },
+    {
+      "title": {
+        "ar": "مختبر VLAN وSTP وEtherChannel",
+        "en": "VLAN, STP & EtherChannel Lab"
+      },
+      "desc": {
+        "ar": "تقسيم شبكة ‎/24 إلى أربع شبكات ‎/26 لكل منها VLAN، مع Trunk ‏(802.1Q) وتوجيه بينها بطريقة Router-on-a-Stick، وضبط أولوية جذر STP، وتجميع الروابط بـ EtherChannel ‏(LACP).",
+        "en": "Subnetted a /24 into four /26 VLANs with 802.1Q trunking and Router-on-a-Stick inter-VLAN routing, set the STP root priority, and bundled links with LACP EtherChannel."
+      },
+      "technologies": [
+        "Cisco Packet Tracer",
+        "VLAN",
+        "802.1Q",
+        "STP",
+        "EtherChannel"
+      ],
+      "details": {
+        "challenges": {
+          "ar": "فصل الأقسام في شبكات مستقلة مع بقاء التواصل بينها، ومنع الحلقات مع الاستفادة من أكثر من رابط.",
+          "en": "Separating departments into their own networks while keeping them reachable, and preventing loops while using more than one link."
+        },
+        "results": {
+          "ar": "شبكة مقسّمة تعمل بين VLANs الأربع، وجذر STP محدد، ورابط مجمّع يتحمل انقطاع أحد أسلاكه.",
+          "en": "A segmented network working across the four VLANs, a chosen STP root, and a bundled link that survives a cable failure."
+        }
+      },
+      "link": "#",
+      "liveUrl": ""
+    },
+    {
+      "title": {
+        "ar": "مختبر المراقبة وإدارة التذاكر",
+        "en": "Network Monitoring & Ticketing Lab"
+      },
+      "desc": {
+        "ar": "تثبيت PRTG ومراقبة جهاز اختبار عبر WMI بـ 11 حساساً (المعالج والذاكرة والقرص ووقت التشغيل وبطاقة الشبكة) مع تنبيهات، وتنفيذ دورة حياة تذكرة كاملة في ManageEngine ServiceDesk Plus.",
+        "en": "Installed PRTG and monitored a test device over WMI with 11 sensors (CPU, memory, disk, uptime, NIC) and alerts, and ran a full ticket lifecycle in ManageEngine ServiceDesk Plus."
+      },
+      "technologies": [
+        "PRTG",
+        "WMI",
+        "ServiceDesk Plus",
+        "ITIL"
+      ],
+      "details": {
+        "challenges": {
+          "ar": "اكتشاف المشكلة قبل أن يبلّغ عنها المستخدم، وتتبع معالجتها حتى الإغلاق.",
+          "en": "Spotting a problem before users report it, and tracking its handling until closure."
+        },
+        "results": {
+          "ar": "لوحة مراقبة بتنبيهات فعّالة، وتذكرة مرّت بكل مراحلها من الإنشاء إلى الإغلاق وفق ITIL.",
+          "en": "A monitoring dashboard with working alerts, and a ticket taken through every stage from creation to closure the ITIL way."
+        }
+      },
+      "link": "#",
+      "liveUrl": ""
     }
   ],
   "certificates": [
+    {
+      "name": {
+        "ar": "عضوية مهنية – أخصائي تقنية معلومات",
+        "en": "Professional Membership – IT Specialist"
+      },
+      "issuer": {
+        "ar": "الهيئة السعودية للمهندسين",
+        "en": "Saudi Council of Engineers"
+      },
+      "credential": "1310001",
+      "date": "November 2026"
+    },
+    {
+      "name": {
+        "ar": "شهادة Google المهنية في الدعم الفني",
+        "en": "Google IT Support Professional Certificate"
+      },
+      "issuer": {
+        "ar": "Google (عبر Coursera)",
+        "en": "Google (Coursera)"
+      },
+      "credential": "UBQWIQEMXEZ2",
+      "date": "November 2026",
+      "url": "https://coursera.org/verify/professional-cert/UBQWIQEMXEZ2"
+    },
+    {
+      "name": {
+        "ar": "شهادة إتمام برنامج تمهير (التدريب على رأس العمل)",
+        "en": "Tamheer On-the-Job Training Completion Certificate"
+      },
+      "issuer": {
+        "ar": "صندوق تنمية الموارد البشرية (هدف)",
+        "en": "Human Resources Development Fund (HRDF)"
+      },
+      "credential": "",
+      "date": "November 2026"
+    },
+    {
+      "name": {
+        "ar": "مسار التعلم التحضيري لشهادة AWS Cloud Practitioner",
+        "en": "AWS Cloud Practitioner – Learning Path (Certificate of Completion)"
+      },
+      "issuer": {
+        "ar": "الأكاديمية السعودية الرقمية (بالشراكة مع AWS)",
+        "en": "Saudi Digital Academy (with AWS)"
+      },
+      "credential": "",
+      "date": "August 2026",
+      "url": "https://mcit.futurex.sa/certificates/7d0da97038944395ac5e991ad86f3b85",
+      "image": "images/certificates/aws-certified-cloud-practitioner-sda-202610110720.webp"
+    },
+    {
+      "name": {
+        "ar": "ITIL 4: الأسس والإطار",
+        "en": "ITIL 4: Foundations and Framework"
+      },
+      "issuer": {
+        "ar": "Coursera (Logical Operations)",
+        "en": "Coursera (Logical Operations)"
+      },
+      "credential": "",
+      "date": "March 2026"
+    },
     {
       "name": {
         "ar": "التحول الرقمي والهوية الرقمية",
         "en": "Digital Transformation and Digital Identity"
       },
       "issuer": {
-        "ar": "أكاديمية طويق",
-        "en": "Tuwaiq Academy"
+        "ar": "منصة سطر (أكاديمية طويق)",
+        "en": "Satr (Tuwaiq Academy)"
       },
       "credential": "",
       "date": "April 2026"
@@ -276,45 +508,60 @@
         "en": "ISC2"
       },
       "credential": "HPUZITAO56UA",
-      "date": "January 2025"
+      "date": "January 2025",
+      "url": "https://www.coursera.org/account/accomplishments/records/HPUZITAO56UA"
     },
     {
       "name": {
         "ar": "مبادئ الأمن",
-        "en": "Principles of Security"
+        "en": "Security Principles"
       },
       "issuer": {
         "ar": "ISC2",
         "en": "ISC2"
       },
       "credential": "RHKTIRIVXJFL",
-      "date": "January 2025"
+      "date": "January 2025",
+      "url": "https://www.coursera.org/account/accomplishments/records/RHKTIRIVXJFL"
     },
     {
       "name": {
-        "ar": "مقدمة في أدوات الأمن السيبراني والهجمات الإلكترونية",
-        "en": "Introduction to Cybersecurity Tools & Cyber Attacks"
+        "ar": "مقدمة في أساسيات الأمن السيبراني",
+        "en": "Introduction to Cybersecurity Essentials"
       },
       "issuer": {
         "ar": "IBM",
         "en": "IBM"
       },
       "credential": "DZ93HR2XW4I1",
-      "date": "January 2025"
+      "date": "January 2025",
+      "url": "https://www.coursera.org/account/accomplishments/records/DZ93HR2XW4I1"
     },
     {
       "name": {
-        "ar": "AWS Certified Cloud Practitioner (SDA)",
-        "en": "AWS Certified Cloud Practitioner (SDA)"
+        "ar": "شهادة AWS Certified Cloud Practitioner (الاختبار)",
+        "en": "AWS Certified Cloud Practitioner (exam)"
       },
       "issuer": {
-        "ar": "Amazon Web Services (AWS)",
-        "en": "Amazon Web Services (AWS)"
+        "ar": "Amazon Web Services",
+        "en": "Amazon Web Services"
       },
       "credential": "",
       "date": "",
-      "url": "https://mcit.futurex.sa/certificates/7d0da97038944395ac5e991ad86f3b85",
-      "image": "images/certificates/aws-certified-cloud-practitioner-sda-202610110720.webp"
+      "status": "in-progress"
+    },
+    {
+      "name": {
+        "ar": "شهادة CCNA",
+        "en": "Cisco CCNA"
+      },
+      "issuer": {
+        "ar": "Cisco",
+        "en": "Cisco"
+      },
+      "credential": "",
+      "date": "",
+      "status": "planned"
     }
   ],
   "workshops": [
@@ -350,8 +597,8 @@
         "en": "English"
       },
       "level": {
-        "ar": "درجة STEP: 60",
-        "en": "STEP Score: 60"
+        "ar": "متوسط (STEP 60)",
+        "en": "Intermediate (STEP 60)"
       }
     }
   ],
@@ -386,20 +633,20 @@
   "availability": {
     "enabled": true,
     "status": {
-      "ar": "متاح للعمل",
-      "en": "Open to work"
+      "ar": "متاح للعمل فوراً",
+      "en": "Available immediately"
     },
     "roles": {
-      "ar": "الدعم الفني , الشبكات , التحول الرقمي",
-      "en": ""
+      "ar": "الدعم الفني · مراكز عمليات الشبكات (NOC) · التحول الرقمي",
+      "en": "IT Support · Network Operations (NOC) · Digital Transformation"
     },
     "cities": {
-      "ar": "",
-      "en": ""
+      "ar": "جميع مناطق المملكة",
+      "en": "Anywhere in Saudi Arabia"
     },
     "types": {
-      "ar": "",
-      "en": ""
+      "ar": "من مقر العمل · ورديات",
+      "en": "On-site · shift work"
     }
   },
   "fonts": {
@@ -408,12 +655,12 @@
   },
   "seo": {
     "ar": {
-      "title": "أسامة الحربي | تقنية المعلومات والشبكات والتحول الرقمي",
-      "description": "خريج تقنية المعلومات من الجامعة الإسلامية بالمدينة المنورة، متخصص في الشبكات والتحول الرقمي والدعم التقني."
+      "title": "أسامة الحربي | دعم فني وعمليات شبكات (NOC) وتحول رقمي",
+      "description": "أخصائي تقنية معلومات من الجامعة الإسلامية بالمدينة المنورة: دعم فني، وتشغيل ومراقبة الشبكات (Cisco وPRTG)، وإدارة خدمات تقنية المعلومات وفق ITIL، وتحول رقمي. متاح للعمل فوراً."
     },
     "en": {
-      "title": "Osama Al-Harbi | IT, Networking & Digital Transformation",
-      "description": "IT graduate (Islamic University of Madinah) in networking, digital transformation and IT support."
+      "title": "Osama Al-Harbi | IT Support, NOC & Digital Transformation",
+      "description": "IT specialist (Islamic University of Madinah) in IT support, network operations (Cisco, PRTG), ITSM/ITIL and digital transformation. Available immediately."
     },
     "image": "",
     "verify": {
@@ -421,5 +668,22 @@
     }
   },
   "scrollbar": "gradient",
-  "cursor": "ring"
+  "cursor": "ring",
+  "skillsStyle": "tags",
+  "cvVersions": [
+    {
+      "label": {
+        "ar": "الدعم الفني والشبكات (NOC)",
+        "en": "IT Support & Networking (NOC)"
+      },
+      "file": "cv/Osama_AlHarbi_CV_IT_Support_Network.pdf"
+    },
+    {
+      "label": {
+        "ar": "التحول الرقمي",
+        "en": "Digital Transformation"
+      },
+      "file": "cv/Osama_AlHarbi_CV_Digital_Transformation.pdf"
+    }
+  ]
 }
