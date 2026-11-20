@@ -1,6 +1,6 @@
 // Render engine: builds every section from data.json (all values escaped).
 import { state } from './state.js';
-import { escapeHTML, imageSrc, safeAssetUrl, safeUrl, showToast, skillLevel, skillStep, skillStyle } from './utils.js';
+import { escapeHTML, imageSrc, safeAssetUrl, safeUrl, showToast, skillLevel, skillStep, skillStyle, youtubeId } from './utils.js';
 import { t, ui } from './i18n.js';
 import { postPages, postPath } from './pages.js';
 import { readingMinutes, plainText } from './markdown.js';
@@ -112,6 +112,7 @@ function renderProfile() {
     }
 
     typeWriter(t(p.title), 'typewriter');
+    renderIntroVideo(p);
 
     const locEl = document.getElementById('profile-location');
     if (locEl) locEl.textContent = t(p.location);
@@ -179,6 +180,31 @@ function renderAvailability() {
         book.classList.toggle('hidden', !url);
         book.href = url || '#';
     }
+}
+
+// Intro video: a YouTube thumbnail until it is clicked (no YouTube request, cookie or script before that)
+function renderIntroVideo(p) {
+    const box = document.getElementById('intro-video');
+    if (!box) return;
+    const id = youtubeId(p.video);
+    box.classList.toggle('hidden', !id);
+    if (!id || box.dataset.videoId === id) return;
+    box.dataset.videoId = id;
+    document.getElementById('intro-video-thumb').src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+}
+
+export function playIntroVideo() {
+    const box = document.getElementById('intro-video');
+    const id = box?.dataset.videoId;
+    if (!id || !/^[\w-]{11}$/.test(id)) return;
+    const frame = document.createElement('iframe');
+    frame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&hl=${state.currentLang}`;
+    frame.title = ui('video_title');
+    frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+    frame.className = 'absolute inset-0 w-full h-full';
+    document.getElementById('intro-video-play')?.replaceWith(frame);
+    frame.focus();
 }
 
 // ─── Home stats (computed from data.json instead of hard-coded numbers) ───

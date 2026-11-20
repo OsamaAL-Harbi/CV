@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/particles.js@2.0.0/ https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/ https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/ https://cdn.jsdelivr.net/npm/jspdf@2.5.1/ https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/ https://www.googletagmanager.com/gtag/ https://www.clarity.ms/ https://scripts.clarity.ms/; style-src 'self' https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/ 'sha256-UP0QZg7irvSMvOBz9mH2PIIE28+57UiavRfeVea0l3g='; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://api.github.com https://analyticsdata.googleapis.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com https://*.clarity.ms https://c.bing.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/particles.js@2.0.0/ https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/ https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/ https://cdn.jsdelivr.net/npm/jspdf@2.5.1/ https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/ https://www.googletagmanager.com/gtag/ https://www.clarity.ms/ https://scripts.clarity.ms/; style-src 'self' https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/ https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/ 'sha256-UP0QZg7irvSMvOBz9mH2PIIE28+57UiavRfeVea0l3g='; font-src 'self'; img-src 'self' data: https:; frame-src https://www.youtube-nocookie.com; connect-src 'self' https://api.github.com https://analyticsdata.googleapis.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com https://*.clarity.ms https://c.bing.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>أسامة الحربي | Portfolio</title>
     <!-- Fonts from admin → Fonts, written here at deploy time (scripts/assemble-site.mjs) so js/early.js applies them before first paint -->
@@ -91,6 +91,7 @@
     <link rel="modulepreload" href="js/scrollbar.js">
     <link rel="modulepreload" href="js/cursor.js">
     <link rel="modulepreload" href="js/lang-hint.js">
+    <link rel="modulepreload" href="js/vitals.js">
     <link rel="modulepreload" href="js/motion.js">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
@@ -251,6 +252,16 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 font-medium" data-lang="stat_graduation">سنة التخرج</p>
                         </div>
                     </div>
+                    <!-- Intro video (data.json → profile.video, a YouTube link): a thumbnail first, the player only on click -->
+                    <div id="intro-video" class="hidden max-w-2xl mx-auto mt-10 print-hide">
+                        <h2 class="text-lg font-bold mb-3 dark:text-white flex items-center justify-center gap-2"><i class="fas fa-play-circle text-primary" aria-hidden="true"></i><span data-lang="video_intro">تعريف سريع بالفيديو</span></h2>
+                        <div class="relative aspect-video rounded-2xl overflow-hidden shadow-lg bg-gray-900">
+                            <button type="button" id="intro-video-play" data-action="play-intro" class="group absolute inset-0 w-full h-full" aria-label="تشغيل الفيديو التعريفي" data-lang-aria="aria_play_video">
+                                <img id="intro-video-thumb" alt="" loading="lazy" decoding="async" width="480" height="360" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition">
+                                <span class="absolute inset-0 flex items-center justify-center"><span class="w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center shadow-xl group-hover:scale-110 transition"><i class="fas fa-play text-2xl ms-1" aria-hidden="true"></i></span></span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -269,6 +280,9 @@
                 <div class="flex gap-2 print-hide">
                     <a href="Osama_Alharbi.pdf" download data-cv-link data-track="cv_download" class="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl text-xs font-bold hover:scale-105 transition">
                         <i class="fas fa-file-pdf"></i><span data-lang="btn_download_cv">تحميل PDF</span>
+                    </a>
+                    <a href="resume.json" download="osama-alharbi-resume.json" data-track="json_resume" title="JSON Resume (jsonresume.org)" class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold hover:scale-105 transition">
+                        <i class="fas fa-code" aria-hidden="true"></i><span>JSON Resume</span>
                     </a>
                     <button data-action="print" class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold hover:scale-105 transition">
                         <i class="fas fa-print"></i><span data-lang="btn_print">طباعة</span>

@@ -2,7 +2,7 @@
 // The token is kept in sessionStorage only and expires after SESSION_DURATION.
 import { SESSION_KEYS, state } from './state.js';
 import { local, session } from './storage.js';
-import { escapeHTML, loadVendor, setDeepValue, showToast, skillLevel } from './utils.js';
+import { escapeHTML, loadVendor, setDeepValue, showToast, skillLevel, youtubeId } from './utils.js';
 import { renderAll } from './render.js';
 import { closeDialog, openDialog } from './modal.js';
 import { DEFAULT_THEME, PRESETS, applyTheme, harmonies, isHex, syncSiteTheme } from './color.js';
@@ -802,6 +802,10 @@ export async function manageProfile() {
             <label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
             <input id="pf-github" class="swal2-input m-0 w-full" value="${escapeHTML(v('github'))}" dir="ltr" placeholder="https://github.com/...">
           </div>
+          <div>
+            <label class="block text-xs mb-1 text-gray-500" for="pf-video">فيديو تعريفي (اختياري) — رابط YouTube، ويُفضَّل «غير مدرج» (Unlisted) ومدته دقيقة إلى دقيقة ونصف</label>
+            <input id="pf-video" class="swal2-input m-0 w-full" value="${escapeHTML(v('video'))}" dir="ltr" placeholder="https://youtu.be/...">
+          </div>
           <div class="p-3 rounded-xl border border-gray-200 space-y-2">
             <label class="block text-xs text-gray-500" for="pf-cv">السيرة الذاتية (PDF) — مسار في الموقع أو رابط https</label>
             <input id="pf-cv" class="swal2-input m-0 w-full" value="${escapeHTML(v('cv'))}" dir="ltr" placeholder="cv/Osama_Alharbi.pdf">
@@ -826,6 +830,11 @@ export async function manageProfile() {
                 Swal.showValidationMessage('رابط السيرة الذاتية غير صالح: مسار داخل الموقع (مثل cv/file.pdf) أو رابط يبدأ بـ https://');
                 return false;
             }
+            const video = document.getElementById('pf-video').value.trim();
+            if (video && !youtubeId(video)) {
+                Swal.showValidationMessage('رابط الفيديو غير صالح: الصق رابط فيديو YouTube (مثل https://youtu.be/… أو https://www.youtube.com/watch?v=…)');
+                return false;
+            }
             return profileFields(cv);
         }
     });
@@ -847,6 +856,7 @@ function profileFields(cv) {
         phone:    document.getElementById('pf-phone').value,
         linkedin: document.getElementById('pf-linkedin').value,
         github:   document.getElementById('pf-github').value,
+        video:    document.getElementById('pf-video').value.trim(),
         cv
     };
 }

@@ -248,7 +248,7 @@ export async function uploadImage(opts, baseName) {
 }
 
 export const IMAGE_PRESETS = {
-    profile:     { title: 'الصورة الشخصية', aspect: 1, outW: 512, outH: 512 },
+    profile:     { title: 'الصورة الشخصية', aspect: 1, outW: 384, outH: 384 },   // shown at 192 px: sharp on 2× screens
     project:     { title: 'صورة المشروع', aspect: 16 / 9, outW: 1200, outH: 675 },
     certificate: { title: 'صورة الشهادة', aspect: null, maxSide: 1600 },
     og:          { title: 'صورة المشاركة (1200×630)', aspect: 1200 / 630, outW: 1200, outH: 630, format: 'jpeg' }
