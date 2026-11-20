@@ -24,34 +24,39 @@ function fill(html, marker, inner) {
     return re.test(html) ? html.replace(re, (_, open, _tag, close) => `${open}${inner}${close}`) : html;
 }
 
-const lines = text => ar(text).split(/\n+/).map(s => s.trim()).filter(Boolean);
-const desc = text => {
-    const l = lines(text);
+const lines = (text, pick = ar) => pick(text).split(/\n+/).map(s => s.trim()).filter(Boolean);
+const desc = (text, pick = ar) => {
+    const l = lines(text, pick);
     if (!l.length) return '';
     return l.length === 1 ? `<p class="text-gray-600 text-sm">${esc(l[0])}</p>` : `<ul class="list-disc ps-5 text-gray-600 text-sm">${l.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
 };
 const item = (title, meta, body = '') => `<article class="mb-6"><h3 class="text-xl font-bold">${esc(title)}</h3>${meta ? `<p class="text-sm text-gray-500">${esc(meta)}</p>` : ''}${body}</article>`;
-const joinMeta = (...parts) => parts.map(ar).filter(Boolean).join(' · ');
-
-export function prerenderContent(html, data) {
+// lang 'en' writes the English texts (en.html, scripts/english-page.mjs); Arabic otherwise
+export function prerenderContent(html, data, lang = 'ar') {
+    const L = lang === 'en' ? en : ar;
+    const word = lang === 'en'
+        ? { hours: 'hours', planned: 'Planned', progress: 'In progress', comma: ', ' }
+        : { hours: 'ساعة', planned: 'مخطط لها', progress: 'قيد الدراسة', comma: '، ' };
+    const joinMeta = (...parts) => parts.map(L).filter(Boolean).join(' · ');
+    const d = text => desc(text, L);
     const p = data?.profile;
     if (p) {
-        html = fill(html, 'data-path="profile.name"', esc(ar(p.name)));
-        html = fill(html, 'data-path="profile.summary"', esc(ar(p.summary)));
-        html = fill(html, 'id="typewriter-sr"', esc(ar(p.title)));
-        html = fill(html, 'id="profile-location"', esc(ar(p.location)));
-        html = fill(html, 'id="contact-location-display"', esc(ar(p.location)));
+        html = fill(html, 'data-path="profile.name"', esc(L(p.name)));
+        html = fill(html, 'data-path="profile.summary"', esc(L(p.summary)));
+        html = fill(html, 'id="typewriter-sr"', esc(L(p.title)));
+        html = fill(html, 'id="profile-location"', esc(L(p.location)));
+        html = fill(html, 'id="contact-location-display"', esc(L(p.location)));
         html = fill(html, 'id="contact-email-display"', esc(p.email || ''));
     }
     const lists = {
-        experience:   x => item(ar(x.role), joinMeta(x.company, x.period), desc(x.description)),
-        education:    x => item(ar(x.degree), joinMeta(x.institution, x.period), desc(x.description)),
-        volunteer:    x => item(ar(x.role), joinMeta(x.organization, x.period, x.hours ? `${x.hours} ساعة` : ''), desc(x.description)),
-        certificates: x => item(ar(x.name), joinMeta(x.issuer, x.date, isEarned(x) ? '' : (x.status === 'planned' ? 'مخطط لها' : 'قيد الدراسة'))),
-        workshops:    x => item(ar(x.name), joinMeta(x.organizer, x.date)),
-        languages:    x => item(ar(x.name), ar(x.level)),
-        projects:     x => item(ar(x.title), (x.technologies || []).join('، '), desc(x.desc)),
-        testimonials: x => item(ar(x.name), ar(x.role), desc(x.text))
+        experience:   x => item(L(x.role), joinMeta(x.company, x.period), d(x.description)),
+        education:    x => item(L(x.degree), joinMeta(x.institution, x.period), d(x.description)),
+        volunteer:    x => item(L(x.role), joinMeta(x.organization, x.period, x.hours ? `${x.hours} ${word.hours}` : ''), d(x.description)),
+        certificates: x => item(L(x.name), joinMeta(x.issuer, x.date, isEarned(x) ? '' : (x.status === 'planned' ? word.planned : word.progress))),
+        workshops:    x => item(L(x.name), joinMeta(x.organizer, x.date)),
+        languages:    x => item(L(x.name), L(x.level)),
+        projects:     x => item(L(x.title), (x.technologies || []).join(word.comma), d(x.desc)),
+        testimonials: x => item(L(x.name), L(x.role), d(x.text))
     };
     for (const [section, render] of Object.entries(lists)) {
         const items = shown(data, section);
@@ -60,9 +65,9 @@ export function prerenderContent(html, data) {
     // Blog: title, date and summary, linking to each article's own page (blog/<slug>.html)
     const posts = postPages(data);
     if (posts.length) html = fill(html, 'id="posts-container"', posts.map(({ slug, item: x }) =>
-        `<article class="mb-6"><h3 class="text-xl font-bold"><a href="${esc(postPath(slug))}">${esc(ar(x.title))}</a></h3>${x.date ? `<p class="text-sm text-gray-500">${esc(x.date)}</p>` : ''}${desc(x.summary)}</article>`).join(''));
+        `<article class="mb-6"><h3 class="text-xl font-bold"><a href="${esc(postPath(slug))}">${esc(L(x.title))}</a></h3>${x.date ? `<p class="text-sm text-gray-500">${esc(x.date)}</p>` : ''}${d(x.summary)}</article>`).join(''));
     const skills = shown(data, 'skills');
-    if (skills.length) html = fill(html, 'id="skills-container"', `<ul class="list-disc ps-5">${skills.map(s => `<li>${esc(ar(s))}</li>`).join('')}</ul>`);
+    if (skills.length) html = fill(html, 'id="skills-container"', `<ul class="list-disc ps-5">${skills.map(s => `<li>${esc(L(s))}</li>`).join('')}</ul>`);
     return html;
 }
 

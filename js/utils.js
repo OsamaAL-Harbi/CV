@@ -85,6 +85,12 @@ export function skillLevel(skill) {
     return Number.isFinite(n) ? Math.min(100, Math.max(0, Math.round(n))) : 0;
 }
 
+// YouTube link (watch, youtu.be, shorts, embed, live) → the 11-character video id, or '' for anything else
+export function youtubeId(url) {
+    const m = String(url || '').trim().match(/^https:\/\/(?:(?:www\.|m\.)?youtube\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})(?:[?&#/]|$)/);
+    return m ? m[1] : '';
+}
+
 // How skills are shown (admin → tools → «عرض المهارات», data.json → skillsStyle): percentage bars (default), a
 // four-step level, or plain tags without any level
 export const SKILL_STYLES = ['bars', 'levels', 'tags'];

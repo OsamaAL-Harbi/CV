@@ -39,7 +39,7 @@ const REVEAL = [
     '#skills-container > div', '#certificates-container > div', '#workshops-container > div', '#languages-container > div',
     '#projects-container > div', '#testimonials-container > div', '#posts-container > article', '#timeline-track',
     '#github-repos > article', '#status-sensors > *', '#contact .contact-card', '#contact [data-section="qr"]', '#contact [data-section="vcard"]',
-    '.page-section:not(#home) h3.text-2xl'
+    '.page-section:not(#home) h2.text-2xl'
 ].join(', ');
 const revealedLists = new WeakSet();     // lists whose items already animated once
 let observer = null;

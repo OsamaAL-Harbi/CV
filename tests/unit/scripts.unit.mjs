@@ -407,3 +407,62 @@ test('certificates still being studied: not schema.org credentials, not timeline
     assert.match(html, /قيد الدراسة/);
     assert.match(html, /مخطط لها/);
 });
+
+test('round 5: JSON Resume, ATS page, English page, markdown images, YouTube links, post kinds', async () => {
+    const { jsonResume } = await import('../../scripts/resume-json.mjs');
+    const { atsPage } = await import('../../scripts/ats.mjs');
+    const { englishPage, linkEnglishPage } = await import('../../scripts/english-page.mjs');
+    const { prerenderContent } = await import('../../scripts/prerender.mjs');
+    const { sitePages } = await import('../../scripts/pages.mjs');
+    const { renderMarkdown, plainText } = await import('../../js/markdown.js');
+    const { youtubeId } = await import('../../js/utils.js');
+    const { createHash } = await import('node:crypto');
+    const data = {
+        profile: { name: { ar: 'أسامة', en: 'Osama' }, title: { ar: 'خريج', en: 'IT Graduate' }, summary: { ar: 'نبذة', en: 'Summary <b>' }, email: 'a@b.co', linkedin: 'https://www.linkedin.com/in/x/' },
+        experience: [{ role: { en: 'Trainee' }, company: { en: 'Org' }, period: { en: 'January 2026 – Present' } }, { role: { en: 'Old' }, company: { en: 'X' }, period: { en: 'May 2024 – March 2025' } }, { role: { en: 'Hidden' }, hidden: true }],
+        certificates: [{ name: { en: 'CCNA' }, status: 'in-progress', date: 'June 2026' }, { name: { en: 'AWS' }, issuer: { en: 'Amazon' }, date: 'May 2025', url: 'https://example.com/v' }],
+        skills: [{ ar: 'شبكات', en: 'Networking', level: 30, category: 'hard' }]
+    };
+    // JSON Resume
+    const r = jsonResume(data);
+    assert.equal(r.basics.name, 'Osama');
+    assert.deepEqual(r.work.map(w => [w.position, w.startDate, w.endDate]), [['Trainee', '2026-01', undefined], ['Old', '2024-05', '2025-03']]);
+    assert.deepEqual(r.certificates.map(c => c.name), ['AWS']);
+    assert.equal(r.skills[0].level, 'Beginner');
+    assert.equal(r.basics.profiles[0].username, 'x');
+    // ATS page: one style allowed by its hash, text escaped, sections in English
+    const ats = atsPage(data);
+    const style = ats.match(/<style>([\s\S]*?)<\/style>/)[1];
+    assert.ok(ats.includes(`'sha256-${createHash('sha256').update(style).digest('base64')}'`));
+    assert.ok(!/<script/i.test(ats));
+    assert.match(ats, /<h2>Experience<\/h2>[\s\S]*Trainee — Org/);
+    assert.match(ats, /<h2>Certifications in progress<\/h2>[\s\S]*CCNA/);
+    assert.ok(ats.includes('Summary &lt;b&gt;') && !ats.includes('Hidden'));
+    // English page
+    const src = '<html lang="ar" dir="rtl" class="x"><head><title>أ</title><link rel="canonical" href="https://osamaal-harbi.github.io/CV/"><link rel="alternate" hreflang="en" href="https://osamaal-harbi.github.io/CV/?lang=en"><meta property="og:locale" content="ar_SA"><meta id="site-cursor" name="site-cursor" content=""></head><body><h1 data-lang="sec_resume">السيرة</h1><button data-lang-aria="aria_close" aria-label="إغلاق"></button><div id="experience-container"></div></body></html>';
+    const enHtml = linkEnglishPage(prerenderContent(englishPage(src, data), data, 'en'));
+    assert.match(enHtml, /<html lang="en" dir="ltr" class="x" data-page-lang="en">/);
+    assert.match(enHtml, /<title>Osama \| IT Graduate<\/title>/);
+    assert.match(enHtml, /rel="canonical" href="https:\/\/osamaal-harbi\.github\.io\/CV\/en\.html"/);
+    assert.match(enHtml, /hreflang="en" href="https:\/\/osamaal-harbi\.github\.io\/CV\/en\.html"/);
+    assert.match(enHtml, /<meta name="site-en-page" content="en\.html">/);
+    assert.match(enHtml, /data-lang="sec_resume">Resume</);
+    assert.match(enHtml, /aria-label="Close"/);
+    assert.match(enHtml, /og:locale" content="en_US"/);
+    assert.match(enHtml, /<h3 class="text-xl font-bold">Trainee<\/h3>/);
+    // Markdown images: https or site paths only, prefixed on the standalone pages
+    assert.equal(renderMarkdown('![net](images/a.webp)', { assetBase: '../' }), '<p dir="auto"><img src="../images/a.webp" alt="net" loading="lazy" decoding="async"></p>');
+    assert.ok(!renderMarkdown('![x](javascript:alert(1))').includes('<img'));
+    assert.ok(!renderMarkdown('![x](//evil.example/a.png)').includes('<img'));
+    assert.equal(plainText('a ![diagram](images/a.webp) b'), 'a diagram b');
+    // YouTube links
+    for (const url of ['https://youtu.be/dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=3', 'https://youtube.com/shorts/dQw4w9WgXcQ']) assert.equal(youtubeId(url), 'dQw4w9WgXcQ');
+    for (const url of ['https://evil.example/watch?v=dQw4w9WgXcQ', 'http://youtu.be/dQw4w9WgXcQ', 'https://youtu.be/short']) assert.equal(youtubeId(url), '');
+    // Post kinds on the article page: badge, images from ../, the copy script allowed by the CSP
+    const post = sitePages({ posts: [{ title: { ar: 'مختبر', en: 'Lab' }, kind: 'lab', body: { ar: '![م](images/posts/a.webp)\n```\nshow vlan\n```' }, date: '2026-11-01', slug: 'vlan-lab' }] })
+        .find(p => p.path === 'blog/vlan-lab.html').html;
+    assert.match(post, /script-src 'self'/);
+    assert.match(post, /<script src="\.\.\/js\/copy-code\.js" defer><\/script>/);
+    assert.match(post, /مختبر عملي/);
+    assert.match(post, /src="\.\.\/images\/posts\/a\.webp"/);
+});

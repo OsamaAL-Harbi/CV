@@ -37,8 +37,8 @@ test('values from data.json are rendered as text, never as HTML', async ({ page 
     await page.locator('#projects-container [data-action="open-project"]').first().click();
     await expect(page.locator('#modal-github-link')).toBeHidden();      // javascript: link dropped
     await expect(page.locator('#modal-live-link')).toBeHidden();
-    // only the static images of the page (profile photo, the site QR code) — nothing injected from data.json
-    await expect(page.locator('main img:not(#profile-img):not([src="assets/img/qr-site.svg"]), #project-modal img:not(#modal-image)')).toHaveCount(0);
+    // only the static images of the page (profile photo, the site QR code, the empty video thumbnail) — nothing injected from data.json
+    await expect(page.locator('main img:not(#profile-img):not(#intro-video-thumb):not([src="assets/img/qr-site.svg"]), #project-modal img:not(#modal-image)')).toHaveCount(0);
     await expect(page.locator('#modal-image')).toBeHidden();           // the project has no (safe) image
     await expect(page.locator('[data-path="profile.name"]')).toHaveText(PAYLOAD);
     await page.keyboard.press('Escape');
@@ -82,13 +82,25 @@ test.describe('admin session', () => {
         expect(await page.evaluate(() => sessionStorage.getItem('gh_token'))).toBeNull();
     });
 
-    test('expires the session after one hour', async ({ page }) => {
+    test('expires the session after 30 minutes', async ({ page }) => {
         await login(page);
-        await page.evaluate(() => sessionStorage.setItem('gh_login_time', String(Date.now() - 2 * 60 * 60 * 1000)));
+        await page.evaluate(() => sessionStorage.setItem('gh_login_time', String(Date.now() - 31 * 60 * 1000)));
         await page.reload();
         await expect(page.locator('#loading-screen')).toBeHidden();
         await expect.poll(() => page.evaluate(() => sessionStorage.getItem('gh_token'))).toBeNull();
         await expect(page.locator('#admin-toolbar')).toBeHidden();
+    });
+
+    test('15 minutes without a click or key press end the session; activity keeps it', async ({ page }) => {
+        await page.clock.install();
+        await login(page);
+        await page.clock.fastForward('10:00');
+        await page.locator('#year').click();                            // activity
+        await page.clock.fastForward('10:00');
+        expect(await page.evaluate(() => sessionStorage.getItem('gh_token'))).not.toBeNull();
+        await page.clock.fastForward('15:30');                           // idle
+        await expect.poll(() => page.evaluate(() => sessionStorage.getItem('gh_token'))).toBeNull();
+        await expect(page.locator('#admin-modal')).toBeVisible();
     });
 
     test('when the session expires, unsaved edits stay and the login dialog reopens', async ({ page }) => {

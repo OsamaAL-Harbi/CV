@@ -1,9 +1,10 @@
 // Render engine: builds every section from data.json (all values escaped).
 import { state } from './state.js';
-import { escapeHTML, imageSrc, safeAssetUrl, safeUrl, showToast, skillLevel, skillStep, skillStyle } from './utils.js';
+import { escapeHTML, imageSrc, safeAssetUrl, safeUrl, showToast, skillLevel, skillStep, skillStyle, youtubeId } from './utils.js';
 import { t, ui } from './i18n.js';
 import { postPages, postPath } from './pages.js';
 import { readingMinutes, plainText } from './markdown.js';
+import { POST_KINDS, postKind } from './post-kinds.js';
 import { renderTimeline } from './timeline.js';
 import { isEarned } from './timeline-data.js';
 
@@ -112,6 +113,7 @@ function renderProfile() {
     }
 
     typeWriter(t(p.title), 'typewriter');
+    renderIntroVideo(p);
 
     const locEl = document.getElementById('profile-location');
     if (locEl) locEl.textContent = t(p.location);
@@ -132,6 +134,21 @@ function renderProfile() {
         if (external) { a.target = '_blank'; a.rel = 'noopener noreferrer'; a.removeAttribute('download'); }
         else { a.removeAttribute('target'); a.removeAttribute('rel'); a.setAttribute('download', ''); }
     });
+    renderCvVersions();
+}
+
+// One CV per career track (IT support, networking, digital transformation…) plus the plain ATS page
+function renderCvVersions() {
+    const box = document.getElementById('cv-versions');
+    const list = document.getElementById('cv-versions-list');
+    if (!box || !list) return;
+    const versions = (state.appData.cvVersions || []).map(v => ({ label: t(v.label), url: safeAssetUrl(v.file) })).filter(v => v.label && v.url);
+    box.classList.toggle('hidden', !versions.length);
+    const chip = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-cardBg font-bold text-gray-700 dark:text-gray-200 hover:border-primary transition';
+    list.innerHTML = versions.map(v => {
+        const external = /^https:/i.test(v.url);
+        return `<a href="${escapeHTML(v.url)}" ${external ? 'target="_blank" rel="noopener noreferrer"' : 'download'} data-track="cv_version_download" class="${chip}"><i class="fas fa-file-pdf text-red-700 dark:text-red-400" aria-hidden="true"></i>${escapeHTML(v.label)}</a>`;
+    }).join('') + `<a href="resume-ats.html" data-track="cv_ats" class="${chip}"><i class="fas fa-align-left" aria-hidden="true"></i>${escapeHTML(ui('cv_ats'))}</a>`;
 }
 
 // ─── WhatsApp (wa.me link from profile.phone, with a greeting in the visitor's language) ───
@@ -179,6 +196,31 @@ function renderAvailability() {
         book.classList.toggle('hidden', !url);
         book.href = url || '#';
     }
+}
+
+// Intro video: a YouTube thumbnail until it is clicked (no YouTube request, cookie or script before that)
+function renderIntroVideo(p) {
+    const box = document.getElementById('intro-video');
+    if (!box) return;
+    const id = youtubeId(p.video);
+    box.classList.toggle('hidden', !id);
+    if (!id || box.dataset.videoId === id) return;
+    box.dataset.videoId = id;
+    document.getElementById('intro-video-thumb').src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+}
+
+export function playIntroVideo() {
+    const box = document.getElementById('intro-video');
+    const id = box?.dataset.videoId;
+    if (!id || !/^[\w-]{11}$/.test(id)) return;
+    const frame = document.createElement('iframe');
+    frame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&hl=${state.currentLang}`;
+    frame.title = ui('video_title');
+    frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+    frame.className = 'absolute inset-0 w-full h-full';
+    document.getElementById('intro-video-play')?.replaceWith(frame);
+    frame.focus();
 }
 
 // ─── Home stats (computed from data.json instead of hard-coded numbers) ───
@@ -271,8 +313,8 @@ function renderCertItem(item) {
                    <img src="${escapeHTML(image)}" alt="" width="56" height="56" loading="lazy" decoding="async" class="w-14 h-14 object-cover rounded-lg border border-gray-200 dark:border-gray-700"></a>`
             : `<div class="text-2xl ${verify ? 'text-green-600 dark:text-green-400' : earned ? 'text-secondary' : 'text-gray-400'} flex-shrink-0" aria-hidden="true"><i class="fas ${verify ? 'fa-award' : earned ? 'fa-certificate' : 'fa-book-open'}"></i></div>`}
         <div class="flex-1 min-w-0">
-            <h4 class="font-bold text-sm dark:text-white flex flex-wrap items-center gap-x-2 gap-y-1">${escapeHTML(t(item.name))}
-                ${status}${verify ? `<span class="cert-verified inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"><i class="fas fa-check-circle" aria-hidden="true"></i>${escapeHTML(ui('cert_verified'))}</span>` : ''}</h4>
+            <h3 class="font-bold text-sm dark:text-white flex flex-wrap items-center gap-x-2 gap-y-1">${escapeHTML(t(item.name))}
+                ${status}${verify ? `<span class="cert-verified inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"><i class="fas fa-check-circle" aria-hidden="true"></i>${escapeHTML(ui('cert_verified'))}</span>` : ''}</h3>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${escapeHTML(t(item.issuer))}${item.credential ? ` · <span dir="ltr" class="font-mono">${escapeHTML(item.credential)}</span>` : ''}</p>
             ${date ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${earned ? '' : `${escapeHTML(ui('cert_target'))}: `}${escapeHTML(date)}</p>` : ''}
         </div>
@@ -309,9 +351,20 @@ function renderPosts() {
     const container = document.getElementById('posts-container');
     if (!container) return;
     const visible = new Map(postPages(state.appData).map(p => [p.index, p.slug]));
-    const list = (state.appData.posts || []).map((item, index) => ({ item, index }))
+    const all = (state.appData.posts || []).map((item, index) => ({ item, index }))
         .filter(({ item }) => isShown(item))
         .sort((a, b) => String(b.item.date || '').localeCompare(String(a.item.date || '')) || a.index - b.index);
+    // Filter chips (articles, labs, support cases, projects) once there is more than one kind
+    const kinds = Object.keys(POST_KINDS).filter(k => all.some(({ item }) => postKind(item) === k));
+    if (!kinds.includes(state.postFilter)) state.postFilter = 'all';
+    const filters = document.getElementById('posts-filters');
+    if (filters) {
+        filters.classList.toggle('hidden', kinds.length < 2);
+        const chip = (key, label) => `<button type="button" data-action="post-filter" data-filter="${key}" aria-pressed="${state.postFilter === key}"
+            class="px-3 py-1 text-xs font-bold rounded-full transition ${state.postFilter === key ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'}">${escapeHTML(label)}</button>`;
+        filters.innerHTML = chip('all', ui('filter_all')) + kinds.map(k => chip(k, POST_KINDS[k][state.currentLang])).join('');
+    }
+    const list = state.postFilter === 'all' ? all : all.filter(({ item }) => postKind(item) === state.postFilter);
     const fmt = new Intl.DateTimeFormat(state.currentLang === 'ar' ? 'ar-u-nu-latn' : 'en', { dateStyle: 'medium', timeZone: 'UTC' });
     container.innerHTML = list.map(({ item, index }) => {
         const slug = visible.get(index);
@@ -321,7 +374,7 @@ function renderPosts() {
         return `
         <article class="${WC.posts}${item.hidden ? ' item-hidden' : ''}" data-index="${index}">
             ${renderAdminButtons('posts', index, item)}
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">${escapeHTML(meta)}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 flex flex-wrap items-center gap-2">${postKind(item) !== 'article' ? `<span class="post-kind inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold"><i class="fas ${POST_KINDS[postKind(item)].icon}" aria-hidden="true"></i>${escapeHTML(POST_KINDS[postKind(item)][state.currentLang])}</span>` : ''}<span>${escapeHTML(meta)}</span></p>
             <h3 class="text-lg font-bold dark:text-white mb-2 leading-snug" dir="auto">${slug ? `<a href="${escapeHTML(postPath(slug))}" class="hover:text-primary">${escapeHTML(t(item.title))}</a>` : escapeHTML(t(item.title))}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1" dir="auto">${escapeHTML(summary)}</p>
             ${(item.tags || []).length ? `<div class="flex flex-wrap gap-1.5 mt-3">${item.tags.map(tag => `<span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold">${escapeHTML(tag)}</span>`).join('')}</div>` : ''}
@@ -348,7 +401,7 @@ function renderWorkshopItem(item) {
         <div class="flex items-start gap-3">
             <div class="text-yellow-500 mt-1 flex-shrink-0" aria-hidden="true"><i class="fas fa-chalkboard-teacher"></i></div>
             <div>
-                <h4 class="font-bold text-sm dark:text-white">${escapeHTML(t(item.name))}</h4>
+                <h3 class="font-bold text-sm dark:text-white">${escapeHTML(t(item.name))}</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${escapeHTML(t(item.organizer))}</p>
                 ${date ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${escapeHTML(date)}</p>` : ''}
             </div>
@@ -390,7 +443,7 @@ function renderProjectItem(item, realIdx) {
             ${hasLive ? `<span class="absolute top-3 left-3 ltr:right-3 ltr:left-auto bg-green-600 text-white text-xs px-2 py-1 rounded-full font-bold pointer-events-none">${escapeHTML(ui('badge_live'))}</span>` : ''}
         </div>
         <div class="p-5 flex-grow flex flex-col">
-            <h3 class="text-base font-bold mb-2 dark:text-white">${escapeHTML(title)}</h3>
+            <h2 class="text-base font-bold mb-2 dark:text-white">${escapeHTML(title)}</h2>
             <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed flex-grow">${escapeHTML(t(item.desc))}</p>
             ${item.technologies?.length ? `
                 <div class="flex flex-wrap gap-1.5 mt-3">
@@ -547,7 +600,7 @@ export function renderSkills(tab = 'hard', { instant = false } = {}) {
     if (tab === 'all') {
         container.innerHTML = ['hard', 'soft'].map(cat => {
             const rows = allSkills.filter(s => s.category === cat && isShown(s)).map(s => skillRow(s, allSkills, BAR_COLOR[cat], style)).join('');
-            return rows ? `<h4 class="w-full text-sm font-bold text-gray-500 dark:text-gray-400 pt-2">${escapeHTML(ui(`skills_${cat}`))}</h4>${rows}` : '';
+            return rows ? `<h3 class="w-full text-sm font-bold text-gray-500 dark:text-gray-400 pt-2">${escapeHTML(ui(`skills_${cat}`))}</h3>${rows}` : '';
         }).join('');
     } else {
         container.innerHTML = allSkills.filter(s => s.category === tab && isShown(s)).map(s => skillRow(s, allSkills, BAR_COLOR[tab], style)).join('');
@@ -637,4 +690,9 @@ export function setSmartGreeting() {
     const key = hour < 12 ? 'm' : (hour < 18 ? 'a' : 'e');
     const el  = document.getElementById('smart-greeting');
     if (el) el.innerText = (msgs[state.currentLang] || msgs.ar)[key];
+}
+
+export function setPostFilter(filter) {
+    state.postFilter = filter;
+    renderPosts();
 }

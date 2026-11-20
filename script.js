@@ -18,6 +18,7 @@ import { syncSiteScrollbar } from './js/scrollbar.js';
 import { initMotion, markReady, syncSiteMotion } from './js/motion.js';
 import { initCursor, syncSiteCursor } from './js/cursor.js';
 import { showLangHint } from './js/lang-hint.js';
+import { initVitals } from './js/vitals.js';
 
 // Older versions kept the token (and a data backup) in localStorage forever.
 function purgeLegacyAdminStorage() {
@@ -74,6 +75,7 @@ function boot() {
     setupTilt();
     initMotion();
     initCursor();
+    initVitals();
     checkLinkedInReferrer();
 
     purgeLegacyAdminStorage();

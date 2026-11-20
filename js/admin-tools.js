@@ -9,7 +9,7 @@ import { SCROLLBARS, applyScrollbar, syncSiteScrollbar, DEFAULT_SCROLLBAR } from
 import { MOTIONS, DEFAULT_MOTION, applyMotion, syncSiteMotion } from './motion.js';
 import { CURSORS, DEFAULT_CURSOR, applyCursor, cursorImages, cursorValues, pageColours, syncSiteCursor } from './cursor.js';
 import { DEFAULT_FONTS, FONTS, applyFonts, syncSiteFonts } from './fonts.js';
-import { diffHTML, editItem, fromBase64Utf8, ghApi, manageProfile, putRepoFile, readAsBase64 } from './admin.js';
+import { diffHTML, editItem, fromBase64Utf8, ghApi, manageProfile, normalizeCvLink, putRepoFile, readAsBase64, uploadCv } from './admin.js';
 
 const pretty = data => JSON.stringify(data, null, 2);
 const stamp = () => new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '');
@@ -248,7 +248,7 @@ export async function uploadImage(opts, baseName) {
 }
 
 export const IMAGE_PRESETS = {
-    profile:     { title: 'الصورة الشخصية', aspect: 1, outW: 512, outH: 512 },
+    profile:     { title: 'الصورة الشخصية', aspect: 1, outW: 384, outH: 384 },   // shown at 192 px: sharp on 2× screens
     project:     { title: 'صورة المشروع', aspect: 16 / 9, outW: 1200, outH: 675 },
     certificate: { title: 'صورة الشهادة', aspect: null, maxSide: 1600 },
     og:          { title: 'صورة المشاركة (1200×630)', aspect: 1200 / 630, outW: 1200, outH: 630, format: 'jpeg' }
@@ -612,6 +612,77 @@ async function manageCursor() {
     showToast('تم تطبيق مؤشر الفأرة — اضغط «حفظ» لنشره ✅', 'success');
 }
 
+// ─── CV versions: one PDF per career track, each uploaded or linked; shown under the resume heading ───
+const CV_TRACKS = [
+    { ar: 'الدعم الفني', en: 'IT Support' },
+    { ar: 'الشبكات', en: 'Networking' },
+    { ar: 'التحول الرقمي', en: 'Digital Transformation' },
+    { ar: '', en: '' }
+];
+async function manageCvVersions() {
+    await loadVendor('swal');
+    const saved = state.appData.cvVersions || [];
+    const rows = CV_TRACKS.map((track, i) => saved[i] || { label: track, file: '' });
+    const row = (v, i) => `
+        <div class="p-3 rounded-xl border border-gray-200 space-y-2" data-cv-row="${i}">
+            <div class="grid grid-cols-2 gap-2">
+                <label class="block text-xs text-gray-500">اسم المسار (عربي)<input class="swal2-input m-0 mt-1 w-full" dir="rtl" data-cv="ar" value="${escapeHTML(v.label?.ar || '')}"></label>
+                <label class="block text-xs text-gray-500 text-left">Track name (English)<input class="swal2-input m-0 mt-1 w-full" dir="ltr" data-cv="en" value="${escapeHTML(v.label?.en || '')}"></label>
+            </div>
+            <div class="flex gap-2 items-end">
+                <label class="block text-xs text-gray-500 flex-1">ملف PDF — مسار في الموقع أو رابط https (Google Drive يُحوَّل تلقائياً)<input class="swal2-input m-0 mt-1 w-full" dir="ltr" data-cv="file" value="${escapeHTML(v.file || '')}" placeholder="cv/Osama_Alharbi_Networking.pdf"></label>
+                <button type="button" data-cv-upload="${i}" class="px-3 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold shrink-0">⬆️ رفع PDF</button>
+            </div>
+            <p class="text-xs text-gray-500" data-cv-status role="status"></p>
+        </div>`;
+    const { value } = await Swal.fire({
+        title: 'نسخ السيرة الذاتية حسب المسار',
+        width: '760px',
+        html: `<div class="text-right space-y-3" dir="rtl">
+            <p class="text-xs text-gray-500">ارفع نسخة PDF لكل مسار وظيفي (صفحة واحدة يُفضَّل)، فتظهر أزرارها تحت عنوان «السيرة الذاتية» مع رابط «النسخة النصية (ATS)» التي يكتبها النشر تلقائياً. اترك المسار فارغاً لإخفائه.</p>
+            ${rows.map(row).join('')}
+            <input type="file" id="cv-version-file" accept="application/pdf,.pdf" class="hidden">
+        </div>`,
+        showCancelButton: true, confirmButtonText: 'تطبيق', cancelButtonText: 'إلغاء', focusConfirm: false,
+        didOpen: popup => {
+            const picker = popup.querySelector('#cv-version-file');
+            let target = null;
+            popup.addEventListener('click', e => {
+                const btn = e.target.closest('[data-cv-upload]');
+                if (!btn) return;
+                target = popup.querySelector(`[data-cv-row="${btn.dataset.cvUpload}"]`);
+                picker.click();
+            });
+            picker.addEventListener('change', async () => {
+                const file = picker.files?.[0];
+                picker.value = '';
+                if (!file || !target) return;
+                const status = text => { target.querySelector('[data-cv-status]').textContent = text; };
+                const path = await uploadCv(file, status).catch(() => { status('❌ حدث خطأ أثناء الرفع'); return null; });
+                if (path) target.querySelector('[data-cv="file"]').value = path;
+            });
+        },
+        preConfirm: () => {
+            const out = [];
+            for (const el of document.querySelectorAll('[data-cv-row]')) {
+                const get = k => el.querySelector(`[data-cv="${k}"]`).value.trim();
+                const label = { ar: get('ar'), en: get('en') };
+                const raw = get('file');
+                if (!raw) continue;
+                const file = normalizeCvLink(raw);
+                if (!file) { Swal.showValidationMessage(`رابط غير صالح: ${raw}`); return false; }
+                if (!label.ar && !label.en) { Swal.showValidationMessage('اكتب اسم المسار لكل ملف'); return false; }
+                out.push({ label, file });
+            }
+            return { versions: out };
+        }
+    });
+    if (!value) return;
+    if (value.versions.length) state.appData.cvVersions = value.versions; else delete state.appData.cvVersions;
+    renderAll();
+    showToast('تم التطبيق — اضغط «حفظ» لنشره ✅', 'success');
+}
+
 // ─── How skills are shown: percentage bars, levels, or tags; the resume shows the choice live ───
 const SKILL_STYLE_OPTIONS = [
     { id: 'bars',   label: 'أشرطة بالنسبة المئوية (الافتراضي)', desc: 'شريط لكل مهارة مع النسبة، كما هو الآن' },
@@ -774,6 +845,7 @@ const TOOLS = [
     { action: 'manage-fonts',        icon: 'fa-font',        label: 'الخطوط',               run: manageFonts },
     { action: 'manage-motion',       icon: 'fa-magic',       label: 'الحركة والتأثيرات',    run: manageMotion },
     { action: 'manage-scrollbar',    icon: 'fa-arrows-alt-v', label: 'شريط التمرير',        run: manageScrollbar },
+    { action: 'manage-cv-versions',  icon: 'fa-copy',        label: 'نسخ السيرة الذاتية',   run: manageCvVersions },
     { action: 'manage-skills-style', icon: 'fa-chart-bar',   label: 'عرض المهارات',         run: manageSkillsStyle },
     { action: 'manage-cursor',       icon: 'fa-mouse-pointer', label: 'مؤشر الفأرة',         run: manageCursor },
     { action: 'manage-seo',          icon: 'fa-magnifying-glass', label: 'SEO والمشاركة',   run: manageSeo },

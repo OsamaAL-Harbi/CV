@@ -2,6 +2,47 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.13.0] — 2026-11-20
+
+### Added
+- **CV per career track** (admin → tools → «نسخ السيرة الذاتية», `data.json → cvVersions`):
+  - up to four PDFs (IT support, networking, digital transformation, other), each uploaded or linked (Google Drive links become direct downloads);
+  - listed under the resume heading.
+- **Plain ATS resume** (`resume-ats.html`, written at deploy by `scripts/ats.mjs`):
+  - the CV in English on one single-column page with real headings, for applicant tracking systems and application forms, to copy from or print to PDF;
+  - no script, and its only style is allowed by hash;
+  - linked next to the CV versions and listed in the sitemap.
+- **JSON Resume** (`resume.json`, written at deploy by `scripts/resume-json.mjs`): the CV in the jsonresume.org format, linked next to the PDF download.
+- **English page for search engines** (`en.html`, written at deploy by `scripts/english-page.mjs`):
+  - English title, description, Open Graph, static texts and CV content without JavaScript;
+  - canonical and hreflang both ways, listed in the sitemap;
+  - `data-page-lang="en"` starts it in English, and the language button moves between `/CV/` and `/CV/en.html`;
+  - without the generated page (local development), `?lang=en` works as before.
+- **Labs, support cases and transformation projects in the blog** (admin → Blog → «النوع»):
+  - each kind starts from a Markdown template (goal / environment / topology / configuration / result…, problem / diagnosis / fix / time…, context / work / standards / impact);
+  - the site shows kind badges and filter chips, and the article and blog pages show the kind.
+- **Images in articles**: `![alt](images/…)` (https or site paths only), plus «إدراج صورة» in the editor, which uploads an image and puts it where the cursor was.
+- **Copy button** on code blocks in articles (`js/copy-code.js`, the only script the article pages allow).
+- **Intro video** (admin → profile → YouTube link):
+  - a thumbnail on the home page;
+  - the privacy-enhanced player (youtube-nocookie.com) loads only on click, so there are no YouTube requests or cookies before that;
+  - CSP `frame-src` allows only that host.
+- **Real-visitor Web Vitals** (`js/vitals.js`, no library): LCP, CLS and the slowest interaction are sent once to GA as `web_vitals` when the page is hidden, never for the admin.
+- **Security**:
+  - CodeQL code scanning workflow (JavaScript and the workflows, security-extended), on pull requests, main and weekly;
+  - Dependabot for npm and GitHub Actions;
+  - every action pinned to a commit SHA.
+
+### Changed
+- **Admin session**: 30 minutes at most (was 60), and it ends after 15 minutes without a click or key press. Unsaved edits stay.
+- **Profile photo uploads** are 384×384 (shown at 192 px): smaller files.
+- **One main heading (`h1`) per view** (resume, portfolio, contact, not found), with the levels below following in order.
+- Static UI strings moved to `js/strings.js` so the deploy can use them.
+- Service worker cache v14.
+
+### Fixed
+- The resume header buttons made the page wider than a phone screen. The row now wraps.
+
 ## [4.12.0] — 2026-11-02
 
 Full review: bugs, security and accessibility, plus new features.

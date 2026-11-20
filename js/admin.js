@@ -2,7 +2,7 @@
 // The token is kept in sessionStorage only and expires after SESSION_DURATION.
 import { SESSION_KEYS, state } from './state.js';
 import { local, session } from './storage.js';
-import { escapeHTML, loadVendor, setDeepValue, showToast, skillLevel } from './utils.js';
+import { escapeHTML, loadVendor, setDeepValue, showToast, skillLevel, youtubeId } from './utils.js';
 import { renderAll } from './render.js';
 import { closeDialog, openDialog } from './modal.js';
 import { DEFAULT_THEME, PRESETS, applyTheme, harmonies, isHex, syncSiteTheme } from './color.js';
@@ -14,7 +14,9 @@ import { syncSiteMotion } from './motion.js';
 
 let githubInfo     = { token: '', repo: '' };
 
-const SESSION_DURATION   = 60 * 60 * 1000;
+// The GitHub token lives at most 30 minutes in this tab, and 15 minutes without any click or key press end it sooner
+const SESSION_DURATION   = 30 * 60 * 1000;
+const IDLE_LIMIT         = 15 * 60 * 1000;
 
 const REPO_PATTERN       = /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/;
 
@@ -28,19 +30,39 @@ function readSession() {
     };
 }
 
+const lastActive = () => Number(session.get(SESSION_KEYS.lastActive)) || Number(session.get(SESSION_KEYS.loginTime)) || 0;
+
 function isSessionExpired(loginTime) {
-    return !loginTime || Date.now() - loginTime > SESSION_DURATION;
+    const now = Date.now();
+    return !loginTime || now - loginTime > SESSION_DURATION || now - lastActive() > IDLE_LIMIT;
+}
+
+// Any click or key press counts as activity (written at most every 20 seconds)
+let lastMark = 0;
+function markActive() {
+    const now = Date.now();
+    if (!session.get(SESSION_KEYS.token) || now - lastMark < 20_000) return;
+    lastMark = now;
+    session.set(SESSION_KEYS.lastActive, String(now));
+}
+let activityWatched = false;
+function watchActivity() {
+    if (activityWatched) return;
+    activityWatched = true;
+    ['pointerdown', 'keydown'].forEach(type => document.addEventListener(type, markActive, { capture: true, passive: true }));
 }
 
 function clearSession() {
     Object.values(SESSION_KEYS).forEach(k => session.remove(k));
     githubInfo = { token: '', repo: '' };
-    if (sessionTimer) { clearTimeout(sessionTimer); sessionTimer = null; }
+    if (sessionTimer) { clearInterval(sessionTimer); sessionTimer = null; }
 }
 
-function scheduleSessionExpiry(loginTime) {
-    if (sessionTimer) clearTimeout(sessionTimer);
-    sessionTimer = setTimeout(expireSession, Math.max(0, loginTime + SESSION_DURATION - Date.now()));
+// Checked every 20 seconds: the 30-minute limit and the 15 idle minutes
+function scheduleSessionExpiry() {
+    if (sessionTimer) clearInterval(sessionTimer);
+    watchActivity();
+    sessionTimer = setInterval(() => { if (isSessionExpired(readSession().loginTime)) expireSession(); }, 20_000);
 }
 
 // Drops the token but keeps unsaved edits on the page: logging in again resumes where you were.
@@ -56,7 +78,7 @@ export function checkSession() {
     if (isSessionExpired(loginTime)) { expireSession(); return; }
     githubInfo.repo  = repo;
     githubInfo.token = token;
-    scheduleSessionExpiry(loginTime);
+    scheduleSessionExpiry();
     enableAdminMode();
 }
 
@@ -128,9 +150,10 @@ export async function authenticateAndEdit() {
     session.set(SESSION_KEYS.token, token);
     session.set(SESSION_KEYS.repo, repo);
     session.set(SESSION_KEYS.loginTime, String(loginTime));
+    session.set(SESSION_KEYS.lastActive, String(loginTime));
     local.set('saved_repo', repo);   // repo name only, not secret
     githubInfo.repo = repo; githubInfo.token = token;
-    scheduleSessionExpiry(loginTime);
+    scheduleSessionExpiry();
     closeDialog(document.getElementById('admin-modal'));
     enableAdminMode();
     showToast('تم تفعيل وضع المدير 🚀', 'success');
@@ -202,7 +225,7 @@ const SECTION_NAMES = {
     profile: 'الملف الشخصي', experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات',
     projects: 'المشاريع', certificates: 'الشهادات', workshops: 'ورش العمل', languages: 'اللغات',
     github: 'GitHub', monitor: 'المراقبة', theme: 'ألوان الموقع', analytics: 'الإحصائيات',
-    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة', fonts: 'الخطوط', testimonials: 'التوصيات', posts: 'المقالات', scrollbar: 'شريط التمرير', motion: 'الحركة والتأثيرات', cursor: 'مؤشر الفأرة', skillsStyle: 'عرض المهارات'
+    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة', fonts: 'الخطوط', testimonials: 'التوصيات', posts: 'المقالات', scrollbar: 'شريط التمرير', motion: 'الحركة والتأثيرات', cursor: 'مؤشر الفأرة', skillsStyle: 'عرض المهارات', cvVersions: 'نسخ السيرة الذاتية'
 };
 
 // Which sections differ from the last loaded/saved version, e.g. ["الخبرات (+1)", "الملف الشخصي"].
@@ -366,10 +389,12 @@ const SCHEMAS = {
         { key: 'link', label: 'رابط LinkedIn (https://)', simple: true }
     ],
     posts: [
+        { key: 'kind',    label: 'النوع / Type — مختبر أو حالة أو مشروع يبدأ بقالب جاهز', simple: true,
+          options: { '': 'مقال / Article', lab: 'مختبر عملي / Hands-on lab', case: 'حالة دعم فني / Support case', project: 'مشروع تحول رقمي / Transformation project' } },
         { key: 'title',   label: 'العنوان / Title' },
         { key: 'summary', label: 'ملخص قصير / Summary', type: 'textarea' },
         { key: 'body',    label: 'نص المقال / Article', type: 'textarea', tall: true,
-          hint: 'Markdown: ## عنوان فرعي، - قائمة، **عريض**، *مائل*، `كود`، [نص](https://رابط)، > اقتباس، ``` كتلة كود ```' },
+          hint: 'Markdown: ## عنوان فرعي، - قائمة، **عريض**، *مائل*، `كود`، [نص](https://رابط)، ![وصف](images/…) صورة، > اقتباس، ``` كتلة كود ```', imageInsert: true },
         { key: 'date',    label: 'التاريخ (YYYY-MM-DD)', simple: true, placeholder: () => new Date().toISOString().slice(0, 10) },
         { key: 'tags',    label: 'الوسوم / Tags', simple: true, array: true },
         { key: 'slug',    label: 'رابط المقال (اختياري، إنجليزي) — blog/<slug>.html', simple: true },
@@ -405,6 +430,42 @@ export async function previewPost(index) {
     await Swal.fire({
         title: 'معاينة المقال', width: '900px', showCloseButton: true, confirmButtonText: 'إغلاق',
         html: `<div class="space-y-8 max-h-[65vh] overflow-y-auto px-1">${post.body?.ar ? block('ar') : ''}${post.body?.en ? `<hr>${block('en')}` : ''}</div>`
+    });
+}
+
+// Blog editor extras: a new lab / support case / project starts from its template, and «إدراج صورة» uploads an image
+// and puts ![](path) where the cursor was (the dialog closes for the upload and reopens with everything typed)
+function setupPostEditor(popup, collect, reopen) {
+    const kind = popup.querySelector('#swal-kind');
+    const body = lang => popup.querySelector(`#swal-body-${lang}`);
+    kind?.addEventListener('change', async () => {
+        const { POST_TEMPLATES } = await import('./post-kinds.js');
+        const isTemplate = text => !text.trim() || Object.values(POST_TEMPLATES).some(t => t.ar === text || t.en === text);
+        for (const lang of ['ar', 'en']) {
+            const el = body(lang);
+            if (el && isTemplate(el.value)) el.value = POST_TEMPLATES[kind.value]?.[lang] || '';
+        }
+    });
+    let target = { lang: 'ar', at: null };
+    for (const lang of ['ar', 'en']) {
+        const el = body(lang);
+        const remember = () => { target = { lang, at: el.selectionStart }; };
+        el?.addEventListener('focus', remember);
+        el?.addEventListener('keyup', remember);
+        el?.addEventListener('click', remember);
+    }
+    popup.querySelector('#swal-body-image')?.addEventListener('click', async () => {
+        const typed = collect();
+        Swal.close();
+        const tools = await import('./admin-tools.js');
+        const path = await tools.uploadImage(tools.IMAGE_PRESETS.certificate, `images/posts/${tools.slug(typed.title?.en || typed.title?.ar || 'post')}`);
+        if (path) {
+            const text = typed.body?.[target.lang] || '';
+            const at = target.at ?? text.length;
+            const snippet = `\n![${target.lang === 'ar' ? 'وصف الصورة' : 'Image description'}](${path})\n`;
+            typed.body = { ...typed.body, [target.lang]: text.slice(0, at) + snippet + text.slice(at) };
+        }
+        reopen(typed);
     });
 }
 
@@ -460,7 +521,7 @@ async function manageItem(type, index = null, draft = null) {
         const valEn = getVal(item, f, 'en');
         if (f.type === 'textarea') {
             const h = f.tall ? 'h-72 font-mono text-xs' : 'h-24';
-            return `${f.hint ? `<p class="text-[11px] text-gray-500 text-right mb-1">${escapeHTML(f.hint)}</p>` : ''}<div class="grid grid-cols-2 gap-2 mb-3">
+            return `${f.hint ? `<p class="text-[11px] text-gray-500 text-right mb-1">${escapeHTML(f.hint)}</p>` : ''}${f.imageInsert ? `<button type="button" id="swal-${f.key}-image" class="mb-2 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold">🖼️ إدراج صورة في النص (مخطط شبكة، لقطة شاشة…)</button>` : ''}<div class="grid grid-cols-2 gap-2 mb-3">
                 <div><label class="block text-xs mb-1 text-gray-500 text-right">${f.label} (AR)</label>
                 <textarea id="swal-${f.key}-ar" class="swal2-textarea m-0 w-full ${h} text-right" dir="rtl">${escapeHTML(valAr)}</textarea></div>
                 <div><label class="block text-xs mb-1 text-gray-500 text-left">${f.label} (EN)</label>
@@ -513,16 +574,19 @@ async function manageItem(type, index = null, draft = null) {
         width: type === 'posts' ? '960px' : '700px', confirmButtonText: 'حفظ التغييرات',
         showCancelButton: true, cancelButtonText: 'إلغاء',
         focusConfirm: false,
-        didOpen: popup => schema.filter(f => f.upload).forEach(f => {
-            popup.querySelector(`#swal-${f.key}-upload`)?.addEventListener('click', async () => {
-                const typed = collect();
-                Swal.close();
-                const tools = await import('./admin-tools.js');
-                const title = typed.name?.en || typed.name?.ar || typed.title?.en || type;
-                const path = await tools.uploadImage(tools.IMAGE_PRESETS[f.upload], `images/${type}/${tools.slug(title)}`);
-                manageItem(type, index, { ...typed, ...(path ? { [f.key]: path } : {}) });
+        didOpen: popup => {
+            schema.filter(f => f.upload).forEach(f => {
+                popup.querySelector(`#swal-${f.key}-upload`)?.addEventListener('click', async () => {
+                    const typed = collect();
+                    Swal.close();
+                    const tools = await import('./admin-tools.js');
+                    const title = typed.name?.en || typed.name?.ar || typed.title?.en || type;
+                    const path = await tools.uploadImage(tools.IMAGE_PRESETS[f.upload], `images/${type}/${tools.slug(title)}`);
+                    manageItem(type, index, { ...typed, ...(path ? { [f.key]: path } : {}) });
+                });
             });
-        }),
+            if (type === 'posts') setupPostEditor(popup, collect, typed => manageItem(type, index, typed));
+        },
         preConfirm: () => {
             const obj = collect();
             const problem = validateItem(type, obj);
@@ -779,6 +843,10 @@ export async function manageProfile() {
             <label class="block text-xs mb-1 text-gray-500">رابط GitHub</label>
             <input id="pf-github" class="swal2-input m-0 w-full" value="${escapeHTML(v('github'))}" dir="ltr" placeholder="https://github.com/...">
           </div>
+          <div>
+            <label class="block text-xs mb-1 text-gray-500" for="pf-video">فيديو تعريفي (اختياري) — رابط YouTube، ويُفضَّل «غير مدرج» (Unlisted) ومدته دقيقة إلى دقيقة ونصف</label>
+            <input id="pf-video" class="swal2-input m-0 w-full" value="${escapeHTML(v('video'))}" dir="ltr" placeholder="https://youtu.be/...">
+          </div>
           <div class="p-3 rounded-xl border border-gray-200 space-y-2">
             <label class="block text-xs text-gray-500" for="pf-cv">السيرة الذاتية (PDF) — مسار في الموقع أو رابط https</label>
             <input id="pf-cv" class="swal2-input m-0 w-full" value="${escapeHTML(v('cv'))}" dir="ltr" placeholder="cv/Osama_Alharbi.pdf">
@@ -803,6 +871,11 @@ export async function manageProfile() {
                 Swal.showValidationMessage('رابط السيرة الذاتية غير صالح: مسار داخل الموقع (مثل cv/file.pdf) أو رابط يبدأ بـ https://');
                 return false;
             }
+            const video = document.getElementById('pf-video').value.trim();
+            if (video && !youtubeId(video)) {
+                Swal.showValidationMessage('رابط الفيديو غير صالح: الصق رابط فيديو YouTube (مثل https://youtu.be/… أو https://www.youtube.com/watch?v=…)');
+                return false;
+            }
             return profileFields(cv);
         }
     });
@@ -824,6 +897,7 @@ function profileFields(cv) {
         phone:    document.getElementById('pf-phone').value,
         linkedin: document.getElementById('pf-linkedin').value,
         github:   document.getElementById('pf-github').value,
+        video:    document.getElementById('pf-video').value.trim(),
         cv
     };
 }
@@ -857,7 +931,7 @@ export function readAsBase64(file) {
     });
 }
 
-async function uploadCv(file, status) {
+export async function uploadCv(file, status) {
     const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
     const head = new Uint8Array(await file.slice(0, 5).arrayBuffer());
     if (!isPdf || String.fromCharCode(...head) !== '%PDF-') { status('❌ الملف ليس PDF'); return null; }

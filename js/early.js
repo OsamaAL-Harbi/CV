@@ -1,5 +1,6 @@
 // Runs before first paint: apply the saved theme and language direction to avoid a flash.
-// Language rule (same as js/state.js): ?lang=en|ar, then the saved choice, then Arabic.
+// Language rule (same as js/state.js): ?lang=en|ar, then the page's own language (en.html), then the saved choice,
+// then Arabic.
 (function () {
     var root = document.documentElement;
     var theme = null, lang = null;
@@ -45,7 +46,9 @@
         if (cu && /^(brand|gradient|ring|dot|classic)$/.test(cu)) root.setAttribute('data-cursor', cu);
     } catch (e) { /* storage blocked: default cursor */ }
     var fromUrl = /[?&]lang=(ar|en)(&|$)/.exec(location.search);
+    var pageLang = root.getAttribute('data-page-lang');
     if (fromUrl) lang = fromUrl[1];
+    else if (pageLang === 'en' || pageLang === 'ar') lang = pageLang;
     if (lang !== 'en') lang = 'ar';
     root.lang = lang;
     root.dir = lang === 'ar' ? 'rtl' : 'ltr';

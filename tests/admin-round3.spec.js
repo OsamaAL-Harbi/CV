@@ -97,7 +97,7 @@ test.describe('images', () => {
         await tool(page, 'رفع الصورة الشخصية');
         await page.locator('#img-file').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: await png(page) });
         await expect(page.locator('#img-canvas')).toBeVisible();
-        await expect(page.locator('#img-info')).toContainText('800×600 → 512×512');
+        await expect(page.locator('#img-info')).toContainText('800×600 → 384×384');
         await page.locator('#img-zoom').fill('1.5');
         await page.locator('.swal2-confirm').click();
         await expect.poll(() => puts.length).toBe(1);
