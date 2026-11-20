@@ -19,6 +19,8 @@ const WC = {
     workshops:    'relative group bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
     languages:    'relative group flex items-center gap-3 bg-white dark:bg-cardBg px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
     testimonials: 'relative group flex flex-col gap-4 bg-white dark:bg-cardBg p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition',
+    highlights:   'relative group bg-white dark:bg-cardBg rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm text-center',
+    readiness:    'relative group flex gap-3 bg-white dark:bg-cardBg p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm',
     posts:        'relative group flex flex-col bg-white dark:bg-cardBg p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition'
 };
 
@@ -54,10 +56,12 @@ export function renderAll() {
     renderSection('workshops',    state.appData.workshops    || [], renderWorkshopItem,    WC.workshops);
     renderSection('languages',    state.appData.languages    || [], renderLanguageItem,    WC.languages);
     renderSection('testimonials', state.appData.testimonials || [], renderTestimonialItem, WC.testimonials);
+    renderSection('highlights',   state.appData.highlights   || [], renderHighlightItem,   WC.highlights);
+    renderSection('readiness',    state.appData.readiness    || [], renderReadinessItem,   WC.readiness);
     renderPosts();
     renderVerifiedCount();
     renderTimeline();
-    hideEmptyForVisitors(['testimonials', 'posts']);
+    hideEmptyForVisitors(['testimonials', 'posts', 'highlights', 'readiness']);
     // Projects: filters first, then filtered grid
     renderProjectFilters();
     renderFilteredProjects();
@@ -299,9 +303,13 @@ function renderVolunteerItem(item) {
         ${renderDescription(item.description)}`;
 }
 
+// A Credly badge page (https://www.credly.com/badges/<id>); anything else is ignored
+const credlyUrl = value => (/^https:\/\/(?:www\.)?credly\.com\/badges\/[\w-]+(?:\/[\w-]+)?\/?$/i.test(String(value || '').trim()) ? String(value).trim() : '');
+
 function renderCertItem(item) {
     const earned = isEarned(item);
-    const verify = earned ? safeUrl(item.url) : '';
+    const badge = earned ? credlyUrl(item.badge) : '';
+    const verify = earned ? (safeUrl(item.url) || badge) : '';
     const date   = localDate(item.date);
     const status = earned ? '' : `<span class="cert-status inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${item.status === 'planned'
         ? 'bg-gray-100 text-gray-700 border border-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
@@ -321,16 +329,44 @@ function renderCertItem(item) {
         ${verify ? `<a href="${escapeHTML(verify)}" target="_blank" rel="noopener noreferrer"
                       class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/40 text-xs font-bold text-primary hover:bg-primary hover:text-white transition print-hide"
                       aria-label="${escapeHTML(`${ui('cert_verify')}: ${t(item.name)}`)}">
-                      <i class="fas fa-shield-alt" aria-hidden="true"></i><span>${escapeHTML(ui('cert_verify'))}</span></a>` : ''}`;
+                      <i class="fas fa-shield-alt" aria-hidden="true"></i><span>${escapeHTML(ui('cert_verify'))}</span></a>` : ''}
+        ${badge && badge !== verify ? `<a href="${escapeHTML(badge)}" target="_blank" rel="noopener noreferrer"
+                      class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-300 text-xs font-bold text-orange-700 dark:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition print-hide"
+                      aria-label="${escapeHTML(`${ui('cert_credly')}: ${t(item.name)}`)}"><i class="fas fa-medal" aria-hidden="true"></i><span>Credly</span></a>` : ''}`;
 }
 
 // "3 verified" next to the Certificates heading (certificates with a verification link)
 function renderVerifiedCount() {
     const el = document.getElementById('certs-verified');
     if (!el) return;
-    const n = shownOnly(state.appData.certificates).filter(c => isEarned(c) && safeUrl(c.url)).length;
+    const n = shownOnly(state.appData.certificates).filter(c => isEarned(c) && (safeUrl(c.url) || credlyUrl(c.badge))).length;
     el.classList.toggle('hidden', n === 0);
     el.textContent = `${n} ${ui('certs_verified')}`;
+}
+
+function renderHighlightItem(item) {
+    return `
+        <p class="text-3xl font-extrabold text-primary" dir="ltr">${escapeHTML(String(item.value ?? ''))}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-300 font-medium mt-1 leading-snug">${escapeHTML(t(item.label))}</p>`;
+}
+
+// Evidence links: https, a page of this site (projects/x.html) or a section (#resume)
+const evidenceLink = value => {
+    const v = String(value || '').trim();
+    if (/^#[\w-]+$/.test(v) || (/^[\w-]+(?:\/[\w-]+)*\.html(?:#[\w-]+)?$/.test(v))) return v;
+    return safeUrl(v);
+};
+
+function renderReadinessItem(item) {
+    const link = evidenceLink(item.link);
+    const external = /^https:/i.test(link);
+    return `
+        <span class="mt-0.5 w-7 h-7 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 flex items-center justify-center shrink-0" aria-hidden="true"><i class="fas fa-check text-xs"></i></span>
+        <div class="min-w-0">
+            <h3 class="font-bold text-sm dark:text-white">${escapeHTML(t(item.title))}</h3>
+            <p class="text-xs text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">${escapeHTML(t(item.evidence))}</p>
+            ${link ? `<a href="${escapeHTML(link)}"${external ? ' target="_blank" rel="noopener noreferrer"' : ''} class="inline-flex items-center gap-1 mt-2 text-xs font-bold text-primary hover:underline"><i class="fas fa-arrow-left ltr:hidden" aria-hidden="true"></i>${escapeHTML(ui('readiness_evidence'))}<i class="fas fa-arrow-right rtl:hidden" aria-hidden="true"></i></a>` : ''}
+        </div>`;
 }
 
 function renderTestimonialItem(item) {
@@ -388,7 +424,7 @@ function renderPosts() {
 
 // Sections that only make sense with content (recommendations, blog) are hidden from visitors while empty
 function hideEmptyForVisitors(types) {
-    const section = { testimonials: 'testimonials', posts: 'blog' };
+    const section = { testimonials: 'testimonials', posts: 'blog', highlights: 'highlights', readiness: 'readiness' };
     for (const type of types) {
         const empty = !shownOnly(state.appData[type]).length;
         document.querySelector(`[data-section="${section[type]}"]`)?.classList.toggle('hidden', empty && !state.isAdmin);

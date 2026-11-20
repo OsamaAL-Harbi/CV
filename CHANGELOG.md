@@ -2,6 +2,27 @@
 
 All notable changes to this site. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.14.0] — 2026-11-20
+
+### Added
+- **Import from LinkedIn** (admin only → tools → «استيراد من LinkedIn», `js/linkedin-import.js`), one way from LinkedIn to the site:
+  - LinkedIn has no API for personal profiles and does not allow reading its pages, so the source is the official copy of your data: the ZIP from LinkedIn's «Get a copy of your data», or the CSV files inside it;
+  - the file is read in the browser only (a small ZIP reader built on `DecompressionStream`, no library) and nothing is sent anywhere;
+  - it covers the summary, headline, experience, education, certificates, skills, languages, projects and volunteering;
+  - titles written «عربي | English» and descriptions separated by ━━━ are split into the two languages;
+  - what LinkedIn doesn't know is kept: certificate images, statuses and Credly badges, hidden items, skill levels, project details, and the text in a language LinkedIn doesn't have;
+  - the admin chooses the sections (skills and headline are opt-in), sees a line-by-line preview, then applies and saves.
+- **Achievements in numbers** (`data.json → highlights`): a list on the home page, edited, sorted and hidden in admin like any other list.
+- **Job readiness** (`data.json → readiness`): what IT support and NOC roles need, each point with its evidence and a link to its lab, page or section. It sits on the resume page.
+- **Recruiter summary**: «نسخ الملخص» and «إرسال بالواتساب» on the contact page, plus a command-palette entry. It gives the CV in a few lines in the page's language, with only earned certificates.
+- **Credly badges**: a `badge` field on certificates. A credly.com badge link shows a Credly button and counts as verified; other hosts are ignored.
+- **ATS page**: a «Back to the portfolio» link in both languages, hidden in print.
+- The owner's LinkedIn posts are now four blog articles, and the sections above are seeded from their CV.
+
+### Fixed
+- **Build**: the Dependabot group update (#22) moved Font Awesome and Tailwind to new major versions that the build does not support, and they are pinned back. Dependabot now skips npm major versions.
+- **Service worker**: `js/strings.js` (added in 4.13.0) was missing from the precached shell. Service worker cache v15.
+
 ## [4.13.0] — 2026-11-20
 
 ### Added

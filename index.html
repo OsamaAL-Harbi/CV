@@ -93,6 +93,7 @@
     <link rel="modulepreload" href="js/lang-hint.js">
     <link rel="modulepreload" href="js/vitals.js">
     <link rel="modulepreload" href="js/post-kinds.js">
+    <link rel="modulepreload" href="js/strings.js">
     <link rel="modulepreload" href="js/motion.js">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
@@ -254,6 +255,14 @@
                         </div>
                     </div>
                     <!-- Intro video (data.json → profile.video, a YouTube link): a thumbnail first, the player only on click -->
+                    <!-- Achievements in numbers (data.json → highlights, edited in admin like any list) -->
+                    <div data-section="highlights" class="max-w-3xl mx-auto mt-10">
+                        <div class="flex items-center justify-center gap-3 mb-4">
+                            <h2 class="text-lg font-bold dark:text-white" data-lang="sec_highlights">إنجازات بالأرقام</h2>
+                            <button type="button" data-action="add-item" data-type="highlights" class="admin-element bg-green-100 text-green-700 px-3 py-1 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
+                        </div>
+                        <div id="highlights-container" class="grid grid-cols-2 md:grid-cols-3 gap-3"></div>
+                    </div>
                     <div id="intro-video" class="hidden max-w-2xl mx-auto mt-10 print-hide">
                         <h2 class="text-lg font-bold mb-3 dark:text-white flex items-center justify-center gap-2"><i class="fas fa-play-circle text-primary" aria-hidden="true"></i><span data-lang="video_intro">تعريف سريع بالفيديو</span></h2>
                         <div class="relative aspect-video rounded-2xl overflow-hidden shadow-lg bg-gray-900">
@@ -295,6 +304,15 @@
                 <span class="font-bold text-gray-500 dark:text-gray-400" data-lang="cv_versions">نسخ حسب المسار:</span>
                 <span id="cv-versions-list" class="contents"></span>
             </div>
+            <!-- Job readiness (data.json → readiness): what the target role needs, each point with its evidence -->
+            <section data-section="readiness" class="mb-16" aria-labelledby="readiness-title">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                    <h2 id="readiness-title" class="text-2xl font-bold flex items-center gap-3"><i class="fas fa-clipboard-check text-green-600 dark:text-green-400" aria-hidden="true"></i><span data-lang="sec_readiness">جاهزيتي للعمل</span></h2>
+                    <button type="button" data-action="add-item" data-type="readiness" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> إضافة</button>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6" data-lang="readiness_sub">ما تحتاجه وظائف الدعم الفني ومراكز عمليات الشبكات (NOC)، ودليل كل نقطة</p>
+                <div id="readiness-container" class="grid md:grid-cols-2 gap-4"></div>
+            </section>
             <!-- Career timeline (js/timeline.js): every dated item on one line, oldest → newest -->
             <section id="timeline-section" data-section="timeline" class="hidden mb-16 print-hide" aria-labelledby="timeline-title">
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -545,6 +563,17 @@
                     <button type="button" data-action="download-vcard" class="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold hover:scale-105 transition flex-shrink-0">
                         <i class="fas fa-address-card text-primary" aria-hidden="true"></i><span>.vcf</span>
                     </button>
+                </div>
+                <!-- Recruiter summary: the CV in a few lines, copied or sent by WhatsApp (js/ui.js → recruiterSummary) -->
+                <div data-section="summary" class="mt-4 bg-white dark:bg-cardBg rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4 border border-gray-100 dark:border-gray-700 print-hide">
+                    <div>
+                        <p class="font-bold text-sm dark:text-white" data-lang="summary_title">ملخص سريع لمسؤول التوظيف</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" data-lang="summary_sub">الخبرة والشهادات والمهارات والتواصل في أسطر قليلة، جاهزة للصق</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" data-action="copy-summary" class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold hover:scale-105 transition"><i class="fas fa-clipboard text-primary" aria-hidden="true"></i><span data-lang="summary_copy">نسخ الملخص</span></button>
+                        <button type="button" data-action="share-summary" class="flex items-center gap-2 px-4 py-2.5 bg-green-700 text-white rounded-xl text-sm font-bold hover:scale-105 transition"><i class="fab fa-whatsapp" aria-hidden="true"></i><span data-lang="summary_whatsapp">إرسال بالواتساب</span></button>
+                    </div>
                 </div>
             </div>
         </section>

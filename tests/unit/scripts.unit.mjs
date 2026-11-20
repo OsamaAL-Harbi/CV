@@ -466,3 +466,53 @@ test('round 5: JSON Resume, ATS page, English page, markdown images, YouTube lin
     assert.match(post, /مختبر عملي/);
     assert.match(post, /src="\.\.\/images\/posts\/a\.webp"/);
 });
+
+test('LinkedIn import: ZIP and CSV reading, bilingual splitting, dates, and what the site keeps', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const li = await import('../../js/linkedin-import.js');
+    const files = await li.unzip(await readFile(new URL('../fixtures/linkedin-export.zip', import.meta.url)));
+    assert.deepEqual(Object.keys(files).sort(), ['Certifications.csv', 'Languages.csv', 'Positions.csv', 'Profile.csv', 'Skills.csv']);
+    assert.deepEqual(li.parseCsv('Notes:\n"a, b\nc"\n\nName,Url\n"x, ""y""",https://e.co\n'), [{ Name: 'x, "y"', Url: 'https://e.co' }]);
+    assert.deepEqual(li.splitTitle('أخصائي | Specialist'), { ar: 'أخصائي', en: 'Specialist' });
+    assert.deepEqual(li.splitTitle('Support | NOC'), { ar: '', en: 'Support | NOC' });
+    assert.deepEqual(li.splitDescription('• عمل على Cisco\n━━━━\n• Worked on Cisco'), { ar: 'عمل على Cisco', en: 'Worked on Cisco' });
+    assert.deepEqual(li.period('Jun 2026', 'Oct 2026'), { ar: 'يونيو 2026 - أكتوبر 2026', en: 'June 2026 – October 2026' });
+    assert.deepEqual(li.period('2026-01', ''), { ar: 'يناير 2026 - حاضر', en: 'January 2026 – Present' });
+    assert.equal(li.parseDate('11/2026').en, 'November 2026');
+
+    const current = {
+        profile: { summary: { ar: 'قديم', en: 'old' }, title: { ar: 'عنوان', en: 'Title' } },
+        experience: [{ role: { ar: 'متدرب شبكات', en: 'شبكات' }, company: { ar: 'الجامعة', en: 'Islamic University of Madinah' }, period: { ar: '', en: '' }, hidden: true }],
+        certificates: [
+            { name: { ar: 'مسار AWS', en: 'AWS path' }, url: 'https://mcit.futurex.sa/certificates/7d0da97038944395ac5e991ad86f3b85', image: 'images/aws.webp' },
+            { name: { ar: 'CCNA', en: 'Cisco CCNA' }, status: 'planned' }
+        ],
+        skills: [{ ar: 'إدارة الشبكات', en: 'Network Management', level: 80, category: 'hard' }]
+    };
+    const mapped = li.mapLinkedIn(files, current);
+    // The networking role matched by title: Arabic company name and the hidden flag kept
+    const net = mapped.experience.find(e => e.role.ar === 'شبكات');
+    assert.equal(net.company.ar, 'الجامعة');
+    assert.equal(net.hidden, true);
+    // Certificate image kept (matched by its verification link); a planned certificate stays
+    const aws = mapped.certificates.find(c => c.url?.includes('futurex'));
+    assert.equal(aws.image, 'images/aws.webp');
+    assert.equal(aws.name.en, 'AWS Cloud Practitioner – Learning Path (Certificate of Completion, SDA)');
+    assert.ok(mapped.certificates.some(c => c.status === 'planned'));
+    assert.equal(mapped.skills.find(s => s.en === 'Network Management').level, 80);
+    assert.equal(mapped.languages[1].level.en, 'Professional working');
+    // Only the chosen sections change; the summary keeps nothing old in a language LinkedIn has
+    const next = li.applyLinkedIn(current, mapped, ['summary', 'experience']);
+    assert.equal(next.profile.summary.ar, 'أخصائي تقنية معلومات يجمع بين تشغيل الشبكات والتحول الرقمي.');
+    assert.deepEqual(next.profile.title, current.profile.title);
+    assert.equal(next.experience.length, 2);
+    assert.deepEqual(next.certificates, current.certificates);
+    assert.notEqual(next, current);
+});
+
+test('ATS page has a way back to the portfolio, hidden in print', async () => {
+    const { atsPage } = await import('../../scripts/ats.mjs');
+    const html = atsPage({ profile: { name: { en: 'O' } } });
+    assert.match(html, /<a href="\.\/en\.html#resume">&larr; Back to the portfolio<\/a>/);
+    assert.match(html, /@media print \{ \.note, \.back \{ display: none; \}/);
+});

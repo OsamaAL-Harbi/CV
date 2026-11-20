@@ -2,7 +2,8 @@
 import { state } from './state.js';
 import { local } from './storage.js';
 import { loadVendor, safeUrl, showToast, track } from './utils.js';
-import { SITE_URL, t, toggleLanguage, ui } from './i18n.js';
+import { SITE_URL, langUrl, t, toggleLanguage, ui } from './i18n.js';
+import { isEarned } from './timeline-data.js';
 import { showPage } from './router.js';
 import { renderSkills, setSkillTab } from './render.js';
 import { closeDialog, isDialogOpen, openDialog } from './modal.js';
@@ -211,6 +212,42 @@ async function copyText(text, okMessage) {
 
 const trackOwn = (name, params) => { if (!state.isAdmin) track(name, params); };
 
+// ─── A ready-to-paste summary for recruiters (application forms, e-mails, WhatsApp), in the page's language ───
+export function recruiterSummary(data = state.appData, lang = state.currentLang) {
+    const pick = v => (v && typeof v === 'object' ? (v[lang] || v.ar || v.en || '') : String(v ?? '')).trim();
+    const p = data.profile || {};
+    const a = data.availability || {};
+    const hidden = new Set(data.visibility?.sections || []);
+    const shown = key => (hidden.has(key) ? [] : (data[key] || []).filter(i => i && !i.hidden));
+    const L = lang === 'ar'
+        ? { avail: 'الجاهزية', exp: 'الخبرة', edu: 'التعليم', certs: 'الشهادات', skills: 'المهارات', contact: 'التواصل', site: 'الموقع والسيرة' }
+        : { avail: 'Availability', exp: 'Experience', edu: 'Education', certs: 'Certifications', skills: 'Skills', contact: 'Contact', site: 'Portfolio & CV' };
+    const lines = [`${pick(p.name)} — ${pick(p.title)}`];
+    const avail = a.enabled ? [pick(a.status), pick(a.roles), pick(a.cities), pick(a.types)].filter(Boolean).join(' · ') : '';
+    if (avail) lines.push(`${L.avail}: ${avail}`);
+    const exp = shown('experience').slice(0, 3).map(e => `${pick(e.role)} (${[pick(e.company).split(' - ').pop(), pick(e.period)].filter(Boolean).join(', ')})`);
+    if (exp.length) lines.push(`${L.exp}: ${exp.join(lang === 'ar' ? '؛ ' : '; ')}`);
+    const edu = shown('education')[0];
+    if (edu) lines.push(`${L.edu}: ${[pick(edu.degree), pick(edu.institution), pick(edu.period)].filter(Boolean).join(' – ')}`);
+    const certs = shown('certificates').filter(isEarned).slice(0, 5).map(c => pick(c.name));
+    if (certs.length) lines.push(`${L.certs}: ${certs.join(', ')}`);
+    const skills = shown('skills').filter(s => s.category !== 'soft').slice(0, 8).map(pick);
+    if (skills.length) lines.push(`${L.skills}: ${skills.join(', ')}`);
+    lines.push(`${L.contact}: ${[p.email, p.phone, safeUrl(p.linkedin)].filter(Boolean).join(' | ')}`);
+    lines.push(`${L.site}: ${langUrl(lang)}`);
+    return lines.join('\n');
+}
+
+export function copySummary() {
+    trackOwn('copy_recruiter_summary');
+    copyText(recruiterSummary(), ar() ? 'تم نسخ الملخص ✅ الصقه في نموذج التقديم أو الرسالة' : 'Summary copied ✅ Paste it into the application form or message');
+}
+
+export function shareSummaryWhatsApp() {
+    trackOwn('share_recruiter_summary');
+    window.open(`https://wa.me/?text=${encodeURIComponent(recruiterSummary())}`, '_blank', 'noopener');
+}
+
 export function contactAction(type) {
     const p = state.appData.profile;
     if (!p) return;
@@ -392,6 +429,7 @@ function commands() {
         { icon: 'fa-file-pdf',      ar: 'إنشاء PDF من الصفحة',      en: 'Generate PDF of this page', run: generatePDF },
         { icon: 'fa-print',         ar: 'طباعة',                    en: 'Print',                run: triggerPrint },
         { icon: 'fa-share-alt',     ar: 'مشاركة',                   en: 'Share',                run: shareProfile },
+        { icon: 'fa-clipboard',     ar: 'نسخ ملخص للتوظيف',         en: 'Copy recruiter summary', run: copySummary, keywords: 'summary recruiter ملخص توظيف' },
         { icon: 'fa-copy',          ar: 'نسخ البريد الإلكتروني',    en: 'Copy email',           run: () => contactAction('email') },
         { icon: 'fa-address-card',  ar: 'حفظ جهة الاتصال (vCard)',  en: 'Save contact (vCard)', run: downloadVCard },
         { icon: 'fa-whatsapp',      ar: 'محادثة واتساب',            en: 'WhatsApp chat',        run: () => document.getElementById('contact-whatsapp')?.click(), keywords: 'whatsapp واتساب' },

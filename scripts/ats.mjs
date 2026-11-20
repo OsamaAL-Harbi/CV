@@ -17,7 +17,10 @@ h1 { font-size: 26px; margin: 0; } h2 { font-size: 16px; text-transform: upperca
 h3 { font-size: 15px; margin: 10px 0 0; } p, li { font-size: 14px; margin: 2px 0; } ul { margin: 4px 0; padding-left: 20px; }
 .meta { color: #333; font-size: 13px; } .contact { margin-top: 4px; font-size: 13px; } a { color: #111; }
 .note { margin-top: 28px; font-size: 12px; color: #555; border-top: 1px dashed #bbb; padding-top: 8px; }
-@media print { .note { display: none; } body { padding: 0; } }`;
+.back { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; font-size: 13px; }
+.back a { display: inline-block; padding: 6px 12px; border: 1px solid #999; border-radius: 8px; text-decoration: none; font-weight: bold; }
+.back a:focus-visible { outline: 3px solid #111; outline-offset: 2px; }
+@media print { .note, .back { display: none; } body { padding: 0; } }`;
 
 const entry = (title, org, when, text) => `
     <h3>${esc(title)}${org ? ` — ${esc(org)}` : ''}</h3>
@@ -62,6 +65,7 @@ export function atsPage(data) {
     <style>${STYLE}</style>
 </head>
 <body>
+    <nav class="back" aria-label="Portfolio"><a href="./en.html#resume">&larr; Back to the portfolio</a><a href="./#resume" lang="ar" dir="rtl">العودة إلى الموقع &rarr;</a></nav>
     <h1>${esc(name)}</h1>
     ${en(p.title) ? `<p class="meta">${esc(en(p.title))}</p>` : ''}
     <p class="contact">${contact.join(' · ')}</p>
