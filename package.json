@@ -27,7 +27,7 @@
     "@fontsource/readex-pro": "5.3.0",
     "@fontsource/roboto": "5.3.0",
     "@fontsource/tajawal": "5.3.0",
-    "@fortawesome/fontawesome-free": "6.4.0",
+    "@fortawesome/fontawesome-free": "6.7.2",
     "@lhci/cli": "0.16.1",
     "@playwright/test": "1.65.1",
     "aos": "2.3.4",
