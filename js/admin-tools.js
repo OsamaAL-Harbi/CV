@@ -424,7 +424,8 @@ export const HIDEABLE = {
     experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات', certificates: 'الشهادات',
     workshops: 'ورش العمل', languages: 'اللغات', projects: 'المشاريع', stats: 'الأرقام في الرئيسية',
     github: 'قسم GitHub', status: 'مراقبة الأنظمة', whatsapp: 'بطاقة واتساب', vcard: 'حفظ جهة الاتصال',
-    testimonials: 'التوصيات', blog: 'المقالات', timeline: 'المسيرة (الخط الزمني)', qr: 'رمز QR'
+    testimonials: 'التوصيات', blog: 'المقالات', timeline: 'المسيرة (الخط الزمني)', qr: 'رمز QR',
+    highlights: 'إنجازات بالأرقام', readiness: 'جاهزيتي للعمل', summary: 'ملخص للتوظيف'
 };
 
 async function manageVisibility() {
@@ -610,6 +611,70 @@ async function manageCursor() {
     if (value === DEFAULT_CURSOR) delete state.appData.cursor; else state.appData.cursor = value;
     syncSiteCursor(state.appData.cursor);
     showToast('تم تطبيق مؤشر الفأرة — اضغط «حفظ» لنشره ✅', 'success');
+}
+
+// ─── Import from LinkedIn (one way: LinkedIn → site). Source: the official copy of your LinkedIn data (ZIP or CSV files),
+// read in the browser (js/linkedin-import.js); a preview shows exactly what changes before anything is applied ───
+async function manageLinkedInImport() {
+    await loadVendor('swal');
+    const li = await import('./linkedin-import.js');
+    let mapped = null;
+    const count = v => (Array.isArray(v) ? v.length : v ? 1 : 0);
+    const chosen = () => [...document.querySelectorAll('[data-li-section]:checked')].map(el => el.dataset.liSection);
+    const { value } = await Swal.fire({
+        title: 'استيراد من LinkedIn',
+        width: '900px',
+        html: `<div class="text-right space-y-3 text-sm" dir="rtl">
+            <p class="text-xs text-gray-600">LinkedIn لا يسمح بسحب الملف الشخصي مباشرةً، لذلك يستورد الموقع <b>نسخة بياناتك الرسمية</b> من LinkedIn، في اتجاه واحد: من LinkedIn إلى موقعك. تُقرأ في متصفحك فقط ولا تُرسل لأي جهة.</p>
+            <ol class="list-decimal pe-5 text-xs text-gray-600 space-y-1">
+                <li>افتح <a href="https://www.linkedin.com/mypreferences/d/download-my-data" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline">صفحة «نسخة من بياناتك» في LinkedIn</a> (الإعدادات ← خصوصية البيانات).</li>
+                <li>اختر الملفات: Profile وPositions وEducation وCertifications وSkills وLanguages وProjects وVolunteering، ثم «طلب الأرشيف».</li>
+                <li>يصلك بريد من LinkedIn خلال دقائق برابط التنزيل: نزّل ملف ZIP واختره هنا (أو ملفات CSV داخله).</li>
+            </ol>
+            <input type="file" id="li-file" accept=".zip,.csv,application/zip,text/csv" multiple class="block w-full text-xs">
+            <p id="li-status" class="text-xs text-gray-500" role="status"></p>
+            <div id="li-sections" class="grid sm:grid-cols-3 gap-2"></div>
+            <details id="li-preview-box" class="hidden"><summary class="cursor-pointer text-xs font-bold">معاينة التغييرات سطراً بسطر</summary><div id="li-preview" class="mt-2 max-h-72 overflow-auto"></div></details>
+            <p class="text-xs text-gray-500">يبقى ما لا يعرفه LinkedIn: صور الشهادات وحالتها وشارات Credly، والعناصر المخفية، ومستويات المهارات، وتفاصيل المشاريع. النص الناقص بلغة يبقى كما هو في الموقع. العناوين المكتوبة «عربي | English» والأوصاف المفصولة بـ ━━━ تُقسَّم تلقائياً.</p>
+        </div>`,
+        showCancelButton: true, confirmButtonText: 'تطبيق على الموقع', cancelButtonText: 'إلغاء', focusConfirm: false,
+        didOpen: popup => {
+            Swal.getConfirmButton().disabled = true;
+            const status = text => { popup.querySelector('#li-status').textContent = text; };
+            const preview = () => {
+                const next = li.applyLinkedIn(state.appData, mapped, chosen());
+                popup.querySelector('#li-preview').innerHTML = diffHTML(pretty(state.appData), pretty(next)).html;
+                Swal.getConfirmButton().disabled = !chosen().length;
+            };
+            popup.querySelector('#li-file').addEventListener('change', async e => {
+                const files = {};
+                try {
+                    for (const f of e.target.files) {
+                        if (/\.zip$/i.test(f.name)) Object.assign(files, await li.unzip(await f.arrayBuffer()));
+                        else if (/\.csv$/i.test(f.name)) files[f.name] = await f.text();
+                    }
+                } catch { status('❌ تعذّرت قراءة الملف: اختر ملف ZIP كما نزل من LinkedIn أو ملفات CSV منه'); return; }
+                mapped = li.mapLinkedIn(files, state.appData);
+                const found = Object.keys(li.IMPORT_SECTIONS).filter(s => li.available(mapped, s));
+                if (!found.length) { status('لم أجد في الملف بيانات أعرفها (Profile.csv، Positions.csv، Certifications.csv…)'); return; }
+                status(`✅ قُرئت ${Object.keys(files).length} ملفات. اختر ما تريد تحديثه من LinkedIn:`);
+                const now = { summary: 1, title: 1, ...state.appData };
+                popup.querySelector('#li-sections').innerHTML = found.map(s => {
+                    const n = s === 'summary' || s === 'title' ? '' : ` <span class="text-gray-500">(${count(now[s])} ← ${count(mapped[s])})</span>`;
+                    const on = s !== 'skills' && s !== 'title';      // a long LinkedIn skill list and headline: opt-in
+                    return `<label class="flex items-center gap-2 p-2 rounded-lg border border-gray-200 text-xs"><input type="checkbox" data-li-section="${s}" class="w-4 h-4" ${on ? 'checked' : ''}> ${escapeHTML(li.IMPORT_SECTIONS[s])}${n}</label>`;
+                }).join('');
+                popup.querySelector('#li-preview-box').classList.remove('hidden');
+                preview();
+            });
+            popup.addEventListener('change', e => { if (e.target.matches('[data-li-section]') && mapped) preview(); });
+        },
+        preConfirm: () => (mapped && chosen().length ? chosen() : false)
+    });
+    if (!value) return;
+    state.appData = li.applyLinkedIn(state.appData, mapped, value);
+    renderAll();
+    showToast('تم التحديث من LinkedIn — راجع الصفحة ثم اضغط «حفظ» لنشره ✅', 'success');
 }
 
 // ─── CV versions: one PDF per career track, each uploaded or linked; shown under the resume heading ───
@@ -845,6 +910,7 @@ const TOOLS = [
     { action: 'manage-fonts',        icon: 'fa-font',        label: 'الخطوط',               run: manageFonts },
     { action: 'manage-motion',       icon: 'fa-magic',       label: 'الحركة والتأثيرات',    run: manageMotion },
     { action: 'manage-scrollbar',    icon: 'fa-arrows-alt-v', label: 'شريط التمرير',        run: manageScrollbar },
+    { action: 'import-linkedin',     icon: 'fa-linkedin',     label: 'استيراد من LinkedIn',   run: manageLinkedInImport },
     { action: 'manage-cv-versions',  icon: 'fa-copy',        label: 'نسخ السيرة الذاتية',   run: manageCvVersions },
     { action: 'manage-skills-style', icon: 'fa-chart-bar',   label: 'عرض المهارات',         run: manageSkillsStyle },
     { action: 'manage-cursor',       icon: 'fa-mouse-pointer', label: 'مؤشر الفأرة',         run: manageCursor },
@@ -861,7 +927,7 @@ export async function openTools() {
         ['manage-monitor', 'fa-heart-pulse', 'مراقبة الأنظمة'], ['manage-profile', 'fa-user-pen', 'الملف الشخصي'], ['analytics', 'fa-chart-bar', 'الإحصائيات']
     ];
     const tile = (action, icon, label) => `<button type="button" data-tool="${action}" class="flex flex-col items-center gap-2 p-4 rounded-2xl border border-gray-200 hover:border-primary hover:bg-gray-50 transition text-sm font-bold">
-        <i class="${icon === 'fa-github' ? 'fab' : 'fas'} ${icon} text-xl text-primary" aria-hidden="true"></i>${label}</button>`;
+        <i class="${icon === 'fa-github' || icon === 'fa-linkedin' ? 'fab' : 'fas'} ${icon} text-xl text-primary" aria-hidden="true"></i>${label}</button>`;
     await Swal.fire({
         title: 'أدوات المدير',
         width: '640px',

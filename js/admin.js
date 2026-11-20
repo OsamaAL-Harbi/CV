@@ -225,7 +225,7 @@ const SECTION_NAMES = {
     profile: 'الملف الشخصي', experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات',
     projects: 'المشاريع', certificates: 'الشهادات', workshops: 'ورش العمل', languages: 'اللغات',
     github: 'GitHub', monitor: 'المراقبة', theme: 'ألوان الموقع', analytics: 'الإحصائيات',
-    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة', fonts: 'الخطوط', testimonials: 'التوصيات', posts: 'المقالات', scrollbar: 'شريط التمرير', motion: 'الحركة والتأثيرات', cursor: 'مؤشر الفأرة', skillsStyle: 'عرض المهارات', cvVersions: 'نسخ السيرة الذاتية'
+    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة', fonts: 'الخطوط', testimonials: 'التوصيات', posts: 'المقالات', scrollbar: 'شريط التمرير', motion: 'الحركة والتأثيرات', cursor: 'مؤشر الفأرة', skillsStyle: 'عرض المهارات', cvVersions: 'نسخ السيرة الذاتية', highlights: 'إنجازات بالأرقام', readiness: 'جاهزيتي للعمل'
 };
 
 // Which sections differ from the last loaded/saved version, e.g. ["الخبرات (+1)", "الملف الشخصي"].
@@ -370,6 +370,7 @@ const SCHEMAS = {
         { key: 'credential', label: 'Credential ID', simple: true },
         { key: 'url',        label: 'رابط التحقق / Verification URL (https://)', simple: true },
         { key: 'date',       label: 'التاريخ / Date (أو الموعد المتوقع / or target date)', simple: true },
+        { key: 'badge',      label: 'شارة Credly (اختياري) — https://www.credly.com/badges/…', simple: true },
         { key: 'status',     label: 'الحالة / Status', simple: true, options: { '': 'حاصل عليها / Earned', 'in-progress': 'قيد الدراسة / In progress', planned: 'مخطط لها / Planned' } },
         { key: 'image',      label: 'صورة الشهادة (اختياري)', simple: true, upload: 'certificate' }
     ],
@@ -387,6 +388,15 @@ const SCHEMAS = {
         { key: 'role', label: 'المنصب والجهة / Role & organization' },
         { key: 'text', label: 'نص التوصية / Recommendation', type: 'textarea' },
         { key: 'link', label: 'رابط LinkedIn (https://)', simple: true }
+    ],
+    highlights: [
+        { key: 'value', label: 'الرقم / Number (مثل 5 أو 30+)', simple: true },
+        { key: 'label', label: 'الوصف / Label' }
+    ],
+    readiness: [
+        { key: 'title',    label: 'المهارة أو المتطلب / Requirement' },
+        { key: 'evidence', label: 'الدليل / Evidence', type: 'textarea' },
+        { key: 'link',     label: 'رابط الدليل (اختياري): صفحة مشروع مثل projects/…html أو قسم مثل #resume أو رابط https', simple: true }
     ],
     posts: [
         { key: 'kind',    label: 'النوع / Type — مختبر أو حالة أو مشروع يبدأ بقالب جاهز', simple: true,
@@ -409,6 +419,18 @@ function validateItem(type, obj) {
         if (!obj.body.ar && !obj.body.en) return 'اكتب نص المقال';
         if (obj.date && !/^\d{4}-\d{2}-\d{2}$/.test(obj.date)) return 'التاريخ بالصيغة YYYY-MM-DD، مثل 2026-10-11';
         if (obj.slug && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(obj.slug)) return 'رابط المقال: حروف إنجليزية صغيرة وأرقام وشرطات فقط';
+    }
+    if (type === 'highlights') {
+        if (!String(obj.value || '').trim()) return 'اكتب الرقم (مثل 5 أو 30+)';
+        if (String(obj.value).length > 8) return 'الرقم قصير: 8 خانات على الأكثر (مثل 30+ أو 96)';
+        if (!obj.label.ar && !obj.label.en) return 'اكتب وصف الرقم';
+    }
+    if (type === 'readiness') {
+        if (!obj.title.ar && !obj.title.en) return 'اكتب المهارة أو المتطلب';
+        const link = String(obj.link || '').trim();
+        if (link && !/^#[\w-]+$/.test(link) && !/^[\w-]+(?:\/[\w-]+)*\.html(?:#[\w-]+)?$/.test(link) && !/^https:\/\/[^\s"<>]+$/.test(link)) {
+            return 'رابط الدليل: صفحة في الموقع (projects/…html) أو قسم (#resume) أو رابط https';
+        }
     }
     if (type === 'testimonials') {
         if (!obj.name.ar && !obj.name.en) return 'اكتب اسم صاحب التوصية';
@@ -1040,7 +1062,7 @@ function makeSortable(el, onEnd) {
 }
 
 function initSortable() {
-    ['experience','education','volunteer','certificates','workshops','languages','testimonials'].forEach(type => {
+    ['experience','education','volunteer','certificates','workshops','languages','testimonials','highlights','readiness'].forEach(type => {
         makeSortable(document.getElementById(`${type}-container`), evt => reorderSection(type, evt.oldIndex, evt.newIndex));
     });
 

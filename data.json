@@ -685,5 +685,198 @@
       },
       "file": "cv/Osama_AlHarbi_CV_Digital_Transformation.pdf"
     }
+  ],
+  "highlights": [
+    {
+      "value": "5",
+      "label": {
+        "ar": "بلاغات توقف عالجتها ميدانياً على شبكة الجامعة",
+        "en": "on-site outage tickets resolved on the campus network"
+      }
+    },
+    {
+      "value": "11",
+      "label": {
+        "ar": "حساس مراقبة ضبطته في PRTG",
+        "en": "PRTG monitoring sensors configured"
+      }
+    },
+    {
+      "value": "3",
+      "label": {
+        "ar": "مواقع ربطتها بـ OSPF مع مسار بديل",
+        "en": "sites linked with OSPF and a tested backup path"
+      }
+    },
+    {
+      "value": "15+",
+      "label": {
+        "ar": "مستنداً تقنياً وإدارياً أعددته",
+        "en": "technical and administrative documents written"
+      }
+    },
+    {
+      "value": "30+",
+      "label": {
+        "ar": "مستنداً راجعته وحدّثته",
+        "en": "documents reviewed and updated"
+      }
+    },
+    {
+      "value": "4",
+      "label": {
+        "ar": "إدارات نسّقت معها في التحول الرقمي",
+        "en": "departments coordinated with in digital transformation"
+      }
+    }
+  ],
+  "readiness": [
+    {
+      "title": {
+        "ar": "المراقبة والتنبيهات",
+        "en": "Monitoring & alerting"
+      },
+      "evidence": {
+        "ar": "مراقبة جهاز عبر WMI بـ 11 حساساً في PRTG مع تنبيهات، والتدرّب على SolarWinds.",
+        "en": "Monitored a device over WMI with 11 PRTG sensors and alerts, and trained on SolarWinds."
+      },
+      "link": "projects/network-monitoring-ticketing-lab.html"
+    },
+    {
+      "title": {
+        "ar": "إدارة الحوادث والتذاكر وفق ITIL",
+        "en": "Incident & ticket handling (ITIL)"
+      },
+      "evidence": {
+        "ar": "دورة حياة تذكرة كاملة في ManageEngine ServiceDesk Plus، ودورة ITIL 4: Foundations.",
+        "en": "A full ticket lifecycle in ManageEngine ServiceDesk Plus, and the ITIL 4: Foundations course."
+      },
+      "link": "projects/network-monitoring-ticketing-lab.html"
+    },
+    {
+      "title": {
+        "ar": "حل الأعطال ميدانياً",
+        "en": "On-site troubleshooting"
+      },
+      "evidence": {
+        "ar": "5 بلاغات توقف على شبكة الجامعة الحية: الطاقة، ومبدلات Stack، ووحدات SFP والكابلات.",
+        "en": "5 outage tickets on the live campus network: power, stacked switches, SFP modules and cables."
+      },
+      "link": "#resume"
+    },
+    {
+      "title": {
+        "ar": "أوامر Cisco IOS",
+        "en": "Cisco IOS CLI"
+      },
+      "evidence": {
+        "ar": "التشخيص عبر منفذ Console وسطر الأوامر بأوامر show وping وtraceroute.",
+        "en": "Troubleshooting through the console port and CLI with show, ping and traceroute."
+      },
+      "link": "projects/vlan-stp-etherchannel-lab.html"
+    },
+    {
+      "title": {
+        "ar": "التوجيه والتبديل",
+        "en": "Routing & switching"
+      },
+      "evidence": {
+        "ar": "VLAN و802.1Q وSTP وEtherChannel، والتوجيه الثابت وOSPF بين 3 مواقع مع اختبار المسار البديل.",
+        "en": "VLANs, 802.1Q, STP and EtherChannel, plus static routing and OSPF across 3 sites with failover testing."
+      },
+      "link": "projects/ospf-failover-lab-3-sites.html"
+    },
+    {
+      "title": {
+        "ar": "التوثيق والتواصل",
+        "en": "Documentation & communication"
+      },
+      "evidence": {
+        "ar": "إعداد أكثر من 15 مستنداً ومراجعة أكثر من 30 بالتنسيق مع 4 إدارات، وتوثيق سبب كل عطل وطريقة معالجته.",
+        "en": "Wrote 15+ documents and reviewed 30+ with 4 departments, and document the cause and fix of every fault."
+      },
+      "link": "#resume"
+    },
+    {
+      "title": {
+        "ar": "الورديات والجاهزية",
+        "en": "Shift work & availability"
+      },
+      "evidence": {
+        "ar": "مستعد للعمل بنظام الورديات والانتقال لأي منطقة في المملكة، ومتاح للمباشرة فوراً.",
+        "en": "Open to shift work and to relocating anywhere in Saudi Arabia, available to start immediately."
+      },
+      "link": ""
+    }
+  ],
+  "posts": [
+    {
+      "title": {
+        "ar": "عضوية الهيئة السعودية للمهندسين – أخصائي تقنية معلومات",
+        "en": "Saudi Council of Engineers membership – IT Specialist"
+      },
+      "body": {
+        "ar": "الحمد لله، يسعدني أشارككم حصولي على عضوية الهيئة السعودية للمهندسين (SCE) بفئة أخصائي في تخصص تقنية المعلومات.\n\nالعضوية خطوة مهمة في مسيرتي المهنية، فهي اعتراف رسمي بالتأهيل في مجال تقنية المعلومات، وتلزمني بالاستمرار في التطوير وبمعايير المهنة وأخلاقياتها.\n\nأتطلع لتوظيف هذا التأهيل في مجالات الشبكات والدعم الفني والتحول الرقمي، والمساهمة في مسيرة التحول التقني في المملكة ضمن رؤية 2030.",
+        "en": "Alhamdulillah, I'm pleased to share that I have obtained membership of the Saudi Council of Engineers (SCE) in the Specialist category, specializing in Information Technology.\n\nThis membership is an important step in my career: it is official recognition of my qualification in IT, and it commits me to continuous development and to the profession's standards and ethics.\n\nI look forward to applying this qualification in networking, IT support and digital transformation, and to contributing to the Kingdom's technology transformation under Vision 2030."
+      },
+      "date": "2026-11-17",
+      "slug": "sce-membership",
+      "tags": [
+        "SCE",
+        "IT",
+        "Vision 2030"
+      ]
+    },
+    {
+      "title": {
+        "ar": "ختام تدريبي في برنامج تمهير بالتحول الرقمي",
+        "en": "Completing my Tamheer training in digital transformation"
+      },
+      "body": {
+        "ar": "الحمد لله، اختتمت يوم 14 نوفمبر 2026 فترة تدريبي ضمن برنامج تمهير في الإدارة العامة للتحول الرقمي بالجامعة الإسلامية بالمدينة المنورة.\n\nشاركت خلال هذه الفترة في إنجاز متطلبات وأعمال دورة قياس التحول الرقمي لعام 2026م، وتشرفت بشهادة شكر وتقدير من الإدارة، أعتز بها كثيرًا.\n\nأشكر سعادة المشرف العام على التحول الرقمي د. عبدالله بن محفوظ الشنقيطي، وأشكر جميع زملائي في الإدارة على دعمهم وثقتهم طوال فترة التدريب.\n\nأتطلع الآن إلى فرصتي القادمة في مجال التحول الرقمي أو تحليل الإجراءات، وأنا متاح للعمل فورًا.",
+        "en": "Alhamdulillah, on 14 November 2026 I completed my training under the Tamheer program at the General Administration for Digital Transformation, Islamic University of Madinah.\n\nDuring this period, I contributed to the 2026 Digital Transformation Measurement (Qiyas) cycle, and I was honored to receive a certificate of appreciation from the administration, which I value greatly.\n\nI thank Dr. Abdullah bin Mahfouz Al-Shinqiti, General Supervisor of Digital Transformation, and all my colleagues in the administration for their support and trust throughout the training.\n\nI now look forward to my next opportunity in digital transformation or process analysis, and I am available to start immediately."
+      },
+      "date": "2026-11-15",
+      "slug": "tamheer-digital-transformation",
+      "tags": [
+        "Tamheer",
+        "Digital Transformation"
+      ]
+    },
+    {
+      "title": {
+        "ar": "ما تعلّمته من العمل في التحول الرقمي",
+        "en": "What I learned working in digital transformation"
+      },
+      "body": {
+        "ar": "خلال عملي في الإدارة العامة للتحول الرقمي بالجامعة الإسلامية بالمدينة المنورة، تعلّمت أن التحول الرقمي ليس مجرد إدخال أنظمة جديدة، بل إعادة تفكير في طريقة العمل نفسها، وتحويل الإجراءات المعقّدة إلى خطوات واضحة قابلة للقياس.\n\n## أبرز ما عملت عليه\n\n- حلّلت سير العمل في نظامين جامعيين، واقترحت تحسينات تختصر الإجراءات\n- شاركت في إعداد وثائق الامتثال لقياس التحول الرقمي الوطني، وفي تقارير حوكمة البيانات\n- كتبت أكثر من 15 وثيقة وراجعت أكثر من 30، بالتنسيق مع 4 إدارات\n- أعددت تقارير Excel تساعد الإدارة على اتخاذ القرار\n\n## أكبر درس\n\nنجاح أي مبادرة رقمية يبدأ من وضوح الإجراء، ودقة القياس، وجودة التنسيق بين الفرق. وهذه العقلية أحملها معي في عملي التقني بمجال الشبكات والدعم الفني.",
+        "en": "During my work at the General Administration for Digital Transformation at the Islamic University of Madinah, I learned that digital transformation isn't just introducing new systems; it's rethinking how the work itself is done and turning complex procedures into clear, measurable steps.\n\n## Highlights of my work\n\n- Analyzed workflows in two university systems and proposed improvements that shorten procedures\n- Contributed to compliance documents for the national digital transformation measurement and to data governance reports\n- Wrote 15+ documents and reviewed 30+, in coordination with 4 departments\n- Prepared Excel reports that support management decision-making\n\n## My biggest lesson\n\nThe success of any digital initiative starts with clear procedures, accurate measurement and strong coordination between teams. I carry this mindset into my technical work in networking and IT support."
+      },
+      "date": "2026-11-13",
+      "slug": "lessons-from-digital-transformation",
+      "tags": [
+        "Digital Transformation",
+        "Qiyas",
+        "Data Governance"
+      ],
+      "kind": "project"
+    },
+    {
+      "title": {
+        "ar": "إتمام مسار التعلم التحضيري لشهادة AWS Cloud Practitioner",
+        "en": "Completing the AWS Cloud Practitioner learning path"
+      },
+      "body": {
+        "ar": "سعيد بإتمامي مسار التعلم المعتمد من وزارة الاتصالات وتقنية المعلومات (MCIT) والأكاديمية السعودية الرقمية بالشراكة مع Amazon Web Services (AWS) التحضيري لشهادة AWS Certified Cloud Practitioner.\n\nتضمن البرنامج 7 دورات تدريبية بنظام التعلم الذاتي بإجمالي 12–18 ساعة، غطت مفاهيم الحوسبة السحابية، والخدمات الأساسية، والأمان، ونماذج التسعير، وإدارة التكاليف، بالإضافة إلى أساسيات بنية AWS السحابية وأفضل الممارسات، ومقدمة حول Cloud Adoption Framework (CAF).\n\nهذا المسار أسس لي قاعدة صلبة في الحوسبة السحابية، وأتطلع إلى تطبيق هذه المعرفة لدعم مسيرة التحول الرقمي في المملكة.",
+        "en": "I'm happy to have completed the learning path that prepares for the AWS Certified Cloud Practitioner certification, accredited by the Ministry of Communications and Information Technology (MCIT) and the Saudi Digital Academy in partnership with Amazon Web Services (AWS) (exam not yet taken).\n\nThe program included 7 self-paced courses totaling 12–18 hours, covering cloud computing concepts, core services, security, pricing models and cost management, as well as AWS cloud architecture fundamentals and best practices, and an introduction to the Cloud Adoption Framework (CAF).\n\nThis path gave me a solid foundation in cloud computing, and I look forward to applying it to support Saudi Arabia's digital transformation journey."
+      },
+      "date": "2026-09-20",
+      "slug": "aws-cloud-practitioner-learning-path",
+      "tags": [
+        "AWS",
+        "Cloud",
+        "Saudi Digital Academy"
+      ]
+    }
   ]
 }

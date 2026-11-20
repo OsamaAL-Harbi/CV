@@ -6,7 +6,7 @@ import { toggleMobileMenu } from './router.js';
 import { playIntroVideo, setPostFilter, setProjectFilter, setSkillTab } from './render.js';
 import { goToTimelineItem, setTimelineFilter } from './timeline.js';
 import { closeDialog, closeProjectModal, openProjectModal } from './modal.js';
-import { closeCmdPalette, contactAction, downloadQrPng, downloadVCard, filterCmd, openCmdPalette, runCommand, sendMailto, shareProfile, triggerPrint, updateCharCounter } from './ui.js';
+import { closeCmdPalette, contactAction, copySummary, shareSummaryWhatsApp, downloadQrPng, downloadVCard, filterCmd, openCmdPalette, runCommand, sendMailto, shareProfile, triggerPrint, updateCharCounter } from './ui.js';
 
 // Admin code is only downloaded when an admin action is used.
 const admin = (name, ...args) => import('./admin.js').then(m => m[name](...args));
@@ -23,6 +23,8 @@ const ACTIONS = {
     'skip-to-content':       skipToContent,
     'play-intro':            () => playIntroVideo(),
     'post-filter':           el => setPostFilter(el.dataset.filter),
+    'copy-summary':          () => copySummary(),
+    'share-summary':         () => shareSummaryWhatsApp(),
     'toggle-language':       () => toggleLanguage(),
     'toggle-menu':           () => toggleMobileMenu(),
     'share':                 () => shareProfile(),
