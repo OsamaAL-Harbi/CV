@@ -4,11 +4,13 @@ import { local } from './storage.js';
 
 export const LANGS = ['ar', 'en'];
 
-// ?lang=en|ar (shareable links, hreflang) wins over the saved choice; Arabic is the default.
-// js/early.js applies the same rule before first paint.
+// ?lang=en|ar (shareable links) wins, then the page's own language (en.html: <html data-page-lang="en">), then the
+// saved choice; Arabic is the default. js/early.js applies the same rule before first paint.
 function initialLang() {
     const fromUrl = new URLSearchParams(location.search).get('lang');
     if (LANGS.includes(fromUrl)) return fromUrl;
+    const pageLang = document.documentElement.dataset.pageLang;
+    if (LANGS.includes(pageLang)) return pageLang;
     const saved = local.get('lang');
     return LANGS.includes(saved) ? saved : 'ar';
 }

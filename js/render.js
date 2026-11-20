@@ -313,8 +313,8 @@ function renderCertItem(item) {
                    <img src="${escapeHTML(image)}" alt="" width="56" height="56" loading="lazy" decoding="async" class="w-14 h-14 object-cover rounded-lg border border-gray-200 dark:border-gray-700"></a>`
             : `<div class="text-2xl ${verify ? 'text-green-600 dark:text-green-400' : earned ? 'text-secondary' : 'text-gray-400'} flex-shrink-0" aria-hidden="true"><i class="fas ${verify ? 'fa-award' : earned ? 'fa-certificate' : 'fa-book-open'}"></i></div>`}
         <div class="flex-1 min-w-0">
-            <h4 class="font-bold text-sm dark:text-white flex flex-wrap items-center gap-x-2 gap-y-1">${escapeHTML(t(item.name))}
-                ${status}${verify ? `<span class="cert-verified inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"><i class="fas fa-check-circle" aria-hidden="true"></i>${escapeHTML(ui('cert_verified'))}</span>` : ''}</h4>
+            <h3 class="font-bold text-sm dark:text-white flex flex-wrap items-center gap-x-2 gap-y-1">${escapeHTML(t(item.name))}
+                ${status}${verify ? `<span class="cert-verified inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"><i class="fas fa-check-circle" aria-hidden="true"></i>${escapeHTML(ui('cert_verified'))}</span>` : ''}</h3>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${escapeHTML(t(item.issuer))}${item.credential ? ` · <span dir="ltr" class="font-mono">${escapeHTML(item.credential)}</span>` : ''}</p>
             ${date ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${earned ? '' : `${escapeHTML(ui('cert_target'))}: `}${escapeHTML(date)}</p>` : ''}
         </div>
@@ -401,7 +401,7 @@ function renderWorkshopItem(item) {
         <div class="flex items-start gap-3">
             <div class="text-yellow-500 mt-1 flex-shrink-0" aria-hidden="true"><i class="fas fa-chalkboard-teacher"></i></div>
             <div>
-                <h4 class="font-bold text-sm dark:text-white">${escapeHTML(t(item.name))}</h4>
+                <h3 class="font-bold text-sm dark:text-white">${escapeHTML(t(item.name))}</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${escapeHTML(t(item.organizer))}</p>
                 ${date ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${escapeHTML(date)}</p>` : ''}
             </div>
@@ -443,7 +443,7 @@ function renderProjectItem(item, realIdx) {
             ${hasLive ? `<span class="absolute top-3 left-3 ltr:right-3 ltr:left-auto bg-green-600 text-white text-xs px-2 py-1 rounded-full font-bold pointer-events-none">${escapeHTML(ui('badge_live'))}</span>` : ''}
         </div>
         <div class="p-5 flex-grow flex flex-col">
-            <h3 class="text-base font-bold mb-2 dark:text-white">${escapeHTML(title)}</h3>
+            <h2 class="text-base font-bold mb-2 dark:text-white">${escapeHTML(title)}</h2>
             <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed flex-grow">${escapeHTML(t(item.desc))}</p>
             ${item.technologies?.length ? `
                 <div class="flex flex-wrap gap-1.5 mt-3">
@@ -600,7 +600,7 @@ export function renderSkills(tab = 'hard', { instant = false } = {}) {
     if (tab === 'all') {
         container.innerHTML = ['hard', 'soft'].map(cat => {
             const rows = allSkills.filter(s => s.category === cat && isShown(s)).map(s => skillRow(s, allSkills, BAR_COLOR[cat], style)).join('');
-            return rows ? `<h4 class="w-full text-sm font-bold text-gray-500 dark:text-gray-400 pt-2">${escapeHTML(ui(`skills_${cat}`))}</h4>${rows}` : '';
+            return rows ? `<h3 class="w-full text-sm font-bold text-gray-500 dark:text-gray-400 pt-2">${escapeHTML(ui(`skills_${cat}`))}</h3>${rows}` : '';
         }).join('');
     } else {
         container.innerHTML = allSkills.filter(s => s.category === tab && isShown(s)).map(s => skillRow(s, allSkills, BAR_COLOR[tab], style)).join('');

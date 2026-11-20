@@ -33,7 +33,7 @@ body { overflow-x: hidden; }
 @media (prefers-reduced-motion: no-preference) {
     /* Scroll reveal: js/motion.js adds .reveal only with JavaScript running, and removes it once in place */
     html:not([data-motion="off"]) .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s cubic-bezier(.2, .8, .2, 1) var(--reveal-delay, 0ms), transform .6s cubic-bezier(.2, .8, .2, 1) var(--reveal-delay, 0ms); }
-    html[data-motion="lively"] .reveal:not(h3) { transform: translateY(22px) scale(.97); }
+    html[data-motion="lively"] .reveal:not(h2) { transform: translateY(22px) scale(.97); }
     html:not([data-motion="off"]) .reveal.reveal-in { opacity: 1; transform: none; }
 
     /* Hero entrance once the loading screen is gone (transform only: the text is already painted) */
@@ -80,7 +80,7 @@ body { overflow-x: hidden; }
     @keyframes bar-sweep-rtl { to { transform: translateX(-100%); } }
     html[data-motion="lively"] .timeline-dot.is-ongoing::after { content: ''; position: absolute; inset: -4px; border-radius: 999px; border: 2px solid currentColor; color: rgb(var(--color-primary)); animation: ongoing 1.8s ease-out infinite; }
     @keyframes ongoing { from { opacity: .7; transform: scale(.8); } to { opacity: 0; transform: scale(1.6); } }
-    html[data-motion="lively"] h3:hover > i.fas { animation: icon-nudge .5s ease; }
+    html[data-motion="lively"] h2:hover > i.fas { animation: icon-nudge .5s ease; }
     @keyframes icon-nudge { 30% { transform: rotate(-12deg) scale(1.12); } 60% { transform: rotate(8deg); } }
     html:not([data-motion="off"]) #scrollTopBtn { transform: scale(.7); transition: opacity .3s, transform .35s cubic-bezier(.34, 1.56, .64, 1); }
     html:not([data-motion="off"]) #scrollTopBtn.show { transform: none; }

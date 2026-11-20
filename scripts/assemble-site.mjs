@@ -17,6 +17,7 @@ import { applyJsonLd, applyVerification, prerenderContent } from './prerender.mj
 import { addToSitemap, cursorCss, fontsCss, sitePages } from './pages.mjs';
 import { jsonResume } from './resume-json.mjs';
 import { atsPage } from './ats.mjs';
+import { englishPage, linkEnglishPage } from './english-page.mjs';
 
 export const SITE_URL = 'https://osamaal-harbi.github.io/CV/';
 
@@ -64,14 +65,6 @@ export function applyProfileImage(html, data) {
     // JSON-encoded (and "<" escaped) so no value can end the string or the script element
     const value = JSON.stringify(img).slice(1, -1).replace(/</g, '\\u003c');
     return img ? html.replace(/(<script type="application\/ld\+json">[\s\S]*?"image": ")[^"]*(")/, (_, a, b) => `${a}${value}${b}`) : html;
-}
-
-// The profile photo itself in the page (instead of the placeholder that script.js used to swap), so it starts
-// loading with the HTML. Only an image under images/ is used.
-export function applyProfilePhoto(html, data) {
-    const img = String(data?.profile?.image || '');
-    if (!/^images\/[\w\-./]+\.(webp|jpe?g|png|avif)$/i.test(img) || img.includes('..')) return html;
-    return html.replace(/(<img id="profile-img" src=")assets\/img\/avatar\.svg(")/, (_, a, b) => `${a}${attr(img)}${b} fetchpriority="high"`);
 }
 
 // Font stack from admin → Fonts for js/early.js (always written, so a stale cached stack never wins)
@@ -124,10 +117,15 @@ async function main() {
     const data = JSON.parse(await readFile(join(ROOT, 'data.json'), 'utf8'));
     const index = join(dest, 'index.html');
     const html = await readFile(index, 'utf8');
-    const steps = [applySeo, applyProfileImage, applyProfilePhoto, applyJsonLd, applyVerification, prerenderContent, applyFonts, applyScrollbarStyle, applyMotionLevel, applyCursorStyle];
+    const steps = [applySeo, applyProfileImage, applyJsonLd, applyVerification, prerenderContent, applyFonts, applyScrollbarStyle, applyMotionLevel, applyCursorStyle];
     const early = await readFile(join(ROOT, 'js/early.js'), 'utf8');
-    const seoHtml = inlineEarlyScript(steps.reduce((out, step) => step(out, data), html), early);
+    const seoHtml = inlineEarlyScript(linkEnglishPage(steps.reduce((out, step) => step(out, data), html)), early);
     if (seoHtml !== html) { await writeFile(index, seoHtml); console.log('seo   index.html meta tags, JSON-LD, CV content, fonts and inlined early.js'); }
+    // The same page in English at en.html (scripts/english-page.mjs): English meta, texts and CV content
+    const enSteps = steps.filter(step => step !== applySeo && step !== prerenderContent);
+    const enHtml = prerenderContent(enSteps.reduce((out, step) => step(out, data), englishPage(html, data)), data, 'en');
+    await writeFile(join(dest, 'en.html'), inlineEarlyScript(linkEnglishPage(enHtml), early));
+    console.log('en    en.html');
     // One page per project and per blog post (scripts/pages.mjs), listed in the sitemap
     const pages = sitePages(data);
     for (const page of pages) {
@@ -141,7 +139,8 @@ async function main() {
     await writeFile(join(dest, 'resume-ats.html'), atsPage(data));
     const today = new Date().toISOString().slice(0, 10);
     const sitemap = join(dest, 'sitemap.xml');
-    await writeFile(sitemap, addToSitemap(touchSitemap(await readFile(sitemap, 'utf8'), today), pages, today));
+    const extra = [{ url: `${SITE_URL}en.html` }, { url: `${SITE_URL}resume-ats.html` }];
+    await writeFile(sitemap, addToSitemap(touchSitemap(await readFile(sitemap, 'utf8'), today), [...extra, ...pages], today));
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) await main();

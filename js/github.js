@@ -192,7 +192,7 @@ function renderRepos(repos) {
         return `
         <article class="tilt relative bg-white dark:bg-cardBg rounded-2xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col">
             <div class="flex items-start justify-between gap-3 mb-2">
-                <h4 class="font-bold text-base dark:text-white break-all" dir="ltr"><i class="fas fa-book-bookmark text-gray-400 me-1.5" aria-hidden="true"></i>${escapeHTML(repo.name)}</h4>
+                <h3 class="font-bold text-base dark:text-white break-all" dir="ltr"><i class="fas fa-book-bookmark text-gray-400 me-1.5" aria-hidden="true"></i>${escapeHTML(repo.name)}</h3>
                 ${repo.archived ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-400 text-amber-700 dark:text-amber-300">${ar() ? 'مؤرشف' : 'Archived'}</span>` : ''}
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-grow" dir="auto">${escapeHTML(repo.description || (ar() ? 'بلا وصف' : 'No description'))}</p>
