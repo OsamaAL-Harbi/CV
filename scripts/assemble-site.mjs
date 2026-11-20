@@ -16,6 +16,7 @@ import { DEFAULT_CURSOR, isCursor } from '../js/cursor.js';
 import { applyJsonLd, applyVerification, prerenderContent } from './prerender.mjs';
 import { addToSitemap, cursorCss, fontsCss, sitePages } from './pages.mjs';
 import { jsonResume } from './resume-json.mjs';
+import { atsPage } from './ats.mjs';
 
 export const SITE_URL = 'https://osamaal-harbi.github.io/CV/';
 
@@ -137,6 +138,7 @@ async function main() {
     await writeFile(join(dest, 'assets/css/site-fonts.css'), fontsCss(fontStack(data?.fonts || {})));
     await writeFile(join(dest, 'assets/css/site-cursor.css'), cursorCss(data));
     await writeFile(join(dest, 'resume.json'), `${JSON.stringify(jsonResume(data), null, 2)}\n`);
+    await writeFile(join(dest, 'resume-ats.html'), atsPage(data));
     const today = new Date().toISOString().slice(0, 10);
     const sitemap = join(dest, 'sitemap.xml');
     await writeFile(sitemap, addToSitemap(touchSitemap(await readFile(sitemap, 'utf8'), today), pages, today));

@@ -40,6 +40,7 @@ const SHELL = [
   './js/cursor.js',
   './js/lang-hint.js',
   './js/vitals.js',
+  './js/post-kinds.js',
   './js/motion.js'
 ];
 

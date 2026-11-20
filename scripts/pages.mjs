@@ -4,6 +4,7 @@
 // in search and shared on its own. No JavaScript; the site's stylesheet and fonts are reused.
 import { projectPages, postPages, projectPath, postPath, BLOG_INDEX } from '../js/pages.js';
 import { renderMarkdown, plainText, readingMinutes } from '../js/markdown.js';
+import { POST_KINDS, postKind } from '../js/post-kinds.js';
 import { DEFAULT_SCROLLBAR, isScrollbar } from '../js/scrollbar.js';
 import { DEFAULT_CURSOR, cursorValues, isCursor } from '../js/cursor.js';
 import { deriveTheme } from '../js/color.js';
@@ -22,9 +23,10 @@ const dateText = (d, lang) => {
     return new Intl.DateTimeFormat(lang === 'ar' ? 'ar-u-nu-latn' : 'en', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`));
 };
 
-const CSP = "default-src 'self'; script-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data: https:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests";
+// Articles load one script of this site (js/copy-code.js: a Copy button on code blocks); every other page runs none
+const cspFor = scripts => `default-src 'self'; script-src ${scripts ? "'self'" : "'none'"}; style-src 'self'; font-src 'self'; img-src 'self' data: https:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests`;
 
-function page({ path, title, description, image, type = 'article', ld, body, scrollbar, cursor }) {
+function page({ path, title, description, image, type = 'article', ld, body, scrollbar, cursor, script = '' }) {
     const url = new URL(path, SITE_URL).href;
     const img = image ? new URL(image, SITE_URL).href : new URL('assets/img/og-image.jpg', SITE_URL).href;
     const depth = '../';
@@ -33,7 +35,7 @@ function page({ path, title, description, image, type = 'article', ld, body, scr
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="${CSP}">
+    <meta http-equiv="Content-Security-Policy" content="${cspFor(script)}">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>${esc(title)}</title>
     <meta name="description" content="${esc(description)}">
@@ -60,7 +62,7 @@ function page({ path, title, description, image, type = 'article', ld, body, scr
     <link rel="stylesheet" href="${depth}assets/css/site-cursor.css">
     <script type="application/ld+json">
 ${jsonLd(ld)}
-    </script>
+    </script>${script ? `\n    <script src="${depth}${script}" defer></script>` : ''}
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
     <header class="bg-white border-b border-gray-200">
@@ -85,6 +87,11 @@ ${body}
 }
 
 const person = data => ({ '@type': 'Person', name: en(data?.profile?.name) || 'Osama Al-Harbi', alternateName: ar(data?.profile?.name) || undefined, url: SITE_URL });
+const kindBadge = (item, lang) => {
+    const kind = postKind(item);
+    if (kind === 'article') return '';
+    return `<span class="inline-flex items-center gap-1 text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-bold"><i class="fas ${POST_KINDS[kind].icon}" aria-hidden="true"></i>${esc(POST_KINDS[kind][lang])}</span>`;
+};
 const chips = list => (list || []).map(t => `<span class="text-xs px-3 py-1 bg-blue-50 text-blue-700 rounded-full font-bold" dir="ltr">${esc(t)}</span>`).join('');
 
 // ─── Projects ───
@@ -147,8 +154,8 @@ function postBlock(item, lang) {
     return `        <article lang="${lang}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}" class="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 md:p-8 space-y-4">
             <h${lang === 'ar' ? 1 : 2} class="text-3xl font-extrabold text-gray-900 leading-tight">${esc(pick(item.title))}</h${lang === 'ar' ? 1 : 2}>
             <p class="text-xs text-gray-500">${esc(meta)}</p>
-            ${item.tags?.length ? `<div class="flex flex-wrap gap-2">${chips(item.tags)}</div>` : ''}
-            <div class="readme">${renderMarkdown(pick(item.body))}</div>
+            ${item.tags?.length || postKind(item) !== 'article' ? `<div class="flex flex-wrap gap-2">${kindBadge(item, lang)}${chips(item.tags)}</div>` : ''}
+            <div class="readme">${renderMarkdown(pick(item.body), { assetBase: '../' })}</div>
             <p><a href="./" class="text-sm font-bold text-primary hover:underline">${lang === 'ar' ? 'كل المقالات' : 'All articles'}</a></p>
         </article>`;
 }
@@ -182,7 +189,8 @@ export function postPage({ slug, item }, data) {
         },
         body,
         scrollbar: data?.scrollbar,
-        cursor: data?.cursor
+        cursor: data?.cursor,
+        script: 'js/copy-code.js'
     });
 }
 
@@ -192,7 +200,7 @@ export function blogIndex(data) {
                 <a href="${esc(`${slug}.html`)}" class="block space-y-2">
                     <h2 class="text-xl font-bold text-gray-900 hover:text-primary">${esc(ar(item.title))}</h2>
                     ${has(item.title, 'en') && en(item.title) !== ar(item.title) ? `<p class="text-sm font-bold text-gray-500" lang="en" dir="ltr">${esc(en(item.title))}</p>` : ''}
-                    <p class="text-xs text-gray-500">${esc(dateText(item.date, 'ar'))}</p>
+                    <p class="text-xs text-gray-500 flex flex-wrap items-center gap-2">${kindBadge(item, 'ar')}${esc(dateText(item.date, 'ar'))}</p>
                     <p class="text-sm text-gray-600 leading-relaxed">${esc(clip(ar(item.summary) || plainText(ar(item.body)), 220))}</p>
                 </a>
             </li>`;

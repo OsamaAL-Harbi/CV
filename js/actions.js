@@ -3,7 +3,7 @@ import { state } from './state.js';
 import { showToast, track } from './utils.js';
 import { toggleLanguage } from './i18n.js';
 import { toggleMobileMenu } from './router.js';
-import { playIntroVideo, setProjectFilter, setSkillTab } from './render.js';
+import { playIntroVideo, setPostFilter, setProjectFilter, setSkillTab } from './render.js';
 import { goToTimelineItem, setTimelineFilter } from './timeline.js';
 import { closeDialog, closeProjectModal, openProjectModal } from './modal.js';
 import { closeCmdPalette, contactAction, downloadQrPng, downloadVCard, filterCmd, openCmdPalette, runCommand, sendMailto, shareProfile, triggerPrint, updateCharCounter } from './ui.js';
@@ -22,6 +22,7 @@ function skipToContent(el, e) {
 const ACTIONS = {
     'skip-to-content':       skipToContent,
     'play-intro':            () => playIntroVideo(),
+    'post-filter':           el => setPostFilter(el.dataset.filter),
     'toggle-language':       () => toggleLanguage(),
     'toggle-menu':           () => toggleMobileMenu(),
     'share':                 () => shareProfile(),

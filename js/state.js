@@ -20,6 +20,7 @@ export const state = {
     activeSkillTab:    'hard',
     activeFilter:      'all',        // project filter
     timelineFilter:    'all',        // career timeline filter
+    postFilter:        'all',        // blog: all, article, lab, case, project
     dataLoaded:        false,
     lastSavedSnapshot: null          // in-memory copy of the last loaded/saved data (admin "restore")
 };

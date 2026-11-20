@@ -44,7 +44,7 @@ export const STATIC_TEXT = {
         load_error:'تعذّر تحميل المحتوى. تحقق من اتصالك ثم أعد المحاولة.', btn_retry:'إعادة المحاولة',
         skills_hard:'المهارات التقنية', skills_soft:'المهارات الشخصية', case_label:'دراسة حالة', open_to_work:'متاح للعمل',
         sec_testimonials:'التوصيات', sec_blog:'المقالات', blog_all:'كل المقالات', blog_read:'اقرأ المقال', blog_minutes:'د قراءة',
-        cert_verified:'موثّقة', video_intro:'تعريف سريع بالفيديو', aria_play_video:'تشغيل الفيديو التعريفي', video_title:'فيديو تعريفي', skill_step_1:'مبتدئ', skill_step_2:'متوسط', skill_step_3:'متقدم', skill_step_4:'خبير', btn_book_call:'احجز مكالمة', cert_in_progress:'قيد الدراسة', cert_planned:'مخطط لها', cert_target:'الموعد المتوقع', certs_verified:'شهادة موثّقة', project_page:'صفحة المشروع', testimonial_profile:'الملف في LinkedIn', sec_timeline:'المسيرة', timeline_hint:'اضغط أي محطة لعرض تفاصيلها',
+        cert_verified:'موثّقة', aria_post_kinds:'نوع المحتوى', cv_versions:'نسخ حسب المسار:', cv_ats:'نسخة نصية (ATS)', video_intro:'تعريف سريع بالفيديو', aria_play_video:'تشغيل الفيديو التعريفي', video_title:'فيديو تعريفي', skill_step_1:'مبتدئ', skill_step_2:'متوسط', skill_step_3:'متقدم', skill_step_4:'خبير', btn_book_call:'احجز مكالمة', cert_in_progress:'قيد الدراسة', cert_planned:'مخطط لها', cert_target:'الموعد المتوقع', certs_verified:'شهادة موثّقة', project_page:'صفحة المشروع', testimonial_profile:'الملف في LinkedIn', sec_timeline:'المسيرة', timeline_hint:'اضغط أي محطة لعرض تفاصيلها',
         qr_title:'امسح الرمز لزيارة موقعي', qr_sub:'للبطاقة الشخصية أو السيرة المطبوعة', qr_download:'تحميل'
     },
     en: {
@@ -73,7 +73,7 @@ export const STATIC_TEXT = {
         load_error:'Could not load the content. Check your connection and try again.', btn_retry:'Try again',
         skills_hard:'Technical Skills', skills_soft:'Soft Skills', case_label:'Case study', open_to_work:'Open to work',
         sec_testimonials:'Recommendations', sec_blog:'Articles', blog_all:'All articles', blog_read:'Read article', blog_minutes:'min read',
-        cert_verified:'Verified', video_intro:'A quick video intro', aria_play_video:'Play the intro video', video_title:'Intro video', skill_step_1:'Beginner', skill_step_2:'Intermediate', skill_step_3:'Advanced', skill_step_4:'Expert', btn_book_call:'Book a call', cert_in_progress:'In progress', cert_planned:'Planned', cert_target:'Target', certs_verified:'verified', project_page:'Project page', testimonial_profile:'LinkedIn profile', sec_timeline:'Journey', timeline_hint:'Select a milestone to see its details',
+        cert_verified:'Verified', aria_post_kinds:'Content type', cv_versions:'By career track:', cv_ats:'Plain-text (ATS) version', video_intro:'A quick video intro', aria_play_video:'Play the intro video', video_title:'Intro video', skill_step_1:'Beginner', skill_step_2:'Intermediate', skill_step_3:'Advanced', skill_step_4:'Expert', btn_book_call:'Book a call', cert_in_progress:'In progress', cert_planned:'Planned', cert_target:'Target', certs_verified:'verified', project_page:'Project page', testimonial_profile:'LinkedIn profile', sec_timeline:'Journey', timeline_hint:'Select a milestone to see its details',
         qr_title:'Scan to visit my site', qr_sub:'For your business card or printed CV', qr_download:'Download'
     }
 };

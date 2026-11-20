@@ -225,7 +225,7 @@ const SECTION_NAMES = {
     profile: 'الملف الشخصي', experience: 'الخبرات', education: 'التعليم', volunteer: 'التطوع', skills: 'المهارات',
     projects: 'المشاريع', certificates: 'الشهادات', workshops: 'ورش العمل', languages: 'اللغات',
     github: 'GitHub', monitor: 'المراقبة', theme: 'ألوان الموقع', analytics: 'الإحصائيات',
-    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة', fonts: 'الخطوط', testimonials: 'التوصيات', posts: 'المقالات', scrollbar: 'شريط التمرير', motion: 'الحركة والتأثيرات', cursor: 'مؤشر الفأرة', skillsStyle: 'عرض المهارات'
+    visibility: 'الأقسام المخفية', availability: 'متاح للعمل', seo: 'SEO', monitorAlerts: 'تنبيهات المراقبة', fonts: 'الخطوط', testimonials: 'التوصيات', posts: 'المقالات', scrollbar: 'شريط التمرير', motion: 'الحركة والتأثيرات', cursor: 'مؤشر الفأرة', skillsStyle: 'عرض المهارات', cvVersions: 'نسخ السيرة الذاتية'
 };
 
 // Which sections differ from the last loaded/saved version, e.g. ["الخبرات (+1)", "الملف الشخصي"].
@@ -389,10 +389,12 @@ const SCHEMAS = {
         { key: 'link', label: 'رابط LinkedIn (https://)', simple: true }
     ],
     posts: [
+        { key: 'kind',    label: 'النوع / Type — مختبر أو حالة أو مشروع يبدأ بقالب جاهز', simple: true,
+          options: { '': 'مقال / Article', lab: 'مختبر عملي / Hands-on lab', case: 'حالة دعم فني / Support case', project: 'مشروع تحول رقمي / Transformation project' } },
         { key: 'title',   label: 'العنوان / Title' },
         { key: 'summary', label: 'ملخص قصير / Summary', type: 'textarea' },
         { key: 'body',    label: 'نص المقال / Article', type: 'textarea', tall: true,
-          hint: 'Markdown: ## عنوان فرعي، - قائمة، **عريض**، *مائل*، `كود`، [نص](https://رابط)، > اقتباس، ``` كتلة كود ```' },
+          hint: 'Markdown: ## عنوان فرعي، - قائمة، **عريض**، *مائل*، `كود`، [نص](https://رابط)، ![وصف](images/…) صورة، > اقتباس، ``` كتلة كود ```', imageInsert: true },
         { key: 'date',    label: 'التاريخ (YYYY-MM-DD)', simple: true, placeholder: () => new Date().toISOString().slice(0, 10) },
         { key: 'tags',    label: 'الوسوم / Tags', simple: true, array: true },
         { key: 'slug',    label: 'رابط المقال (اختياري، إنجليزي) — blog/<slug>.html', simple: true },
@@ -428,6 +430,42 @@ export async function previewPost(index) {
     await Swal.fire({
         title: 'معاينة المقال', width: '900px', showCloseButton: true, confirmButtonText: 'إغلاق',
         html: `<div class="space-y-8 max-h-[65vh] overflow-y-auto px-1">${post.body?.ar ? block('ar') : ''}${post.body?.en ? `<hr>${block('en')}` : ''}</div>`
+    });
+}
+
+// Blog editor extras: a new lab / support case / project starts from its template, and «إدراج صورة» uploads an image
+// and puts ![](path) where the cursor was (the dialog closes for the upload and reopens with everything typed)
+function setupPostEditor(popup, collect, reopen) {
+    const kind = popup.querySelector('#swal-kind');
+    const body = lang => popup.querySelector(`#swal-body-${lang}`);
+    kind?.addEventListener('change', async () => {
+        const { POST_TEMPLATES } = await import('./post-kinds.js');
+        const isTemplate = text => !text.trim() || Object.values(POST_TEMPLATES).some(t => t.ar === text || t.en === text);
+        for (const lang of ['ar', 'en']) {
+            const el = body(lang);
+            if (el && isTemplate(el.value)) el.value = POST_TEMPLATES[kind.value]?.[lang] || '';
+        }
+    });
+    let target = { lang: 'ar', at: null };
+    for (const lang of ['ar', 'en']) {
+        const el = body(lang);
+        const remember = () => { target = { lang, at: el.selectionStart }; };
+        el?.addEventListener('focus', remember);
+        el?.addEventListener('keyup', remember);
+        el?.addEventListener('click', remember);
+    }
+    popup.querySelector('#swal-body-image')?.addEventListener('click', async () => {
+        const typed = collect();
+        Swal.close();
+        const tools = await import('./admin-tools.js');
+        const path = await tools.uploadImage(tools.IMAGE_PRESETS.certificate, `images/posts/${tools.slug(typed.title?.en || typed.title?.ar || 'post')}`);
+        if (path) {
+            const text = typed.body?.[target.lang] || '';
+            const at = target.at ?? text.length;
+            const snippet = `\n![${target.lang === 'ar' ? 'وصف الصورة' : 'Image description'}](${path})\n`;
+            typed.body = { ...typed.body, [target.lang]: text.slice(0, at) + snippet + text.slice(at) };
+        }
+        reopen(typed);
     });
 }
 
@@ -483,7 +521,7 @@ async function manageItem(type, index = null, draft = null) {
         const valEn = getVal(item, f, 'en');
         if (f.type === 'textarea') {
             const h = f.tall ? 'h-72 font-mono text-xs' : 'h-24';
-            return `${f.hint ? `<p class="text-[11px] text-gray-500 text-right mb-1">${escapeHTML(f.hint)}</p>` : ''}<div class="grid grid-cols-2 gap-2 mb-3">
+            return `${f.hint ? `<p class="text-[11px] text-gray-500 text-right mb-1">${escapeHTML(f.hint)}</p>` : ''}${f.imageInsert ? `<button type="button" id="swal-${f.key}-image" class="mb-2 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold">🖼️ إدراج صورة في النص (مخطط شبكة، لقطة شاشة…)</button>` : ''}<div class="grid grid-cols-2 gap-2 mb-3">
                 <div><label class="block text-xs mb-1 text-gray-500 text-right">${f.label} (AR)</label>
                 <textarea id="swal-${f.key}-ar" class="swal2-textarea m-0 w-full ${h} text-right" dir="rtl">${escapeHTML(valAr)}</textarea></div>
                 <div><label class="block text-xs mb-1 text-gray-500 text-left">${f.label} (EN)</label>
@@ -536,16 +574,19 @@ async function manageItem(type, index = null, draft = null) {
         width: type === 'posts' ? '960px' : '700px', confirmButtonText: 'حفظ التغييرات',
         showCancelButton: true, cancelButtonText: 'إلغاء',
         focusConfirm: false,
-        didOpen: popup => schema.filter(f => f.upload).forEach(f => {
-            popup.querySelector(`#swal-${f.key}-upload`)?.addEventListener('click', async () => {
-                const typed = collect();
-                Swal.close();
-                const tools = await import('./admin-tools.js');
-                const title = typed.name?.en || typed.name?.ar || typed.title?.en || type;
-                const path = await tools.uploadImage(tools.IMAGE_PRESETS[f.upload], `images/${type}/${tools.slug(title)}`);
-                manageItem(type, index, { ...typed, ...(path ? { [f.key]: path } : {}) });
+        didOpen: popup => {
+            schema.filter(f => f.upload).forEach(f => {
+                popup.querySelector(`#swal-${f.key}-upload`)?.addEventListener('click', async () => {
+                    const typed = collect();
+                    Swal.close();
+                    const tools = await import('./admin-tools.js');
+                    const title = typed.name?.en || typed.name?.ar || typed.title?.en || type;
+                    const path = await tools.uploadImage(tools.IMAGE_PRESETS[f.upload], `images/${type}/${tools.slug(title)}`);
+                    manageItem(type, index, { ...typed, ...(path ? { [f.key]: path } : {}) });
+                });
             });
-        }),
+            if (type === 'posts') setupPostEditor(popup, collect, typed => manageItem(type, index, typed));
+        },
         preConfirm: () => {
             const obj = collect();
             const problem = validateItem(type, obj);
@@ -890,7 +931,7 @@ export function readAsBase64(file) {
     });
 }
 
-async function uploadCv(file, status) {
+export async function uploadCv(file, status) {
     const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
     const head = new Uint8Array(await file.slice(0, 5).arrayBuffer());
     if (!isPdf || String.fromCharCode(...head) !== '%PDF-') { status('❌ الملف ليس PDF'); return null; }

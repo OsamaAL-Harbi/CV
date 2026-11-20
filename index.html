@@ -92,6 +92,7 @@
     <link rel="modulepreload" href="js/cursor.js">
     <link rel="modulepreload" href="js/lang-hint.js">
     <link rel="modulepreload" href="js/vitals.js">
+    <link rel="modulepreload" href="js/post-kinds.js">
     <link rel="modulepreload" href="js/motion.js">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
@@ -289,6 +290,11 @@
                     </button>
                 </div>
             </div>
+            <!-- CV per career track (admin → tools → «نسخ السيرة الذاتية», data.json → cvVersions) and the plain ATS page -->
+            <div id="cv-versions" class="hidden -mt-12 mb-12 flex flex-wrap items-center gap-2 text-xs print-hide">
+                <span class="font-bold text-gray-500 dark:text-gray-400" data-lang="cv_versions">نسخ حسب المسار:</span>
+                <span id="cv-versions-list" class="contents"></span>
+            </div>
             <!-- Career timeline (js/timeline.js): every dated item on one line, oldest → newest -->
             <section id="timeline-section" data-section="timeline" class="hidden mb-16 print-hide" aria-labelledby="timeline-title">
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -399,6 +405,7 @@
                         <button data-action="add-item" data-type="posts" class="admin-element bg-green-100 text-green-700 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-200 gap-2 transition"><i class="fas fa-plus"></i> مقال جديد</button>
                     </div>
                 </div>
+                <div id="posts-filters" class="hidden flex flex-wrap gap-2 mb-6" role="group" aria-label="نوع المحتوى" data-lang-aria="aria_post_kinds"></div>
                 <div id="posts-container" class="grid md:grid-cols-2 gap-6"></div>
             </section>
 

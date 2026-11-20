@@ -4,6 +4,7 @@ import { escapeHTML, imageSrc, safeAssetUrl, safeUrl, showToast, skillLevel, ski
 import { t, ui } from './i18n.js';
 import { postPages, postPath } from './pages.js';
 import { readingMinutes, plainText } from './markdown.js';
+import { POST_KINDS, postKind } from './post-kinds.js';
 import { renderTimeline } from './timeline.js';
 import { isEarned } from './timeline-data.js';
 
@@ -133,6 +134,21 @@ function renderProfile() {
         if (external) { a.target = '_blank'; a.rel = 'noopener noreferrer'; a.removeAttribute('download'); }
         else { a.removeAttribute('target'); a.removeAttribute('rel'); a.setAttribute('download', ''); }
     });
+    renderCvVersions();
+}
+
+// One CV per career track (IT support, networking, digital transformation…) plus the plain ATS page
+function renderCvVersions() {
+    const box = document.getElementById('cv-versions');
+    const list = document.getElementById('cv-versions-list');
+    if (!box || !list) return;
+    const versions = (state.appData.cvVersions || []).map(v => ({ label: t(v.label), url: safeAssetUrl(v.file) })).filter(v => v.label && v.url);
+    box.classList.toggle('hidden', !versions.length);
+    const chip = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-cardBg font-bold text-gray-700 dark:text-gray-200 hover:border-primary transition';
+    list.innerHTML = versions.map(v => {
+        const external = /^https:/i.test(v.url);
+        return `<a href="${escapeHTML(v.url)}" ${external ? 'target="_blank" rel="noopener noreferrer"' : 'download'} data-track="cv_version_download" class="${chip}"><i class="fas fa-file-pdf text-red-700 dark:text-red-400" aria-hidden="true"></i>${escapeHTML(v.label)}</a>`;
+    }).join('') + `<a href="resume-ats.html" data-track="cv_ats" class="${chip}"><i class="fas fa-align-left" aria-hidden="true"></i>${escapeHTML(ui('cv_ats'))}</a>`;
 }
 
 // ─── WhatsApp (wa.me link from profile.phone, with a greeting in the visitor's language) ───
@@ -335,9 +351,20 @@ function renderPosts() {
     const container = document.getElementById('posts-container');
     if (!container) return;
     const visible = new Map(postPages(state.appData).map(p => [p.index, p.slug]));
-    const list = (state.appData.posts || []).map((item, index) => ({ item, index }))
+    const all = (state.appData.posts || []).map((item, index) => ({ item, index }))
         .filter(({ item }) => isShown(item))
         .sort((a, b) => String(b.item.date || '').localeCompare(String(a.item.date || '')) || a.index - b.index);
+    // Filter chips (articles, labs, support cases, projects) once there is more than one kind
+    const kinds = Object.keys(POST_KINDS).filter(k => all.some(({ item }) => postKind(item) === k));
+    if (!kinds.includes(state.postFilter)) state.postFilter = 'all';
+    const filters = document.getElementById('posts-filters');
+    if (filters) {
+        filters.classList.toggle('hidden', kinds.length < 2);
+        const chip = (key, label) => `<button type="button" data-action="post-filter" data-filter="${key}" aria-pressed="${state.postFilter === key}"
+            class="px-3 py-1 text-xs font-bold rounded-full transition ${state.postFilter === key ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'}">${escapeHTML(label)}</button>`;
+        filters.innerHTML = chip('all', ui('filter_all')) + kinds.map(k => chip(k, POST_KINDS[k][state.currentLang])).join('');
+    }
+    const list = state.postFilter === 'all' ? all : all.filter(({ item }) => postKind(item) === state.postFilter);
     const fmt = new Intl.DateTimeFormat(state.currentLang === 'ar' ? 'ar-u-nu-latn' : 'en', { dateStyle: 'medium', timeZone: 'UTC' });
     container.innerHTML = list.map(({ item, index }) => {
         const slug = visible.get(index);
@@ -347,7 +374,7 @@ function renderPosts() {
         return `
         <article class="${WC.posts}${item.hidden ? ' item-hidden' : ''}" data-index="${index}">
             ${renderAdminButtons('posts', index, item)}
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">${escapeHTML(meta)}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 flex flex-wrap items-center gap-2">${postKind(item) !== 'article' ? `<span class="post-kind inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold"><i class="fas ${POST_KINDS[postKind(item)].icon}" aria-hidden="true"></i>${escapeHTML(POST_KINDS[postKind(item)][state.currentLang])}</span>` : ''}<span>${escapeHTML(meta)}</span></p>
             <h3 class="text-lg font-bold dark:text-white mb-2 leading-snug" dir="auto">${slug ? `<a href="${escapeHTML(postPath(slug))}" class="hover:text-primary">${escapeHTML(t(item.title))}</a>` : escapeHTML(t(item.title))}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1" dir="auto">${escapeHTML(summary)}</p>
             ${(item.tags || []).length ? `<div class="flex flex-wrap gap-1.5 mt-3">${item.tags.map(tag => `<span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold">${escapeHTML(tag)}</span>`).join('')}</div>` : ''}
@@ -663,4 +690,9 @@ export function setSmartGreeting() {
     const key = hour < 12 ? 'm' : (hour < 18 ? 'a' : 'e');
     const el  = document.getElementById('smart-greeting');
     if (el) el.innerText = (msgs[state.currentLang] || msgs.ar)[key];
+}
+
+export function setPostFilter(filter) {
+    state.postFilter = filter;
+    renderPosts();
 }

@@ -2,7 +2,8 @@
 // (scripts/pages.mjs). No library and no raw HTML: every character of the source is escaped first, then only
 // these constructs become markup —
 //   ## / ### / #### headings, paragraphs, - or * lists, 1. lists, > quotes, ``` code blocks,
-//   **bold**, *italic*, `code`, [text](https://… or a site path) links, and --- rules.
+//   **bold**, *italic*, `code`, [text](https://… or a site path) links, ![alt](https://… or images/…) images,
+//   and --- rules. opts.assetBase is put before site paths of images (the standalone pages live one folder down).
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 // https links, mailto:, or a path on this site (no "..", no scheme) — anything else stays plain text
@@ -13,11 +14,23 @@ export function safeLink(url) {
     return '';
 }
 
-function inline(text) {
-    // Code spans and links become placeholders first, so emphasis never touches code or a link's address
+// Image sources: https, or a path on this site (no scheme, no "..")
+export function safeImage(url, assetBase = '') {
+    const u = safeLink(url);
+    if (!u || /^mailto:/i.test(u)) return '';
+    return /^https:/i.test(u) ? u : assetBase + u.replace(/^\.?\//, '');
+}
+
+function inline(text, opts = {}) {
+    // Code spans, images and links become placeholders first, so emphasis never touches code or an address
     const codes = [], links = [];
     const emphasis = t => t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
     let s = esc(text).replace(/`([^`]+)`/g, (_, c) => `\u0000${codes.push(c) - 1}\u0000`);
+    s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (m, alt, src) => {
+        const url = safeImage(src.replace(/&amp;/g, '&'), opts.assetBase);
+        if (!url) return alt;
+        return `\u0001${links.push(`<img src="${esc(url)}" alt="${alt}" loading="lazy" decoding="async">`) - 1}\u0001`;
+    });
     s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, label, href) => {
         const url = safeLink(href.replace(/&amp;/g, '&'));
         if (!url) return label;
@@ -29,13 +42,14 @@ function inline(text) {
         .replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${codes[i]}</code>`);
 }
 
-export function renderMarkdown(source) {
+export function renderMarkdown(source, opts = {}) {
     const lines = String(source ?? '').replace(/\r\n?/g, '\n').split('\n');
     const out = [];
     let para = [], list = null, quote = [];
-    const flushPara = () => { if (para.length) out.push(`<p dir="auto">${inline(para.join(' '))}</p>`); para = []; };
-    const flushList = () => { if (list) out.push(`<${list.tag}>${list.items.map(i => `<li dir="auto">${inline(i)}</li>`).join('')}</${list.tag}>`); list = null; };
-    const flushQuote = () => { if (quote.length) out.push(`<blockquote dir="auto">${inline(quote.join(' '))}</blockquote>`); quote = []; };
+    const inl = text => inline(text, opts);
+    const flushPara = () => { if (para.length) out.push(`<p dir="auto">${inl(para.join(' '))}</p>`); para = []; };
+    const flushList = () => { if (list) out.push(`<${list.tag}>${list.items.map(i => `<li dir="auto">${inl(i)}</li>`).join('')}</${list.tag}>`); list = null; };
+    const flushQuote = () => { if (quote.length) out.push(`<blockquote dir="auto">${inl(quote.join(' '))}</blockquote>`); quote = []; };
     const flush = () => { flushPara(); flushList(); flushQuote(); };
 
     for (let i = 0; i < lines.length; i++) {
@@ -48,7 +62,7 @@ export function renderMarkdown(source) {
             continue;
         }
         const heading = line.match(/^(#{1,4})\s+(.+)$/);
-        if (heading) { flush(); const level = Math.min(4, Math.max(2, heading[1].length + 1)); out.push(`<h${level} dir="auto">${inline(heading[2].trim())}</h${level}>`); continue; }
+        if (heading) { flush(); const level = Math.min(4, Math.max(2, heading[1].length + 1)); out.push(`<h${level} dir="auto">${inl(heading[2].trim())}</h${level}>`); continue; }
         if (/^\s*(---|\*\*\*)\s*$/.test(line)) { flush(); out.push('<hr>'); continue; }
         const bullet = line.match(/^\s*[-*]\s+(.+)$/), numbered = line.match(/^\s*\d+[.)]\s+(.+)$/);
         if (bullet || numbered) {
@@ -71,7 +85,7 @@ export function renderMarkdown(source) {
 
 // Plain text of a post (for descriptions and reading time)
 export const plainText = source => String(source ?? '')
-    .replace(/```[\s\S]*?```/g, ' ').replace(/[#>*`_-]+/g, ' ').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/```[\s\S]*?```/g, ' ').replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1').replace(/[#>*`_-]+/g, ' ').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
     .replace(/\s+/g, ' ').trim();
 
 export const readingMinutes = source => Math.max(1, Math.round(plainText(source).split(' ').filter(Boolean).length / 200));
