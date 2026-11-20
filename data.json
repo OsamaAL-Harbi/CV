@@ -421,5 +421,21 @@
     }
   },
   "scrollbar": "gradient",
-  "cursor": "ring"
+  "cursor": "ring",
+  "cvVersions": [
+    {
+      "label": {
+        "ar": "الشبكات",
+        "en": "Networking"
+      },
+      "file": "cv/Osama_AlHarbi_CV_IT_Support_Network.pdf"
+    },
+    {
+      "label": {
+        "ar": "التحول الرقمي",
+        "en": "Digital Transformation"
+      },
+      "file": "cv/Osama_AlHarbi_CV_Digital_Transformation.pdf"
+    }
+  ]
 }
