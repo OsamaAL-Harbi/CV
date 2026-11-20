@@ -67,7 +67,8 @@ test.describe('content rendering', () => {
         await page.goto('./?lang=en');
         await expect(page.locator('#loading-screen')).toBeHidden();
         const year = Math.max(...JSON.stringify(DATA.education).match(/\b20\d{2}\b/g).map(Number));
-        await expect(page.locator('[data-stat="certificates"]')).toHaveText(String(DATA.certificates.length));
+        const earned = DATA.certificates.filter(c => !c.hidden && !['in-progress', 'planned'].includes(c.status)).length;   // studying ones are not counted
+        await expect(page.locator('[data-stat="certificates"]')).toHaveText(String(earned));
         await expect(page.locator('[data-stat="graduationYear"]')).toHaveText(String(year));
         await expect(page.locator('[data-stat="projects"]')).toHaveText(String(DATA.projects.length));
     });

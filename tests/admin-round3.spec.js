@@ -150,6 +150,9 @@ test.describe('checker', () => {
         const data = clone();
         data.languages[1].level.en = '';
         data.workshops[0].name.en = 'ورشة بالعربي';
+        data.experience[1].role.ar = 'متدرب شبكات';
+        data.experience[1].period = { ar: '', en: '' };
+        data.certificates[0] = { ...data.certificates[0], name: { ar: 'شهادة AWS', en: 'AWS cert' }, date: '' };
         await page.context().route('**/data.json*', route => route.fulfill({ json: data }));
         await stubGitHub(page, { remote: data });       // the admin panel loads the GitHub copy at login
         await login(page);
@@ -178,7 +181,8 @@ test.describe('visibility', () => {
         await expect(page.locator('#certificates-container > div')).toHaveCount(DATA.certificates.length - 1);
         await expect(page.locator('#certificates-container')).not.toContainText(DATA.certificates[0].name.ar);
         await page.evaluate(() => { location.hash = 'home'; });
-        await expect(page.locator('[data-stat="certificates"]')).toHaveText(String(DATA.certificates.length - 1));
+        const earned = DATA.certificates.filter(c => !c.hidden && !['in-progress', 'planned'].includes(c.status)).length;
+        await expect(page.locator('[data-stat="certificates"]')).toHaveText(String(earned - 1));   // the first one is earned
     });
 
     test('admin sees hidden things dimmed, and toggles items with the eye button', async ({ page }) => {
